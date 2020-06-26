@@ -1887,6 +1887,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	{
 		ApplBegin_Time = TIME;
 		TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
+		Extrae_AddSyncEntryToLocalSYM(ApplBegin_Time);
 #if !defined(IS_BG_MACHINE)
 		Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
 #endif
@@ -2038,7 +2039,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 #endif
 
 		}
-		else
+		else if (new_num_threads > 0)
 			current_NumOfThreads = new_num_threads;
 	}
 	else
@@ -2158,6 +2159,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 		Extrae_getrusage_set_to_0_Wrapper (InitTime);
 
 		TRACE_MPIINITEV (EndTime, init_event, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
+		Extrae_AddSyncEntryToLocalSYM (EndTime);
 		Extrae_AnnotateTopology (FALSE, EndTime);
 	}
 
@@ -2805,6 +2807,36 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	#undef LINE_SIZE
 }
 
+pthread_mutex_t write_local_sym_mtx = PTHREAD_MUTEX_INITIALIZER;
+
+void Extrae_AddSyncEntryToLocalSYM(unsigned long long sync_time)
+{
+	#define LINE_SIZE 2048
+	char line[LINE_SIZE];
+	char trace_sym[TMP_DIR_LEN];
+	int fd;
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
+
+	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname, getpid(), TASKID, 0 /* THREADID -- force write at TASK level */, EXT_SYM);
+
+	pthread_mutex_lock (&write_local_sym_mtx);
+	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
+	{
+		snprintf (line, sizeof(line), "%c %lld\n", 'S', sync_time);
+		if (write (fd, line, strlen(line)) < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error writing synchronization point local symbolic file");
+		}
+		close (fd);
+	}
+	pthread_mutex_unlock(&write_local_sym_mtx);
+	#undef LINE_SIZE
+}
+
+
 void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *description,
 	char code_values, unsigned nvalues, unsigned long long *values,
 	char **description_values)
@@ -2823,6 +2855,7 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname,
 	  getpid(), TASKID, THREADID, EXT_SYM);
 
+	pthread_mutex_lock (&write_local_sym_mtx);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
@@ -2863,6 +2896,7 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 		}
 		close (fd);
 	}
+	pthread_mutex_unlock(&write_local_sym_mtx);
 	#undef LINE_SIZE
 }
 
@@ -2883,6 +2917,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname,
 	  getpid(), TASKID, THREADID, EXT_SYM);
 
+	pthread_mutex_lock (&write_local_sym_mtx);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
@@ -2903,6 +2938,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 
 		close (fd);
 	}
+	pthread_mutex_unlock(&write_local_sym_mtx);
 	#undef LINE_SIZE
 }
 

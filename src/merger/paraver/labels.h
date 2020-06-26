@@ -466,9 +466,10 @@ extern unsigned int HaveSpectralEvents;
 void Address2Info_Write_Labels (FILE *);
 int Labels_GeneratePCFfile (char *name, long long options);
 void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
-	unsigned task, char *name, int report);
+	unsigned task, char *name, int report, UINT64 *io_TaskStartTime, UINT64 *io_TaskSyncTime);
 void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
-	struct input_t * IFiles);
+	struct input_t * IFiles, UINT64 **StartingTimes, UINT64 **SynchronizationTimes);
+int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description);
 void Share_File_Names(int taskid);
 int Unify_File_Id(unsigned ptask, unsigned task, int file_id);
 

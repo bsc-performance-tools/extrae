@@ -641,17 +641,20 @@ int Assign_File_Global_Id(char *file_name)
  *** Labels_loadSYMfile
  ******************************************************************************/
 void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
-	unsigned task, char *name, int report)
+	unsigned task, char *name, int report, UINT64 *io_TaskStartTime, UINT64 *io_TaskSyncTime)
 {
 	static int Labels_loadSYMfile_init = FALSE;
 	FILE *FD;
 	char LINE[1024], Type;
 	unsigned function_count = 0, hwc_count = 0, other_count = 0;
+	int sync_points_seen = 0;
+ 	unsigned long long first_sync_point = 0;
+	unsigned long long last_sync_point = 0;
 
 	if (!Labels_loadSYMfile_init)
 	{
 		Extrae_Vector_Init (&defined_user_event_types);
-        Extrae_Vector_Init (&defined_basic_block_labels);
+		Extrae_Vector_Init (&defined_basic_block_labels);
 		Labels_loadSYMfile_init = TRUE;
 	}
 	event_type_t * last_event_type_used = NULL;
@@ -676,8 +679,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 	{
 		int args_assigned;
 
-		if (fgets (LINE, 1024, FD) == NULL)
-			break;
+		if (fgets (LINE, 1024, FD) == NULL) break;
 
 		args_assigned = sscanf (LINE, "%c %[^\n]", &Type, LINE);
 
@@ -692,11 +694,9 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						int res = sscanf (LINE, "0 \"%lx-%lx %lx %[^\n\"]\"", &start, &end, &offset, module);
 						if (res == 4)
 						{
-							ObjectTable_AddBinaryObject (allobjects, ptask, task,
-							  start, end, offset, module);
+							ObjectTable_AddBinaryObject (allobjects, ptask, task, start, end, offset, module);
 						}
-						else
-							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+						else fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 					}
 					break;
 
@@ -713,20 +713,15 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						UINT64 address;
 
 						res = sscanf (LINE, "%lx \"%[^\"]\" \"%[^\"]\" %d", &address, fname, modname, &line);
-						if (res != 4)
-							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+						if (res != 4) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 
 						if (!get_option_merge_UniqueCallerID())
 						{
-							if (Type == 'O')
-								type = OTHER_FUNCTION_TYPE;
-							else if (Type == 'U')
-								type = USER_FUNCTION_TYPE;
-							else /* if (Type == 'P') */
-								type = OUTLINED_OPENMP_TYPE;
+							if (Type == 'O') type = OTHER_FUNCTION_TYPE;
+							else if (Type == 'U') type = USER_FUNCTION_TYPE;
+							else if (Type == 'P') type = OUTLINED_OPENMP_TYPE;
 						}
-						else
-							type = UNIQUE_TYPE;
+						else type = UNIQUE_TYPE;
 
 						Address2Info_AddSymbol (address, type, fname, modname, line);
 						function_count++;
@@ -740,8 +735,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						char hwc_description[1024];
 
 						res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, hwc_description);
-						if (res != 2)
-							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+						if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 
 						HardwareCounters_AssignGlobalID (ptask, eventcode, hwc_description);
 						hwc_count++;
@@ -755,181 +749,201 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						char code_description[1024];
 
 						res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, code_description);
-						if (res != 2)
-							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+						if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 
 						Labels_Add_CodeLocation_Label (eventcode,
-							Type=='C'?CODELOCATION_FUNCTION:CODELOCATION_FILELINE,
+							(Type == 'C') ? CODELOCATION_FUNCTION : CODELOCATION_FILELINE,
 							code_description);
 						other_count++;
 					}
 					break;
 
-                case 'd':
-                    {
-                        int res, eventvalue;
-                        char value_description[1024];
-                        value_t * evt_value = NULL;
-                        unsigned i, max = Extrae_Vector_Count (&last_event_type_used->event_values);
-
-                        res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, value_description);
-                        if (res != 2)
-                            fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
-                        
-                        for (i = 0; i < max; i++)
-                        {
-                            value_t * evt = Extrae_Vector_Get (&last_event_type_used->event_values, i);
-                            if(evt->value == eventvalue)
-                            {
-                                if(strcmp(evt->label, value_description))
-                                {
-                                    fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
-                                }
-                                evt_value = evt;
-                                break;
-                            }
-                        }
-                        if (!evt_value)
-                        {
-                            evt_value = (value_t*) malloc (sizeof (value_t));
-                            if (evt_value == NULL)
-                            {
-                                fprintf (stderr, PACKAGE_NAME"(%s,%d): Fatal error! Cannot allocate memory to store the 'd' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-                                exit(-1);
-                            }
-                            evt_value->value = eventvalue;
-                            strcpy(evt_value->label, value_description);
-                            Extrae_Vector_Append (&last_event_type_used->event_values, evt_value);
-                            other_count++;
-                        }
-                    }
-                    break;
-                case 'D':
-                    {
-                        int res, eventcode;
-                        char code_description[1024];
-                        unsigned i, max = Extrae_Vector_Count (&defined_user_event_types);
-                        event_type_t * evt_type = NULL;
-
-                        res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, code_description);
-                        if (res != 2)
-                            fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
-
-                        for (i = 0; i < max; i++)
-                        {
-                            event_type_t * evt = Extrae_Vector_Get (&defined_user_event_types, i);
-                            if (evt->event_type.type == eventcode)
-                            {
-                                if(strcmp(evt->event_type.label, code_description))
-                                {
-                                    fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for type %d!\n", __FILE__, __LINE__, code_description, eventcode);
-                                }
-                                evt_type = evt;
-                                break;
-                            }
-                        }
-
-                        if (!evt_type)
-                        {
-                            evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
-                            if (evt_type == NULL)
-                            {
-                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'D' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-                                exit(-1);
-                            }
-                            evt_type->event_type.type = eventcode;
-                            strcpy(evt_type->event_type.label, code_description);
-                            Extrae_Vector_Init(&evt_type->event_values);
-    
-                            Extrae_Vector_Append(&defined_user_event_types, evt_type);
-                            other_count++;
-                        }
-                        last_event_type_used = evt_type;
-                    }
-                    break;
-
-                case 'b': // BasicBlocks symbol
-                    {
-                        int res, eventvalue;
-                        char bb_description[1024];
-                        unsigned i, max = Extrae_Vector_Count (&defined_basic_block_labels);
-                        event_type_t * evt_type = NULL;
-                        value_t * evt_value = NULL;
-
-                        res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, bb_description);
-                        if (res != 2)
-                            fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
-                        if (max==0){
-                            evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
-                            if (evt_type == NULL)
-                            {
-                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-                                exit(-1);
-                            }
-                            evt_type->event_type.type = USRFUNC_EV_BB;
-                            strcpy(evt_type->event_type.label, "BASIC_BLOCKS");
-                            Extrae_Vector_Init(&evt_type->event_values);
-                            Extrae_Vector_Append(&defined_basic_block_labels, evt_type);
-                        } else 
-                        {
-                            evt_type = Extrae_Vector_Get (&defined_basic_block_labels, 0); // There is only one event type in the vector
-                        }
-
-                        max = Extrae_Vector_Count (&evt_type->event_values);
-
-                        for(i = 0; i < max; i++)
-                        {
-                            value_t * evt = Extrae_Vector_Get (&evt_type->event_values, i);
-                            if(evt->value == eventvalue)
-                            {
-                                if(strcmp(evt->label, bb_description))
-                                {
-                                    fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, bb_description,evt_type->event_type.type, eventvalue);
-                                }
-                                evt_value = evt;
-                                break;
-                            }
-                        }
-
-                        if (!evt_value)
-                        {
-                            evt_value = (value_t*) malloc (sizeof (value_t));
-                            if (evt_value == NULL)
-                            {
-                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-                                exit(-1);
-                            }
-                            evt_value->value = eventvalue;
-                            strcpy(evt_value->label, bb_description);
-                            Extrae_Vector_Append (&evt_type->event_values, evt_value);
-                            other_count++;
-                        }
-                    }
-                    break;
-			/* The 'F' entries in the *.SYM represent open files */
-			case 'F':
-			{
-				int open_counter = 0;
-				char pathname[4096];
-				int res = sscanf (LINE, "%d \"%[^\n\"]\"\"", &open_counter, pathname);
-				if (res == 2)
+				case 'd':
 				{
-					/* Store this entry in the list of open files per task */
-					OpenFilesPerTask = (open_file_t *)realloc(OpenFilesPerTask, sizeof(open_file_t) * (NumberOfOpenFiles + 1));
+					int res, eventvalue;
+					char value_description[1024];
+					value_t * evt_value = NULL;
+					unsigned i, max = Extrae_Vector_Count (&last_event_type_used->event_values);
 
-					OpenFilesPerTask[NumberOfOpenFiles].ptask          = ptask;
-					OpenFilesPerTask[NumberOfOpenFiles].task           = task;
-					OpenFilesPerTask[NumberOfOpenFiles].local_file_id  = open_counter; // The local file identifier 
-                                        OpenFilesPerTask[NumberOfOpenFiles].global_file_id = Assign_File_Global_Id(pathname); // Assign the global identifier for this file
+					res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, value_description);
+					if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+                        
+					for (i = 0; i < max; i++)
+					{
+						value_t * evt = Extrae_Vector_Get (&last_event_type_used->event_values, i);
+						if(evt->value == eventvalue)
+						{
+							if(strcmp(evt->label, value_description))
+							{
+								fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
+							}
+							evt_value = evt;
+							break;
+						}
+					}
+					if (!evt_value)
+					{
+						evt_value = (value_t*) malloc (sizeof (value_t));
+						if (evt_value == NULL)
+						{
+							fprintf (stderr, PACKAGE_NAME"(%s,%d): Fatal error! Cannot allocate memory to store the 'd' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+							exit(-1);
+						}
+						evt_value->value = eventvalue;
+						strcpy(evt_value->label, value_description);
+						Extrae_Vector_Append (&last_event_type_used->event_values, evt_value);
+						other_count++;
+					}
+				}
+                    break;
 
-					NumberOfOpenFiles ++;
+				case 'D':
+				{
+					int res, eventcode;
+					char code_description[1024];
+					unsigned i, max = Extrae_Vector_Count (&defined_user_event_types);
+					event_type_t * evt_type = NULL;
+
+					res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, code_description);
+					if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+
+					for (i = 0; i < max; i++)
+					{
+						event_type_t * evt = Extrae_Vector_Get (&defined_user_event_types, i);
+						if (evt->event_type.type == eventcode)
+						{
+							if(strcmp(evt->event_type.label, code_description))
+							{
+								fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for type %d!\n", __FILE__, __LINE__, code_description, eventcode);
+							}
+							evt_type = evt;
+							break;
+						}
+					}
+
+					if (!evt_type)
+					{
+						evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
+						if (evt_type == NULL)
+						{
+							fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'D' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+							exit(-1);
+						}
+						evt_type->event_type.type = eventcode;
+						strcpy(evt_type->event_type.label, code_description);
+						Extrae_Vector_Init(&evt_type->event_values);
+    
+						Extrae_Vector_Append(&defined_user_event_types, evt_type);
+						other_count++;
+					}
+					last_event_type_used = evt_type;
+				}
+				break;
+
+				case 'b': // BasicBlocks symbol
+				{
+					int res, eventvalue;
+					char bb_description[1024];
+					unsigned i, max = Extrae_Vector_Count (&defined_basic_block_labels);
+					event_type_t * evt_type = NULL;
+					value_t * evt_value = NULL;
+
+					res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, bb_description);
+					if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+					if (max==0)
+					{
+						evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
+						if (evt_type == NULL)
+						{
+							fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+							exit(-1);
+						}
+						evt_type->event_type.type = USRFUNC_EV_BB;
+						strcpy(evt_type->event_type.label, "BASIC_BLOCKS");
+						Extrae_Vector_Init(&evt_type->event_values);
+						Extrae_Vector_Append(&defined_basic_block_labels, evt_type);
+					} 
+					else 
+					{
+						evt_type = Extrae_Vector_Get (&defined_basic_block_labels, 0); // There is only one event type in the vector
+					}
+
+					max = Extrae_Vector_Count (&evt_type->event_values);
+
+					for (i = 0; i < max; i++)
+					{
+						value_t * evt = Extrae_Vector_Get (&evt_type->event_values, i);
+						if (evt->value == eventvalue)
+						{
+							if (strcmp(evt->label, bb_description))
+							{
+								fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, bb_description,evt_type->event_type.type, eventvalue);
+							}
+							evt_value = evt;
+							break;
+						}
+					}
+
+					if (!evt_value)
+					{
+						evt_value = (value_t*) malloc (sizeof (value_t));
+						if (evt_value == NULL)
+						{
+							fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+							exit(-1);
+						}
+						evt_value->value = eventvalue;
+						strcpy(evt_value->label, bb_description);
+						Extrae_Vector_Append (&evt_type->event_values, evt_value);
+						other_count++;
+					}
+				}
+				break;
+
+				/* The 'F' entries in the *.SYM represent open files */
+				case 'F':
+				{
+					int open_counter = 0;
+					char pathname[4096];
+					int res = sscanf (LINE, "%d \"%[^\n\"]\"\"", &open_counter, pathname);
+					if (res == 2)
+					{
+						/* Store this entry in the list of open files per task */
+						OpenFilesPerTask = (open_file_t *)realloc(OpenFilesPerTask, sizeof(open_file_t) * (NumberOfOpenFiles + 1));
+
+						OpenFilesPerTask[NumberOfOpenFiles].ptask          = ptask;
+						OpenFilesPerTask[NumberOfOpenFiles].task           = task;
+						OpenFilesPerTask[NumberOfOpenFiles].local_file_id  = open_counter; // The local file identifier 
+						OpenFilesPerTask[NumberOfOpenFiles].global_file_id = Assign_File_Global_Id(pathname); // Assign the global identifier for this file
+
+						NumberOfOpenFiles ++;
+					}
+				}
+				break;
+
+				/* 'S' represents synchronization points.
+				 * Currently, these are 3 synchronization points:
+				 * APPL_EV (1st event of the trace)
+				 * TRACE_INIT_EV (emitted at the beginning) and 
+				 * MPI_INIT_EV (or START_PES_EV, somewhat later)
+				 * We need to retrieve the 1st one (starting times), and 
+				 * the last one, so if an app is MPI we use the time of the MPI_Init
+				 * as synchronization point. Otherwise, the time of the sequential initialization is used
+				 */ 
+				case 'S':
+				{
+					unsigned long long sync_point = atoll(LINE);
+					if (!sync_points_seen) first_sync_point = sync_point;
+					last_sync_point = sync_point;
+					sync_points_seen ++;
+					break;
 				}
 
-
-			}	break;
 				default:
+				{
 					fprintf (stderr, PACKAGE_NAME" mpi2prv: Error! Task %d found unexpected line in symbol file '%s'\n", taskid, LINE);
 					break;
+				}
 			}
 		}
 	}
@@ -940,6 +954,9 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 		fprintf (stdout, "mpi2prv: %u function symbols imported\n", function_count);
 		fprintf (stdout, "mpi2prv: %u HWC counter descriptions imported\n", hwc_count);
 	}
+
+	if (io_TaskStartTime != NULL) *io_TaskStartTime = first_sync_point;
+	if (io_TaskSyncTime != NULL) *io_TaskSyncTime = last_sync_point;
 
 	fclose (FD);
 }
@@ -1100,21 +1117,47 @@ int Labels_GeneratePCFfile (char *name, long long options)
 }
 
 void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
-	struct input_t * IFiles)
+	struct input_t * IFiles, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes)
 {
 	unsigned long file;
 
-	for (file = 0; file < nfiles; file++)
-	{
-		char symbol_file_name[PATH_MAX];
+	UINT64 *StartingTimes = NULL;
+	UINT64 *SynchronizationTimes = NULL;
 
-		strcpy (symbol_file_name, IFiles[file].name);
-		symbol_file_name[strlen(symbol_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
-		strcat (symbol_file_name, EXT_SYM); /* add ".sym" */
-		if (__Extrae_Utils_file_exists(symbol_file_name))
-			Labels_loadSYMfile (taskid, FALSE, IFiles[file].ptask, 
-			  IFiles[file].task, symbol_file_name, FALSE);
+	/* Allocate space for the synchronization times of each task */
+	xmalloc(StartingTimes, nfiles * sizeof(UINT64));
+	memset (StartingTimes, 0, nfiles * sizeof(UINT64));
+	xmalloc(SynchronizationTimes, nfiles * sizeof(UINT64));
+	memset (SynchronizationTimes, 0, nfiles * sizeof(UINT64));
+
+	if (taskid == 0)
+	{
+		for (file = 0; file < nfiles; file++)
+		{
+			char symbol_file_name[PATH_MAX];
+			UINT64 TaskStartTime = 0, TaskSyncTime = 0;
+
+			strcpy (symbol_file_name, IFiles[file].name);
+			symbol_file_name[strlen(symbol_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
+			strcat (symbol_file_name, EXT_SYM); /* add ".sym" */
+
+			if (__Extrae_Utils_file_exists(symbol_file_name))
+			{
+				Labels_loadSYMfile (taskid, FALSE, IFiles[file].ptask, IFiles[file].task, symbol_file_name, FALSE, &TaskStartTime, &TaskSyncTime);
+	
+				StartingTimes[file] = TaskStartTime;
+				SynchronizationTimes[file] = TaskSyncTime;
+			}
+		}
 	}
+
+#if defined(PARALLEL_MERGE)
+	MPI_Bcast( StartingTimes, nfiles, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD );
+	MPI_Bcast( SynchronizationTimes, nfiles, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD );
+#endif
+
+	*io_StartingTimes = StartingTimes;
+	*io_SynchronizationTimes = SynchronizationTimes;
 }
 
 #if defined(PARALLEL_MERGE)

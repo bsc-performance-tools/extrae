@@ -41,6 +41,7 @@
 #include "timesync.h"
 #include "utils.h"
 
+//#define DEBUG
 
 /* Time synchronization module */
 

@@ -478,7 +478,7 @@ static int loadGlobalSYMfile(int rank, char *sym_file, char *mpits_file, int pta
 {
 	if ((sym_file != NULL) && (__Extrae_Utils_file_exists(sym_file)))
 	{
-		Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, sym_file, TRUE);
+		Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, sym_file, TRUE, NULL, NULL);
 		return 1;
 	}
 	else if (mpits_file != NULL)
@@ -492,7 +492,7 @@ static int loadGlobalSYMfile(int rank, char *sym_file, char *mpits_file, int pta
 
 			if (__Extrae_Utils_file_exists(global_SYM_file)) 
 			{
-				Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, global_SYM_file, TRUE);
+				Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, global_SYM_file, TRUE, NULL, NULL);
 				return 1;
 			}
 		}
@@ -1460,8 +1460,6 @@ int merger_post (int numtasks, int taskid)
 		set_option_merge_SortAddresses (tmp);
 	}
 #endif
-
-	unsigned i;
 
 	if (taskid == 0)
 	{

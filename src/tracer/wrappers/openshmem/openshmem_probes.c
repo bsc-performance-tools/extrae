@@ -43,7 +43,9 @@ void PROBE_start_pes_EXIT (void)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(TIME, START_PES_EV, EVT_END, EMPTY);
+    iotimer_t start_pes_fini_time = TIME;
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(start_pes_fini_time, START_PES_EV, EVT_END, EMPTY);
+    Extrae_AddSyncEntryToLocalSYM (start_pes_fini_time);
   }
 }
 

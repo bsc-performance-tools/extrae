@@ -37,6 +37,7 @@ ChangeLog
  + 14Jul2020 Adds missing wrappers/CUPTI and a catch-all for CUPTI uninstrumented routines
  + 03Jul2020 Adds Makefile.extrae_module to distribution to compile extrae_module.f90
  + 29Jun2020 Adds instrumentation for close and fclose IO calls
+ * 26Jun2020 Synchronization points are now stored in the local SYM to allow MPI_Init to be called from threads other than 0
  * 25Jun2020 Changes call to MPI_Barrier into PMPI_Barrier
  * 23Jun2020 Fixes wrong JAVAH definition and conditional check
  * 23Jun2020 Fixes for dyninst make check tests and configure checks for libsynapse

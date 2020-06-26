@@ -253,8 +253,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	fset = Create_FS (nfiles, files, taskid, PRV_SEMANTICS);
 	error = (fset == NULL);
 
-	if (taskid == 0)
-		Labels_loadLocalSymbols (taskid, nfiles, files);
+	Labels_loadLocalSymbols (taskid, nfiles, files, &StartingTimes, &SynchronizationTimes);
 
 	/* If no actual filename is given, use the binary name if possible */
 	if (!get_merge_GivenTraceName())
@@ -351,22 +350,12 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 
 /**************************************************************************************/
 
-	if (0 == taskid)
-	{
-		fprintf (stdout, "mpi2prv: Searching synchronization points...");
-		fflush (stdout);
-	}
-	Search_Synchronization_Times (taskid, numtasks, fset, &StartingTimes,
-	  &SynchronizationTimes);
-	if (0 == taskid)
-		fprintf (stdout, " done\n");
-
 #if defined(DEBUG)
 	for (i = 0; i < nfiles; i++)
 	{
 		fprintf (stderr, "[DEBUG] SynchronizationTimes[%d] = %llu "
 		                 " files[%d].SpawnOffset = %llu\n",
-		  i, SynchronizationTimes[i], i, files[i].SpawnOffset);
+		                 i, SynchronizationTimes[i], i, files[i].SpawnOffset);
 	}
 #endif
 
