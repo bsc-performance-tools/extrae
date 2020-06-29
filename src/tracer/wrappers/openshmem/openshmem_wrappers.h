@@ -163,4 +163,6 @@ void shmem_udcflush_line (void *target);
 
 void Extrae_OPENSHMEM_init(void);
 
+int OPENSHMEM_Generate_Task_File_list();
+
 #endif /* __OPENSHMEM__WRAPPERS_H__ */

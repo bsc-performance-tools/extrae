@@ -83,6 +83,8 @@ void Extrae_MPI_stats_Wrapper (iotimer_t timestamp);
 void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *global_source);
 void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *receiver, int send_or_recv);
 
+int MPI_Generate_Task_File_List();
+
 #define MPI_REQUEST_TO_HASH_KEY(r) ((uintptr_t)r)
 #define MPI_MESSAGE_TO_HASH_KEY(m) ((uintptr_t)m)
 

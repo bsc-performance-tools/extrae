@@ -16,7 +16,7 @@ NumberEntriesInPRV ()
 
 	local n
 	if [[ -f ${1} ]]; then
-		n=`grep :${2}:${3} ${1} | wc -l`
+		n=`grep -E ":${2}:${3}(:|$)" ${1} | wc -l`
 	else
 		n=0
 	fi

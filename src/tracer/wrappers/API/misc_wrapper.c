@@ -274,7 +274,7 @@ void Extrae_function_from_address_Wrapper (extrae_type_t type, void *address)
 	}
 }
 
-static void Generate_Task_File_List (void)
+void Generate_Task_File_List (void)
 {
 	int filedes;
 	unsigned thid;
@@ -377,47 +377,11 @@ void Extrae_init_Wrapper (void)
 
 void Extrae_fini_Wrapper (void)
 {
-	/* Finalize only if its initialized by Extrae_init call */
+	/* Finalize only if it is initialized */
 	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
 	{
-		/* If the application is MPI the MPI wrappers are responsible
-		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
-		{
-			/* If we are appending into the file (i.e. using the cmd-line) don't
-			   change the already existing .mpits file */
-			if (!Extrae_getAppendingEventsToGivenPID(NULL))
-				Generate_Task_File_List();
-
-			/* Finalize tracing library */
-			Backend_Finalize ();
-		}
-	}
-}
-
-/* This will be called by the atexit() hook. If this happens and the app is MPI we
-   warn about a finalization that does not occur through MPI_Finalize */
-void Extrae_fini_last_chance_Wrapper (void)
-{
-	/* Finalize independently from who did the initialization ! */
-	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
-	{
-
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-			fprintf (stderr, PACKAGE_NAME": Warning! MPI task %d application did not terminate using MPI_Finalize! Review your application code.\n", TASKID);
-
-		/* If the application is MPI the MPI wrappers are responsible
-		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
-		{
-			/* If we are appending into the file (i.e. using the cmd-line) don't
-			   change the already existing .mpits file */
-			if (!Extrae_getAppendingEventsToGivenPID(NULL))
-				Generate_Task_File_List();
-
-			/* Finalize tracing library */
-			Backend_Finalize ();
-		}
+		/* Finalize tracing library */
+		Backend_Finalize ();
 	}
 }
 

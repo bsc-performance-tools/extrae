@@ -450,7 +450,7 @@ void OPENSHMEM_remove_file_list (int all)
 char *MpitsFileName = NULL;
 #include "threadinfo.h"
 
-int OPENSHMEM_Generate_Task_File_list( char **node_list )
+int OPENSHMEM_Generate_Task_File_list()
 {
 	int i;
 	unsigned ret;
@@ -529,7 +529,7 @@ int OPENSHMEM_Generate_Task_File_list( char **node_list )
                                 /* If Im processing MASTER, I know my threads and their names */
                                 for (thid = 0; thid < NTHREADS; thid++)
                                 {
-                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, node_list[i], PID, TID, thid, EXT_MPIT);
+                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, TasksNodes[i], PID, TID, thid, EXT_MPIT);
                                         sprintf (tmpline, "%s named %s\n", tmpname, Extrae_get_thread_name(thid));
                                         ret = write (fd, tmpline, strlen (tmpline));
                                         if (ret != strlen (tmpline))
@@ -545,7 +545,7 @@ int OPENSHMEM_Generate_Task_File_list( char **node_list )
 				shmem_getmem_real(thread_names_target, thread_names_source, Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char), i);
                                 for (thid = 0; thid < NTHREADS; thid++)
                                 {
-                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, node_list[i], PID, TID, thid, EXT_MPIT);
+                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, TasksNodes[i], PID, TID, thid, EXT_MPIT);
                                         sprintf (tmpline, "%s named %s\n", tmpname, &thread_names_target[thid*THREAD_INFO_NAME_LEN]);
                                         ret = write (fd, tmpline, strlen (tmpline));
                                         if (ret != strlen (tmpline))
@@ -1559,7 +1559,7 @@ static void Initialize_Extrae_Stuff()
   if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
     OPENSHMEM_remove_file_list (TRUE);
 
-  OPENSHMEM_Generate_Task_File_list (TasksNodes);
+  OPENSHMEM_Generate_Task_File_list();
 
   shmem_init_start_time = TIME;
 

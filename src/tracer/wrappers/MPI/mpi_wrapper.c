@@ -524,13 +524,15 @@ static void Gather_Nodes_Info (void)
 /******************************************************************************
  ***  MPI_Generate_Task_File_List
  ******************************************************************************/
-static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
+int MPI_Generate_Task_File_List ()
 {
 	int filedes, ierror;
 	unsigned u, ret, thid;
 	char tmpname[1024];
 	unsigned *buffer = NULL;
 	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
+	MPI_Comm cparent = MPI_COMM_NULL;
+	int isSpawned = 0;
 
 	if (TASKID == 0)
 	{
@@ -551,6 +553,11 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 	/* Share PID and number of threads of each MPI task */
 	ierror = PMPI_Gather (&tmp, 3, MPI_UNSIGNED, buffer, 3, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 	MPI_CHECK(ierror, PMPI_Gather);
+
+#if MPI_SUPPORTS_MPI_COMM_SPAWN
+	PMPI_Comm_get_parent (&cparent);
+#endif
+	isSpawned = cparent != MPI_COMM_NULL;
 
 	/* If I haven't been MPI_Comm_Spawned, let's clean all the *-%d.mpits we
 	   have created in earlier execes */
@@ -639,7 +646,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
 					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
-					  node_list[u], PID, TID, thid, EXT_MPIT);
+					  TasksNodes[u], PID, TID, thid, EXT_MPIT);
 					sprintf (tmpline, "%s named %s\n", tmpname,
 					  Extrae_get_thread_name(thid));
 					ret = write (filedes, tmpline, strlen (tmpline));
@@ -673,7 +680,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
 					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
-					  node_list[u], PID, TID, thid, EXT_MPIT);
+					  TasksNodes[u], PID, TID, thid, EXT_MPIT);
 					sprintf (tmpline, "%s named %s\n", tmpname,
 					  &tmp[thid*THREAD_INFO_NAME_LEN]);
 					ret = write (filedes, tmpline, strlen (tmpline));
@@ -982,7 +989,6 @@ static void Spawn_Children_Sync(iotimer_t init_time)
 void PMPI_Init_Wrapper (MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
 	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_NONE);
@@ -1058,10 +1064,9 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 		MPI_remove_file_list (TRUE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
@@ -1102,7 +1107,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
         hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK);
@@ -1178,10 +1182,9 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 		MPI_remove_file_list (TRUE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
@@ -1226,8 +1229,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
  ******************************************************************************/
 void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
-
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 1;
 #endif
@@ -1248,16 +1249,15 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 	/* Generate the final file list */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	/* Finalize only if its initialized by MPI_init call */
-	if ((Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED) && (Extrae_get_ApplicationIsMPI() == TRUE))
+	/* Finalize now only if its initialized by MPI_init call, wait for the
+	 * program to end otherwise */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
-		Backend_Finalize ();
+		Extrae_fini_Wrapper();
 
 #ifdef WITH_PMPI_HOOK
 		int (*real_mpi_finalize)(MPI_Fint *ierror) = NULL;
@@ -1269,8 +1269,6 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 		{
 			CtoF77 (pmpi_finalize) (ierror);
 		}
-
-		mpitrace_on = FALSE;
 	}
 	else
 		*ierror = MPI_SUCCESS;
@@ -1874,7 +1872,6 @@ void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
 
 int MPI_Init_C_Wrapper (int *argc, char ***argv)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
@@ -1950,10 +1947,9 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		MPI_remove_file_list (TRUE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
@@ -1992,7 +1988,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 #if defined(MPI_HAS_INIT_THREAD_C)
 int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
@@ -2068,10 +2063,9 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		MPI_remove_file_list (TRUE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
@@ -2114,7 +2108,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 int MPI_Finalize_C_Wrapper (void)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	int ierror = 0;
 
 #if defined(IS_BGL_MACHINE)
@@ -2137,16 +2130,15 @@ int MPI_Finalize_C_Wrapper (void)
 
 	/* Generate the final file list */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	/* Finalize only if its initialized by MPI_init call */
-	if ((Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED) && (Extrae_get_ApplicationIsMPI() == TRUE))
+	/* Finalize now only if its initialized by MPI_init call, wait for the
+	 * program to end otherwise */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
-		Backend_Finalize ();
+		Extrae_fini_Wrapper();
 
 #ifdef WITH_PMPI_HOOK
 		int (*real_mpi_finalize)() = NULL;
@@ -2158,8 +2150,6 @@ int MPI_Finalize_C_Wrapper (void)
 		{
 			ierror = PMPI_Finalize();
 		}
-
-		mpitrace_on = FALSE;
 	}
 	else
 		ierror = MPI_SUCCESS;

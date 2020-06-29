@@ -69,7 +69,7 @@
 
 #define MAX_MISC_INDEX	        9
 
-#define NUM_MISC_PRV_ELEMENTS  13
+#define NUM_MISC_PRV_ELEMENTS  15
 
 struct t_event_misc2prv
 {
@@ -85,35 +85,39 @@ struct t_prv_val_label
 };
 
 static struct t_event_misc2prv event_misc2prv[NUM_MISC_PRV_ELEMENTS] = {
-        {READ_EV, READ_VAL_EV, FALSE},
-        {WRITE_EV, WRITE_VAL_EV, FALSE},
-        {FREAD_EV, FREAD_VAL_EV, FALSE},
-        {FWRITE_EV, FWRITE_VAL_EV, FALSE},
-        {PREAD_EV, PREAD_VAL_EV, FALSE},
-        {PWRITE_EV, PWRITE_VAL_EV, FALSE},
-        {READV_EV, READV_VAL_EV, FALSE},
-        {WRITEV_EV, WRITEV_VAL_EV, FALSE},
-        {PREADV_EV, PREADV_VAL_EV, FALSE},
-        {PWRITEV_EV, PWRITEV_VAL_EV, FALSE},
-        {OPEN_EV, OPEN_VAL_EV, FALSE},
-        {FOPEN_EV, FOPEN_VAL_EV, FALSE},
-        {IOCTL_EV, IOCTL_VAL_EV, FALSE}
+	{READ_EV, READ_VAL_EV, FALSE},
+	{WRITE_EV, WRITE_VAL_EV, FALSE},
+	{FREAD_EV, FREAD_VAL_EV, FALSE},
+	{FWRITE_EV, FWRITE_VAL_EV, FALSE},
+	{PREAD_EV, PREAD_VAL_EV, FALSE},
+	{PWRITE_EV, PWRITE_VAL_EV, FALSE},
+	{READV_EV, READV_VAL_EV, FALSE},
+	{WRITEV_EV, WRITEV_VAL_EV, FALSE},
+	{PREADV_EV, PREADV_VAL_EV, FALSE},
+	{PWRITEV_EV, PWRITEV_VAL_EV, FALSE},
+	{OPEN_EV, OPEN_VAL_EV, FALSE},
+	{FOPEN_EV, FOPEN_VAL_EV, FALSE},
+	{IOCTL_EV, IOCTL_VAL_EV, FALSE},
+	{CLOSE_EV, CLOSE_VAL_EV, FALSE},
+	{FCLOSE_EV, FCLOSE_VAL_EV, FALSE}
 };
 
 static struct t_prv_val_label misc_prv_val_label[NUM_MISC_PRV_ELEMENTS] = {
-        {READ_VAL_EV, READ_LBL},
-        {WRITE_VAL_EV, WRITE_LBL},
-        {FREAD_VAL_EV, FREAD_LBL},
-        {FWRITE_VAL_EV, FWRITE_LBL},
-        {PREAD_VAL_EV, PREAD_LBL},
-        {PWRITE_VAL_EV, PWRITE_LBL},
-        {READV_VAL_EV, READV_LBL},
-        {WRITEV_VAL_EV, WRITEV_LBL},
-        {PREADV_VAL_EV, PREADV_LBL},
-        {PWRITEV_VAL_EV, PWRITEV_LBL},
-        {OPEN_VAL_EV, OPEN_LBL},
-        {FOPEN_VAL_EV, FOPEN_LBL},
-        {IOCTL_VAL_EV, IOCTL_LBL}
+	{READ_VAL_EV, READ_LBL},
+	{WRITE_VAL_EV, WRITE_LBL},
+	{FREAD_VAL_EV, FREAD_LBL},
+	{FWRITE_VAL_EV, FWRITE_LBL},
+	{PREAD_VAL_EV, PREAD_LBL},
+	{PWRITE_VAL_EV, PWRITE_LBL},
+	{READV_VAL_EV, READV_LBL},
+	{WRITEV_VAL_EV, WRITEV_LBL},
+	{PREADV_VAL_EV, PREADV_LBL},
+	{PWRITEV_VAL_EV, PWRITEV_LBL},
+	{OPEN_VAL_EV, OPEN_LBL},
+	{FOPEN_VAL_EV, FOPEN_LBL},
+	{IOCTL_VAL_EV, IOCTL_LBL},
+	{CLOSE_VAL_EV, CLOSE_LBL},
+	{FCLOSE_VAL_EV, FCLOSE_LBL}
 };
 
 /******************************************************************************
@@ -183,12 +187,13 @@ void Enable_MISC_Operation (int type)
 	else if (type == TRACING_EV)
 		inuse[TRACING_INDEX] = TRUE;
 	else if (type == READ_EV   || type == WRITE_EV   ||
-                 type == FREAD_EV  || type == FWRITE_EV  ||
-                 type == PREAD_EV  || type == PWRITE_EV  ||
-                 type == READV_EV  || type == WRITEV_EV  ||
-                 type == PREADV_EV || type == PWRITEV_EV ||
-                 type == OPEN_EV   || type == FOPEN_EV   ||
-                 type == IOCTL_EV)
+	         type == FREAD_EV  || type == FWRITE_EV  ||
+	         type == PREAD_EV  || type == PWRITE_EV  ||
+	         type == READV_EV  || type == WRITEV_EV  ||
+	         type == PREADV_EV || type == PWRITEV_EV ||
+	         type == OPEN_EV   || type == FOPEN_EV   ||
+	         type == IOCTL_EV  || type == CLOSE_EV   ||
+	         type == FCLOSE_EV)
 		{
 			inuse[INOUT_INDEX] = TRUE;
 			Used_MISC_Operation(type);

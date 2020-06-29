@@ -232,6 +232,7 @@ void NAME_ROUTINE_C2F(mpi_finalize) (MPI_Fint *ierror)
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		PMPI_Finalize_Wrapper (ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else if (!mpitrace_on && Extrae_getCheckControlFile())
@@ -935,6 +936,7 @@ int NAME_ROUTINE_C(MPI_Finalize) (void)
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		res = MPI_Finalize_C_Wrapper ();
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else if (!mpitrace_on && Extrae_getCheckControlFile())

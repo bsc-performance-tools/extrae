@@ -1137,8 +1137,8 @@ int main (int argc, char *argv[])
 		}
 		else
 		{
-			/* Cover those cases that MPI apps do not call MPI_Finalize */
-			wrapRoutine (appImage, "main", "", "Extrae_fini_last_chance_Wrapper");
+			/* Call the exit handler of the library destructor */
+			wrapRoutine (appImage, "main", "", "Extrae_fini_Wrapper");
 		}
 
 		{
@@ -1159,7 +1159,7 @@ int main (int argc, char *argv[])
 			{
 				BPatch_function *special_exit = getRoutine (exit_calls[i].c_str(), appImage, false);
 				if (NULL != special_exit)
-					wrapRoutine (appImage, exit_calls[i], "Extrae_fini_last_chance_Wrapper", "");
+					wrapRoutine (appImage, exit_calls[i], "Extrae_fini_Wrapper", "");
 				i++;
 			}
 			extrae_detecting_application_type = false;

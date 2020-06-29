@@ -1,6 +1,10 @@
 SUBDIRS = \
   OTHER
 
+if INSTRUMENT_IO
+SUBDIRS += IO
+endif
+
 if WANT_PTHREAD
 SUBDIRS += PTHREAD
 endif

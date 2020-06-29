@@ -116,6 +116,8 @@ static ssize_t (*real_preadv64)(int fd, const struct iovec *iov, int iovcnt, off
 static ssize_t (*real_pwritev)(int fd, const struct iovec *iov, int iovcnt, off_t offset)       = NULL;
 static ssize_t (*real_pwritev64)(int fd, const struct iovec *iov, int iovcnt, __off64_t offset) = NULL;
 static int     (*real_ioctl)(int fd, unsigned long request, ...)                                          = NULL;
+static int     (*real_close)(int fildes) = NULL;
+static int     (*real_fclose)(FILE *stream) = NULL;
 
 static unsigned traceInternalsIO = FALSE;
 
@@ -1603,6 +1605,190 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   fprintf(stderr, "[DEBUG] Task %d: pwritev64() returns\n", TASKID);
 #endif
   return res;
+}
+
+/**
+ * close
+ *
+ * Wrapper for the system call 'close'
+ */
+int
+close(int fildes)
+{
+#ifdef HAVE_ERRNO_H
+	int errno_real = errno;
+#endif
+	int res;
+
+	/* Check whether IO instrumentation is enabled */
+	int canInstrument = EXTRAE_INITIALIZED() &&
+	                    mpitrace_on          &&
+	                    Extrae_get_trace_io();
+
+	/*
+	 * Can't be evaluated before because the compiler optimizes the if's
+	 * clauses, and THREADID calls a null callback if Extrae is not yet
+	 * initialized
+	 */
+	if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+	fprintf(stderr,
+			"[DEBUG] Task %d: %s() wrapper (canInstrument=%d) (depth=%d)\n",
+			TASKID, __func__, canInstrument, __in_io_depth);
+#endif
+
+	/* Initialize the module if the pointer to the real call is not yet set */
+	if (real_close == NULL)
+	{
+		real_close = EXTRAE_DL_INIT(__func__);
+	}
+
+#if defined(DEBUG)
+	if (canInstrument)
+	{
+		fprintf(stderr, PACKAGE_NAME": %s is at %p\n",
+		        __func__, real_close);
+		fprintf(stderr, PACKAGE_NAME": %s params %d\n",
+		        __func__, fildes);
+	}
+#endif
+
+	if (real_close != NULL && canInstrument)
+	{
+		/* Instrumentation is enabled, emit events and invoke the real call */
+		IO_Enter_Instrumentation();
+
+		Probe_IO_close_Entry(fildes);
+		TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+		res = real_close(fildes);
+#ifdef HAVE_ERRNO_H
+		errno_real = errno;
+#endif
+		Probe_IO_close_Exit();
+		IO_Leave_Instrumentation();
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+	}
+	else if (real_close != NULL && !canInstrument)
+	{
+		/* Instrumentation is not enabled, bypass to the real call */
+		res = real_close(fildes);
+	}
+	else
+	{
+		/*
+		 * An error is thrown if the application uses this symbol but during the
+		 * initialization we couldn't find the real implementation. This kind of
+		 * situation could happen in the very strange case where, by the time
+		 * this symbol is first called, the libc (where the real implementation
+		 * is) has not been loaded yet. One suggestion if we see this error is
+		 * to try to prepend the libc.so to the LD_PRELOAD to force to load it
+		 * first.
+		 */
+		fprintf(stderr, PACKAGE_NAME": %s is not hooked! exiting!!\n", __func__);
+		abort();
+	}
+#if defined(DEBUG)
+	fprintf(stderr, "[DEBUG] Task %d: %s() returns\n", TASKID, __func__);
+#endif
+	return res;
+}
+
+/**
+ * fclose
+ *
+ * Wrapper for the system call 'fclose'
+ */
+int
+fclose(FILE *stream)
+{
+#ifdef HAVE_ERRNO_H
+	int errno_real = errno;
+#endif
+	int res;
+
+	/* Check whether IO instrumentation is enabled */
+	int canInstrument = EXTRAE_INITIALIZED() &&
+	                    mpitrace_on          &&
+	                    Extrae_get_trace_io();
+
+	/*
+	 * Can't be evaluated before because the compiler optimizes the if's
+	 * clauses, and THREADID calls a null callback if Extrae is not yet
+	 * initialized
+	 */
+	if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+	fprintf(stderr,
+			"[DEBUG] Task %d: %s() wrapper (canInstrument=%d) (depth=%d)\n",
+			TASKID, __func__, canInstrument, __in_io_depth);
+#endif
+
+	/* Initialize the module if the pointer to the real call is not yet set */
+	if (real_fclose == NULL)
+	{
+		real_fclose = EXTRAE_DL_INIT(__func__);
+	}
+
+#if defined(DEBUG)
+	if (canInstrument)
+	{
+		fprintf(stderr, PACKAGE_NAME": %s is at %p\n",
+		        __func__, real_fclose);
+		fprintf(stderr, PACKAGE_NAME": %s params %p\n",
+		        __func__, stream);
+	}
+#endif
+
+	if (real_fclose != NULL && canInstrument)
+	{
+		/* Instrumentation is enabled, emit events and invoke the real call */
+		IO_Enter_Instrumentation();
+
+		Probe_IO_fclose_Entry(stream);
+		TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+		res = real_fclose(stream);
+#ifdef HAVE_ERRNO_H
+		errno_real = errno;
+#endif
+		Probe_IO_fclose_Exit();
+		IO_Leave_Instrumentation();
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+	}
+	else if (real_fclose != NULL && !canInstrument)
+	{
+		/* Instrumentation is not enabled, bypass to the real call */
+		res = real_fclose(stream);
+	}
+	else
+	{
+		/*
+		 * An error is thrown if the application uses this symbol but during the
+		 * initialization we couldn't find the real implementation. This kind of
+		 * situation could happen in the very strange case where, by the time
+		 * this symbol is first called, the libc (where the real implementation
+		 * is) has not been loaded yet. One suggestion if we see this error is
+		 * to try to prepend the libc.so to the LD_PRELOAD to force to load it
+		 * first.
+		 */
+		fprintf(stderr, PACKAGE_NAME": %s is not hooked! exiting!!\n", __func__);
+		abort();
+	}
+#if defined(DEBUG)
+	fprintf(stderr, "[DEBUG] Task %d: %s() returns\n", TASKID, __func__);
+#endif
+	return res;
 }
 
 # endif /* -DPIC */

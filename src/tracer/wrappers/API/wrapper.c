@@ -94,6 +94,9 @@
 #if defined(MPI_SUPPORT)
 # include "mpi_wrapper.h"
 #endif
+#if defined(OPENSHMEM_SUPPORT)
+#include "openshmem_wrappers.h"
+#endif
 #include "misc_wrapper.h"
 #include "fork_wrapper.h"
 #include "clock.h"
@@ -2382,6 +2385,35 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 
 void Backend_Finalize (void)
 {
+	// Moved here to prevent instrumentation of IO calls on our files
+	mpitrace_on = FALSE; /* Turn off tracing now */
+
+	/* Mark as already finalized, thus avoiding further deinits */
+	Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
+
+	/* If the application is MPI the MPI wrappers are responsible
+	   for gathering and generating the .MPITS file*/
+#if defined(MPI_SUPPORT)
+	if (Extrae_get_ApplicationIsMPI())
+	{
+		MPI_Generate_Task_File_List();
+	} else
+#endif
+#if defined(OPENSHMEM_SUPPORT)
+	if (Extrae_get_ApplicationIsSHMEM())
+	{
+		OPENSHMEM_Generate_Task_File_list();
+	} else
+#endif
+	{
+		/* If we are appending into the file (i.e. using the cmd-line) don't
+		   change the already existing .mpits file */
+		if (!Extrae_getAppendingEventsToGivenPID(NULL))
+		{
+			Generate_Task_File_List();
+		}
+	}
+
 	Extrae_getExecutableInfo ();
 
 	unsigned thread;
@@ -2526,11 +2558,6 @@ void Backend_Finalize (void)
 
 		if (TASKID == 0 && Extrae_isProcessMaster())
 			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
-
-		mpitrace_on = FALSE; /* Turn off tracing now */
-
-		/* Mark as already finalized, thus avoiding further deinits */
-		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 
 #if defined(EMBED_MERGE_IN_TRACE)
 		/* Launch the merger */

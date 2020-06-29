@@ -212,6 +212,12 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 					case IOCTL_EV:
 						io_type = IOCTL_VAL_EV;
 						break;
+					case CLOSE_EV:
+						io_type = CLOSE_VAL_EV;
+						break;
+					case FCLOSE_EV:
+						io_type = FCLOSE_VAL_EV;
+						break;
 					default:
 						io_type = 0;
 						break;
@@ -1788,8 +1794,8 @@ static int SystemCall_Event (event_t * event,
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
-        { OPEN_EV, ReadWrite_Event },
-        { FOPEN_EV, ReadWrite_Event },
+	{ OPEN_EV, ReadWrite_Event },
+	{ FOPEN_EV, ReadWrite_Event },
 	{ READ_EV, ReadWrite_Event },
 	{ WRITE_EV, ReadWrite_Event },
 	{ FREAD_EV, ReadWrite_Event },
@@ -1801,6 +1807,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ WRITEV_EV, ReadWrite_Event },
 	{ PWRITEV_EV, ReadWrite_Event },
 	{ IOCTL_EV, ReadWrite_Event },
+	{ CLOSE_EV, ReadWrite_Event },
+	{ FCLOSE_EV, ReadWrite_Event },
 	{ APPL_EV, Appl_Event },
 	{ TRACE_INIT_EV, InitTracing_Event },
 	{ USER_EV, User_Event },
