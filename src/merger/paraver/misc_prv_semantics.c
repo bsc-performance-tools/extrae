@@ -1612,7 +1612,7 @@ static int GetCPU_Event (event_t * current_event,
 	UNREFERENCED_PARAMETER(fset);
 
 	trace_paraver_event (cpu, ptask, task, thread, current_time,
-	  Get_EvEvent (current_event), Get_EvValue (current_event));
+	  Get_EvEvent (current_event), 1+Get_EvValue(current_event));
 
 	return 0;
 }

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 03Ago2021 Makes CPUID event start at 1
  * 03Ago2021 Sampling temporal files not created if disabled in XML
  + 03Ago2021 Reads PC on RISC-V architecture to add support for time sampling
  * 06Jul2021 Adds L3 store misses offcore counter PEBS sampling (closes #62)
