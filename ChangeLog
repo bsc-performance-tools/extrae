@@ -10,6 +10,7 @@ ChangeLog
  * 19Ago2020 Fixes wrong exit event in cudaFree and cudaMemset
  * 12Ago2020 Modifications to support CUDA10
  + 14Jul2020 Adds missing wrappers/CUPTI and a catch-all for CUPTI uninstrumented routines
+ + 03Jul2020 Adds Makefile.extrae_module to distribution to compile extrae_module.f90
  * 25Jun2020 Changes call to MPI_Barrier into PMPI_Barrier
  * 23Jun2020 Fixes wrong JAVAH definition and conditional check
  * 23Jun2020 Fixes for dyninst make check tests and configure checks for libsynapse
