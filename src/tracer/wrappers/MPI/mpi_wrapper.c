@@ -2956,18 +2956,15 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 			if (me == 0)
 			{
 				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n", Extrae_Get_TemporalDirNoTask());
-			}
 
-			for (i = 0; i < world_size; i+=Extrae_Get_TemporalDir_BlockSize())
-			{
-				if (me == 0)
+				for (i = 0; i < world_size; i+=Extrae_Get_TemporalDir_BlockSize())
 				{
 					Backend_createExtraeDirectory (i, TRUE);
 				}
-				else if (enforce_fs_sync)
-				{
-					Backend_syncOnExtraeDirectory (i, TRUE);
-				}
+			}
+			else if (enforce_fs_sync)
+			{
+				Backend_syncOnExtraeDirectory (me, TRUE);
 			}
 		}
 		else
@@ -2994,18 +2991,15 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 			if (me == 0)
 			{
 				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n", Extrae_Get_FinalDirNoTask());
-			}
 
-			for (i = 0; i < world_size; i+=Extrae_Get_FinalDir_BlockSize())
-			{
-				if (me == 0) 
+				for (i = 0; i < world_size; i+=Extrae_Get_FinalDir_BlockSize())
 				{
 					Backend_createExtraeDirectory (i, FALSE);
 				}
-				else if (enforce_fs_sync)
-				{
-					Backend_syncOnExtraeDirectory (i, FALSE);
-				}
+			}
+			else if (enforce_fs_sync)
+			{
+				Backend_syncOnExtraeDirectory (me, FALSE);
 			}
 		}
 		else

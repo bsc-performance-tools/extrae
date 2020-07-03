@@ -345,7 +345,6 @@ void Read_SPAWN_file (char *mpit_file, int current_ptask)
 #endif /* MPI_SUPPORTS_MPI_COMM_SPAWN */
 
 
-
 /******************************************************************************
  ***  Read_MPITS_file
  ***  Inserts into trace tables the contents of a ascii file!
@@ -359,6 +358,28 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 	char mybuffer[4096];
 	char thdname[2048];
 	char path[2048];
+
+	char *env_enforce_fs_sync = getenv("EXTRAE_ENFORCE_FS_SYNC");
+	int enforce_fs_sync = (env_enforce_fs_sync != NULL)                &&
+	                       ((atoi(env_enforce_fs_sync) == 1)           ||
+	                        (strcmp(env_enforce_fs_sync, "TRUE") == 0) ||
+	                        (strcmp(env_enforce_fs_sync, "true") == 0));
+
+	if (enforce_fs_sync)
+	{
+		int delay = __Extrae_Utils_sync_on_file(file);
+
+		if (delay == -1)
+		{
+			fprintf(stderr, "mpi2prv: Aborting due to task %d timeout waiting on file system synchronization (> %d second(s) elapsed): %s is not ready\n", taskid, FS_SYNC_TIMEOUT, file);
+			exit(-1);
+		}
+		else if (delay > 0)
+		{
+			fprintf(stderr, "mpi2prv: Task %d syncs on %s after %d seconds\n", taskid, file, delay);
+		}
+	}
+	
 	FILE *fd = fopen (file, "r");
 
 	if (fd == NULL)

@@ -602,51 +602,26 @@ void Backend_createExtraeDirectory (int taskid, int Temporal)
 		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", taskid, dirname);
 }
 
+
 void Backend_syncOnExtraeDirectory (int taskid, int Temporal)
 {
 	char *dirname;
-	int seen_dir = 0;
-	int attempts = 0;
+	int delay;
 
 	dirname = (Temporal) ? Get_TemporalDir(taskid) : Get_FinalDir(taskid);
-
-	do
+	
+	delay = __Extrae_Utils_sync_on_file (dirname);
+	if (delay == -1)
 	{
-		if (attempts > 0) sleep(FS_SYNC_RETRY_IN);
-
-		struct stat st;
-		int err = stat(dirname, &st);
-		if (-1 == err) 
-		{
-			// set-* folder still not exists
-			if (attempts == FS_SYNC_MAX_ATTEMPTS)
-			{
-				fprintf(stderr, PACKAGE_NAME ": Aborting due to task %d timeout waiting on file system synchronization. Folder is not ready: %s\n", taskid, dirname);
-				exit(-1);
-			}
-			if (attempts % (5 * (taskid+1)) == 0)
-			{
-				fprintf(stderr, PACKAGE_NAME ": Task %d is waiting on folder to be ready (%d second(s) elapsed): %s\n", taskid, attempts, dirname);
-			}
-		} 
-		else 
-		{
-			if (S_ISDIR(st.st_mode)) 
-			{
-				// set-* folder is accessible
-				seen_dir = 1;
-			} 
-			else 
-			{
-				// exists but is no dir
-       				fprintf(stderr, PACKAGE_NAME ": Task %d cannot access folder: %s: There's a file with the same name!\n", taskid, dirname);
-				exit(-1);
-			}
-		}
-		attempts ++;
-	} while (!seen_dir);
-
+		fprintf(stderr, PACKAGE_NAME ": Aborting due to task %d timeout waiting on file system synchronization (> %d second(s) elapsed): %s is not ready\n", taskid, FS_SYNC_TIMEOUT, dirname);
+		exit(-1);
+	}
+	else if (delay > 0)
+	{
+		fprintf(stderr, PACKAGE_NAME ": Task %d syncs on %s directory %s after %d seconds\n", taskid, (Temporal ? "temporal" : "final"), dirname, delay);
+	}
 }
+
 
 /******************************************************************************
  ***  read_environment_variables

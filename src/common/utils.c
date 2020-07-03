@@ -536,3 +536,22 @@ void __Extrae_Utils_free_array(char **array, int size)
 	}
 	xfree(array);
 }
+
+int __Extrae_Utils_sync_on_file(char *file)
+{
+	int attempts = 0;
+
+	while (access(file, F_OK) == -1)
+	{
+		attempts ++;
+
+		if (attempts == FS_SYNC_MAX_ATTEMPTS)
+		{
+			return -1;
+		}
+
+		sleep(FS_SYNC_RETRY_IN);
+	}
+	return attempts * FS_SYNC_RETRY_IN;
+}
+

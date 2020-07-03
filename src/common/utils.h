@@ -56,6 +56,10 @@
    ptr = NULL;                        \
 } 
 
+#define FS_SYNC_MAX_ATTEMPTS 60
+#define FS_SYNC_RETRY_IN      1
+#define FS_SYNC_TIMEOUT      FS_SYNC_MAX_ATTEMPTS * FS_SYNC_RETRY_IN
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -74,6 +78,7 @@ int __Extrae_Utils_directory_exists (const char *file);
 int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
 	unsigned __Extrae_Utils_buffersize, char *buffer, const char *string);
 void __Extrae_Utils_free_array(char **, int);
+int __Extrae_Utils_sync_on_file(char *file);
 
 #if defined(__cplusplus)
 }

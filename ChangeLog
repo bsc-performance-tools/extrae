@@ -35,6 +35,7 @@ ChangeLog
  * 19Aug2020 Fixes wrong exit event in cudaFree and cudaMemset
  * 12Aug2020 Modifications to support CUDA10
  + 14Jul2020 Adds missing wrappers/CUPTI and a catch-all for CUPTI uninstrumented routines
+ + 03Jul2020 Enforces a second file system synchronization for the merger on the TRACE.mpits file
  + 03Jul2020 Adds Makefile.extrae_module to distribution to compile extrae_module.f90
  + 29Jun2020 Adds instrumentation for close and fclose IO calls
  * 26Jun2020 Synchronization points are now stored in the local SYM to allow MPI_Init to be called from threads other than 0

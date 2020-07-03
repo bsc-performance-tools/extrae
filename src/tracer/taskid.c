@@ -58,35 +58,46 @@ static unsigned xtr_get_taskid ()
 
 static unsigned xtr_set_taskid ()
 {
-	unsigned int NUM_ENVVARS = 9;
-	char *envvars[] =
+	unsigned int NUM_RANK_ENVVARS = 9;
+	char *rank_envvars[] =
 	{
 		"SLURM_PROCID",         // SLURM
 		"EC_FARM_ID",           // PBS
 		"EC_FARM_LOCALENT",     // PBS
 		"ALPS_APP_PE",          // ALPS
-		"OMPI_COMM_WORLD_RANK", // OpenMPI
+		"OMPI_COMM_WORLD_RANK", // OpenMPI, Spectrum MPI
 		"MV2_COMM_WORLD_RANK",  // MVAPICH
 		"PMI_RANK",             // MPICH, Intel
 		"MPI_RANKID",           // Platform MPI
-		"MP_CHILD"              // Spectrum MPI
+		"MP_CHILD"              // POE
+	};
+
+	unsigned int NUM_WORLD_ENVVARS = 6;
+	char *world_envvars[] =
+	{
+		"SLURM_NPROCS",         // SLURM
+		"OMPI_COMM_WORLD_SIZE", // OpenMPI
+		"MV2_COMM_WORLD_SIZE",  // MVAPICH
+		"PMI_SIZE",             // MPICH, Intel
+		"MPI_NRANKS",           // Platform MPI
+		"MP_PROCS"              // POE 
 	};
 
 	unsigned int i = 0;
 	char *envread = NULL;
 	unsigned int localid = 0;
 
-	while (i < NUM_ENVVARS)
+	while (i < NUM_RANK_ENVVARS)
 	{
-		envread = getenv(envvars[i]);
+		envread = getenv(rank_envvars[i]);
 
 		if ((envread != NULL) && ((localid = (unsigned int)strtoul(envread, NULL, 10)) != 0))
 		{
 			if (localid > xtr_taskid)
 			{
-				 xtr_taskid = localid;
+				xtr_taskid = localid;
 #if defined(DEBUG)
-				fprintf (stdout, PACKAGE_NAME": Task %u got TASKID from %s\n", xtr_taskid, envvars[i]);
+				fprintf (stdout, PACKAGE_NAME": Task %u got TASKID from %s\n", xtr_taskid, rank_envvars[i]);
 #endif
 			}
 		}
@@ -94,7 +105,18 @@ static unsigned xtr_set_taskid ()
 		i++;
 	}
 
-	if (xtr_taskid >= xtr_num_tasks) xtr_num_tasks = xtr_taskid + 1;
+	unsigned int world_size = 0;
+	i = 0;
+	while (i < NUM_WORLD_ENVVARS)
+	{
+		envread = getenv(world_envvars[i]);
+
+		if ((envread != NULL) && ((world_size = (unsigned int)strtoul(envread, NULL, 10)) != 0))
+		{
+			if (world_size > xtr_num_tasks) xtr_num_tasks = world_size;
+		}
+		i ++;
+	}
 
 	get_task_num = xtr_get_taskid;
 

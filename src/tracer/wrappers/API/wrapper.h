@@ -55,9 +55,6 @@
 #define MAX_FUNCTION_NAME 450
 #define MAX_FUNCTIONS 300
 
-#define FS_SYNC_MAX_ATTEMPTS 60
-#define FS_SYNC_RETRY_IN     1
-
 extern unsigned long long last_mpi_exit_time;
 extern unsigned long long last_mpi_begin_time;
 extern unsigned long long CPU_Burst_Threshold;
