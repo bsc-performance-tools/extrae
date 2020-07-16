@@ -61,6 +61,16 @@ static cudaError_t (*real_cudaStreamCreateWithPriority)(cudaStream_t*, unsigned 
 static cudaError_t (*real_cudaStreamDestroy)(cudaStream_t) = NULL;
 static cudaError_t (*real_cudaDeviceReset)(void) = NULL;
 static cudaError_t (*real_cudaThreadExit)(void) = NULL;
+
+static cudaError_t (*real_cudaMalloc)(void **, size_t) = NULL;
+static cudaError_t (*real_cudaMallocPitch)(void **, size_t *, size_t, size_t) = NULL;
+static cudaError_t (*real_cudaFree)(void *) = NULL;
+static cudaError_t (*real_cudaMallocArray)(cudaArray_t *, const cudaChannelFormatDesc *, size_t, size_t, unsigned int) = NULL;
+static cudaError_t (*real_cudaFreeArray)(cudaArray_t) = NULL;
+static cudaError_t (*real_cudaMallocHost)(void **, size_t) = NULL;
+static cudaError_t (*real_cudaFreeHost)(void *) = NULL;
+static cudaError_t (*real_cudaHostAlloc)(void **, size_t, unsigned int) = NULL;
+static cudaError_t (*real_cudaMemset)(void *, int, size_t) = NULL;
 #endif /* PIC */
 
 void Extrae_CUDA_init (int rank)
@@ -93,6 +103,16 @@ void Extrae_CUDA_init (int rank)
 	real_cudaDeviceReset = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceReset");
 
 	real_cudaThreadExit = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaThreadExit");
+
+	real_cudaMalloc = (cudaError_t(*)(void **, size_t))dlsym(RTLD_NEXT, "cudaMalloc");
+	real_cudaMallocPitch = (cudaError_t(*)(void **, size_t *, size_t, size_t))dlsym(RTLD_NEXT, "cudaMallocPitch");
+	real_cudaFree = (cudaError_t(*)(void *))dlsym(RTLD_NEXT, "cudaFree");
+	real_cudaMallocArray = (cudaError_t(*)(cudaArray_t *, const cudaChannelFormatDesc *, size_t, size_t, unsigned int))dlsym(RTLD_NEXT, "cudaMallocArray");
+	real_cudaFreeArray = (cudaError_t(*)(cudaArray_t))dlsym(RTLD_NEXT, "cudaFreeArray");
+	real_cudaMallocHost = (cudaError_t(*)(void **, size_t))dlsym(RTLD_NEXT, "cudaMallocHost");
+	real_cudaFreeHost = (cudaError_t(*)(void *))dlsym(RTLD_NEXT, "cudaFreeHost");
+	real_cudaHostAlloc = (cudaError_t(*)(void **, size_t, unsigned int))dlsym(RTLD_NEXT, "cudaHostAlloc");
+	real_cudaMemset = (cudaError_t(*)(void *, int, size_t))dlsym(RTLD_NEXT, "cudaMemset");
 #else
 	fprintf (stderr, PACKAGE_NAME": Warning! CUDA instrumentation requires linking with shared library!\n");
 #endif /* PIC */
@@ -470,4 +490,285 @@ cudaError_t cudaDeviceReset (void)
 	return res;
 }
 
+cudaError_t
+cudaMalloc(void **devPtr, size_t size)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaMalloc);
+#endif
+
+	if (real_cudaMalloc != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaMalloc_Enter(CUDAMALLOC_EV, devPtr, size);
+		res = real_cudaMalloc(devPtr, size);
+		Extrae_cudaMalloc_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaMalloc(devPtr, size);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t height)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaMallocPitch);
+#endif
+
+	if  (real_cudaMallocPitch != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaMalloc_Enter(CUDAMALLOCPITCH_EV, devPtr, width * height);
+		res = real_cudaMallocPitch(devPtr, pitch, width, height);
+		Extrae_cudaMalloc_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaMallocPitch(devPtr, pitch, width, height);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaFree(void *devPtr)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaFree);
+#endif
+
+	if  (real_cudaFree != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaFree_Enter(CUDAFREE_EV, devPtr);
+		res = real_cudaFree(devPtr);
+		Extrae_cudaFree_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaFree(devPtr);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaMallocArray(cudaArray_t *array, const cudaChannelFormatDesc *desc,
+  size_t width, size_t height, unsigned int flags)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaMallocArray);
+#endif
+
+	if  (real_cudaMallocArray != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaMalloc_Enter(
+		  CUDAMALLOCARRAY_EV, (void *)array, width * height
+		  );
+		res = real_cudaMallocArray(array, desc, width, height, flags);
+		Extrae_cudaMalloc_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaMallocArray(array, desc, width, height, flags);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaFreeArray(cudaArray_t array)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaFreeArray);
+#endif
+
+	if  (real_cudaFreeArray != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaFree_Enter(CUDAFREEARRAY_EV, (void *)array);
+		res = real_cudaFreeArray(array);
+		Extrae_cudaFree_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaFreeArray(array);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaMallocHost(void **ptr, size_t size)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaMallocHost);
+#endif
+
+	if  (real_cudaMallocHost != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaMalloc_Enter(CUDAMALLOCHOST_EV, ptr, size);
+		res = real_cudaMallocHost(ptr, size);
+		Extrae_cudaMalloc_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaMallocHost(ptr, size);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaFreeHost(void *ptr)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaFreeHost);
+#endif
+
+	if  (real_cudaFreeHost != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaFree_Enter(CUDAFREEHOST_EV, ptr);
+		res = real_cudaFreeHost(ptr);
+		Extrae_cudaFree_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaFreeHost(ptr);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaHostAlloc(void **pHost, size_t size, unsigned int flags)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaHostAlloc);
+#endif
+
+	if  (real_cudaHostAlloc != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaHostAlloc_Enter(pHost, size);
+		res = real_cudaHostAlloc(pHost, size, flags);
+		Extrae_cudaHostAlloc_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaHostAlloc(pHost, size, flags);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
+
+cudaError_t
+cudaMemset(void *devPtr, int value, size_t count)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf(stderr,
+	  PACKAGE_NAME": THREAD %d %s is at %p\n",
+	  THREADID, __func__, real_cudaMemset);
+#endif
+
+	if  (real_cudaMemset != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaMemset_Enter(devPtr, count);
+		res = real_cudaMemset(devPtr, value, count);
+		Extrae_cudaMemset_Exit();
+	}
+	else if (real_cudaStreamSynchronize != NULL &&
+	  !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaMemset(devPtr, value, count);
+	}
+	else
+	{
+		fprintf(stderr, "Unable to find %s in DSOs. Dying ...\n", __func__);
+		exit(0);
+	}
+
+	return res;
+}
 #endif /* PIC */

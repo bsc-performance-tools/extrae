@@ -47,24 +47,28 @@
 #define CUDADEVICERESET_INDEX      7
 #define CUDASTREAMCREATE_INDEX     8
 #define CUDASTREAMDESTROY_INDEX    9
+#define CUDAMALLOC_INDEX          10
+#define CUDAHOSTALLOC_INDEX       11
+#define CUDAMEMSET_INDEX          12
+#define CUDAUNKNOWN_INDEX         13
 
-#define MAX_CUDA_INDEX             10
+#define MAX_CUDA_INDEX            14
 
 static int inuse[MAX_CUDA_INDEX] = { FALSE };
 
 void Enable_CUDA_Operation (int type)
 {
-	if (type == CUDALAUNCH_EV)
+	if (type == CUDALAUNCH_EV || type == CUDAKERNEL_GPU_EV)
 		inuse[CUDALAUNCH_INDEX] = TRUE;
-	else if (type == CUDAMEMCPY_EV)
+	else if (type == CUDAMEMCPY_EV || type == CUDAMEMCPY_GPU_EV)
 		inuse[CUDAMEMCPY_INDEX] = TRUE;
 	else if (type == CUDASTREAMBARRIER_EV)
 		inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
-	else if (type == CUDATHREADBARRIER_EV)
+	else if (type == CUDATHREADBARRIER_EV || type == CUDATHREADBARRIER_GPU_EV)
 		inuse[CUDATHREADBARRIER_INDEX] = TRUE;
-	else if (type == CUDACONFIGCALL_EV)
+	else if (type == CUDACONFIGCALL_EV || type == CUDACONFIGKERNEL_GPU_EV)
 		inuse[CUDACONFIGCALL_INDEX] = TRUE;
-	else if (type == CUDAMEMCPYASYNC_EV)
+	else if (type == CUDAMEMCPYASYNC_EV || type == CUDAMEMCPYASYNC_GPU_EV)
 		inuse[CUDAMEMCPYASYNC_INDEX] = TRUE;
 	else if (type == CUDADEVICERESET_EV)
 		inuse[CUDADEVICERESET_INDEX] = TRUE;
@@ -74,6 +78,17 @@ void Enable_CUDA_Operation (int type)
 		inuse[CUDASTREAMCREATE_INDEX] = TRUE;
 	else if (type == CUDASTREAMDESTROY_EV)
 		inuse[CUDASTREAMDESTROY_INDEX] = TRUE;
+	else if (type == CUDAMALLOC_EV || type == CUDAMALLOCPITCH_EV ||
+	  type == CUDAFREE_EV || type == CUDAMALLOCARRAY_EV ||
+	  type == CUDAFREEARRAY_EV || type == CUDAMALLOCHOST_EV ||
+	  type == CUDAFREEHOST_EV)
+		inuse[CUDAMALLOC_INDEX] = TRUE;
+	else if (type == CUDAHOSTALLOC_EV)
+		inuse[CUDAHOSTALLOC_INDEX] = TRUE;
+	else if (type == CUDAMEMSET_EV)
+		inuse[CUDAMEMSET_INDEX] = TRUE;
+	else if (type == CUDAUNKNOWN_EV)
+		inuse[CUDAUNKNOWN_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -140,18 +155,50 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 		if (inuse[CUDASTREAMDESTROY_INDEX])
 			fprintf (fd, "%d cudaStreamDestroy\n", CUDASTREAMDESTROY_EV - CUDABASE_EV);
 
+		if (inuse[CUDAMALLOC_INDEX])
+		{
+			fprintf(fd, "%d cudaMalloc\n", CUDAMALLOC_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaMallocPitch\n", CUDAMALLOCPITCH_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaFree\n", CUDAFREE_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaMallocArray\n", CUDAMALLOCARRAY_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaFreeArray\n", CUDAFREEARRAY_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaMallocHost\n", CUDAMALLOCHOST_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaFreeHost\n", CUDAFREEHOST_EV - CUDABASE_EV);
+		}
+
+		if (inuse[CUDAHOSTALLOC_INDEX])
+			fprintf(fd, "%d cudaHostAlloc\n", CUDAHOSTALLOC_EV - CUDABASE_EV);
+
+		if (inuse[CUDAMEMSET_INDEX])
+			fprintf(fd, "%d cudaMemset\n", CUDAMEMSET_EV - CUDABASE_EV);
+
 		fprintf (fd, "\n");
 
-		if (inuse[CUDAMEMCPY_INDEX] || inuse[CUDAMEMCPYASYNC_INDEX])
+		if (inuse[CUDAMALLOC_INDEX] || inuse[CUDAMEMCPY_INDEX] ||
+		  inuse[CUDAMEMCPYASYNC_INDEX] || inuse[CUDAHOSTALLOC_INDEX] ||
+		  inuse[CUDAMEMSET_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
-			              "%d   %d    cudaMemcpy size\n"
+			              "%d   %d    CUDA Dynamic memory size\n"
 			              "\n",
-			              0, CUDAMEMCPY_SIZE_EV);
+			              0, CUDA_DYNAMIC_MEM_SIZE_EV);
+
+		if (inuse[CUDAMALLOC_INDEX] || inuse[CUDAHOSTALLOC_INDEX] ||
+		  inuse[CUDAMEMSET_INDEX])
+			fprintf(fd, "EVENT_TYPE\n"
+			            "%d   %d    CUDA Dynamic memory pointer\n"
+						"\n",
+						0, CUDA_DYNAMIC_MEM_PTR_EV);
 
 		if (inuse[CUDASTREAMBARRIER_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
 			             "%d    %d    Synchronized stream (on thread)\n"
                          "\n",
                          0, CUDASTREAMBARRIER_THID_EV);
+
+		if (inuse[CUDAUNKNOWN_INDEX])
+			fprintf(fd, "EVENT_TYPE\n"
+			  "%d\t%d\tCUDA Unknown event\n"
+			  "\n",
+			  0, CUDAUNKNOWN_EV);
 	}
 }

@@ -24,14 +24,22 @@
 #ifndef CUDA_PROBE_H_INCLUDED
 #define CUDA_PROBE_H_INCLUDED
 
-void Probe_Cuda_Launch_Entry (UINT64 p1);
-void Probe_Cuda_Launch_Exit (void);
 void Probe_Cuda_ConfigureCall_Entry (void);
 void Probe_Cuda_ConfigureCall_Exit (void);
+void Probe_Cuda_Launch_Entry (UINT64 p1);
+void Probe_Cuda_Launch_Exit (void);
+void Probe_Cuda_Malloc_Entry(unsigned int, UINT64, size_t);
+void Probe_Cuda_Malloc_Exit();
+void Probe_Cuda_Free_Entry(unsigned int, UINT64);
+void Probe_Cuda_Free_Exit();
+void Probe_Cuda_HostAlloc_Entry(UINT64, size_t);
+void Probe_Cuda_HostAlloc_Exit();
 void Probe_Cuda_Memcpy_Entry (size_t size);
 void Probe_Cuda_Memcpy_Exit (void);
 void Probe_Cuda_MemcpyAsync_Entry (size_t size);
 void Probe_Cuda_MemcpyAsync_Exit (void);
+void Probe_Cuda_Memset_Entry(UINT64, size_t);
+void Probe_Cuda_Memset_Exit();
 void Probe_Cuda_ThreadBarrier_Entry (void);
 void Probe_Cuda_ThreadBarrier_Exit (void);
 void Probe_Cuda_StreamBarrier_Entry (unsigned thread);
