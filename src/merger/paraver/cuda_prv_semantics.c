@@ -51,7 +51,7 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent(event);
-	EvValue = Get_EvEvent(event);
+	EvValue = Get_EvValue(event);
 
 	switch (EvType)
 	{

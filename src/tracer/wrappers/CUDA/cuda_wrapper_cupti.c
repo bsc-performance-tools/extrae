@@ -40,12 +40,31 @@
 
 #include "wrapper.h"
 
+#include <cupti.h>
 #include "cuda_common.h"
 #include "cuda_probe.h"
 
 #if 0
 static CUptiResult (*cuptiGetCallbackName_real)(CUpti_CallbackDomain, uint32_t, const char**) = NULL;
 #endif
+
+/*
+ * Values for CUPTI_API_VERSION.
+ * Retrieved from cuda-10.1/extras/CUPTI/include/cupti_version.h
+ *
+ * v1 : CUDAToolsSDK 4.0
+ * v2 : CUDAToolsSDK 4.1
+ * v3 : CUDA Toolkit 5.0
+ * v4 : CUDA Toolkit 5.5
+ * v5 : CUDA Toolkit 6.0
+ * v6 : CUDA Toolkit 6.5
+ * v7 : CUDA Toolkit 6.5(with sm_52 support)
+ * v8 : CUDA Toolkit 7.0
+ * v9 : CUDA Toolkit 8.0
+ * v10 : CUDA Toolkit 9.0
+ * v11 : CUDA Toolkit 9.1
+ * v12 : CUDA Toolkit 10.0 and 10.1
+ */
 
 static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain domain,
 	CUpti_CallbackId cbid, const CUpti_CallbackData *cbinfo)
@@ -63,6 +82,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 		   to the routine that has been invoked. */
 		switch (cbid)
 		{
+#if CUPTI_API_VERSION < 12
 			/* 8 */
 			case CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020:
 			{
@@ -85,15 +105,16 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 				  (cudaLaunch_v3020_params*)cbinfo->functionParams;
 
 				if (cbinfo->callbackSite == CUPTI_API_ENTER)
-#if CUPTI_API_VERSION >= 3
-					Extrae_cudaLaunch_Enter(p->func);
-#else
-					Extrae_cudaLaunch_Enter(p->entry);
-#endif
+# if CUPTI_API_VERSION >= 3
+					Extrae_cudaLaunch_Enter(p->func, NULL);
+# else
+					Extrae_cudaLaunch_Enter(p->entry, NULL);
+# endif /* CUPTI_API_VERSION >= 3 */
 				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 					Extrae_cudaLaunch_Exit();
 			}
 			break;
+#endif /* CUPTI_API_VERSION < 12 */
 
 			/* 20 */
 			case CUPTI_RUNTIME_TRACE_CBID_cudaMalloc_v3020:
@@ -311,6 +332,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			}
 			break;
 
+#if CUPTI_API_VERSION < 12
 			/* 130 */
 			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v3020:
 			{
@@ -323,6 +345,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 					Extrae_cudaStreamDestroy_Exit();
 			}
 			break;
+#endif /* CUPTI_API_VERSION < 12 */
 
 			/* 131 */
 			case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020:
@@ -360,6 +383,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			}
 			break;
 
+#if CUPTI_API_VERSION >= 3
 			/* 198 */
 			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithFlags_v5000:
 			{
@@ -372,7 +396,9 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 					Extrae_cudaStreamCreate_Exit();
 			}
 			break;
+#endif /* CUPTI_API_VERSION >= 3 */
 
+#if CUPTI_API_VERSION >= 4
 			/* 201 */
 			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v5050:
 			{
@@ -398,6 +424,82 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 					Extrae_cudaStreamCreate_Exit();
 			}
 			break;
+#endif /* CUPTI_API_VERSION >= 4 */
+
+#if CUPTI_API_VERSION >= 5
+			/* 206 */
+			case CUPTI_RUNTIME_TRACE_CBID_cudaMallocManaged_v6000:
+			{
+				cudaMallocManaged_v6000_params *p =
+				  (cudaMallocManaged_v6000_params*)cbinfo->functionParams;
+
+				if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				{
+					Extrae_cudaMalloc_Enter(CUDAMALLOC_EV, p->devPtr, p->size);
+				}
+				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				{
+					Extrae_cudaMalloc_Exit();
+				}
+			}
+			break;
+#endif /* CUPTI_API_VERSION >= 5 */
+
+#if CUPTI_API_VERSION >= 8
+			/* 211 */
+			case CUPTI_RUNTIME_TRACE_CBID_cudaLaunchKernel_v7000:
+			{
+				cudaLaunchKernel_v7000_params *p =
+				  (cudaLaunchKernel_v7000_params*)cbinfo->functionParams;
+
+				if (cbinfo->callbackSite == CUPTI_API_ENTER)
+					Extrae_cudaLaunch_Enter(p->func, p->stream);
+				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+					Extrae_cudaLaunch_Exit();
+			}
+			break;
+
+			/* 214 */
+			case CUPTI_RUNTIME_TRACE_CBID_cudaLaunchKernel_ptsz_v7000:
+			{
+				cudaLaunchKernel_ptsz_v7000_params *p =
+				  (cudaLaunchKernel_ptsz_v7000_params*)cbinfo->functionParams;
+
+				if (cbinfo->callbackSite == CUPTI_API_ENTER)
+					Extrae_cudaLaunch_Enter(p->func, p->stream);
+				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+					Extrae_cudaLaunch_Exit();
+			}
+			break;
+#endif /* CUPTI_API_VERSION >= 8 */
+
+#if CUPTI_API_VERSION >= 10
+			/* 269 */
+			case CUPTI_RUNTIME_TRACE_CBID_cudaLaunchCooperativeKernel_v9000:
+			{
+				cudaLaunchCooperativeKernel_v9000_params *p =
+				  (cudaLaunchCooperativeKernel_v9000_params*)cbinfo->functionParams;
+
+				if (cbinfo->callbackSite == CUPTI_API_ENTER)
+					Extrae_cudaLaunch_Enter(p->func, p->stream);
+				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+					Extrae_cudaLaunch_Exit();
+			}
+			break;
+
+			/* 270 */
+			case CUPTI_RUNTIME_TRACE_CBID_cudaLaunchCooperativeKernel_ptsz_v9000:
+			{
+				cudaLaunchCooperativeKernel_ptsz_v9000_params *p =
+				  (cudaLaunchCooperativeKernel_ptsz_v9000_params*)cbinfo->functionParams;
+
+				if (cbinfo->callbackSite == CUPTI_API_ENTER)
+					Extrae_cudaLaunch_Enter(p->func, p->stream);
+				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+					Extrae_cudaLaunch_Exit();
+			}
+			break;
+#endif /* CUPTI_API_VERSION >= 10 */
 
 			default:
 			{
@@ -479,5 +581,6 @@ cuptiGetCallbackName_real = (CUptiResult(*)(CUpti_CallbackDomain, uint32_t, cons
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaProfilerStart_v4000); /* 171 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaProfilerStop_v4000); /* 172 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceGetAttribute_v5000); /* 200 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDeviceFlags_v7000); /* 212 */
 }
 

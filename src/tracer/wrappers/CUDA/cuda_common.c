@@ -205,6 +205,13 @@ static void Extrae_CUDA_Initialize (int devid)
 
 		Extrae_CUDA_SynchronizeStream (devid, 0);
 
+		/*
+		 * Necessary to change the base state of CUDA streams from NOT_TRACING
+		 * to IDLE. We manually emit a TRACING_MODE_DETAIL event because CUDA
+		 * doesn't have burst mode yet. Will need a revision when supported.
+		 */
+		THREAD_TRACE_MISCEVENT(devices[devid].Stream[0].threadid, devices[devid].Stream[0].host_reference_time, TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
+
 		for (i = 0; i < MAX_CUDA_EVENTS; i++)
 		{
 			/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
@@ -308,6 +315,13 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 		err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].device_reference_time), 0);
 		CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
 		Extrae_CUDA_SynchronizeStream(devid, i);
+
+		/*
+		 * Necessary to change the base state of CUDA streams from NOT_TRACING
+		 * to IDLE. We manually emit a TRACING_MODE_DETAIL event because CUDA
+		 * doesn't have burst mode yet. Will need a revision when supported.
+		 */
+		THREAD_TRACE_MISCEVENT(devices[devid].Stream[i].threadid, devices[devid].Stream[i].host_reference_time, TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
 
 		for (j = 0; j < MAX_CUDA_EVENTS; j++)
 		{
@@ -450,7 +464,7 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 /* CUDA INSTRUMENTATION                                                     */
 /****************************************************************************/
 
-static int _cudaLaunch_stream = 0;
+__thread int _cudaLaunch_stream = 0;
 
 void Extrae_cudaConfigureCall_Enter (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
 {
@@ -491,7 +505,7 @@ void Extrae_cudaConfigureCall_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_cudaLaunch_Enter (const char *p1)
+void Extrae_cudaLaunch_Enter (const char *p1, cudaStream_t stream)
 {
 	int devid;
 	unsigned tag = Extrae_CUDA_tag_generator();
@@ -504,6 +518,12 @@ void Extrae_cudaLaunch_Enter (const char *p1)
 
 	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
 
+	if (stream != NULL)
+	{
+		int strid = Extrae_CUDA_SearchStream (devid, stream);
+		_cudaLaunch_stream = strid;
+	}
+
 	Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, (UINT64) p1, 0, 0);
 }
 
@@ -515,6 +535,7 @@ void Extrae_cudaLaunch_Exit (void)
 	Extrae_CUDA_Initialize (devid);
 
 	Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, EVT_END, 0, 0);
+
 	Probe_Cuda_Launch_Exit ();
 	Backend_Leave_Instrumentation ();
 }
@@ -846,13 +867,11 @@ void Extrae_cudaMemcpy_Exit (void)
 		  CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
 
 	/* This is a safe point because cudaMemcpy is a synchronization point */
-	/*
 	for (i = 0; i < devices[devid].nstreams; i++)
 	{
 		Extrae_CUDA_FlushStream (devid, i);
 		Extrae_CUDA_SynchronizeStream (devid, i);
 	}
-	*/
 
 	Probe_Cuda_Memcpy_Exit ();
 
