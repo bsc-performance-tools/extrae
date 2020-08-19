@@ -109,7 +109,7 @@ void Probe_Cuda_Free_Exit()
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		TRACE_EVENTANDCOUNTERS(TIME, CUDAFUNC_EV, EVT_END, TRUE);
+		TRACE_EVENTANDCOUNTERS(TIME, CUDAFREE_EV, EVT_END, TRUE);
 	}
 }
 
@@ -187,7 +187,7 @@ void Probe_Cuda_Memset_Exit()
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		TRACE_EVENTANDCOUNTERS(TIME, CUDAMEMCPY_EV, EVT_END, TRUE);
+		TRACE_EVENTANDCOUNTERS(TIME, CUDAMEMSET_EV, EVT_END, TRUE);
 	}
 }
 
