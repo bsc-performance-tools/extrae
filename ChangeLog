@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 21Ago2020 Fixes bug instrumenting user code inside OpenMP
  * 19Ago2020 Fixes wrong exit event in cudaFree and cudaMemset
  * 12Ago2020 Modifications to support CUDA10
  + 14Jul2020 Adds missing wrappers/CUPTI and a catch-all for CUPTI uninstrumented routines

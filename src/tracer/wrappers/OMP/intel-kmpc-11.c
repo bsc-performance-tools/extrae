@@ -1131,7 +1131,6 @@ void __kmpc_omp_task_begin_if0 (void *loc, int gtid, void *task)
 		{
 			Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
 			Extrae_OpenMP_Notify_NewInstantiatedTask();
-			Backend_Leave_Instrumentation();
 			__kmpc_omp_task_begin_if0_real (loc, gtid, task);
 		}
 		else

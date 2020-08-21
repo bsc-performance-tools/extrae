@@ -61,10 +61,12 @@ void Extrae_OpenMP_UF_Entry (const void *uf)
 {
 	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_UF_Entry ((UINT64) uf);
+	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_OpenMP_UF_Exit (void)
 {
+	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
@@ -275,10 +277,12 @@ void Extrae_OpenMP_TaskUF_Entry (const void* uf)
 {
 	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_TaskUF_Entry ((UINT64) uf);
+	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_OpenMP_TaskUF_Exit (void)
 {
+	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_TaskUF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
