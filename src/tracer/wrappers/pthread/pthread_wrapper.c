@@ -61,10 +61,12 @@ static int (*pthread_mutex_trylock_real)(pthread_mutex_t*) = NULL;
 static int (*pthread_mutex_timedlock_real)(pthread_mutex_t*,const struct timespec *) = NULL;
 static int (*pthread_mutex_unlock_real)(pthread_mutex_t*) = NULL;
 
+#if defined(WANT_PTHREAD_COND_CALLS)
 static int (*pthread_cond_broadcast_real)(pthread_cond_t*) = NULL;
 static int (*pthread_cond_timedwait_real)(pthread_cond_t*,pthread_mutex_t*,const struct timespec *) = NULL;
 static int (*pthread_cond_signal_real)(pthread_cond_t*) = NULL;
 static int (*pthread_cond_wait_real)(pthread_cond_t*,pthread_mutex_t*) = NULL;
+#endif
 
 static int (*pthread_rwlock_rdlock_real)(pthread_rwlock_t *) = NULL;
 static int (*pthread_rwlock_tryrdlock_real)(pthread_rwlock_t *) = NULL;
@@ -133,6 +135,7 @@ static void GetpthreadHookPoints (int rank)
 	if (pthread_mutex_timedlock_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_mutex_timedlock in DSOs!!\n");
 
+#if defined(WANT_PTHREAD_COND_CALLS)
 	/* Obtain @ for pthread_cond_signal */
 	pthread_cond_signal_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_signal");
 	if (pthread_cond_signal_real == NULL && rank == 0)
@@ -152,7 +155,8 @@ static void GetpthreadHookPoints (int rank)
 	pthread_cond_timedwait_real = (int(*)(pthread_cond_t*,pthread_mutex_t*,const struct timespec*)) dlsym (RTLD_NEXT, "pthread_cond_timedwait");
 	if (pthread_cond_timedwait_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_timedwait in DSOs!!\n");
-	
+#endif
+
 	/* Obtain @ for pthread_rwlock_rdlock */
 	pthread_rwlock_rdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_rdlock");
 	if (pthread_rwlock_rdlock_real == NULL && rank == 0)
@@ -590,6 +594,7 @@ int pthread_mutex_unlock (pthread_mutex_t *m)
 	return res;
 }
 
+#if defined(WANT_PTHREAD_COND_CALLS)
 int pthread_cond_signal (pthread_cond_t *c)
 {
 	int res = 0;
@@ -735,6 +740,7 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 
 	return res;
 }
+#endif
 
 int pthread_rwlock_rdlock (pthread_rwlock_t *l)
 {

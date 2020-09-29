@@ -51,12 +51,14 @@ void Probe_pthread_mutex_lock_Exit (void *p);
 void Probe_pthread_mutex_unlock_Entry (void *p);
 void Probe_pthread_mutex_unlock_Exit (void *p);
 
+#if defined(WANT_PTHREAD_COND_CALLS)
 void Probe_pthread_cond_signal_Entry (void *p);
 void Probe_pthread_cond_signal_Exit (void *p);
 void Probe_pthread_cond_broadcast_Entry (void *p);
 void Probe_pthread_cond_broadcast_Exit (void *p);
 void Probe_pthread_cond_wait_Entry (void *p);
 void Probe_pthread_cond_wait_Exit (void *p);
+#endif
 
 void Probe_pthread_Barrier_Wait_Entry (void);
 void Probe_pthread_Barrier_Wait_Exit (void);

@@ -199,6 +199,7 @@ void Probe_pthread_mutex_unlock_Exit (void *p)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_MUTEX_UNLOCK_EV, EMPTY, EMPTY);
 }
 
+#if defined(WANT_PTHREAD_COND_CALLS)
 /* CONDs */
 
 void Probe_pthread_cond_signal_Entry (void *p)
@@ -248,6 +249,7 @@ void Probe_pthread_cond_wait_Exit (void *p)
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_WAIT_EV, EMPTY, EMPTY);
 }
+#endif
 
 void Probe_pthread_Barrier_Wait_Entry (void)
 {

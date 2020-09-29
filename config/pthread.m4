@@ -63,6 +63,19 @@ AC_DEFUN([AX_PTHREAD],
 	)
 	AM_CONDITIONAL(PTHREAD_SUPPORT_IN_ALL_LIBS, test "${enable_pthread_in_all_libs}" = "yes" -a "${enable_pthread}" = "yes" )
 
+	AC_MSG_CHECKING([whether pthread_cond_* calls are instrumented])
+	AC_ARG_ENABLE(pthread_cond_calls,
+		AC_HELP_STRING(
+			[--disable-pthread-cond-calls],
+			[Disables instrumentation support for pthread_cond_* calls (enabled by default)]
+		),
+		[enable_pthread_cond_calls="${enableval}"],
+		[enable_pthread_cond_calls="yes"]
+	)
+	if test "${enable_pthread_cond_calls}" = "yes" ; then
+		AC_DEFINE([WANT_PTHREAD_COND_CALLS], [1], [Determine if pthread_cond_* calls are instrumented])
+	fi
+	AC_MSG_RESULT([${enable_pthread_cond_calls}])
 ])
 
 
@@ -73,6 +86,7 @@ AC_DEFUN([AX_PTHREAD_SHOW_CONFIGURATION],
 	if test "${enable_pthread}" = "yes" -a "${pthread_create_exists}" = "yes" ; then
 		echo pThread instrumentation: yes
 		echo -e \\\tSupport for pthread_barrier_wait: ${pthread_barrier_wait_exists}
+		echo -e \\\tSupport for pthread_cond_* calls: ${enable_pthread_cond_calls}
 	else
 		echo pThread instrumentation: no
 	fi
