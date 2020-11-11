@@ -16,7 +16,7 @@ UNAME=`uname`
 if [ "${UNAME}" = "Darwin" -o "${UNAME}" = "AIX" ] ; then
 	TMPFILE=substitute-$$
 	${SED} "s|${KEY}|${VALUE}|g" < ${FILE} >${TMPFILE}
-	/bin/mv -f ${TMPFILE} ${FILE}
+	command mv -f ${TMPFILE} ${FILE}
 else
 	${SED} "s|${KEY}|${VALUE}|g" -i ${FILE}
 fi
