@@ -49,6 +49,7 @@
 #include "papi_hwc.h"
 #include "hwc_version.h"
 #include "papi.h"
+#include <pthread.h>
 
 #if defined(IS_BGL_MACHINE)
 # define COUNTERS_INFO
@@ -68,6 +69,8 @@
 
 static HWC_Definition_t *hwc_used = NULL;
 static unsigned num_hwc_used = 0;
+
+static pthread_rwlock_t pThread_mtx_HWC_sets = PTHREAD_RWLOCK_INITIALIZER;
 
 static void HWCBE_PAPI_AddDefinition (unsigned event_code, char *code, char *description)
 {
@@ -107,6 +110,7 @@ int HWCBE_PAPI_Allocate_eventsets_per_thread (int num_set, int old_thread_num, i
 {
 	int i;
 
+    pthread_rwlock_wrlock(&pThread_mtx_HWC_sets);
 	HWC_sets[num_set].eventsets = (int *) realloc (HWC_sets[num_set].eventsets, sizeof(int)*new_thread_num);
 	if (HWC_sets[num_set].eventsets == NULL)
 	{
@@ -116,6 +120,7 @@ int HWCBE_PAPI_Allocate_eventsets_per_thread (int num_set, int old_thread_num, i
 
 	for (i = old_thread_num; i < new_thread_num; i++)
 		HWC_sets[num_set].eventsets[i] = PAPI_NULL;
+    pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 
 	return TRUE;
 }
@@ -207,6 +212,7 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 		ncounters = MAX_HWC;
 	}
 	
+    pthread_rwlock_wrlock(&pThread_mtx_HWC_sets);
 	HWC_sets = (struct HWC_Set_t *) realloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
 	if (HWC_sets == NULL)
 	{
@@ -345,6 +351,7 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 				pretended_set);
 		HWC_sets[num_set].domain = PAPI_DOM_USER;
 	}
+    pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 
 	HWCBE_PAPI_Allocate_eventsets_per_thread (num_set, 0, Backend_getNumberOfThreads());
 
@@ -669,6 +676,7 @@ int __in_PAPI_read_BG = FALSE;
 #endif
 int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 {
+    pthread_rwlock_rdlock(&pThread_mtx_HWC_sets);
 	int EventSet = HWCEVTSET(tid);
 
 #if !defined(IS_BG_MACHINE)
@@ -676,8 +684,10 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 	{
 		fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
 			tid, EventSet, __FILE__, __LINE__);
+        pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 		return 0;
 	}
+    pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 	return 1;
 #else
 	if (!__in_PAPI_read_BG)
@@ -687,13 +697,17 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 		{
 			fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
 				tid, EventSet, __FILE__, __LINE__);
+            pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 			return 0;
 		}
 		__in_PAPI_read_BG = FALSE;
+        pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 		return 1;
 	}
-	else
+	else {
+        pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 		return 0;
+    }
 #endif
 }
 

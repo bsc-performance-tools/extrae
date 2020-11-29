@@ -23,6 +23,14 @@
 
 #include "common.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <sys/syscall.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -157,7 +165,11 @@
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
 static int requestedDynamicMemoryInstrumentation = FALSE;
+static pthread_mutex_t pThreadChangeNumberOfThreads_mtx = PTHREAD_MUTEX_INITIALIZER;
 
+static pthread_rwlock_t pThread_mtx_Realloc = PTHREAD_RWLOCK_INITIALIZER;
+static pthread_rwlock_t pThread_mtx_Extrae_inInstrumentation = PTHREAD_RWLOCK_INITIALIZER;
+extern pthread_rwlock_t pThread_mtx_Trace_Mode_reInitialize;
 
 #if defined(STANDALONE)
 module_t *Modules = NULL;
@@ -487,11 +499,14 @@ void Extrae_AnnotateCPU (UINT64 timestamp)
 #if defined(HAVE_SCHED_GETCPU)
     int cpu = sched_getcpu();
 
+    pthread_rwlock_rdlock(&pThread_mtx_Realloc);
     if (cpu != LastCPUEvent[THREADID] || AlwaysEmitCPUEvent)
     {
         LastCPUEvent[THREADID] = cpu;
         TRACE_EVENT (timestamp, GETCPU_EV, cpu);
     }
+
+    pthread_rwlock_unlock(&pThread_mtx_Realloc);
 #else
     UNREFERENCED_PARAMETER(timestamp);
 #endif
@@ -1422,6 +1437,7 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 	UNREFERENCED_PARAMETER(world_size);
 #endif
 
+    pthread_rwlock_wrlock(&pThread_mtx_Realloc);
 	if (!forked)
 	{
 		xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
@@ -1434,7 +1450,7 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 
 	for (i = 0; i < num_threads; i++)
 		Allocate_buffer_and_file (i, forked);
-
+    pthread_rwlock_unlock(&pThread_mtx_Realloc);
 	return TRUE;
 }
 
@@ -1446,17 +1462,16 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 static int Reallocate_buffers_and_files (int new_num_threads)
 {
 	int i;
-
+    pthread_rwlock_wrlock(&pThread_mtx_Realloc);
 	xrealloc(TracingBuffer, TracingBuffer, new_num_threads * sizeof(Buffer_t *));
 	xrealloc(LastCPUEmissionTime, LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
 	xrealloc(LastCPUEvent, LastCPUEvent, new_num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
 	xrealloc(SamplingBuffer, SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
 #endif
-
 	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)
 		Allocate_buffer_and_file (i, FALSE);
-
+    pthread_rwlock_unlock(&pThread_mtx_Realloc);
 	return TRUE;
 }
 
@@ -1961,11 +1976,17 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 {
 	unsigned new_num_threads = numberofthreads;
 
+    pthread_mutex_lock (&pThreadChangeNumberOfThreads_mtx);
+
 	if (EXTRAE_INITIALIZED())
 	{
 		/* Just modify things if there are more threads */
 		if (new_num_threads > get_maximum_NumOfThreads())
 		{
+            char cur_host_name[100];
+            cur_host_name[99] = '\0';
+            gethostname(cur_host_name, 99);
+            fprintf(stderr, "%s OS_TID:%ld Start Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
 			unsigned u;
 
 #if defined(ENABLE_PEBS_SAMPLING)
@@ -2013,7 +2034,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 #if defined(ENABLE_PEBS_SAMPLING)
 			Extrae_IntelPEBS_resumeSampling(); 
 #endif
-
+            fprintf(stderr, "%s OS_TID:%ld End   Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
 		}
 		else
 			current_NumOfThreads = new_num_threads;
@@ -2025,6 +2046,8 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 
 		current_NumOfThreads = new_num_threads;
 	}
+
+    pthread_mutex_unlock (&pThreadChangeNumberOfThreads_mtx);
 
 	return TRUE;
 }
@@ -2591,26 +2614,33 @@ static int *Extrae_inSampling = NULL;
 
 int Backend_inInstrumentation (unsigned thread)
 {
+    pthread_rwlock_rdlock(&pThread_mtx_Extrae_inInstrumentation);
+    int ret = FALSE;
 	if ((Extrae_inInstrumentation != NULL) && (Extrae_inSampling != NULL))
-		return (Extrae_inInstrumentation[thread] || Extrae_inSampling[thread]);
-	else
-		return FALSE;
+		ret = (Extrae_inInstrumentation[thread] || Extrae_inSampling[thread]);
+    pthread_rwlock_unlock(&pThread_mtx_Extrae_inInstrumentation);
+    return ret;
 }
 
-void Backend_setInSampling (unsigned thread, int insampling)      
-{                                                                               
-	  if (Extrae_inSampling != NULL)                                         
-			    Extrae_inSampling[thread] = insampling;                       
-}                                                                               
+void Backend_setInSampling (unsigned thread, int insampling)
+{
+    pthread_rwlock_rdlock(&pThread_mtx_Extrae_inInstrumentation);
+	if (Extrae_inSampling != NULL)
+        Extrae_inSampling[thread] = insampling;
+    pthread_rwlock_unlock(&pThread_mtx_Extrae_inInstrumentation);
+}
 
 void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
 {
+    pthread_rwlock_rdlock(&pThread_mtx_Extrae_inInstrumentation);
 	if (Extrae_inInstrumentation != NULL)
 		Extrae_inInstrumentation[thread] = ininstrumentation;
+    pthread_rwlock_unlock(&pThread_mtx_Extrae_inInstrumentation);
 }
 
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 {
+    pthread_rwlock_wrlock(&pThread_mtx_Extrae_inInstrumentation);
 	Extrae_inInstrumentation = (int*) realloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
 	if (Extrae_inInstrumentation == NULL)
 	{
@@ -2625,6 +2655,7 @@ void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 		  ": Failed to allocate memory for inSampling structure\n");
 		exit (-1);
 	}
+    pthread_rwlock_unlock(&pThread_mtx_Extrae_inInstrumentation);
 }
 
 void Backend_Enter_Instrumentation ()
@@ -2675,9 +2706,10 @@ void Backend_Enter_Instrumentation ()
 #endif
 
 	/* Check whether we will fill the buffer soon (or now) */
+    pthread_rwlock_rdlock(&pThread_mtx_Realloc);
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= NEVENTS)
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
-
+    pthread_rwlock_unlock(&pThread_mtx_Realloc);
 	/* Record the time when this is happening
 	   we need this for subsequent calls to TIME, as this is being cached in
 	   clock routines */
@@ -2710,8 +2742,10 @@ void Backend_Leave_Instrumentation (void)
 	}
 
 	/* Change trace mode? (issue from API) */
+    pthread_rwlock_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
 	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
 		Trace_Mode_Change(thread, LAST_READ_TIME);
+    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
 
 	Backend_setInInstrumentation (thread, FALSE);
 }

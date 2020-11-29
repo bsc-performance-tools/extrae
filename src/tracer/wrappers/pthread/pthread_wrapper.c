@@ -74,15 +74,13 @@ static int (*pthread_rwlock_trywrlock_real)(pthread_rwlock_t *) = NULL;
 static int (*pthread_rwlock_timedwrlock_real)(pthread_rwlock_t *, const struct timespec *) = NULL;
 static int (*pthread_rwlock_unlock_real)(pthread_rwlock_t *) = NULL;
 
-static pthread_mutex_t extrae_pthread_create_mutex;
+static pthread_mutex_t extrae_pthread_create_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #endif /* PIC */
 
 static void GetpthreadHookPoints (int rank)
 {
 #if defined(PIC)
-	/* Create mutex to protect pthread_create calls */
-	pthread_mutex_init (&extrae_pthread_create_mutex, NULL);
 
 	/* Obtain @ for pthread_create */
 	pthread_create_real =
@@ -220,6 +218,9 @@ static void * pthread_create_hook (void *p1)
 
 	/* Wake up the calling thread */
 	pthread_barrier_wait_real(&(i->barrier));
+
+    if (pthread_create_real == NULL)
+		GetpthreadHookPoints(0);
 
 	Backend_Enter_Instrumentation ();
 	Probe_pthread_Function_Entry (routine);

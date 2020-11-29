@@ -264,7 +264,8 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_loc
 				PMPI_Group_size(remote_group, &remote_group_size);
 				local_ranks = (int *)malloc(sizeof(int) * remote_group_size);
 				world_ranks = (int *)malloc(sizeof(int) * remote_group_size);
-				for (int i = 0; i < remote_group_size; i++) local_ranks[i] = i;
+                int i;
+				for (i = 0; i < remote_group_size; i++) local_ranks[i] = i;
 
 				PMPI_Group_translate_ranks (remote_group, remote_group_size, local_ranks, CommWorldRanks, world_ranks); 
 

@@ -50,6 +50,9 @@
 #if defined(ENABLE_PEBS_SAMPLING)
 # include "sampling-intel-pebs.h"
 #endif
+#include <pthread.h>
+
+static pthread_rwlock_t pThread_mtx_HWC_Start_Counters = PTHREAD_RWLOCK_INITIALIZER;
 
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
@@ -373,6 +376,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	/* Allocate memory if this process has not been forked */
 	if (!forked)
 	{
+        pthread_rwlock_wrlock(&pThread_mtx_HWC_Start_Counters);
 		HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
 		ASSERT(HWC_Thread_Initialized!=NULL, "Cannot allocate memory for HWC_Thread_Initialized!");
 
@@ -392,6 +396,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 			ASSERT(Accumulated_HWC[i]!=NULL, "Cannot allocate memory for Accumulated_HWC");
 			HWC_Accum_Reset(i);
 		}
+        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
 
 		if (HWC_num_sets <= 0)
 			return;
@@ -424,7 +429,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 {
 	int i;
-
+    pthread_rwlock_wrlock(&pThread_mtx_HWC_Start_Counters);
 #if defined(PAPI_COUNTERS)
 	for (i = 0; i < HWC_num_sets; i++)
 		HWCBE_PAPI_Allocate_eventsets_per_thread (i, old_num_threads, new_num_threads);
@@ -465,6 +470,7 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 		HWC_current_timebegin[i] = 0;
 		HWC_current_glopsbegin[i] = 0;
 	}
+    pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
 }
 
 /**
@@ -629,6 +635,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 
 	if (HWCEnabled)
 	{
+        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
 		if (!HWC_Thread_Initialized[tid])
 			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( Accumulated_HWC[tid] );
@@ -642,6 +649,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 #endif
 
 		Accumulated_HWC_Valid[tid] = TRUE;
+        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
 	}
 	return (HWCEnabled && accum_ok);
 }
@@ -655,8 +663,10 @@ int HWC_Accum_Reset (unsigned int tid)
 {
 	if (HWCEnabled)
 	{
+        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
 		Accumulated_HWC_Valid[tid] = FALSE;
 		memset(Accumulated_HWC[tid], 0, MAX_HWC * sizeof(long long));
+        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
 		return 1;
 	}
 	else return 0;
@@ -665,7 +675,11 @@ int HWC_Accum_Reset (unsigned int tid)
 /** Returns whether Accumulated_HWC contains valid values or not */
 int HWC_Accum_Valid_Values (unsigned int tid) 
 {
-	return ( HWCEnabled ? Accumulated_HWC_Valid[tid] : 0 );
+    int ret;
+    pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
+    ret = ( HWCEnabled ? Accumulated_HWC_Valid[tid] : 0 );
+    pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
+    return ret;
 }
 
 /** 
@@ -677,7 +691,9 @@ int HWC_Accum_Copy_Here (unsigned int tid, long long *store_buffer)
 {
 	if (HWCEnabled)
 	{
+        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
 		memcpy(store_buffer, Accumulated_HWC[tid], MAX_HWC * sizeof(long long));
+        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
 		return 1;
 	}
 	else return 0;
@@ -693,10 +709,12 @@ int HWC_Accum_Add_Here (unsigned int tid, long long *store_buffer)
 	int i;
 	if (HWCEnabled)
 	{
+        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
 		for (i=0; i<MAX_HWC; i++)
 		{
 			store_buffer[i] += 	Accumulated_HWC[tid][i];
 		}
+        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
 		return 1;
 	}
 	else return 0;

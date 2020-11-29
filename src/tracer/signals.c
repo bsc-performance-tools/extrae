@@ -50,7 +50,7 @@
  * Flushes the buffers to disk and disables tracing
  * ----------------------------------------------------------------------- */
 
-int sigInhibited = FALSE;
+volatile int sigInhibited = FALSE;
 
 void Signals_Inhibit()
 {
