@@ -56,106 +56,106 @@ void GetpthreadHookPoints (int rank)
 		(int(*)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*))
 		dlsym (RTLD_NEXT, "pthread_create");
 	if (pthread_create_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_create in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_create in DSOs!!\n");
 
 	/* Obtain @ for pthread_join */
 	pthread_join_real =
 		(int(*)(pthread_t,void**)) dlsym (RTLD_NEXT, "pthread_join");
 	if (pthread_join_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_join in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_join in DSOs!!\n");
 
 	/* Obtain @ for pthread_barrier_wait */
 	pthread_barrier_wait_real =
 		(int(*)(pthread_barrier_t *)) dlsym (RTLD_NEXT, "pthread_barrier_wait");
 	if (pthread_barrier_wait_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_barrier_wait in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_barrier_wait in DSOs!!\n");
 
 	/* Obtain @ for pthread_detach */
 	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
 	if (pthread_detach_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_detach in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_detach in DSOs!!\n");
 
 	/* Obtain @ for pthread_exit */
 	pthread_exit_real = (void(*)(void*)) dlsym (RTLD_NEXT, "pthread_exit");
 	if (pthread_exit_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_exit in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_exit in DSOs!!\n");
 
 	/* Obtain @ for pthread_mutex_lock */
 	pthread_mutex_lock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_lock");
 	if (pthread_mutex_lock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_lock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_lock in DSOs!!\n");
 	
 	/* Obtain @ for pthread_mutex_unlock */
 	pthread_mutex_unlock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_unlock");
 	if (pthread_mutex_unlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_unlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_unlock in DSOs!!\n");
 	
 	/* Obtain @ for pthread_mutex_trylock */
 	pthread_mutex_trylock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_trylock");
 	if (pthread_mutex_trylock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_trylock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_trylock in DSOs!!\n");
 
 	/* Obtain @ for pthread_mutex_timedlock */
 	pthread_mutex_timedlock_real = (int(*)(pthread_mutex_t*,const struct timespec*)) dlsym (RTLD_NEXT, "pthread_mutex_timedlock");
 	if (pthread_mutex_timedlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_mutex_timedlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_mutex_timedlock in DSOs!!\n");
 
 	/* Obtain @ for pthread_cond_signal */
 	pthread_cond_signal_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_signal");
 	if (pthread_cond_signal_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_signal in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_cond_signal in DSOs!!\n");
 	
 	/* Obtain @ for pthread_cond_broadcast */
 	pthread_cond_broadcast_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_broadcast");
 	if (pthread_cond_broadcast_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_broadcast in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_cond_broadcast in DSOs!!\n");
 	
 	/* Obtain @ for pthread_cond_wait */
 	pthread_cond_wait_real = (int(*)(pthread_cond_t*,pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_cond_wait");
 	if (pthread_cond_wait_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_wait in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_cond_wait in DSOs!!\n");
 	
 	/* Obtain @ for pthread_cond_timedwait */
 	pthread_cond_timedwait_real = (int(*)(pthread_cond_t*,pthread_mutex_t*,const struct timespec*)) dlsym (RTLD_NEXT, "pthread_cond_timedwait");
 	if (pthread_cond_timedwait_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_timedwait in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_cond_timedwait in DSOs!!\n");
 	
 	/* Obtain @ for pthread_rwlock_rdlock */
 	pthread_rwlock_rdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_rdlock");
 	if (pthread_rwlock_rdlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_rdlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_rwlock_rdlock in DSOs!!\n");
 	
 	/* Obtain @ for pthread_rwlock_tryrdlock */
 	pthread_rwlock_tryrdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_tryrdlock");
 	if (pthread_rwlock_tryrdlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_tryrdlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_rwlock_tryrdlock in DSOs!!\n");
 	
 	/* Obtain @ for pthread_rwlock_timedrdlock */
 	pthread_rwlock_timedrdlock_real = (int(*)(pthread_rwlock_t *, const struct timespec *)) dlsym (RTLD_NEXT, "pthread_rwlock_timedrdlock");
 	if (pthread_rwlock_timedrdlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_timedrdlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_rwlock_timedrdlock in DSOs!!\n");
 	
 	/* Obtain @ for pthread_rwlock_rwlock */
 	pthread_rwlock_wrlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_wrlock");
 	if (pthread_rwlock_wrlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_wrlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_rwlock_wrlock in DSOs!!\n");
 	
 	/* Obtain @ for pthread_rwlock_tryrwlock */
 	pthread_rwlock_trywrlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_trywrlock");
 	if (pthread_rwlock_trywrlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_trywrlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_rwlock_trywrlock in DSOs!!\n");
 	
 	/* Obtain @ for pthread_rwlock_timedrwlock */
 	pthread_rwlock_timedwrlock_real = (int(*)(pthread_rwlock_t *, const struct timespec *)) dlsym (RTLD_NEXT, "pthread_rwlock_timedwrlock");
 	if (pthread_rwlock_timedwrlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_timedwrlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_rwlock_timedwrlock in DSOs!!\n");
 
 	/* Obtain @ for pthread_rwlock_unlock */
 	pthread_rwlock_unlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_unlock");
 	if (pthread_rwlock_unlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_unlock in DSOs!!\n");
+		fprintf (stderr, "Unable to find pthread_rwlock_unlock in DSOs!!\n");
 // #else
-	// fprintf (stderr, PACKAGE_NAME": Warning! pthread instrumentation requires linking with shared library!\n");
+	// fprintf (stderr, "Warning! pthread instrumentation requires linking with shared library!\n");
 // #endif /* PIC */
 }
 

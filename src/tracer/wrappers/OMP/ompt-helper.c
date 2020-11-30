@@ -34,7 +34,7 @@
 #endif
 
 #include "ompt-helper.h"
-
+#include "pthread_redirect.h"
 
 /* Relation between parallel id and parallel function */
 typedef struct ompt_parallel_id_pf_st
@@ -165,8 +165,11 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid,
 	const void *tf, int implicit)
 {
 	unsigned u;
+    
+    if (pthread_rwlock_wrlock_real == NULL)
+		GetpthreadHookPoints(0);
 
-	pthread_rwlock_wrlock (&mutex_tid_tf);
+	pthread_rwlock_wrlock_real(&mutex_tid_tf);
 	if (n_ompt_tids_tf == n_allocated_ompt_tids_tf)
 	{
 #if defined(DEBUG)
@@ -205,7 +208,7 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid,
 #endif
 			break;
 		}
-	pthread_rwlock_unlock (&mutex_tid_tf);
+	pthread_rwlock_unlock_real(&mutex_tid_tf);
 }
 
 /* Extrae_OMPT_unregister_ompt_task_id_tf
@@ -217,7 +220,10 @@ void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 	{
 		unsigned u;
 
-		pthread_rwlock_wrlock (&mutex_tid_tf);
+        if (pthread_rwlock_wrlock_real == NULL)
+		    GetpthreadHookPoints(0);
+
+		pthread_rwlock_wrlock_real(&mutex_tid_tf);
 		for (u = 0; u < n_allocated_ompt_tids_tf; u++)
 			if (ompt_tids_tf[u].tid == ompt_tid)
 			{
@@ -230,7 +236,7 @@ void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 #endif
 				break;
 			}
-		pthread_rwlock_unlock (&mutex_tid_tf);
+		pthread_rwlock_unlock_real(&mutex_tid_tf);
 	}
 }
 
@@ -242,7 +248,10 @@ const void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 	unsigned u;
 	const void *ptr = NULL;
 
-	pthread_rwlock_rdlock (&mutex_tid_tf);
+    if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
+	pthread_rwlock_rdlock_real(&mutex_tid_tf);
 	for (u = 0; u < n_allocated_ompt_tids_tf; u++)
 		if (ompt_tids_tf[u].tid == ompt_tid)
 		{
@@ -253,7 +262,7 @@ const void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 				*taskctr = ompt_tids_tf[u].task_ctr;
 			break;
 		}
-	pthread_rwlock_unlock (&mutex_tid_tf);
+	pthread_rwlock_unlock_real(&mutex_tid_tf);
 
 	return ptr;
 }
@@ -264,7 +273,10 @@ void Extrae_OMPT_tf_task_id_set_running (ompt_task_id_t ompt_tid, int b)
 {
 	unsigned u;
 
-	pthread_rwlock_rdlock (&mutex_tid_tf);
+    if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
+	pthread_rwlock_rdlock_real(&mutex_tid_tf);
 
 	for (u = 0; u < n_allocated_ompt_tids_tf; u++)
 		if (ompt_tids_tf[u].tid == ompt_tid)
@@ -273,7 +285,7 @@ void Extrae_OMPT_tf_task_id_set_running (ompt_task_id_t ompt_tid, int b)
 			break;
 		}
 
-	pthread_rwlock_unlock (&mutex_tid_tf);
+	pthread_rwlock_unlock_real(&mutex_tid_tf);
 }
 
 
@@ -285,7 +297,10 @@ int Extrae_OMPT_tf_task_id_is_running (ompt_task_id_t ompt_tid)
 	unsigned u;
 	int res = FALSE;
 
-	pthread_rwlock_rdlock (&mutex_tid_tf);
+    if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
+	pthread_rwlock_rdlock_real(&mutex_tid_tf);
 
 	for (u = 0; u < n_allocated_ompt_tids_tf; u++)
 		if (ompt_tids_tf[u].tid == ompt_tid)
@@ -294,7 +309,7 @@ int Extrae_OMPT_tf_task_id_is_running (ompt_task_id_t ompt_tid)
 			break;
 		}
 
-	pthread_rwlock_unlock (&mutex_tid_tf);
+	pthread_rwlock_unlock_real(&mutex_tid_tf);
 
 	return res;
 }

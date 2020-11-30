@@ -31,7 +31,6 @@
 #include "hwc.h"
 #include "mode.h"
 #include "utils.h"
-#include <pthread.h>
 
 int *MPI_Deepness              = NULL;
 int *Current_Trace_Mode        = NULL;
@@ -62,13 +61,13 @@ static int is_ValidMode (int mode)
 
 void Trace_Mode_CleanUp (void)
 {
-    pthread_rwlock_wrlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_wrlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 	xfree (MPI_Deepness);
 	xfree (Current_Trace_Mode);
 	xfree (Future_Trace_Mode);
 	xfree (Pending_Trace_Mode_Change);
 	xfree (First_Trace_Mode);
-    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_unlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 }
 
 int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
@@ -77,7 +76,7 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 
 	size = sizeof(int) * new_num_threads;
 
-    pthread_rwlock_wrlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_wrlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 	MPI_Deepness = (int *)realloc(MPI_Deepness, size);
 	if (MPI_Deepness == NULL)
 	{
@@ -121,22 +120,28 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 		Pending_Trace_Mode_Change[i] = FALSE;
 		First_Trace_Mode[i] = TRUE;
 	}
-    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_unlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 
 	return TRUE;
 }
 
 int Trace_Mode_FirstMode (unsigned thread)
 {
+    if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
     int ret;
-    pthread_rwlock_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_rdlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 	ret = First_Trace_Mode[thread];
-    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_unlock_real(&pThread_mtx_Trace_Mode_reInitialize);
     return ret;
 }
 
 int Trace_Mode_Initialize (int num_threads)
 {
+    if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 	int res = Trace_Mode_reInitialize (0, num_threads);
 
 	/* Show configuration */
@@ -164,7 +169,10 @@ int Trace_Mode_Initialize (int num_threads)
 
 void Trace_Mode_Change (int tid, iotimer_t time)
 {
-    pthread_rwlock_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
+    if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
+    pthread_rwlock_rdlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 	if (Pending_Trace_Mode_Change[tid] || First_Trace_Mode[tid])
 	{
 		if (Future_Trace_Mode[tid] != Current_Trace_Mode[tid] || First_Trace_Mode[tid])
@@ -185,7 +193,7 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 		Pending_Trace_Mode_Change[tid] = FALSE;
 		First_Trace_Mode[tid] = FALSE;
 	}
-    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_unlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 }
 
 void
@@ -193,19 +201,22 @@ Trace_mode_switch(void)
 {
 	unsigned i;
 
+    if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 	/*
 	 * XXX Should this be Backend_getMaximumOfThreads()? If we decrease the
 	 * number of threads, switch tracing mode and then increase again the the
 	 * number of threads, only the "old" threads will use burst mode, while the
 	 * "new" ones will continue in detail.
 	 */
-    pthread_rwlock_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_rdlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 	for (i=0; i<Backend_getNumberOfThreads(); i++)
 	{
 		Pending_Trace_Mode_Change[i] = TRUE;
 		Future_Trace_Mode[i] = (Current_Trace_Mode[i] == TRACE_MODE_DETAIL)?TRACE_MODE_BURSTS:TRACE_MODE_DETAIL;
 	}
-    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
+    pthread_rwlock_unlock_real(&pThread_mtx_Trace_Mode_reInitialize);
 }
 
 /* Configure options */

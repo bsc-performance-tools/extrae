@@ -26,7 +26,7 @@
 
 #include "clock.h"
 #include "trace_mode.h"
-#include <pthread.h>
+#include "pthread_redirect.h"
 
 extern int *MPI_Deepness;
 extern int *Current_Trace_Mode;
@@ -37,9 +37,9 @@ extern pthread_rwlock_t pThread_mtx_Trace_Mode_reInitialize;
 #define CURRENT_TRACE_MODE(tid) Current_Trace_Mode[tid]\
 // { \
 //     int ret; \
-//     pthread_rwlock_rdlock(&pThread_mtx_Trace_Mode_reInitialize); \
+//     pthread_rwlock_rdlock_real(&pThread_mtx_Trace_Mode_reInitialize); \
 //     ret = Current_Trace_Mode[tid]; \
-//     pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize); \
+//     pthread_rwlock_unlock_real(&pThread_mtx_Trace_Mode_reInitialize); \
 //     return ret; \
 // }
 

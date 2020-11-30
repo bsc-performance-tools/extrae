@@ -415,7 +415,7 @@ int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int thread
 #endif
 	int rc;
 
-    // pthread_rwlock_rdlock(&pThread_mtx_HWC_sets);
+    // pthread_rwlock_rdlock_real(&pThread_mtx_HWC_sets);
 	/* The given set is a valid one? */
 	if (numset < 0 || numset >= HWC_num_sets)
 		return FALSE;
@@ -475,7 +475,7 @@ int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int thread
 			fprintf (stderr, PACKAGE_NAME": errno = %d\n", errno);
 		}
 	}
-    // pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+    // pthread_rwlock_unlock_real(&pThread_mtx_HWC_sets);
 
 	return rc == PAPI_OK;
 }
@@ -614,7 +614,7 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 	if (HWC_num_sets <= 0)
 		return FALSE;
 
-    //pthread_rwlock_rdlock(&pThread_mtx_HWC_sets);
+    //pthread_rwlock_rdlock_real(&pThread_mtx_HWC_sets);
 	if (forked)
 	{
 		PAPI_stop (HWCEVTSET(threadid), NULL);
@@ -676,7 +676,7 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 	    Extrae_IntelPEBS_startSampling();                                              
 #endif
     int ret = HWC_Thread_Initialized[threadid];
-    //pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+    //pthread_rwlock_unlock_real(&pThread_mtx_HWC_sets);
 	return ret;
 }
 

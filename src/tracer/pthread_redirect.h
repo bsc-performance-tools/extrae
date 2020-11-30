@@ -1,9 +1,31 @@
 #ifndef __PTHREAD_REDIRECT_H__
 #define __PTHREAD_REDIRECT_H__
 
+#include "common.h"
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
+#ifdef HAVE_DLFCN_H
+# define __USE_GNU
+# include <dlfcn.h>
+# undef  __USE_GNU
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
+
 #include <sys/syscall.h>
 #include <sys/time.h>
 #include <sys/types.h>
