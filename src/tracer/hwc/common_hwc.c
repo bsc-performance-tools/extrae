@@ -609,12 +609,14 @@ int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer)
 	if (HWCEnabled)
 	{
         mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_Realloc);
 		if (!HWC_Thread_Initialized[tid])
 			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( store_buffer );
 
 		read_ok = HWCBE_READ (tid, store_buffer);
 		reset_ok = (Reset_After_Read ? HWCBE_RESET (tid) : TRUE);
+        mtx_rw_unlock(&pThread_mtx_Realloc);
         mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
 	}
 	return (HWCEnabled && read_ok && reset_ok);
@@ -652,6 +654,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 	if (HWCEnabled)
 	{
         mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_Realloc);
 		if (!HWC_Thread_Initialized[tid])
 			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( Accumulated_HWC[tid] );
@@ -665,6 +668,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 #endif
 
 		Accumulated_HWC_Valid[tid] = TRUE;
+        mtx_rw_unlock(&pThread_mtx_Realloc);
         mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
 	}
 	return (HWCEnabled && accum_ok);

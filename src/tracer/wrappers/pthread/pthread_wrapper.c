@@ -56,6 +56,8 @@
 
 */
 
+static pthread_rwlock_t extrae_pthread_create_mutex = PTHREAD_RWLOCK_INITIALIZER;
+
 #if defined(PIC)
 
 struct pthread_create_info

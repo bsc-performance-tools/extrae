@@ -57,24 +57,24 @@ static pthread_mutex_t pThread_mtx_sigInhibited = PTHREAD_MUTEX_INITIALIZER;
 
 void Signals_Inhibit()
 {
-    mtx_lock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
+    mtx_lock(&pThread_mtx_sigInhibited);
 	sigInhibited = TRUE;
-    mtx_unlock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
+    mtx_unlock(&pThread_mtx_sigInhibited);
 }
 
 void Signals_Desinhibit()
 {
-    mtx_lock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
+    mtx_lock(&pThread_mtx_sigInhibited);
 	sigInhibited = FALSE;
-    mtx_unlock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
+    mtx_unlock(&pThread_mtx_sigInhibited);
 }
 
 int Signals_Inhibited()
 {
     int ret;
-    mtx_lock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
+    mtx_lock(&pThread_mtx_sigInhibited);
 	ret = sigInhibited;
-    mtx_unlock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
+    mtx_unlock(&pThread_mtx_sigInhibited);
     return ret;
 }
 

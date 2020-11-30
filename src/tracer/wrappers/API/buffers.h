@@ -39,7 +39,7 @@
 #include "record.h"
 
 #define LOCK_AT_INSERT 1
-//#define LOCK_AT_FLUSH 1
+#define LOCK_AT_FLUSH 1
 
 typedef int Mask_t; 
 
