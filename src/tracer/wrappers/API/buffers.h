@@ -39,7 +39,7 @@
 #include "record.h"
 
 #define LOCK_AT_INSERT 1
-#define LOCK_AT_FLUSH 1
+//#define LOCK_AT_FLUSH 1
 
 typedef int Mask_t; 
 
@@ -56,9 +56,9 @@ struct Buffer
 
   int fd;
 
-#if defined(HAVE_ONLINE) 
+// #if defined(HAVE_ONLINE) 
   pthread_mutex_t Lock;
-#endif
+// #endif
   Mask_t *Masks;
 
   int (*FlushCallback)(struct Buffer *);

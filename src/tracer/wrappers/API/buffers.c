@@ -57,6 +57,8 @@
 #include "utils.h"
 #include "pthread_redirect.h"
 
+extern pthread_rwlock_t pThread_mtx_Realloc;
+
 #define EVENT_INDEX(buffer, event) (event - Buffer_GetFirst(buffer))
 #define ALL_BITS_SET 0xFFFFFFFF
 
@@ -76,12 +78,12 @@ static void DataBlocks_Free (DataBlocks_t *blocks);
 Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 {
 	Buffer_t *buffer = NULL;
-#if defined(HAVE_ONLINE)
+// #if defined(HAVE_ONLINE)
 #if 0
 	pthread_mutexattr_t attr;
 #endif
 	int rc;
-#endif
+// #endif
 
 	xmalloc(buffer, sizeof(Buffer_t));
 	buffer->FillCount = 0;
@@ -117,7 +119,7 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
           }
         } 
 
-#if defined(HAVE_ONLINE) 
+// #if defined(HAVE_ONLINE) 
 #if 0
 	pthread_mutexattr_init( &attr );
 	pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE_NP );
@@ -140,7 +142,7 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 		exit(1);
 	}
 #endif
-#endif
+// #endif
 
 	xmalloc(buffer->Masks, n_events * sizeof(Mask_t));
 	Mask_Wipe(buffer);
@@ -164,9 +166,9 @@ void Buffer_Free (Buffer_t *buffer)
 	if (buffer != NULL)
 	{
 		xfree (buffer->FirstEvt);
-#if defined(HAVE_ONLINE)
+// #if defined(HAVE_ONLINE)
 		pthread_mutex_destroy(&(buffer->Lock));
-#endif
+// #endif
 		xfree (buffer->Masks);
 
                 xfree (buffer->CachedEvents);
@@ -356,20 +358,20 @@ event_t * Buffer_GetNext (Buffer_t *buffer, event_t *current)
 
 void Buffer_Lock (Buffer_t *buffer)
 {
-#if defined(HAVE_ONLINE)
+// #if defined(HAVE_ONLINE)
 	mtx_lock(&(buffer->Lock));
-#else
-	UNREFERENCED_PARAMETER(buffer);
-#endif
+// #else
+// 	UNREFERENCED_PARAMETER(buffer);
+// #endif
 }
 
 void Buffer_Unlock (Buffer_t *buffer)
 {
-#if defined(HAVE_ONLINE)
+// #if defined(HAVE_ONLINE)
 	mtx_unlock(&(buffer->Lock));
-#else
-	UNREFERENCED_PARAMETER(buffer);
-#endif
+// #else
+// 	UNREFERENCED_PARAMETER(buffer);
+// #endif
 }
 
 /*
@@ -463,6 +465,7 @@ void Buffer_InsertSingle(Buffer_t *buffer, event_t *new_event)
 {
 #if defined(LOCK_AT_INSERT)
 	Buffer_Lock (buffer);
+    mtx_rw_rdlock(&pThread_mtx_Realloc);
 #endif
 
 	if (Buffer_IsFull (buffer))
@@ -481,6 +484,7 @@ void Buffer_InsertSingle(Buffer_t *buffer, event_t *new_event)
 	buffer->FillCount ++;
 
 #if defined(LOCK_AT_INSERT)
+    mtx_rw_unlock(&pThread_mtx_Realloc);
 	Buffer_Unlock (buffer);
 #endif
 }

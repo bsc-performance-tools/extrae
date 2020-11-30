@@ -261,7 +261,9 @@ int HWCBE_PMAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int threa
 		return FALSE;
 
 	HWC_current_changeat = HWC_sets[numset].change_at;
+    mtx_lock(&pThread_mtx_HWC_current_changetype);
 	HWC_current_changetype = HWC_sets[numset].change_type;
+    mtx_unlock(&pThread_mtx_HWC_current_changetype);
 	HWC_current_timebegin[threadid] = time;
 	HWC_current_glopsbegin[threadid] = countglops;
 

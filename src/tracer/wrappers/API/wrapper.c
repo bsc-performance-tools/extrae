@@ -329,11 +329,13 @@ char tmp_dir[TMP_DIR_LEN];
 int
 PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
 {
+    mtx_rw_rdlock(&pThread_mtx_Realloc);
 	if ((LastCPUEmissionTime[thread_id] == 0) || (((current_time - LastCPUEmissionTime[thread_id]) >  MinimumCPUEventTime) && MinimumCPUEventTime > 0)) {
 		LastCPUEmissionTime[thread_id] = current_time;
+        mtx_rw_unlock(&pThread_mtx_Realloc);
 		return 1;
 	}
-
+    mtx_rw_unlock(&pThread_mtx_Realloc);
 	return 0;
 }
 
@@ -2670,6 +2672,7 @@ void Backend_Enter_Instrumentation ()
 	Backend_setInInstrumentation (thread, TRUE);
 
 	/* Check if we have to fill the sampling buffer */
+    mtx_rw_rdlock(&pThread_mtx_Realloc);
 #if defined(SAMPLING_SUPPORT)
 	if (Extrae_get_DumpBuffersAtInstrumentation())
 		if (Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
@@ -2707,7 +2710,6 @@ void Backend_Enter_Instrumentation ()
 #endif
 
 	/* Check whether we will fill the buffer soon (or now) */
-    mtx_rw_rdlock(&pThread_mtx_Realloc);
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= NEVENTS)
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
     mtx_rw_unlock(&pThread_mtx_Realloc);

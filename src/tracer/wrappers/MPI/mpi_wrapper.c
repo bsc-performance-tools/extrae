@@ -343,8 +343,10 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 	 *   tag : message tag or MPI_ANY_TAG              commid: Communicator id
 	 *   aux: request id
 	 */
+    mtx_rw_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
 	TRACE_MPIEVENT_NOHWC (temps, MPI_PERSIST_REQ_EV, p_request->tipus,
 	  src_world, size, p_request->tag, p_request->comm, p_request->req);
+    mtx_rw_unlock(&pThread_mtx_Trace_Mode_reInitialize);
 }
 
 
@@ -3116,8 +3118,9 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 		if (cancel_flag)
 		{
 			// Communication was cancelled
+            mtx_rw_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
 			TRACE_MPIEVENT_NOHWC (ts, MPI_REQUEST_CANCELLED_EV, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, request);
-
+            mtx_rw_unlock(&pThread_mtx_Trace_Mode_reInitialize);
 			CancelRequest(request);
 		}
 		else
@@ -3136,8 +3139,9 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 				getCommDataFromStatus(status, MPI_BYTE, request_data.commid, request_data.group, &size, &tag, &src_world);
 
 				updateStats_P2P(global_mpi_stats, src_world, size, 0);
-  
+                mtx_rw_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
 				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, request_data.commid, request);
+                mtx_rw_unlock(&pThread_mtx_Trace_Mode_reInitialize);
 			}
 			else 
 			{
@@ -3146,7 +3150,9 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 				/* This case would also trigger if a receive request was not found in the hash (e.g. hash full) 
 				This should not happen unless there's errors in xtr_hash_add or we've missed instrumenting any recv calls. 
 				*/
+                mtx_rw_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
 				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, EMPTY, EMPTY, status->MPI_TAG, EMPTY, request);
+                mtx_rw_unlock(&pThread_mtx_Trace_Mode_reInitialize);
 			}
 		}
 	}
