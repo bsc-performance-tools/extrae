@@ -80,7 +80,7 @@ extern unsigned long long * HWC_current_glopsbegin;
 extern enum ChangeType_t HWC_current_changetype;
 extern int * HWC_current_set;
 
-extern pthread_rwlock_t pThread_mtx_HWC_current_changetype;
+extern pthread_mutex_t pThread_mtx_HWC_current_changetype;
 
 /*------------------------------------------------ Useful macros ------------*/
 
