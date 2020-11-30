@@ -28,6 +28,7 @@
 #include "trace_macros.h"
 #include "wrapper.h"
 #include "common_hwc.h"
+#include "pthread_redirect.h"
 
 //#define DEBUG
 //#define MPICALLER_DEBUG
@@ -87,14 +88,19 @@ void Extrae_trace_callers (iotimer_t time, int offset, int type)
 			{
 				if (Trace_Caller[type][current_deep-offset])
 				{
+                    mtx_rw_rdlock(&pThread_mtx_Realloc);
 					TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_deep-offset+1), (UINT64)ip);
+                    mtx_rw_unlock(&pThread_mtx_Realloc);
 				}
 			}
 #if defined(SAMPLING_SUPPORT)
 			else if (type == CALLER_SAMPLING)
 			{
-				if (Trace_Caller[type][current_deep-offset])
+				if (Trace_Caller[type][current_deep-offset]) {
+                    mtx_rw_rdlock(&pThread_mtx_Realloc);
 					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_deep-offset+1, (UINT64) ip);
+                    mtx_rw_unlock(&pThread_mtx_Realloc);
+                }
 			} 
 #endif
 		}

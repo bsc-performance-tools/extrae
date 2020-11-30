@@ -159,15 +159,13 @@ void xtr_hash_free(xtr_hash_t *hash)
  */
 int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 {
-    if (pthread_rwlock_wrlock_real == NULL)
-		GetpthreadHookPoints(0);
 	// Apply the hash function to find corresponding cell in the head array
 	xtr_hash_cell_t *cell = XTR_HASH_GET_CELL_FOR_KEY(hash, key);
 	xtr_hash_cell_t *cell_to_add = cell;
 
 	if (hash->flags & XTR_HASH_LOCK)
 	{
-		pthread_rwlock_wrlock_real(&hash->lock);
+		mtx_rw_wrlock(&hash->lock);
 	}
 
 #if defined(DEBUG)
@@ -201,7 +199,7 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 
 	if (hash->flags & XTR_HASH_LOCK)
 	{
-		pthread_rwlock_unlock_real(&hash->lock);
+		mtx_rw_unlock(&hash->lock);
 	}
 
 	return 1;
@@ -261,13 +259,11 @@ static int xtr_hash_search (xtr_hash_t *hash, uintptr_t key, xtr_hash_cell_t **p
  */
 int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 {
-    if (pthread_rwlock_rdlock_real == NULL)
-		GetpthreadHookPoints(0);
 	xtr_hash_cell_t *previous = NULL, *cell = NULL;
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_rdlock_real(&hash->lock);
+                mtx_rw_rdlock(&hash->lock);
         }
 
 #if defined(DEBUG)
@@ -287,7 +283,7 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_unlock_real(&hash->lock);
+                mtx_rw_unlock(&hash->lock);
         }
 
 	return 0;
@@ -307,14 +303,12 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
  */
 int xtr_hash_fetch (xtr_hash_t * hash, uintptr_t key, void *data)
 {
-    if (pthread_rwlock_wrlock_real == NULL)
-		GetpthreadHookPoints(0);
 	int found = 0;
 	xtr_hash_cell_t *previous = NULL, *cell = NULL;
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_wrlock_real(&hash->lock);
+                mtx_rw_wrlock(&hash->lock);
         }
 
 #if defined(DEBUG)
@@ -347,7 +341,7 @@ int xtr_hash_fetch (xtr_hash_t * hash, uintptr_t key, void *data)
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_unlock_real(&hash->lock);
+                mtx_rw_unlock(&hash->lock);
         }
 
 	return found;

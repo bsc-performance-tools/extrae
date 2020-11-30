@@ -159,7 +159,36 @@ void GetpthreadHookPoints (int rank)
 // #endif /* PIC */
 }
 
+void mtx_lock_caller(pthread_mutex_t* lock, char* name, char const * caller_name) {
+    if(pthread_mutex_lock_real == NULL)
+        GetpthreadHookPoints(0);
+
+    pthread_mutex_lock_real(lock);
+
+    char cur_host_name[100];
+    cur_host_name[99] = '\0';
+    gethostname(cur_host_name, 99);
+
+    //fprintf(stderr, "DEBUG_LOCK\t%s OS_TID:%ld\t%s\tmtx_rw_wrlock\t%s\n", cur_host_name, syscall(SYS_gettid), name, caller_name);
+}
+
+void mtx_unlock_caller(pthread_mutex_t* lock, char* name, char const * caller_name){
+    // if(pthread_mutex_unlock_real == NULL)
+    //     GetpthreadHookPoints(0);
+
+    pthread_mutex_unlock_real(lock);
+
+    char cur_host_name[100];
+    cur_host_name[99] = '\0';
+    gethostname(cur_host_name, 99);
+
+    //fprintf(stderr, "DEBUG_LOCK\t%s OS_TID:%ld\t%s\tmtx_rw_wrlock\t%s\n", cur_host_name, syscall(SYS_gettid), name, caller_name);
+}
+
 void mtx_rw_wrlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name) {
+    if(pthread_rwlock_wrlock_real == NULL)
+        GetpthreadHookPoints(0);
+
     pthread_rwlock_wrlock_real(lock);
 
     char cur_host_name[100];
@@ -170,6 +199,9 @@ void mtx_rw_wrlock_caller(pthread_rwlock_t* lock, char* name, char const * calle
 }
 
 void mtx_rw_rdlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name) {
+    if(pthread_rwlock_rdlock_real == NULL)
+        GetpthreadHookPoints(0);
+
     pthread_rwlock_rdlock_real(lock);
 
     char cur_host_name[100];
@@ -180,6 +212,9 @@ void mtx_rw_rdlock_caller(pthread_rwlock_t* lock, char* name, char const * calle
 }
 
 void mtx_rw_unlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name) {
+    // if(pthread_rwlock_unlock_real == NULL)
+    //     GetpthreadHookPoints(0);
+
     pthread_rwlock_unlock_real(lock);
 
     char cur_host_name[100];

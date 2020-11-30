@@ -55,6 +55,7 @@
 
 #include "buffers.h"
 #include "utils.h"
+#include "pthread_redirect.h"
 
 #define EVENT_INDEX(buffer, event) (event - Buffer_GetFirst(buffer))
 #define ALL_BITS_SET 0xFFFFFFFF
@@ -356,7 +357,7 @@ event_t * Buffer_GetNext (Buffer_t *buffer, event_t *current)
 void Buffer_Lock (Buffer_t *buffer)
 {
 #if defined(HAVE_ONLINE)
-	pthread_mutex_lock(&(buffer->Lock));
+	mtx_lock(&(buffer->Lock));
 #else
 	UNREFERENCED_PARAMETER(buffer);
 #endif
@@ -365,7 +366,7 @@ void Buffer_Lock (Buffer_t *buffer)
 void Buffer_Unlock (Buffer_t *buffer)
 {
 #if defined(HAVE_ONLINE)
-	pthread_mutex_unlock(&(buffer->Lock));
+	mtx_unlock(&(buffer->Lock));
 #else
 	UNREFERENCED_PARAMETER(buffer);
 #endif

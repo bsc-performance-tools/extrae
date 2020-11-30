@@ -42,7 +42,7 @@
 #  include <pthread.h>
 # endif
 #endif
-#include <pthread.h>
+#include "pthread_redirect.h"
 
 /* #define DBG_SIGNALS */
 
@@ -57,24 +57,24 @@ static pthread_mutex_t pThread_mtx_sigInhibited = PTHREAD_MUTEX_INITIALIZER;
 
 void Signals_Inhibit()
 {
-    pthread_mutex_lock(&pThread_mtx_sigInhibited);
+    mtx_lock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
 	sigInhibited = TRUE;
-    pthread_mutex_unlock(&pThread_mtx_sigInhibited);
+    mtx_unlock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
 }
 
 void Signals_Desinhibit()
 {
-    pthread_mutex_lock(&pThread_mtx_sigInhibited);
+    mtx_lock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
 	sigInhibited = FALSE;
-    pthread_mutex_unlock(&pThread_mtx_sigInhibited);
+    mtx_unlock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
 }
 
 int Signals_Inhibited()
 {
     int ret;
-    pthread_mutex_lock(&pThread_mtx_sigInhibited);
+    mtx_lock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
 	ret = sigInhibited;
-    pthread_mutex_unlock(&pThread_mtx_sigInhibited);
+    mtx_unlock(&pThread_mtx_sigInhibited, "pThread_mtx_sigInhibited");
     return ret;
 }
 
@@ -231,20 +231,20 @@ void Signals_CondInit (Condition_t *cond)
 
 void Signals_CondWait (Condition_t *cond)
 {
-	pthread_mutex_lock(&(cond->ConditionMutex));
+	mtx_lock(&(cond->ConditionMutex));
 	while (cond->WaitingForCondition)
 	{
 		pthread_cond_wait(&(cond->WaitCondition), &(cond->ConditionMutex));
 	}
-	pthread_mutex_unlock(&(cond->ConditionMutex));
+	mtx_unlock(&(cond->ConditionMutex));
 }
 
 void Signals_CondWakeUp (Condition_t *cond)
 {
-	pthread_mutex_lock(&(cond->ConditionMutex));
+	mtx_lock(&(cond->ConditionMutex));
 	cond->WaitingForCondition = FALSE;
 	pthread_cond_signal(&(cond->WaitCondition));
-	pthread_mutex_unlock(&(cond->ConditionMutex));
+	mtx_unlock(&(cond->ConditionMutex));
 }
 
 #endif /* HAVE_ONLINE */

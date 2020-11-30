@@ -35,14 +35,6 @@ extern int *Pending_Trace_Mode_Change;
 extern pthread_rwlock_t pThread_mtx_Trace_Mode_reInitialize;
 
 #define CURRENT_TRACE_MODE(tid) Current_Trace_Mode[tid]\
-// { \
-//     int ret; \
-//     pthread_rwlock_rdlock_real(&pThread_mtx_Trace_Mode_reInitialize); \
-//     ret = Current_Trace_Mode[tid]; \
-//     pthread_rwlock_unlock_real(&pThread_mtx_Trace_Mode_reInitialize); \
-//     return ret; \
-// }
-
 #define PENDING_TRACE_MODE_CHANGE(tid) Pending_Trace_Mode_Change[tid]
 
 #define INCREASE_MPI_DEEPNESS(tid) (MPI_Deepness[tid]++)

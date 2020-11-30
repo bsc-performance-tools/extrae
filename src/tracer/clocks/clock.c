@@ -72,6 +72,9 @@
 # error "Unhandled clock type"
 #endif
 
+#include "pthread_redirect.h"
+static pthread_rwlock_t pThread_mtx_extrae_last_read_clock = PTHREAD_RWLOCK_INITIALIZER;
+
 static UINT64 *_extrae_last_read_clock = NULL;
 static unsigned ClockType = REAL_CLOCK;
 iotimer_t (*get_clock)();
@@ -89,7 +92,11 @@ unsigned Clock_getType (void)
 /* We obtain the last read time */
 UINT64 Clock_getLastReadTime (unsigned thread)
 {
-	return _extrae_last_read_clock[thread];
+    UINT64 ret;
+    mtx_rw_rdlock(&pThread_mtx_extrae_last_read_clock);
+	ret = _extrae_last_read_clock[thread];
+    mtx_rw_unlock(&pThread_mtx_extrae_last_read_clock);
+    return ret;
 }
 
 /* We obtain the current time, but we don't store it in the last read time */
@@ -103,24 +110,31 @@ UINT64 Clock_getCurrentTime_nstore (void)
 UINT64 Clock_getCurrentTime (unsigned thread)
 {
 	UINT64 tmp = Clock_getCurrentTime_nstore ();
+    mtx_rw_rdlock(&pThread_mtx_extrae_last_read_clock);
 	_extrae_last_read_clock[thread] = tmp;
+    mtx_rw_unlock(&pThread_mtx_extrae_last_read_clock);
 	return tmp;
 }
 
 void Clock_AllocateThreads (unsigned numthreads)
 {
+    mtx_rw_wrlock(&pThread_mtx_extrae_last_read_clock);
 	_extrae_last_read_clock = (UINT64*) realloc (_extrae_last_read_clock,
 		sizeof(UINT64)*numthreads);
 	if (_extrae_last_read_clock == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot allocate timing memory for %u threads\n", numthreads);
+        mtx_rw_unlock(&pThread_mtx_extrae_last_read_clock);
 		exit (-1);
 	}
+    mtx_rw_unlock(&pThread_mtx_extrae_last_read_clock);
 }
 
 void Clock_CleanUp (void)
 {
+    mtx_rw_wrlock(&pThread_mtx_extrae_last_read_clock);
 	xfree (_extrae_last_read_clock);
+    mtx_rw_unlock(&pThread_mtx_extrae_last_read_clock);
 }
 
 void Clock_Initialize (unsigned numthreads)

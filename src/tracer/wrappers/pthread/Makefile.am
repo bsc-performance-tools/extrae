@@ -3,8 +3,7 @@ include $(top_srcdir)/PATHS
 # Wrappers for pthread instrumentation
 WRAPPERS_PTHREAD = \
  pthread_wrapper.c pthread_wrapper.h \
- pthread_probe.c pthread_probe.h \
- pthread_redirect.c pthread_redirect.h
+ pthread_probe.c pthread_probe.h
 
 noinst_LTLIBRARIES  = libwrap_pthread.la
 
