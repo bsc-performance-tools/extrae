@@ -1983,10 +1983,10 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		/* Just modify things if there are more threads */
 		if (new_num_threads > get_maximum_NumOfThreads())
 		{
-            char cur_host_name[100];
-            cur_host_name[99] = '\0';
-            gethostname(cur_host_name, 99);
-            fprintf(stderr, "%s OS_TID:%ld Start Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
+            // char cur_host_name[100];
+            // cur_host_name[99] = '\0';
+            // gethostname(cur_host_name, 99);
+            // fprintf(stderr, "%s OS_TID:%ld Start Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
 			unsigned u;
 
 #if defined(ENABLE_PEBS_SAMPLING)
@@ -2034,7 +2034,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 #if defined(ENABLE_PEBS_SAMPLING)
 			Extrae_IntelPEBS_resumeSampling(); 
 #endif
-            fprintf(stderr, "%s OS_TID:%ld End   Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
+            // fprintf(stderr, "%s OS_TID:%ld End   Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
 		}
 		else
 			current_NumOfThreads = new_num_threads;

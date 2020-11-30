@@ -42,6 +42,7 @@
 #  include <pthread.h>
 # endif
 #endif
+#include <pthread.h>
 
 /* #define DBG_SIGNALS */
 
@@ -52,19 +53,29 @@
 
 volatile int sigInhibited = FALSE;
 
+static pthread_mutex_t pThread_mtx_sigInhibited = PTHREAD_MUTEX_INITIALIZER;
+
 void Signals_Inhibit()
 {
+    pthread_mutex_lock(&pThread_mtx_sigInhibited);
 	sigInhibited = TRUE;
+    pthread_mutex_unlock(&pThread_mtx_sigInhibited);
 }
 
 void Signals_Desinhibit()
 {
+    pthread_mutex_lock(&pThread_mtx_sigInhibited);
 	sigInhibited = FALSE;
+    pthread_mutex_unlock(&pThread_mtx_sigInhibited);
 }
 
 int Signals_Inhibited()
 {
-	return sigInhibited;
+    int ret;
+    pthread_mutex_lock(&pThread_mtx_sigInhibited);
+	ret = sigInhibited;
+    pthread_mutex_unlock(&pThread_mtx_sigInhibited);
+    return ret;
 }
 
 int Deferred_Signal_FlushAndTerminate = FALSE;

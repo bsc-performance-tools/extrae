@@ -46,7 +46,7 @@ int Starting_Trace_Mode = TRACE_MODE_DETAIL;
 unsigned long long BurstsMode_Threshold = 10000000; /* 10ms */
 int                BurstsMode_MPI_Stats = ENABLED; 
 
-static pthread_rwlock_t pThread_mtx_Trace_Mode_reInitialize = PTHREAD_RWLOCK_INITIALIZER;
+pthread_rwlock_t pThread_mtx_Trace_Mode_reInitialize = PTHREAD_RWLOCK_INITIALIZER;
 
 static int is_ValidMode (int mode)
 {
@@ -62,11 +62,13 @@ static int is_ValidMode (int mode)
 
 void Trace_Mode_CleanUp (void)
 {
+    pthread_rwlock_wrlock(&pThread_mtx_Trace_Mode_reInitialize);
 	xfree (MPI_Deepness);
 	xfree (Current_Trace_Mode);
 	xfree (Future_Trace_Mode);
 	xfree (Pending_Trace_Mode_Change);
 	xfree (First_Trace_Mode);
+    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
 }
 
 int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
@@ -126,7 +128,11 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 
 int Trace_Mode_FirstMode (unsigned thread)
 {
-	return First_Trace_Mode[thread];
+    int ret;
+    pthread_rwlock_rdlock(&pThread_mtx_Trace_Mode_reInitialize);
+	ret = First_Trace_Mode[thread];
+    pthread_rwlock_unlock(&pThread_mtx_Trace_Mode_reInitialize);
+    return ret;
 }
 
 int Trace_Mode_Initialize (int num_threads)

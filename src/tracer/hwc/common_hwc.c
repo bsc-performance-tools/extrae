@@ -51,6 +51,7 @@
 # include "sampling-intel-pebs.h"
 #endif
 #include <pthread.h>
+#include "pthread_redirect.h"
 
 static pthread_rwlock_t pThread_mtx_HWC_Start_Counters = PTHREAD_RWLOCK_INITIALIZER;
 
@@ -106,7 +107,11 @@ int HWC_IsEnabled()
  */
 int HWC_Get_Current_Set (int threadid)
 {
-	return HWC_current_set[threadid];
+    int ret;
+    mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
+	ret = HWC_current_set[threadid];
+    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
+    return ret;
 }
 
 /*
@@ -197,9 +202,11 @@ void HWC_Stop_Current_Set (UINT64 time, int thread_id)
 	{
 		/* make sure we don't loose the current counter values */
 		Extrae_counters_at_Time_Wrapper(time);
-
+        
+        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		/* Actually stop the counters */
 		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 	}
 }
 
@@ -212,8 +219,10 @@ void HWC_Start_Current_Set (UINT64 countglops, UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 0)
 	{
+        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		/* Actually start the counters */
 		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 	}
 }
 
@@ -229,11 +238,13 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 	{
 		HWC_Stop_Current_Set (time, thread_id);
 		
+        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		/* Move to the next set */
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
 			HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
 			HWC_current_set[thread_id] = random()%HWC_num_sets;
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -250,11 +261,13 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 	{
 		HWC_Stop_Current_Set (time, thread_id);
 
+        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		/* Move to the previous set */
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
 			HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
 			HWC_current_set[thread_id] = random()%HWC_num_sets;
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -376,7 +389,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	/* Allocate memory if this process has not been forked */
 	if (!forked)
 	{
-        pthread_rwlock_wrlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_wrlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
 		ASSERT(HWC_Thread_Initialized!=NULL, "Cannot allocate memory for HWC_Thread_Initialized!");
 
@@ -396,10 +409,11 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 			ASSERT(Accumulated_HWC[i]!=NULL, "Cannot allocate memory for Accumulated_HWC");
 			HWC_Accum_Reset(i);
 		}
-        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 
-		if (HWC_num_sets <= 0)
+		if (HWC_num_sets <= 0) {
 			return;
+        }
 
 		HWCEnabled = TRUE;
 	}
@@ -429,7 +443,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 {
 	int i;
-    pthread_rwlock_wrlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_wrlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 #if defined(PAPI_COUNTERS)
 	for (i = 0; i < HWC_num_sets; i++)
 		HWCBE_PAPI_Allocate_eventsets_per_thread (i, old_num_threads, new_num_threads);
@@ -470,7 +484,7 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 		HWC_current_timebegin[i] = 0;
 		HWC_current_glopsbegin[i] = 0;
 	}
-    pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 }
 
 /**
@@ -635,7 +649,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 
 	if (HWCEnabled)
 	{
-        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		if (!HWC_Thread_Initialized[tid])
 			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( Accumulated_HWC[tid] );
@@ -649,7 +663,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 #endif
 
 		Accumulated_HWC_Valid[tid] = TRUE;
-        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 	}
 	return (HWCEnabled && accum_ok);
 }
@@ -663,10 +677,8 @@ int HWC_Accum_Reset (unsigned int tid)
 {
 	if (HWCEnabled)
 	{
-        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
 		Accumulated_HWC_Valid[tid] = FALSE;
 		memset(Accumulated_HWC[tid], 0, MAX_HWC * sizeof(long long));
-        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
 		return 1;
 	}
 	else return 0;
@@ -676,9 +688,9 @@ int HWC_Accum_Reset (unsigned int tid)
 int HWC_Accum_Valid_Values (unsigned int tid) 
 {
     int ret;
-    pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
     ret = ( HWCEnabled ? Accumulated_HWC_Valid[tid] : 0 );
-    pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
     return ret;
 }
 
@@ -691,9 +703,9 @@ int HWC_Accum_Copy_Here (unsigned int tid, long long *store_buffer)
 {
 	if (HWCEnabled)
 	{
-        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		memcpy(store_buffer, Accumulated_HWC[tid], MAX_HWC * sizeof(long long));
-        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		return 1;
 	}
 	else return 0;
@@ -709,12 +721,12 @@ int HWC_Accum_Add_Here (unsigned int tid, long long *store_buffer)
 	int i;
 	if (HWCEnabled)
 	{
-        pthread_rwlock_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		for (i=0; i<MAX_HWC; i++)
 		{
 			store_buffer[i] += 	Accumulated_HWC[tid][i];
 		}
-        pthread_rwlock_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters, "pThread_mtx_HWC_Start_Counters");
 		return 1;
 	}
 	else return 0;

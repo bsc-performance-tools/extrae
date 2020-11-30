@@ -50,6 +50,7 @@
 #include "hwc_version.h"
 #include "papi.h"
 #include <pthread.h>
+#include "pthread_redirect.h"
 
 #if defined(IS_BGL_MACHINE)
 # define COUNTERS_INFO
@@ -110,17 +111,18 @@ int HWCBE_PAPI_Allocate_eventsets_per_thread (int num_set, int old_thread_num, i
 {
 	int i;
 
-    pthread_rwlock_wrlock(&pThread_mtx_HWC_sets);
+    //mtx_rw_wrlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	HWC_sets[num_set].eventsets = (int *) realloc (HWC_sets[num_set].eventsets, sizeof(int)*new_thread_num);
 	if (HWC_sets[num_set].eventsets == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for HWC_set\n");
+        // mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		return FALSE;
 	}
 
 	for (i = old_thread_num; i < new_thread_num; i++)
 		HWC_sets[num_set].eventsets[i] = PAPI_NULL;
-    pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+    //mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 
 	return TRUE;
 }
@@ -212,11 +214,12 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 		ncounters = MAX_HWC;
 	}
 	
-    pthread_rwlock_wrlock(&pThread_mtx_HWC_sets);
+    mtx_rw_wrlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	HWC_sets = (struct HWC_Set_t *) realloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
 	if (HWC_sets == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for HWC_set (rank %d)\n", rank);
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		return 0;
 	}
 
@@ -286,6 +289,7 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	{
 		if (rank == 0)
 			fprintf (stderr, PACKAGE_NAME": Set %d of counters seems to be empty/invalid, skipping\n", pretended_set);
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		return 0;
 	}
 
@@ -351,7 +355,6 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 				pretended_set);
 		HWC_sets[num_set].domain = PAPI_DOM_USER;
 	}
-    pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 
 	HWCBE_PAPI_Allocate_eventsets_per_thread (num_set, 0, Backend_getNumberOfThreads());
 
@@ -388,8 +391,10 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 		Add_Overflows_To_Set (rank, num_set, pretended_set, num_overflows,
 			overflow_counters, overflow_values);
 #endif
+    int ret = HWC_sets[num_set].num_counters;
+    mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 
-	return HWC_sets[num_set].num_counters;
+	return ret;
 }
 
 #if defined(PAPI_SAMPLING_SUPPORT)
@@ -410,6 +415,7 @@ int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int thread
 #endif
 	int rc;
 
+    // pthread_rwlock_rdlock(&pThread_mtx_HWC_sets);
 	/* The given set is a valid one? */
 	if (numset < 0 || numset >= HWC_num_sets)
 		return FALSE;
@@ -469,6 +475,7 @@ int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int thread
 			fprintf (stderr, PACKAGE_NAME": errno = %d\n", errno);
 		}
 	}
+    // pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
 
 	return rc == PAPI_OK;
 }
@@ -506,7 +513,7 @@ void HWCBE_PAPI_CleanUp (unsigned nthreads)
 		int state;
 		int i;
 		unsigned t;
-
+        mtx_rw_wrlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		if (PAPI_state (HWCEVTSET(THREADID), &state) == PAPI_OK)
 		{
 			if (state & PAPI_RUNNING)
@@ -538,8 +545,8 @@ void HWCBE_PAPI_CleanUp (unsigned nthreads)
 			}
 		}
 #endif
-		xfree (HWC_sets); 
-
+		xfree (HWC_sets);
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		PAPI_shutdown();
 	}
 }
@@ -607,6 +614,7 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 	if (HWC_num_sets <= 0)
 		return FALSE;
 
+    //pthread_rwlock_rdlock(&pThread_mtx_HWC_sets);
 	if (forked)
 	{
 		PAPI_stop (HWCEVTSET(threadid), NULL);
@@ -666,9 +674,10 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 
 #if defined(ENABLE_PEBS_SAMPLING)                                               
 	    Extrae_IntelPEBS_startSampling();                                              
-#endif                                                                          
-
-	return HWC_Thread_Initialized[threadid];
+#endif
+    int ret = HWC_Thread_Initialized[threadid];
+    //pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+	return ret;
 }
 
 #if defined(IS_BG_MACHINE)
@@ -676,7 +685,7 @@ int __in_PAPI_read_BG = FALSE;
 #endif
 int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 {
-    pthread_rwlock_rdlock(&pThread_mtx_HWC_sets);
+    mtx_rw_rdlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	int EventSet = HWCEVTSET(tid);
 
 #if !defined(IS_BG_MACHINE)
@@ -684,10 +693,10 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 	{
 		fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
 			tid, EventSet, __FILE__, __LINE__);
-        pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		return 0;
 	}
-    pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+    mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	return 1;
 #else
 	if (!__in_PAPI_read_BG)
@@ -697,15 +706,15 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 		{
 			fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
 				tid, EventSet, __FILE__, __LINE__);
-            pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+            mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 			return 0;
 		}
 		__in_PAPI_read_BG = FALSE;
-        pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		return 1;
 	}
 	else {
-        pthread_rwlock_unlock(&pThread_mtx_HWC_sets);
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		return 0;
     }
 #endif
@@ -713,23 +722,29 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 
 int HWCBE_PAPI_Reset (unsigned int tid)
 {
+    mtx_rw_rdlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	if (PAPI_reset(HWCEVTSET(tid)) != PAPI_OK)
 	{
 		fprintf (stderr, PACKAGE_NAME": PAPI_reset failed for thread %d evtset %d (%s:%d)\n", \
 			tid, HWCEVTSET(tid), __FILE__, __LINE__);
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 		return 0;
 	}
+    mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	return 1;
 }
 
 int HWCBE_PAPI_Accum (unsigned int tid, long long *store_buffer)
 {
+    mtx_rw_rdlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	if (PAPI_accum(HWCEVTSET(tid), store_buffer) != PAPI_OK)
 	{
 		fprintf (stderr, PACKAGE_NAME": PAPI_accum failed for thread %d evtset %d (%s:%d)\n", \
 			tid, HWCEVTSET(tid), __FILE__, __LINE__);
-		return 0;		
+        mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
+		return 0;
 	}
+    mtx_rw_unlock(&pThread_mtx_HWC_sets, "pThread_mtx_HWC_sets");
 	return 1;
 }
 
