@@ -57,7 +57,7 @@
 #include "utils.h"
 #include "pthread_redirect.h"
 
-extern pthread_rwlock_t pThread_mtx_Realloc;
+extern pthread_rwlock_t pThread_mtx_change_number_threads;
 
 #define EVENT_INDEX(buffer, event) (event - Buffer_GetFirst(buffer))
 #define ALL_BITS_SET 0xFFFFFFFF
@@ -465,7 +465,7 @@ void Buffer_InsertSingle(Buffer_t *buffer, event_t *new_event)
 {
 #if defined(LOCK_AT_INSERT)
 	Buffer_Lock (buffer);
-    mtx_rw_rdlock(&pThread_mtx_Realloc);
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 #endif
 
 	if (Buffer_IsFull (buffer))
@@ -484,7 +484,7 @@ void Buffer_InsertSingle(Buffer_t *buffer, event_t *new_event)
 	buffer->FillCount ++;
 
 #if defined(LOCK_AT_INSERT)
-    mtx_rw_unlock(&pThread_mtx_Realloc);
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	Buffer_Unlock (buffer);
 #endif
 }

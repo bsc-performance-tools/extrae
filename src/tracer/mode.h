@@ -32,8 +32,6 @@ extern int *MPI_Deepness;
 extern int *Current_Trace_Mode;
 extern int *Pending_Trace_Mode_Change;
 
-extern pthread_rwlock_t pThread_mtx_Trace_Mode_reInitialize;
-
 #define CURRENT_TRACE_MODE(tid) Current_Trace_Mode[tid]
 #define PENDING_TRACE_MODE_CHANGE(tid) Pending_Trace_Mode_Change[tid]
 

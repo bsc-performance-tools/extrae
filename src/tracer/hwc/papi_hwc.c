@@ -222,6 +222,7 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
         mtx_rw_unlock(&pThread_mtx_HWC_sets);
 		return 0;
 	}
+    mtx_rw_unlock(&pThread_mtx_HWC_sets);
 
 	/* Initialize this set */
 	HWC_sets[num_set].num_counters = 0;
@@ -289,7 +290,6 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	{
 		if (rank == 0)
 			fprintf (stderr, PACKAGE_NAME": Set %d of counters seems to be empty/invalid, skipping\n", pretended_set);
-        mtx_rw_unlock(&pThread_mtx_HWC_sets);
 		return 0;
 	}
 
@@ -392,8 +392,6 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 			overflow_counters, overflow_values);
 #endif
     int ret = HWC_sets[num_set].num_counters;
-    mtx_rw_unlock(&pThread_mtx_HWC_sets);
-
 	return ret;
 }
 

@@ -53,8 +53,8 @@
 #include <pthread.h>
 #include "pthread_redirect.h"
 
-static pthread_rwlock_t pThread_mtx_HWC_Start_Counters = PTHREAD_RWLOCK_INITIALIZER;
 pthread_mutex_t pThread_mtx_HWC_current_changetype = PTHREAD_MUTEX_INITIALIZER;
+extern pthread_rwlock_t pThread_mtx_change_number_threads;
 
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
@@ -109,9 +109,9 @@ int HWC_IsEnabled()
 int HWC_Get_Current_Set (int threadid)
 {
     int ret;
-    mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 	ret = HWC_current_set[threadid];
-    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
     return ret;
 }
 
@@ -204,10 +204,10 @@ void HWC_Stop_Current_Set (UINT64 time, int thread_id)
 		/* make sure we don't loose the current counter values */
 		Extrae_counters_at_Time_Wrapper(time);
         
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		/* Actually stop the counters */
 		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	}
 }
 
@@ -220,10 +220,10 @@ void HWC_Start_Current_Set (UINT64 countglops, UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 0)
 	{
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		/* Actually start the counters */
 		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	}
 }
 
@@ -239,13 +239,13 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 	{
 		HWC_Stop_Current_Set (time, thread_id);
 		
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		/* Move to the next set */
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
 			HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
 			HWC_current_set[thread_id] = random()%HWC_num_sets;
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -262,13 +262,13 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 	{
 		HWC_Stop_Current_Set (time, thread_id);
 
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		/* Move to the previous set */
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
 			HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
 			HWC_current_set[thread_id] = random()%HWC_num_sets;
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -308,13 +308,13 @@ static inline int CheckForHWCSetChange_TIME (UINT64 countglops, UINT64 time, int
 	int ret = 0;
 
 //	fprintf (stderr, "HWC_current_timebegin[%d]=%llu HWC_current_changeat=%llu time = %llu\n", THREADID, HWC_current_timebegin[threadid], HWC_current_changeat, time);
-    mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 	if (HWC_current_timebegin[threadid] + HWC_current_changeat < time)
 	{
 		HWC_Start_Next_Set (countglops, time, threadid);
 		ret = 1;
 	}
-    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	return ret;
 }
 
@@ -346,7 +346,7 @@ int HWC_Check_Pending_Set_Change (UINT64 countglops, UINT64 time, int thread_id)
 void HWC_Initialize (int options)
 {
 	int num_threads = Backend_getMaximumOfThreads();
-    mtx_rw_wrlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_wrlock(&pThread_mtx_change_number_threads);
 	HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
 	ASSERT(HWC_current_set != NULL, "Cannot allocate memory for HWC_current_set");
 	memset (HWC_current_set, 0, sizeof(int) * num_threads);
@@ -356,7 +356,7 @@ void HWC_Initialize (int options)
 
 	HWC_current_glopsbegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
 	ASSERT(HWC_current_glopsbegin != NULL, "Cannot allocate memory for HWC_current_glopsbegin");
-    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 	HWCBE_INITIALIZE(options);
 }
@@ -396,7 +396,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	/* Allocate memory if this process has not been forked */
 	if (!forked)
 	{
-        mtx_rw_wrlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_wrlock(&pThread_mtx_change_number_threads);
 		HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
 		ASSERT(HWC_Thread_Initialized!=NULL, "Cannot allocate memory for HWC_Thread_Initialized!");
 
@@ -416,7 +416,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 			ASSERT(Accumulated_HWC[i]!=NULL, "Cannot allocate memory for Accumulated_HWC");
 			HWC_Accum_Reset(i);
 		}
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 		if (HWC_num_sets <= 0) {
 			return;
@@ -429,7 +429,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	HWCEnabled = HWCBE_START_COUNTERS_THREAD (time, 0, forked);
 
 	/* Inherit hwc set change values from thread 0 */
-    mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 	for (i = 1; i < num_threads; i++)
 	{
 /*
@@ -441,7 +441,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 		HWC_current_timebegin[i] = HWC_current_timebegin[0];
 		HWC_current_glopsbegin[i] = HWC_current_glopsbegin[0];
 	}
-    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 }
 
 /** 
@@ -452,7 +452,6 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 {
 	int i;
-    mtx_rw_wrlock(&pThread_mtx_HWC_Start_Counters);
 #if defined(PAPI_COUNTERS)
 	for (i = 0; i < HWC_num_sets; i++)
 		HWCBE_PAPI_Allocate_eventsets_per_thread (i, old_num_threads, new_num_threads);
@@ -493,7 +492,6 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 		HWC_current_timebegin[i] = 0;
 		HWC_current_glopsbegin[i] = 0;
 	}
-    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
 }
 
 /**
@@ -617,16 +615,14 @@ int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer)
 
 	if (HWCEnabled)
 	{
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
-        mtx_rw_rdlock(&pThread_mtx_Realloc);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		if (!HWC_Thread_Initialized[tid])
 			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( store_buffer );
 
 		read_ok = HWCBE_READ (tid, store_buffer);
 		reset_ok = (Reset_After_Read ? HWCBE_RESET (tid) : TRUE);
-        mtx_rw_unlock(&pThread_mtx_Realloc);
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	}
 	return (HWCEnabled && read_ok && reset_ok);
 }
@@ -662,8 +658,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 
 	if (HWCEnabled)
 	{
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
-        mtx_rw_rdlock(&pThread_mtx_Realloc);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		if (!HWC_Thread_Initialized[tid])
 			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( Accumulated_HWC[tid] );
@@ -677,8 +672,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 #endif
 
 		Accumulated_HWC_Valid[tid] = TRUE;
-        mtx_rw_unlock(&pThread_mtx_Realloc);
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	}
 	return (HWCEnabled && accum_ok);
 }
@@ -703,9 +697,9 @@ int HWC_Accum_Reset (unsigned int tid)
 int HWC_Accum_Valid_Values (unsigned int tid) 
 {
     int ret;
-    mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
     ret = ( HWCEnabled ? Accumulated_HWC_Valid[tid] : 0 );
-    mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
     return ret;
 }
 
@@ -718,9 +712,9 @@ int HWC_Accum_Copy_Here (unsigned int tid, long long *store_buffer)
 {
 	if (HWCEnabled)
 	{
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		memcpy(store_buffer, Accumulated_HWC[tid], MAX_HWC * sizeof(long long));
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 		return 1;
 	}
 	else return 0;
@@ -736,12 +730,12 @@ int HWC_Accum_Add_Here (unsigned int tid, long long *store_buffer)
 	int i;
 	if (HWCEnabled)
 	{
-        mtx_rw_rdlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 		for (i=0; i<MAX_HWC; i++)
 		{
 			store_buffer[i] += 	Accumulated_HWC[tid][i];
 		}
-        mtx_rw_unlock(&pThread_mtx_HWC_Start_Counters);
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 		return 1;
 	}
 	else return 0;
