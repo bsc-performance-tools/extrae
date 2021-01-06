@@ -59,15 +59,15 @@ extern int (*pthread_rwlock_unlock_real)(pthread_rwlock_t *);
 int GetpThreadIdentifier (void);
 
 // ============================= Locking helper ===================================
-void mtx_lock_caller(pthread_mutex_t* lock, char* name, char const * caller_name);
+void mtx_lock_caller(pthread_mutex_t* lock, const char *name, const char *caller_name);
 
-void mtx_unlock_caller(pthread_mutex_t* lock, char* name, char const * caller_name);
+void mtx_unlock_caller(pthread_mutex_t* lock, const char *name, const char *caller_name);
 
-void mtx_rw_wrlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name);
+void mtx_rw_wrlock_caller(pthread_rwlock_t* lock, const char *name, const char *caller_name);
 
-void mtx_rw_rdlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name);
+void mtx_rw_rdlock_caller(pthread_rwlock_t* lock, const char *name, const char *caller_name);
 
-void mtx_rw_unlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name);
+void mtx_rw_unlock_caller(pthread_rwlock_t* lock, const char *name, const char *caller_name);
 
 #ifndef mtx_lock
 #define mtx_lock(mtx) mtx_lock_caller(mtx, #mtx, __func__)

@@ -50,8 +50,7 @@ int (*pthread_rwlock_unlock_real)(pthread_rwlock_t *) = NULL;
 
 void GetpthreadHookPoints (int rank)
 {
-// #if defined(PIC)
-
+#if defined(PIC)
 	/* Obtain @ for pthread_create */
 	pthread_create_real =
 		(int(*)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*))
@@ -155,27 +154,34 @@ void GetpthreadHookPoints (int rank)
 	pthread_rwlock_unlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_unlock");
 	if (pthread_rwlock_unlock_real == NULL && rank == 0)
 		fprintf (stderr, "Unable to find pthread_rwlock_unlock in DSOs!!\n");
-// #else
-	// fprintf (stderr, "Warning! pthread instrumentation requires linking with shared library!\n");
-// #endif /* PIC */
+#else
+	fprintf (stderr, "Warning! pthread instrumentation requires linking with shared library!\n");
+#endif /* PIC */
 }
 
 // #define DEBUG_PRINT_LOCKING
 
 #ifdef DEBUG_PRINT_LOCKING
+#define LOCK_LVL_PADDING_FACTOR 1
+#define LOCK_LVL_NUM_LOCKS 200
+#define LOCK_LVL_MAX_LEN_HOSTNAME 100
+
+static pthread_mutex_t mtx_output_stderr = PTHREAD_MUTEX_INITIALIZER;
+
 typedef struct lock_idx {
-    char name[100];
+    char name[LOCK_LVL_MAX_LEN_HOSTNAME];
+    // more features?
 } lock_idx;
 
-__thread int current_lock_level[100];
-__thread lock_idx lock_assignments[100];
+__thread int current_lock_level[LOCK_LVL_NUM_LOCKS*LOCK_LVL_PADDING_FACTOR];       // use padding to avoid false sharing
+__thread lock_idx lock_assignments[LOCK_LVL_NUM_LOCKS*LOCK_LVL_PADDING_FACTOR];    // use padding to avoid false sharing
 __thread int cur_idx = -1;
 __thread int current_lock_level_init = 0;
 
 static void init_lock_level(){
     int i;
-    for(i = 0; i < 100; i++) {
-        current_lock_level[i] = 0;
+    for(i = 0; i < LOCK_LVL_NUM_LOCKS; i++) {
+        current_lock_level[i*LOCK_LVL_PADDING_FACTOR] = 0;
     }
     current_lock_level_init = 1;
 }
@@ -186,103 +192,101 @@ static int get_lock_idx(const char *name) {
 
     int i;
     for(i = 0; i <= cur_idx; i++) {
-        if(strcmp(name, lock_assignments[i].name) == 0) {
+        if(strcmp(name, lock_assignments[i*LOCK_LVL_PADDING_FACTOR].name) == 0) {
             return i;
         }
     }
     
     int tmp_idx = ++cur_idx;
-    strncpy(lock_assignments[tmp_idx].name, name, strlen(name));
+    strncpy(lock_assignments[tmp_idx*LOCK_LVL_PADDING_FACTOR].name, name, strlen(name));
     return tmp_idx;
 }
-#endif //DEBUG_PRINT_LOCKING
 
-void mtx_lock_caller(pthread_mutex_t* lock, char* name, char const * caller_name) {
+static void mtx_print_message(const char *lock_type, const char *lock_name, int lock_name_idx, const char *caller_name, int before) {
+    char cur_host_name[LOCK_LVL_MAX_LEN_HOSTNAME];
+    cur_host_name[LOCK_LVL_MAX_LEN_HOSTNAME-1] = '\0';
+    gethostname(cur_host_name, LOCK_LVL_MAX_LEN_HOSTNAME-1);
+    pthread_mutex_lock_real(&mtx_output_stderr);
+    if(before) {
+        fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\t%s\tBEFORE\tidx=%d\tLvl=%d\tCaller=%s\n", cur_host_name, syscall(SYS_gettid), lock_type, lock_name, lock_name_idx, current_lock_level[lock_name_idx], caller_name);
+    } else {
+        fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\t%s\tAFTER\tidx=%d\tLvl=%d\tCaller=%s\n", cur_host_name, syscall(SYS_gettid), lock_type, lock_name, lock_name_idx, current_lock_level[lock_name_idx], caller_name);
+    }
+    fflush(stderr);
+    pthread_mutex_unlock_real(&mtx_output_stderr);
+}
+#endif /* DEBUG_PRINT_LOCKING */
+
+void mtx_lock_caller(pthread_mutex_t* lock, const char *name, const char *caller_name) {
     if(pthread_mutex_lock_real == NULL)
         GetpthreadHookPoints(0);
 
-// #ifdef DEBUG_PRINT_LOCKING
-//     int tmp_idx = get_lock_idx(name);
-//     char cur_host_name[100];
-//     cur_host_name[99] = '\0';
-//     gethostname(cur_host_name, 99);
-//     fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_lock\tBEFORE\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
-// #endif
+#ifdef DEBUG_PRINT_LOCKING
+    const char *lock_type = "mtx_lock";
+    int tmp_idx = get_lock_idx(name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 1);
+#endif
     pthread_mutex_lock_real(lock);
-// #ifdef DEBUG_PRINT_LOCKING
-//     current_lock_level[tmp_idx]++;
-//     fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_lock\tAFTER\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
-// #endif
+#ifdef DEBUG_PRINT_LOCKING
+    current_lock_level[tmp_idx]++;
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 0);
+#endif
 }
 
-void mtx_unlock_caller(pthread_mutex_t* lock, char* name, char const * caller_name){
-    // if(pthread_mutex_unlock_real == NULL)
-    //     GetpthreadHookPoints(0);
-
-// #ifdef DEBUG_PRINT_LOCKING
-//     int tmp_idx = get_lock_idx(name);
-//     char cur_host_name[100];
-//     cur_host_name[99] = '\0';
-//     gethostname(cur_host_name, 99);
-//     fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_unlock\tBEFORE\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
-// #endif
+void mtx_unlock_caller(pthread_mutex_t* lock, const char *name, const char *caller_name){
+#ifdef DEBUG_PRINT_LOCKING
+    const char *lock_type = "mtx_unlock";
+    int tmp_idx = get_lock_idx(name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 1);
+#endif
     pthread_mutex_unlock_real(lock);
-// #ifdef DEBUG_PRINT_LOCKING
-//     current_lock_level[tmp_idx]--;
-//     fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_unlock\tAFTER\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
-// #endif
+#ifdef DEBUG_PRINT_LOCKING
+    current_lock_level[tmp_idx]--;
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 0);
+#endif
 }
 
-void mtx_rw_wrlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name) {
+void mtx_rw_wrlock_caller(pthread_rwlock_t* lock, const char *name, const char *caller_name) {
     if(pthread_rwlock_wrlock_real == NULL)
         GetpthreadHookPoints(0);
 
 #ifdef DEBUG_PRINT_LOCKING
+    const char *lock_type = "mtx_rw_wrlock";
     int tmp_idx = get_lock_idx(name);
-    char cur_host_name[100];
-    cur_host_name[99] = '\0';
-    gethostname(cur_host_name, 99);
-    fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_rw_wrlock\tBEFORE\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 1);
 #endif
     pthread_rwlock_wrlock_real(lock);
 #ifdef DEBUG_PRINT_LOCKING
     current_lock_level[tmp_idx]++;
-    fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_rw_wrlock\tAFTER\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 0);
 #endif
 }
 
-void mtx_rw_rdlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name) {
+void mtx_rw_rdlock_caller(pthread_rwlock_t* lock, const char *name, const char *caller_name) {
     if(pthread_rwlock_rdlock_real == NULL)
         GetpthreadHookPoints(0);
 
 #ifdef DEBUG_PRINT_LOCKING
+    const char *lock_type = "mtx_rw_rdlock";
     int tmp_idx = get_lock_idx(name);
-    char cur_host_name[100];
-    cur_host_name[99] = '\0';
-    gethostname(cur_host_name, 99);
-    fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_rw_rdlock\tBEFORE\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 1);
 #endif
     pthread_rwlock_rdlock_real(lock);
 #ifdef DEBUG_PRINT_LOCKING
     current_lock_level[tmp_idx]++;
-    fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_rw_rdlock\tAFTER\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 0);
 #endif
 }
 
-void mtx_rw_unlock_caller(pthread_rwlock_t* lock, char* name, char const * caller_name) {
-    // if(pthread_rwlock_unlock_real == NULL)
-    //     GetpthreadHookPoints(0);
-
+void mtx_rw_unlock_caller(pthread_rwlock_t* lock, const char *name, const char *caller_name) {
 #ifdef DEBUG_PRINT_LOCKING
+    const char *lock_type = "mtx_rw_unlock";
     int tmp_idx = get_lock_idx(name);
-    char cur_host_name[100];
-    cur_host_name[99] = '\0';
-    gethostname(cur_host_name, 99);
-    fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_rw_unlock\tBEFORE\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 1);
 #endif
     pthread_rwlock_unlock_real(lock);
 #ifdef DEBUG_PRINT_LOCKING
     current_lock_level[tmp_idx]--;
-    fprintf(stderr, "DEBUG_LOCK\t%s\tOS_TID:\t%ld\t%s\tmtx_rw_unlock\tAFTER\t%d\t%s\n", cur_host_name, syscall(SYS_gettid), name, current_lock_level[tmp_idx], caller_name);
+    mtx_print_message(lock_type, name, tmp_idx, caller_name, 0);
 #endif
 }

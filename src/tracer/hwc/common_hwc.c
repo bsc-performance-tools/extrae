@@ -346,7 +346,6 @@ int HWC_Check_Pending_Set_Change (UINT64 countglops, UINT64 time, int thread_id)
 void HWC_Initialize (int options)
 {
 	int num_threads = Backend_getMaximumOfThreads();
-    mtx_rw_wrlock(&pThread_mtx_change_number_threads);
 	HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
 	ASSERT(HWC_current_set != NULL, "Cannot allocate memory for HWC_current_set");
 	memset (HWC_current_set, 0, sizeof(int) * num_threads);
@@ -356,7 +355,6 @@ void HWC_Initialize (int options)
 
 	HWC_current_glopsbegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
 	ASSERT(HWC_current_glopsbegin != NULL, "Cannot allocate memory for HWC_current_glopsbegin");
-    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 	HWCBE_INITIALIZE(options);
 }
@@ -396,7 +394,6 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	/* Allocate memory if this process has not been forked */
 	if (!forked)
 	{
-        mtx_rw_wrlock(&pThread_mtx_change_number_threads);
 		HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
 		ASSERT(HWC_Thread_Initialized!=NULL, "Cannot allocate memory for HWC_Thread_Initialized!");
 
@@ -416,7 +413,6 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 			ASSERT(Accumulated_HWC[i]!=NULL, "Cannot allocate memory for Accumulated_HWC");
 			HWC_Accum_Reset(i);
 		}
-        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 		if (HWC_num_sets <= 0) {
 			return;
