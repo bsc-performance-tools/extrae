@@ -153,6 +153,7 @@ WRAPPERS_CORE = \
 core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
+ pthread_redirect.c pthread_redirect.h       \
  xml-parse.c xml-parse.h                     \
  UF_gcc_instrument.c UF_gcc_instrument.h     \
  UF_xl_instrument.c UF_xl_instrument.h       \

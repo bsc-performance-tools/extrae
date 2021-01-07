@@ -45,6 +45,8 @@ int Starting_Trace_Mode = TRACE_MODE_DETAIL;
 unsigned long long BurstsMode_Threshold = 10000000; /* 10ms */
 int                BurstsMode_MPI_Stats = ENABLED; 
 
+extern pthread_rwlock_t pThread_mtx_change_number_threads;
+
 static int is_ValidMode (int mode)
 {
 	switch(mode)
@@ -121,7 +123,11 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 
 int Trace_Mode_FirstMode (unsigned thread)
 {
-	return First_Trace_Mode[thread];
+    int ret;
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
+	ret = First_Trace_Mode[thread];
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
+    return ret;
 }
 
 int Trace_Mode_Initialize (int num_threads)
@@ -153,6 +159,7 @@ int Trace_Mode_Initialize (int num_threads)
 
 void Trace_Mode_Change (int tid, iotimer_t time)
 {
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 	if (Pending_Trace_Mode_Change[tid] || First_Trace_Mode[tid])
 	{
 		if (Future_Trace_Mode[tid] != Current_Trace_Mode[tid] || First_Trace_Mode[tid])
@@ -173,6 +180,7 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 		Pending_Trace_Mode_Change[tid] = FALSE;
 		First_Trace_Mode[tid] = FALSE;
 	}
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 }
 
 void
@@ -180,17 +188,19 @@ Trace_mode_switch(void)
 {
 	unsigned i;
 
-	/*
+    /*
 	 * XXX Should this be Backend_getMaximumOfThreads()? If we decrease the
 	 * number of threads, switch tracing mode and then increase again the the
 	 * number of threads, only the "old" threads will use burst mode, while the
 	 * "new" ones will continue in detail.
 	 */
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 	for (i=0; i<Backend_getNumberOfThreads(); i++)
 	{
 		Pending_Trace_Mode_Change[i] = TRUE;
 		Future_Trace_Mode[i] = (Current_Trace_Mode[i] == TRACE_MODE_DETAIL)?TRACE_MODE_BURSTS:TRACE_MODE_DETAIL;
 	}
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 }
 
 /* Configure options */

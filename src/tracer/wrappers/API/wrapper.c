@@ -23,6 +23,14 @@
 
 #include "common.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <sys/syscall.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -153,11 +161,14 @@
 #include "syscall_probe.h"
 #include "syscall_wrapper.h"
 #include "taskid.h"
+#include "pthread_redirect.h"
 
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
 static int requestedDynamicMemoryInstrumentation = FALSE;
+pthread_rwlock_t pThread_mtx_change_number_threads = PTHREAD_RWLOCK_INITIALIZER;
 
+static pthread_rwlock_t pThread_mtx_Extrae_inInstrumentation = PTHREAD_RWLOCK_INITIALIZER;
 
 #if defined(STANDALONE)
 module_t *Modules = NULL;
@@ -316,11 +327,13 @@ char tmp_dir[TMP_DIR_LEN];
 int
 PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
 {
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 	if ((LastCPUEmissionTime[thread_id] == 0) || (((current_time - LastCPUEmissionTime[thread_id]) >  MinimumCPUEventTime) && MinimumCPUEventTime > 0)) {
 		LastCPUEmissionTime[thread_id] = current_time;
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 		return 1;
 	}
-
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	return 0;
 }
 
@@ -487,11 +500,17 @@ void Extrae_AnnotateCPU (UINT64 timestamp)
 #if defined(HAVE_SCHED_GETCPU)
     int cpu = sched_getcpu();
 
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
+    int unlocked = 0;
     if (cpu != LastCPUEvent[THREADID] || AlwaysEmitCPUEvent)
     {
         LastCPUEvent[THREADID] = cpu;
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
+        unlocked = 1;
         TRACE_EVENT (timestamp, GETCPU_EV, cpu);
     }
+    if(!unlocked)
+        mtx_rw_unlock(&pThread_mtx_change_number_threads);
 #else
     UNREFERENCED_PARAMETER(timestamp);
 #endif
@@ -1434,7 +1453,6 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 
 	for (i = 0; i < num_threads; i++)
 		Allocate_buffer_and_file (i, forked);
-
 	return TRUE;
 }
 
@@ -1453,10 +1471,8 @@ static int Reallocate_buffers_and_files (int new_num_threads)
 #if defined(SAMPLING_SUPPORT)
 	xrealloc(SamplingBuffer, SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
 #endif
-
 	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)
 		Allocate_buffer_and_file (i, FALSE);
-
 	return TRUE;
 }
 
@@ -1548,7 +1564,7 @@ void Backend_Flush_pThread (pthread_t t)
 
 			// Protect race condition with the master thread flushing the buffers at
 			// the end of this pthread and the process
-			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+			mtx_lock(&pthreadFreeBuffer_mtx);
 
 			// TracingBuffer may have been already free'd by the master thread if the process finished
 			if (TracingBuffer != NULL)
@@ -1574,7 +1590,7 @@ void Backend_Flush_pThread (pthread_t t)
 			}
 #endif
 
-			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+			mtx_unlock(&pthreadFreeBuffer_mtx);
 
 			break;
 		}
@@ -1601,13 +1617,13 @@ void Backend_NotifyNewPthread (void)
 {
 	int numthreads;
 
-	pthread_mutex_lock (&pThreadIdentifier_mtx);
+	mtx_lock(&pThreadIdentifier_mtx);
 
 	numthreads = Backend_getNumberOfThreads();
 	Backend_SetpThreadIdentifier (numthreads);
 	Backend_ChangeNumberOfThreads (numthreads+1);
 
-	pthread_mutex_unlock (&pThreadIdentifier_mtx);
+	mtx_unlock (&pThreadIdentifier_mtx);
 }
 #endif
 
@@ -1961,11 +1977,17 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 {
 	unsigned new_num_threads = numberofthreads;
 
+    mtx_rw_wrlock(&pThread_mtx_change_number_threads);
+
 	if (EXTRAE_INITIALIZED())
 	{
 		/* Just modify things if there are more threads */
 		if (new_num_threads > get_maximum_NumOfThreads())
 		{
+            // char cur_host_name[100];
+            // cur_host_name[99] = '\0';
+            // gethostname(cur_host_name, 99);
+            // fprintf(stderr, "%s OS_TID:%ld Start Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
 			unsigned u;
 
 #if defined(ENABLE_PEBS_SAMPLING)
@@ -2013,7 +2035,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 #if defined(ENABLE_PEBS_SAMPLING)
 			Extrae_IntelPEBS_resumeSampling(); 
 #endif
-
+            // fprintf(stderr, "%s OS_TID:%ld End   Backend_ChangeNumberOfThreads: %d\n", cur_host_name, syscall(SYS_gettid), new_num_threads);
 		}
 		else
 			current_NumOfThreads = new_num_threads;
@@ -2025,6 +2047,8 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 
 		current_NumOfThreads = new_num_threads;
 	}
+
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 	return TRUE;
 }
@@ -2442,7 +2466,7 @@ void Backend_Finalize (void)
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
 		{
 			// Protects race condition with Backend_Flush_pThread
-			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+			mtx_lock(&pthreadFreeBuffer_mtx);
 
 			// If buffer was working in circular mode, change it to flush mode to dump the final data into the trace
 			if ((circular_buffering) && (!online_mode))
@@ -2459,7 +2483,7 @@ void Backend_Finalize (void)
 
 			Extrae_Flush_Wrapper_setCounters (TRUE);
 
-			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+			mtx_unlock(&pthreadFreeBuffer_mtx);
 		}
 
 		/* Final write files to disk, include renaming of the filenames,
@@ -2468,7 +2492,7 @@ void Backend_Finalize (void)
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 		{
 			// Protects race condition with Backend_Flush_pThread
-			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+			mtx_lock(&pthreadFreeBuffer_mtx);
 
 			if (TRACING_BUFFER(thread) != NULL)
 			{
@@ -2477,7 +2501,7 @@ void Backend_Finalize (void)
 				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
 			}
 
-			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+			mtx_unlock(&pthreadFreeBuffer_mtx);
 		}
 	
 		/* Free allocated memory */
@@ -2491,7 +2515,7 @@ void Backend_Finalize (void)
 				pThreads[thread] = (pthread_t)0;
 #endif
 				// Protects race condition with Backend_Flush_pThread
-				pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+				mtx_lock(&pthreadFreeBuffer_mtx);
 				if (TRACING_BUFFER(thread) != NULL)
 				{
 					Buffer_Free (TRACING_BUFFER(thread));
@@ -2504,7 +2528,7 @@ void Backend_Finalize (void)
 					SAMPLING_BUFFER(thread) = NULL;
 				}
 #endif
-				pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+				mtx_unlock(&pthreadFreeBuffer_mtx);
 			}
 			xfree(LastCPUEmissionTime);
 			xfree(LastCPUEvent);
@@ -2573,14 +2597,14 @@ void Backend_Finalize (void)
 		int pid;
 		Extrae_getAppendingEventsToGivenPID (&pid);
 		// Protects race condition with Backend_Flush_pThread
-		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+		mtx_lock(&pthreadFreeBuffer_mtx);
 		if (TRACING_BUFFER(THREADID) != NULL)
 		{
 			Buffer_Flush(TRACING_BUFFER(THREADID));
 			for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
 				Backend_Finalize_close_mpits (pid, thread, TRUE);
 		}
-		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+		mtx_unlock(&pthreadFreeBuffer_mtx);
 		remove_temporal_files ();
 	}
 }
@@ -2591,26 +2615,33 @@ static int *Extrae_inSampling = NULL;
 
 int Backend_inInstrumentation (unsigned thread)
 {
+    mtx_rw_rdlock(&pThread_mtx_Extrae_inInstrumentation);
+    int ret = FALSE;
 	if ((Extrae_inInstrumentation != NULL) && (Extrae_inSampling != NULL))
-		return (Extrae_inInstrumentation[thread] || Extrae_inSampling[thread]);
-	else
-		return FALSE;
+		ret = (Extrae_inInstrumentation[thread] || Extrae_inSampling[thread]);
+    mtx_rw_unlock(&pThread_mtx_Extrae_inInstrumentation);
+    return ret;
 }
 
-void Backend_setInSampling (unsigned thread, int insampling)      
-{                                                                               
-	  if (Extrae_inSampling != NULL)                                         
-			    Extrae_inSampling[thread] = insampling;                       
-}                                                                               
+void Backend_setInSampling (unsigned thread, int insampling)
+{
+    mtx_rw_rdlock(&pThread_mtx_Extrae_inInstrumentation);
+	if (Extrae_inSampling != NULL)
+        Extrae_inSampling[thread] = insampling;
+    mtx_rw_unlock(&pThread_mtx_Extrae_inInstrumentation);
+}
 
 void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
 {
+    mtx_rw_wrlock(&pThread_mtx_Extrae_inInstrumentation);
 	if (Extrae_inInstrumentation != NULL)
 		Extrae_inInstrumentation[thread] = ininstrumentation;
+    mtx_rw_unlock(&pThread_mtx_Extrae_inInstrumentation);
 }
 
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 {
+    mtx_rw_wrlock(&pThread_mtx_Extrae_inInstrumentation);
 	Extrae_inInstrumentation = (int*) realloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
 	if (Extrae_inInstrumentation == NULL)
 	{
@@ -2625,6 +2656,7 @@ void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 		  ": Failed to allocate memory for inSampling structure\n");
 		exit (-1);
 	}
+    mtx_rw_unlock(&pThread_mtx_Extrae_inInstrumentation);
 }
 
 void Backend_Enter_Instrumentation ()
@@ -2638,6 +2670,7 @@ void Backend_Enter_Instrumentation ()
 	Backend_setInInstrumentation (thread, TRUE);
 
 	/* Check if we have to fill the sampling buffer */
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 #if defined(SAMPLING_SUPPORT)
 	if (Extrae_get_DumpBuffersAtInstrumentation())
 		if (Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
@@ -2677,14 +2710,14 @@ void Backend_Enter_Instrumentation ()
 	/* Check whether we will fill the buffer soon (or now) */
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= NEVENTS)
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
-
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 	/* Record the time when this is happening
 	   we need this for subsequent calls to TIME, as this is being cached in
 	   clock routines */
 	current_time = TIME;
 
 	if (Trace_Mode_FirstMode(thread))
-		Trace_Mode_Change (thread, current_time);
+		Trace_Mode_Change (thread, current_time);    
 
 #if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS)
 	/* Must change counters? check only at detail tracing, at bursty
@@ -2710,8 +2743,10 @@ void Backend_Leave_Instrumentation (void)
 	}
 
 	/* Change trace mode? (issue from API) */
+    mtx_rw_rdlock(&pThread_mtx_change_number_threads);
 	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
 		Trace_Mode_Change(thread, LAST_READ_TIME);
+    mtx_rw_unlock(&pThread_mtx_change_number_threads);
 
 	Backend_setInInstrumentation (thread, FALSE);
 }

@@ -26,6 +26,7 @@
 
 #include "clock.h"
 #include "trace_mode.h"
+#include "pthread_redirect.h"
 
 extern int *MPI_Deepness;
 extern int *Current_Trace_Mode;

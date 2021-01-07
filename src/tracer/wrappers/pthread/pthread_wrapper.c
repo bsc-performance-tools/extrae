@@ -42,155 +42,12 @@
 #endif
 
 #include "wrapper.h"
+#include "pthread_redirect.h"
 #include "trace_macros.h"
 #include "pthread_probe.h"
 
 //#define DEBUG
 //#define DEBUG_MUTEX
-
-#if defined(PIC)
-
-static int (*pthread_create_real)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*) = NULL;
-static int (*pthread_join_real)(pthread_t,void**) = NULL;
-static int (*pthread_detach_real)(pthread_t) = NULL;
-static void (*pthread_exit_real)(void*) = NULL;
-static int (*pthread_barrier_wait_real)(pthread_barrier_t *barrier) = NULL;
-
-static int (*pthread_mutex_lock_real)(pthread_mutex_t*) = NULL;
-static int (*pthread_mutex_trylock_real)(pthread_mutex_t*) = NULL;
-static int (*pthread_mutex_timedlock_real)(pthread_mutex_t*,const struct timespec *) = NULL;
-static int (*pthread_mutex_unlock_real)(pthread_mutex_t*) = NULL;
-
-static int (*pthread_cond_broadcast_real)(pthread_cond_t*) = NULL;
-static int (*pthread_cond_timedwait_real)(pthread_cond_t*,pthread_mutex_t*,const struct timespec *) = NULL;
-static int (*pthread_cond_signal_real)(pthread_cond_t*) = NULL;
-static int (*pthread_cond_wait_real)(pthread_cond_t*,pthread_mutex_t*) = NULL;
-
-static int (*pthread_rwlock_rdlock_real)(pthread_rwlock_t *) = NULL;
-static int (*pthread_rwlock_tryrdlock_real)(pthread_rwlock_t *) = NULL;
-static int (*pthread_rwlock_timedrdlock_real)(pthread_rwlock_t *, const struct timespec *) = NULL;
-static int (*pthread_rwlock_wrlock_real)(pthread_rwlock_t *) = NULL;
-static int (*pthread_rwlock_trywrlock_real)(pthread_rwlock_t *) = NULL;
-static int (*pthread_rwlock_timedwrlock_real)(pthread_rwlock_t *, const struct timespec *) = NULL;
-static int (*pthread_rwlock_unlock_real)(pthread_rwlock_t *) = NULL;
-
-static pthread_mutex_t extrae_pthread_create_mutex;
-
-#endif /* PIC */
-
-static void GetpthreadHookPoints (int rank)
-{
-#if defined(PIC)
-	/* Create mutex to protect pthread_create calls */
-	pthread_mutex_init (&extrae_pthread_create_mutex, NULL);
-
-	/* Obtain @ for pthread_create */
-	pthread_create_real =
-		(int(*)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*))
-		dlsym (RTLD_NEXT, "pthread_create");
-	if (pthread_create_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_create in DSOs!!\n");
-
-	/* Obtain @ for pthread_join */
-	pthread_join_real =
-		(int(*)(pthread_t,void**)) dlsym (RTLD_NEXT, "pthread_join");
-	if (pthread_join_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_join in DSOs!!\n");
-
-	/* Obtain @ for pthread_barrier_wait */
-	pthread_barrier_wait_real =
-		(int(*)(pthread_barrier_t *)) dlsym (RTLD_NEXT, "pthread_barrier_wait");
-	if (pthread_barrier_wait_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_barrier_wait in DSOs!!\n");
-
-	/* Obtain @ for pthread_detach */
-	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
-	if (pthread_detach_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_detach in DSOs!!\n");
-
-	/* Obtain @ for pthread_exit */
-	pthread_exit_real = (void(*)(void*)) dlsym (RTLD_NEXT, "pthread_exit");
-	if (pthread_exit_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_exit in DSOs!!\n");
-
-	/* Obtain @ for pthread_mutex_lock */
-	pthread_mutex_lock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_lock");
-	if (pthread_mutex_lock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_lock in DSOs!!\n");
-	
-	/* Obtain @ for pthread_mutex_unlock */
-	pthread_mutex_unlock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_unlock");
-	if (pthread_mutex_unlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_unlock in DSOs!!\n");
-	
-	/* Obtain @ for pthread_mutex_trylock */
-	pthread_mutex_trylock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_trylock");
-	if (pthread_mutex_trylock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_trylock in DSOs!!\n");
-
-	/* Obtain @ for pthread_mutex_timedlock */
-	pthread_mutex_timedlock_real = (int(*)(pthread_mutex_t*,const struct timespec*)) dlsym (RTLD_NEXT, "pthread_mutex_timedlock");
-	if (pthread_mutex_timedlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_mutex_timedlock in DSOs!!\n");
-
-	/* Obtain @ for pthread_cond_signal */
-	pthread_cond_signal_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_signal");
-	if (pthread_cond_signal_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_signal in DSOs!!\n");
-	
-	/* Obtain @ for pthread_cond_broadcast */
-	pthread_cond_broadcast_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_broadcast");
-	if (pthread_cond_broadcast_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_broadcast in DSOs!!\n");
-	
-	/* Obtain @ for pthread_cond_wait */
-	pthread_cond_wait_real = (int(*)(pthread_cond_t*,pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_cond_wait");
-	if (pthread_cond_wait_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_wait in DSOs!!\n");
-	
-	/* Obtain @ for pthread_cond_timedwait */
-	pthread_cond_timedwait_real = (int(*)(pthread_cond_t*,pthread_mutex_t*,const struct timespec*)) dlsym (RTLD_NEXT, "pthread_cond_timedwait");
-	if (pthread_cond_timedwait_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_timedwait in DSOs!!\n");
-	
-	/* Obtain @ for pthread_rwlock_rdlock */
-	pthread_rwlock_rdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_rdlock");
-	if (pthread_rwlock_rdlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_rdlock in DSOs!!\n");
-	
-	/* Obtain @ for pthread_rwlock_tryrdlock */
-	pthread_rwlock_tryrdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_tryrdlock");
-	if (pthread_rwlock_tryrdlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_tryrdlock in DSOs!!\n");
-	
-	/* Obtain @ for pthread_rwlock_timedrdlock */
-	pthread_rwlock_timedrdlock_real = (int(*)(pthread_rwlock_t *, const struct timespec *)) dlsym (RTLD_NEXT, "pthread_rwlock_timedrdlock");
-	if (pthread_rwlock_timedrdlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_timedrdlock in DSOs!!\n");
-	
-	/* Obtain @ for pthread_rwlock_rwlock */
-	pthread_rwlock_wrlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_wrlock");
-	if (pthread_rwlock_wrlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_wrlock in DSOs!!\n");
-	
-	/* Obtain @ for pthread_rwlock_tryrwlock */
-	pthread_rwlock_trywrlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_trywrlock");
-	if (pthread_rwlock_trywrlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_trywrlock in DSOs!!\n");
-	
-	/* Obtain @ for pthread_rwlock_timedrwlock */
-	pthread_rwlock_timedwrlock_real = (int(*)(pthread_rwlock_t *, const struct timespec *)) dlsym (RTLD_NEXT, "pthread_rwlock_timedwrlock");
-	if (pthread_rwlock_timedwrlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_timedwrlock in DSOs!!\n");
-
-	/* Obtain @ for pthread_rwlock_unlock */
-	pthread_rwlock_unlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_unlock");
-	if (pthread_rwlock_unlock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_unlock in DSOs!!\n");
-#else
-	fprintf (stderr, PACKAGE_NAME": Warning! pthread instrumentation requires linking with shared library!\n");
-#endif /* PIC */
-}
 
 /*
 
@@ -198,6 +55,8 @@ static void GetpthreadHookPoints (int rank)
 	 INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
 
 */
+
+static pthread_mutex_t extrae_pthread_create_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #if defined(PIC)
 
@@ -220,6 +79,9 @@ static void * pthread_create_hook (void *p1)
 
 	/* Wake up the calling thread */
 	pthread_barrier_wait_real(&(i->barrier));
+
+    if (pthread_create_real == NULL)
+		GetpthreadHookPoints(0);
 
 	Backend_Enter_Instrumentation ();
 	Probe_pthread_Function_Entry (routine);
@@ -317,7 +179,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 			res = pthread_create_real (p1, p2, p3, p4);
 
 		/* Stop protecting the region, more pthread creations can enter */
-		pthread_mutex_unlock_real (&extrae_pthread_create_mutex);
+		pthread_mutex_unlock_real(&extrae_pthread_create_mutex);
 	}
 	else if (pthread_create_real != NULL)
 	{
@@ -736,7 +598,7 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 	return res;
 }
 
-int pthread_rwlock_rdlock (pthread_rwlock_t *l)
+int pthread_rwlock_rdlock(pthread_rwlock_t *l)
 {
 	int res = 0;
 

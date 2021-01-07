@@ -56,9 +56,9 @@ struct Buffer
 
   int fd;
 
-#if defined(HAVE_ONLINE) 
+// #if defined(HAVE_ONLINE) 
   pthread_mutex_t Lock;
-#endif
+// #endif
   Mask_t *Masks;
 
   int (*FlushCallback)(struct Buffer *);

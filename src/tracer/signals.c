@@ -42,6 +42,7 @@
 #  include <pthread.h>
 # endif
 #endif
+#include "pthread_redirect.h"
 
 /* #define DBG_SIGNALS */
 
@@ -50,21 +51,31 @@
  * Flushes the buffers to disk and disables tracing
  * ----------------------------------------------------------------------- */
 
-int sigInhibited = FALSE;
+volatile int sigInhibited = FALSE;
+
+static pthread_mutex_t pThread_mtx_sigInhibited = PTHREAD_MUTEX_INITIALIZER;
 
 void Signals_Inhibit()
 {
+    mtx_lock(&pThread_mtx_sigInhibited);
 	sigInhibited = TRUE;
+    mtx_unlock(&pThread_mtx_sigInhibited);
 }
 
 void Signals_Desinhibit()
 {
+    mtx_lock(&pThread_mtx_sigInhibited);
 	sigInhibited = FALSE;
+    mtx_unlock(&pThread_mtx_sigInhibited);
 }
 
 int Signals_Inhibited()
 {
-	return sigInhibited;
+    int ret;
+    mtx_lock(&pThread_mtx_sigInhibited);
+	ret = sigInhibited;
+    mtx_unlock(&pThread_mtx_sigInhibited);
+    return ret;
 }
 
 int Deferred_Signal_FlushAndTerminate = FALSE;
@@ -220,20 +231,20 @@ void Signals_CondInit (Condition_t *cond)
 
 void Signals_CondWait (Condition_t *cond)
 {
-	pthread_mutex_lock(&(cond->ConditionMutex));
+	mtx_lock(&(cond->ConditionMutex));
 	while (cond->WaitingForCondition)
 	{
 		pthread_cond_wait(&(cond->WaitCondition), &(cond->ConditionMutex));
 	}
-	pthread_mutex_unlock(&(cond->ConditionMutex));
+	mtx_unlock(&(cond->ConditionMutex));
 }
 
 void Signals_CondWakeUp (Condition_t *cond)
 {
-	pthread_mutex_lock(&(cond->ConditionMutex));
+	mtx_lock(&(cond->ConditionMutex));
 	cond->WaitingForCondition = FALSE;
 	pthread_cond_signal(&(cond->WaitCondition));
-	pthread_mutex_unlock(&(cond->ConditionMutex));
+	mtx_unlock(&(cond->ConditionMutex));
 }
 
 #endif /* HAVE_ONLINE */

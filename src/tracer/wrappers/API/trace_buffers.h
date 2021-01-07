@@ -26,6 +26,7 @@
 
 #include "buffers.h"
 #include "signals.h"
+#include "pthread_redirect.h"
 
 /* Don't like these externs -> Declare fetch functions in wrapper.c and include prototypes in wrapper.h ? */
 extern Buffer_t **TracingBuffer;

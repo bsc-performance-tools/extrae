@@ -27,7 +27,7 @@
 #include <string.h>
 #include <pthread.h>
 #include "hash_table.h"
-
+#include "pthread_redirect.h"
 
 /*** Prototypes ***/
 static inline int xtr_hash_search (xtr_hash_t *hash, uintptr_t key, xtr_hash_cell_t **previous_out, xtr_hash_cell_t **cell_out) __attribute__((always_inline));
@@ -165,7 +165,7 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 
 	if (hash->flags & XTR_HASH_LOCK)
 	{
-		pthread_rwlock_wrlock(&hash->lock);
+		mtx_rw_wrlock(&hash->lock);
 	}
 
 #if defined(DEBUG)
@@ -199,7 +199,7 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 
 	if (hash->flags & XTR_HASH_LOCK)
 	{
-		pthread_rwlock_unlock(&hash->lock);
+		mtx_rw_unlock(&hash->lock);
 	}
 
 	return 1;
@@ -263,7 +263,7 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_rdlock(&hash->lock);
+                mtx_rw_rdlock(&hash->lock);
         }
 
 #if defined(DEBUG)
@@ -283,7 +283,7 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_unlock(&hash->lock);
+                mtx_rw_unlock(&hash->lock);
         }
 
 	return 0;
@@ -308,7 +308,7 @@ int xtr_hash_fetch (xtr_hash_t * hash, uintptr_t key, void *data)
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_wrlock(&hash->lock);
+                mtx_rw_wrlock(&hash->lock);
         }
 
 #if defined(DEBUG)
@@ -341,7 +341,7 @@ int xtr_hash_fetch (xtr_hash_t * hash, uintptr_t key, void *data)
 
         if (hash->flags & XTR_HASH_LOCK)
         {
-                pthread_rwlock_unlock(&hash->lock);
+                mtx_rw_unlock(&hash->lock);
         }
 
 	return found;

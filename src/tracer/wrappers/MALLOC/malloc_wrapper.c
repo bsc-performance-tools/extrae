@@ -98,7 +98,7 @@ static void Extrae_malloctrace_add (void *p, size_t s)
 		unsigned u;
 		assert (real_realloc != NULL);
 
-		pthread_mutex_lock (&mutex_allocations);
+		mtx_lock(&mutex_allocations);
 	
 		if (nmallocentries == nmallocentries_allocated)
 		{
@@ -124,7 +124,7 @@ static void Extrae_malloctrace_add (void *p, size_t s)
 				break;
 			}
 
-		pthread_mutex_unlock (&mutex_allocations);
+		mtx_unlock(&mutex_allocations);
 	}
 }
 
@@ -136,7 +136,7 @@ static int Extrae_malloctrace_remove (const void *p)
 	{
 		unsigned u;
 
-		pthread_mutex_lock (&mutex_allocations);
+		mtx_lock(&mutex_allocations);
 
 		for (u = 0; u < nmallocentries_allocated; u++)
 			if (mallocentries[u] == p)
@@ -148,7 +148,7 @@ static int Extrae_malloctrace_remove (const void *p)
 				break;
 			}
 
-		pthread_mutex_unlock (&mutex_allocations);
+		mtx_unlock(&mutex_allocations);
 	}
 	return found;
 }
@@ -157,7 +157,7 @@ static size_t Extrae_malloctrace_replace (const void *p1, void *p2, size_t s)
 {
 	size_t prev_sz = 0;
 
-	pthread_mutex_lock (&mutex_allocations);
+	mtx_lock(&mutex_allocations);
 
 	int replaced = FALSE;
 	if (p1)
@@ -206,7 +206,7 @@ static size_t Extrae_malloctrace_replace (const void *p1, void *p2, size_t s)
 			}
 	}
 
-	pthread_mutex_unlock (&mutex_allocations);
+	mtx_unlock(&mutex_allocations);
 
 	return prev_sz;
 }
