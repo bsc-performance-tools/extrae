@@ -23,7 +23,7 @@ if (ExtraeHomeEnv):
 
 CEventsEnv     = os.getenv("EXTRAE_PY_CEVENTS")
 TraceCEvents   = False
-if (CEventsEnv.lower() == "yes") or (CEventsEnv.lower() == "enabled") or (CEventsEnv.lower() == "true") or (CEventsEnv == "1"):
+if (CEventsEnv != None) and ((CEventsEnv.lower() == "yes") or (CEventsEnv.lower() == "enabled") or (CEventsEnv.lower() == "true") or (CEventsEnv == "1")):
   TraceCEvents = True
 
 LibrarySeq     = ExtraeHome + "/lib/libseqtrace.so"
