@@ -302,7 +302,7 @@ void ObjectTable_dumpAddresses (FILE *fd, unsigned eventstart)
 
 			fprintf (fd, "EVENT_TYPE\n");
 			fprintf (fd, "0 %u Object addresses for task %u.%u\n", eventstart++, _ptask, _task);
-			fprintf (fd, "VALUES\n");
+			fprintf (fd, "%s\n0   %s\n", "VALUES", "End");
 
 			/* For now, emit only data symbols for binary object 0 */
 			for (_address = 0; _address < task_info->binary_objects[0].nDataSymbols; _address++)
