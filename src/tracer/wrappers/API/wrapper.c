@@ -1931,8 +1931,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	}
 #endif
 
-	Extrae_getExecutableInfo ();
-
 	last_mpi_exit_time = ApplBegin_Time;
 
 	return TRUE;
@@ -2384,6 +2382,8 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 
 void Backend_Finalize (void)
 {
+	Extrae_getExecutableInfo ();
+
 	unsigned thread;
 	int online_mode = 0;
 
