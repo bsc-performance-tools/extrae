@@ -1609,7 +1609,10 @@ static int DynamicMemory_Event (event_t * event,
 	    (EvType == MEMKIND_POSIX_MEMALIGN_EV) ||
 	    (EvType == POSIX_MEMALIGN_EV)         ||
 	    (EvType == KMPC_MALLOC_EV)            ||
-	    (EvType == KMPC_ALIGNED_MALLOC_EV))
+	    (EvType == KMPC_ALIGNED_MALLOC_EV)    ||
+	    (EvType == CALLOC_EV)         ||
+	    (EvType == MEMKIND_CALLOC_EV) ||
+	    (EvType == KMPC_CALLOC_EV))
 	{
 		/* Malloc: in size, out pointer */
 		if (isBegin)
@@ -1714,31 +1717,8 @@ static int DynamicMemory_Event (event_t * event,
 		}
 	
 	}
-	else if ((EvType == CALLOC_EV)         ||
-	         (EvType == MEMKIND_CALLOC_EV) ||
-	         (EvType == KMPC_CALLOC_EV))
-	{
-		/* Calloc: in size, out pointer */
-		if (isBegin)
-		{
-			trace_paraver_event (cpu, ptask, task, thread, time,
-			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
-
-			thread_info->AddressSpace_size = EvParam;
-		}
-		else
-		{
-			trace_paraver_event (cpu, ptask, task, thread, time,
-			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
-
-			AddressSpace_add (task_info->AddressSpace, EvParam,
-			  EvParam+thread_info->AddressSpace_size,
-			  thread_info->AddressSpace_calleraddresses,
-			  thread_info->AddressSpace_callertype);
-		}
-	}
-	else if ((EvType == ADD_RESERVED_MEM_EV)	||
-			 (EvType == SUB_RESERVED_MEM_EV)) { 
+	else if ((EvType == ADD_RESERVED_MEM_EV) ||
+			 (EvType == SUB_RESERVED_MEM_EV)) {
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  EvType, EvValue);
 	}
