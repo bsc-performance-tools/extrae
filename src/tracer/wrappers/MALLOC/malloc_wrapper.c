@@ -360,7 +360,8 @@ void *calloc (size_t nmemb, size_t size)
 	void *res;
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
                             mpitrace_on                          &&
-                            Extrae_get_trace_malloc();
+                            Extrae_get_trace_malloc() &&
+                            (nmemb * size)  >= Extrae_get_trace_malloc_allocate_threshold();
 	/*
 	 * Can't be evaluated before because the compiler optimizes the if's
 	 * clauses, and THREADID calls a null callback if Extrae is not yet
@@ -628,7 +629,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
-                      size >= Extrae_get_trace_malloc_allocate_threshold();
+                      (num * size) >= Extrae_get_trace_malloc_allocate_threshold();
   /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
   if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
@@ -936,7 +937,7 @@ kmpc_calloc( size_t nelem, size_t elsize )
 	                    mpitrace_on                          &&
 	                    Extrae_get_trace_malloc()            &&
 	                    Extrae_get_trace_malloc_allocate()   &&
-	                    elsize >= Extrae_get_trace_malloc_allocate_threshold();
+	                    (nelem * elsize) >= Extrae_get_trace_malloc_allocate_threshold();
 	/* Can't be evaluated before because the compiler optimizes the if's clauses,
 	 * and THREADID calls a null callback if Extrae is not yet initialized */
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
