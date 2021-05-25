@@ -147,3 +147,6 @@ static int option_merge_EmitLibraryEvents = FALSE;
 int get_option_merge_EmitLibraryEvents (void) { return option_merge_EmitLibraryEvents; }
 void set_option_merge_EmitLibraryEvents (int b) { option_merge_EmitLibraryEvents = b; }
 
+static int option_merge_EmitRAWCallstack = FALSE;
+int get_option_merge_EmitRAWCallstack (void) { return option_merge_EmitRAWCallstack; }
+void set_option_merge_EmitRAWCallstack (int b) { option_merge_EmitRAWCallstack = b; }

@@ -917,6 +917,11 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			set_option_merge_RemoveFiles (FALSE);
 			continue;
 		}
+		if (!strcmp (argv[CurArg], "-emit-raw-callstack"))
+		{
+			set_option_merge_EmitRAWCallstack (TRUE);
+			continue;
+		}
 		if (!strcmp (argv[CurArg], "--"))
 		{
 			cur_ptask++;
