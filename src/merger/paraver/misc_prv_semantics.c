@@ -1667,7 +1667,7 @@ static int DynamicMemory_Event (event_t * event,
 	         (EvType == MEMKIND_REALLOC_EV) ||
 	         (EvType == KMPC_REALLOC_EV))
 	{
-		/* Realloc: in size, in pointer (in EVT_BEGIN+1), out ptr*/
+		/* Realloc: in pointer (in EVT_BEGIN), in size (in EVT_BEGIN+1), out ptr (in EVT_END) */
 		if (EvValue == EVT_BEGIN)
 		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
