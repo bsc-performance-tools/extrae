@@ -65,11 +65,13 @@ static int _PEBS_sampling_paused = FALSE;
 #define LOAD_SAMPLE_TYPE         ( PERF_SAMPLE_IP | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC | PERF_SAMPLE_ADDR )
 #define STORE_SAMPLE_TYPE        ( PERF_SAMPLE_IP | PERF_SAMPLE_DATA_SRC | PERF_SAMPLE_ADDR )
 #define LOAD_L3M_SAMPLE_TYPE     ( PERF_SAMPLE_IP | PERF_SAMPLE_ADDR )
+#define OFFCORE_STORE_L3_MISS_SAMPLE_TYPE    ( PERF_SAMPLE_IP )
 
 typedef enum SamplingType_e {
 	LOAD_INDEX = 0,
 	STORE_INDEX,
 	LOAD_L3M_INDEX,
+	OFFCORE_STORE_L3M_INDEX,
 	NUM_SAMPLING_TYPES }
 SamplingType_t;
 
@@ -430,6 +432,7 @@ static long long **prev_head = NULL;
 static int **perf_pebs_fd = NULL;
 static int mmap_pages=1+MMAP_DATA_SIZE;
 static int *group_fd = NULL;
+static uint64_t **prev_value_fd = NULL;
 
 #define ALLOCATED_SIZE MMAP_DATA_SIZE*4096
 static char **data_thread_buffer = NULL;
@@ -652,6 +655,7 @@ static void extrae_intel_pebs_handler_store (int threadid)
 	
 		if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
 		{
+			uint64_t cnt;
 			unsigned memlevel, memhitormiss;
 		
 			if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
@@ -667,6 +671,14 @@ static void extrae_intel_pebs_handler_store (int threadid)
 		
 			SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_ST_EV, ip, addr);
 			SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_MEM_LEVEL_EV, memhitormiss, memlevel);
+
+			// Attention, this is specific code for Intel CLX processors
+			if (sizeof(cnt) == read (perf_pebs_fd[threadid][OFFCORE_STORE_L3M_INDEX], &cnt, sizeof(cnt)))
+			{
+				uint64_t delta = cnt - prev_value_fd[threadid][OFFCORE_STORE_L3M_INDEX];
+				SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_L3_STORE_MISSES_EV, delta, EMPTY);
+				prev_value_fd[threadid][OFFCORE_STORE_L3M_INDEX] = cnt;
+			}
 			Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
 		}
 	}
@@ -725,7 +737,9 @@ static void extrae_intel_pebs_handler (int signum, siginfo_t *info, void *uc)
 	// ret = ioctl (group_fd, PERF_EVENT_IOC_REFRESH, 1);
 	
 	// Rather than restarting the group leader, we restart this specific counter
-	ret = ioctl (info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
+	// ret = ioctl (info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
+	// We want to restart the group leader
+	ret = ioctl (group_fd[thid], PERF_EVENT_IOC_REFRESH, 1);
 	(void) ret;
 }
 
@@ -766,25 +780,38 @@ static int Extrae_IntelPEBS_enable (void)
 		data_thread_buffer = (char **) realloc (data_thread_buffer, (thread_id+1) * sizeof(char *));
 		assert (data_thread_buffer);
 
+		prev_value_fd = (uint64_t**) realloc (prev_value_fd, (thread_id+1) * sizeof(uint64_t *));
+		assert (prev_value_fd);
+
 		for (i=pebs_init_threads; i<(thread_id+1); i++)
 		{
 			extrae_intel_pebs_mmap[i] = malloc (sizeof(void*)*NUM_SAMPLING_TYPES);
 			assert (extrae_intel_pebs_mmap[i]);
 			extrae_intel_pebs_mmap[i][LOAD_INDEX] =
 			  extrae_intel_pebs_mmap[i][STORE_INDEX] =
-			  extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] = NULL;
+			  extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] =
+			  extrae_intel_pebs_mmap[i][OFFCORE_STORE_L3M_INDEX] = NULL;
 
 			perf_pebs_fd[i] = malloc (sizeof(int)*NUM_SAMPLING_TYPES);
 			assert (perf_pebs_fd[i]);
 			perf_pebs_fd[i][LOAD_INDEX] =
 			  perf_pebs_fd[i][STORE_INDEX] =
-			  perf_pebs_fd[i][LOAD_L3M_INDEX] = -1;
+			  perf_pebs_fd[i][LOAD_L3M_INDEX] =
+			  perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX] = -1;
 
 			prev_head[i] = (long long*) malloc  (sizeof (long long)*NUM_SAMPLING_TYPES);
 			assert (prev_head[i]);
 			prev_head[i][LOAD_INDEX] =
 			  prev_head[i][STORE_INDEX] =
-			  prev_head[i][LOAD_L3M_INDEX] = 0;
+			  prev_head[i][LOAD_L3M_INDEX] =
+			  prev_head[i][OFFCORE_STORE_L3M_INDEX] = 0;
+
+			prev_value_fd[i] = (uint64_t*) malloc (sizeof(uint64_t)*NUM_SAMPLING_TYPES);
+			assert (prev_value_fd[i]);
+			prev_value_fd[i][LOAD_INDEX] =
+			  prev_value_fd[i][STORE_INDEX] =
+			  prev_value_fd[i][LOAD_L3M_INDEX] =
+			  prev_value_fd[i][OFFCORE_STORE_L3M_INDEX] = 0;
 
 			group_fd[i] = -1;
 
@@ -966,6 +993,34 @@ static int Extrae_IntelPEBS_enable (void)
 		fcntl(perf_pebs_fd[thread_id][LOAD_L3M_INDEX], F_SETOWN_EX, &owner);
 	}
 
+	// Attention, this is specific code for Intel CLX processors
+	// This enables collection of OffCore Store L3 misses.
+	if (PEBS_store_enabled)
+	{
+		memset (&pe,0,sizeof(struct perf_event_attr));
+		pe.config = 0x01b7;
+		pe.type = PERF_TYPE_RAW;
+		pe.size = sizeof(struct perf_event_attr);
+		pe.precise_ip = 0;
+		pe.exclude_kernel = 1;
+		pe.exclude_hv = 1;
+		pe.config1 = 0x3fbc000002;
+
+		// If we're creating this group, make sure that we pin the group and that the
+		// group starts disabled
+		if (group_fd[thread_id] == -1)
+		{
+			pe.pinned = 1;
+			pe.disabled = 1;
+		}
+
+		perf_pebs_fd[thread_id][OFFCORE_STORE_L3M_INDEX] = perf_event_open (&pe, 0, -1, group_fd[thread_id], 0); // Chain on LOADS - if setup
+		if (perf_pebs_fd[thread_id][OFFCORE_STORE_L3M_INDEX] < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for offcore store L3 misses\n");
+			return -1;
+		}
+	}
 
 	// Start sampling on the given counter -- which is a group leader.
 	if (!_PEBS_sampling_paused)
@@ -1014,6 +1069,11 @@ void Extrae_IntelPEBS_stopSampling (void)
 		if (perf_pebs_fd[i][LOAD_L3M_INDEX] >= 0) {
 			ioctl (perf_pebs_fd[i][LOAD_L3M_INDEX], PERF_EVENT_IOC_REFRESH, 0);
 			close (perf_pebs_fd[i][LOAD_L3M_INDEX]);
+		}
+		// Stop Offcore L3M stores and unmap associated pages
+		if (perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX] >= 0) {
+			ioctl (perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX], PERF_EVENT_IOC_ENABLE, 0);
+			close (perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX]);
 		}
 		if (extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] != NULL) {
 			munmap (extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
@@ -1086,5 +1146,10 @@ void Extrae_IntelPEBS_stopSamplingThread (int thid)
 	if (extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX] != NULL) {
 		munmap (extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
 		extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX] = NULL;
+	}
+	// Stop Offcore L3M stores and unmap associated pages
+	if (perf_pebs_fd[thid][OFFCORE_STORE_L3M_INDEX] >= 0) {
+		ioctl (perf_pebs_fd[thid][OFFCORE_STORE_L3M_INDEX], PERF_EVENT_IOC_DISABLE, 0);
+		close (perf_pebs_fd[thid][OFFCORE_STORE_L3M_INDEX]);
 	}
 }
