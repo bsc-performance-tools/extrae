@@ -83,6 +83,27 @@ static int User_Event (event_t * current_event, unsigned long long current_time,
 }
 
 /******************************************************************************
+ ***  L3_store_miss_Event
+ ******************************************************************************/
+static int L3_store_miss_Event (event_t * current_event, unsigned long long current_time,
+	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+	FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(current_time);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Dimemas_User_Event (fset->output_file, task-1, thread-1, EvType, EvValue);
+
+  return 0;
+}
+
+/******************************************************************************
  **      Function name : Set_Overflow_Event
  **      Description :
  ******************************************************************************/
@@ -166,6 +187,7 @@ SingleEv_Handler_t TRF_MISC_Event_Handlers[] = {
 	{ WRITE_EV, SkipHandler },
 	{ APPL_EV, Appl_Event },
 	{ USER_EV, User_Event },
+	{ SAMPLING_ADDRESS_L3_STORE_MISSES_EV, L3_store_miss_Event },
 	{ HWC_EV, SkipHandler }, /* hardware counters will be emitted at the main loop */
 	{ HWC_CHANGE_EV, Evt_SetCounters },
 	{ TRACING_EV, SkipHandler },
