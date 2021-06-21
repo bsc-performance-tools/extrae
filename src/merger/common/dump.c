@@ -115,6 +115,10 @@ static void show_current (const event_t * c, UINT64 max_time)
 	{
 		fprintf (stdout, "USER EVENT value: %lu [0x%lx]\n", c->param.misc_param.param, c->param.misc_param.param);
 	}
+	else if (c->event == SAMPLING_ADDRESS_L3_STORE_MISSES_EV)
+	{
+		fprintf (stdout, "L3 STORE MISS EVENT value: %lu [0x%lx]\n", c->param.misc_param.param, c->param.misc_param.param);
+	}
 	else if (c->event == SAMPLING_ADDRESS_LD_EV)
 	{
 		fprintf (stdout, "SAMPLING_ADDRESS EVENT (load) value: %lu [0x%lx]\n", c->param.misc_param.param, c->param.misc_param.param);
