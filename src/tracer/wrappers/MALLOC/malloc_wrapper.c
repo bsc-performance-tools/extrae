@@ -99,7 +99,7 @@ static void Extrae_malloctrace_add (void *p, size_t s)
 		assert (real_realloc != NULL);
 
 		pthread_mutex_lock (&mutex_allocations);
-	
+
 		if (nmallocentries == nmallocentries_allocated)
 		{
 			mallocentries = real_realloc (mallocentries,
@@ -232,11 +232,11 @@ static size_t Extrae_malloctrace_replace (const void *p1, void *p2, size_t s)
 void *malloc (size_t s)
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            mpitrace_on                          &&
-                            Extrae_get_trace_malloc()            &&
-                            Extrae_get_trace_malloc_allocate()   &&
-                            s >= Extrae_get_trace_malloc_allocate_threshold();
+	int canInstrument = EXTRAE_INITIALIZED()               &&
+	                    mpitrace_on                        &&
+	                    Extrae_get_trace_malloc()          &&
+	                    Extrae_get_trace_malloc_allocate() &&
+	                    s >= Extrae_get_trace_malloc_allocate_threshold();
 	/* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
@@ -246,8 +246,8 @@ void *malloc (size_t s)
 #if defined(DEBUG)
 	if (canInstrument)
 	{
-		fprintf (stderr, PACKAGE_NAME": malloc is at %p\n", real_malloc);
-		fprintf (stderr, PACKAGE_NAME": malloc params %lu\n", s);
+		fprintf(stderr, PACKAGE_NAME": malloc is at %p\n", real_malloc);
+		fprintf(stderr, PACKAGE_NAME": malloc params %lu\n", s);
 	}
 #endif
 
@@ -255,25 +255,25 @@ void *malloc (size_t s)
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
-		Backend_Enter_Instrumentation ();
-		Probe_Malloc_Entry (s);
+		Backend_Enter_Instrumentation();
+		Probe_Malloc_Entry(s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
-		res = real_malloc (s);
+		res = real_malloc(s);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res, s);
+			Extrae_malloctrace_add(res, s);
 		}
-		Probe_Malloc_Exit (res);
-		Backend_Leave_Instrumentation ();
+		Probe_Malloc_Exit(res);
+		Backend_Leave_Instrumentation();
 	}
 	else if (real_malloc != NULL)
 	{
 		/* Otherwise, call the original */
-		res = real_malloc (s);
+		res = real_malloc(s);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": malloc is not hooked! exiting!!\n");
+		fprintf(stderr, PACKAGE_NAME": malloc is not hooked! exiting!!\n");
 		abort();
 	}
 
@@ -293,8 +293,8 @@ void free (void *p)
 {
 	if (p == extrae_dlsym_static_buffer) return;
 
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-	                    mpitrace_on                          &&
+	int canInstrument = EXTRAE_INITIALIZED() &&
+	                    mpitrace_on          &&
 	                    Extrae_get_trace_malloc();
 	/*
 	 * Can't be evaluated before, the compiler optimizes the if's clauses,
@@ -309,7 +309,7 @@ void free (void *p)
 	if (real_free == NULL && !__in_free)
 	{
 		__in_free = TRUE;
-		real_free = EXTRAE_DL_INIT (__func__);
+		real_free = EXTRAE_DL_INIT(__func__);
 		__in_free = FALSE;
 	}
 
@@ -354,25 +354,26 @@ infinite loop of recursive calls to calloc */
 
 /* Used to know the depth of calloc calls */
 int __in_calloc_depth = 0;
-void *calloc (size_t nmemb, size_t size)
+void *calloc(size_t nmemb, size_t size)
 {
 	__in_calloc_depth++;
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            mpitrace_on                          &&
-                            Extrae_get_trace_malloc();
+	int canInstrument = EXTRAE_INITIALIZED()      &&
+	                    mpitrace_on               &&
+	                    Extrae_get_trace_malloc() &&
+	                    (nmemb * size) >= Extrae_get_trace_malloc_allocate_threshold();
 	/*
 	 * Can't be evaluated before because the compiler optimizes the if's
 	 * clauses, and THREADID calls a null callback if Extrae is not yet
 	 * initialized
 	 */
-        if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_calloc == NULL)
 	{
 		if (__in_calloc_depth == 1)
 		{
-			real_calloc = EXTRAE_DL_INIT (__func__);
+			real_calloc = EXTRAE_DL_INIT(__func__);
 		} else if (__in_calloc_depth == 2)
 		{
 			int i = 0;
@@ -380,7 +381,7 @@ void *calloc (size_t nmemb, size_t size)
 			/* Check if the requested size fits in the static buffer */
 			if ((nmemb*size) > DLSYM_CALLOC_SIZE)
 			{
-				fprintf (stderr, PACKAGE_NAME
+				fprintf(stderr, PACKAGE_NAME
 				    ": The size requested by calloc (%zu) is bigger"
 				    " than DLSYM_CALLOC_SIZE, please increase its value and"
 				    " recompile.\n", nmemb*size);
@@ -397,7 +398,7 @@ void *calloc (size_t nmemb, size_t size)
 		} else
 		{
 			/* in_calloc_depth shouldn't be greater than 2 */
-			fprintf (stderr, PACKAGE_NAME
+			fprintf(stderr, PACKAGE_NAME
 			    ": Please turn off calloc instrumentation.\n");
 			abort();
 
@@ -405,31 +406,31 @@ void *calloc (size_t nmemb, size_t size)
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": calloc is at %p\n", real_calloc);
-	fprintf (stderr, PACKAGE_NAME": calloc params %u %u\n", nmemb, size);
+	fprintf(stderr, PACKAGE_NAME": calloc is at %p\n", real_calloc);
+	fprintf(stderr, PACKAGE_NAME": calloc params %u %u\n", nmemb, size);
 #endif
 
 	if (real_calloc != NULL && canInstrument)
 	{
-		Backend_Enter_Instrumentation ();
-		Probe_Calloc_Entry (nmemb, size);
+		Backend_Enter_Instrumentation();
+		Probe_Calloc_Entry(nmemb, size);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
-		res = real_calloc (nmemb, size);
+		res = real_calloc(nmemb, size);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res, size);
+			Extrae_malloctrace_add(res, size);
 		}
-		Probe_Calloc_Exit (res);
-		Backend_Leave_Instrumentation ();
+		Probe_Calloc_Exit(res);
+		Backend_Leave_Instrumentation();
 	}
 	else if (real_calloc != NULL && !canInstrument)
 	{
 		/* Otherwise, call the original */
-		res = real_calloc (nmemb, size);
+		res = real_calloc(nmemb, size);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": calloc is not hooked! exiting!!\n");
+		fprintf(stderr, PACKAGE_NAME": calloc is not hooked! exiting!!\n");
 		abort();
 	}
 
@@ -437,25 +438,28 @@ void *calloc (size_t nmemb, size_t size)
 	return res;
 }
 
-void *realloc (void *p, size_t s)
+void *realloc(void *p, size_t s)
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            mpitrace_on                          &&
-                            Extrae_get_trace_malloc()            &&
-                            Extrae_get_trace_malloc_allocate()   &&
-                            s >= Extrae_get_trace_malloc_allocate_threshold();
-        /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
-        if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+	int canInstrument = EXTRAE_INITIALIZED()               &&
+	                    mpitrace_on                        &&
+	                    Extrae_get_trace_malloc()          &&
+	                    Extrae_get_trace_malloc_allocate() &&
+	                    s >= Extrae_get_trace_malloc_allocate_threshold();
+		/* Can't be evaluated before because the compiler optimizes the if's
+		 * clauses, and THREADID calls a null callback if Extrae is not yet
+		 * initialized
+		 */
+		if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_realloc == NULL)
-		real_realloc = EXTRAE_DL_INIT (__func__);
+		real_realloc = EXTRAE_DL_INIT(__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
 	{
-		fprintf (stderr, PACKAGE_NAME": realloc is at %p\n", real_realloc);
-		fprintf (stderr, PACKAGE_NAME": realloc params %p %lu\n", p, s);
+		fprintf(stderr, PACKAGE_NAME": realloc is at %p\n", real_realloc);
+		fprintf(stderr, PACKAGE_NAME": realloc params %p %lu\n", p, s);
 	}
 #endif
 
@@ -466,27 +470,27 @@ void *realloc (void *p, size_t s)
 
 		int usable_size;
 
-		Backend_Enter_Instrumentation ();
-		usable_size = Probe_Realloc_Entry (p, s);
+		Backend_Enter_Instrumentation();
+		usable_size = Probe_Realloc_Entry(p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
-		res = real_realloc (p, s);
+		res = real_realloc(p, s);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_replace (p, res, s);
+			Extrae_malloctrace_replace(p, res, s);
 		}
-		Probe_Realloc_Exit (res, usable_size);
-		Backend_Leave_Instrumentation ();
+		Probe_Realloc_Exit(res, usable_size);
+		Backend_Leave_Instrumentation();
 	}
 	else if (real_realloc != NULL)
 	{
 		/* Otherwise, call the original */
-		res = real_realloc (p, s);
+		res = real_realloc(p, s);
 		// We may need to remove the previous pointer
-		Extrae_malloctrace_remove (p);
+		Extrae_malloctrace_remove(p);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": realloc is not hooked! exiting!!\n");
+		fprintf(stderr, PACKAGE_NAME": realloc is not hooked! exiting!!\n");
 		abort();
 	}
 
@@ -496,17 +500,17 @@ void *realloc (void *p, size_t s)
 int posix_memalign(void **memptr, size_t alignment, size_t size)
 {
   int res = 0;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_malloc()            &&
-                      Extrae_get_trace_malloc_allocate()   &&
-                      size >= Extrae_get_trace_malloc_allocate_threshold();
+  int canInstrument = EXTRAE_INITIALIZED()               &&
+	                  mpitrace_on                        &&
+	                  Extrae_get_trace_malloc()          &&
+	                  Extrae_get_trace_malloc_allocate() &&
+	                  size >= Extrae_get_trace_malloc_allocate_threshold();
   /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
   if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_posix_memalign == NULL)
   {
-	real_posix_memalign = EXTRAE_DL_INIT (__func__);
+	real_posix_memalign = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -519,16 +523,16 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 
   if (real_posix_memalign != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation ();
-    Probe_posix_memalign_Entry (size);
+    Backend_Enter_Instrumentation();
+    Probe_posix_memalign_Entry(size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_posix_memalign(memptr, alignment, size);
     if (res == 0)
     {
-      Extrae_malloctrace_add (*memptr, size);
+      Extrae_malloctrace_add(*memptr, size);
     }
-    Probe_memkind_malloc_Exit (*memptr);
-    Backend_Leave_Instrumentation ();
+    Probe_memkind_malloc_Exit(*memptr);
+    Backend_Leave_Instrumentation();
   }
   else if (real_posix_memalign != NULL)
   {
@@ -536,7 +540,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
   }
   else
   {
-    fprintf (stderr, PACKAGE_NAME": posix_memalign is not hooked! exiting!!\n");
+    fprintf(stderr, PACKAGE_NAME": posix_memalign is not hooked! exiting!!\n");
     abort();
   }
   return res;
@@ -575,17 +579,17 @@ static int get_memkind_partition(memkind_t kind)
 void *memkind_malloc(memkind_t kind, size_t size)
 {
   void *res = NULL;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_malloc()            &&
-                      Extrae_get_trace_malloc_allocate()   &&
-                      size >= Extrae_get_trace_malloc_allocate_threshold();
+  int canInstrument = EXTRAE_INITIALIZED()               &&
+	                  mpitrace_on                        &&
+	                  Extrae_get_trace_malloc()          &&
+	                  Extrae_get_trace_malloc_allocate() &&
+	                  size >= Extrae_get_trace_malloc_allocate_threshold();
   /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
   if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_malloc == NULL)
   {
-	real_memkind_malloc = EXTRAE_DL_INIT (__func__);
+	real_memkind_malloc = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -598,16 +602,16 @@ void *memkind_malloc(memkind_t kind, size_t size)
 
   if (real_memkind_malloc != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation ();
-    Probe_memkind_malloc_Entry (get_memkind_partition( kind ), size);
+    Backend_Enter_Instrumentation();
+    Probe_memkind_malloc_Entry(get_memkind_partition( kind ), size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_malloc(kind, size);
     if (res != NULL)
     {
-      Extrae_malloctrace_add (res, size);
+      Extrae_malloctrace_add(res, size);
     }
-    Probe_memkind_malloc_Exit (res);
-    Backend_Leave_Instrumentation ();
+    Probe_memkind_malloc_Exit(res);
+    Backend_Leave_Instrumentation();
   }
   else if (real_memkind_malloc != NULL)
   {
@@ -615,7 +619,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
   }
   else
   {
-    fprintf (stderr, PACKAGE_NAME": memkind_malloc is not hooked! exiting!!\n");
+    fprintf(stderr, PACKAGE_NAME": memkind_malloc is not hooked! exiting!!\n");
     abort();
   }
   return res;
@@ -624,17 +628,17 @@ void *memkind_malloc(memkind_t kind, size_t size)
 void *memkind_calloc(memkind_t kind, size_t num, size_t size)
 {
   void *res = NULL;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_malloc()            &&
-                      Extrae_get_trace_malloc_allocate()   &&
-                      size >= Extrae_get_trace_malloc_allocate_threshold();
+  int canInstrument = EXTRAE_INITIALIZED()               &&
+	                  mpitrace_on                        &&
+	                  Extrae_get_trace_malloc()          &&
+	                  Extrae_get_trace_malloc_allocate() &&
+	                  (num * size) >= Extrae_get_trace_malloc_allocate_threshold();
   /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
   if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_calloc == NULL)
   {
-	real_memkind_calloc = EXTRAE_DL_INIT (__func__);
+	real_memkind_calloc = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -647,16 +651,16 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
 
   if (real_memkind_calloc != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation ();
-    Probe_memkind_calloc_Entry (get_memkind_partition( kind ), num, size);
+    Backend_Enter_Instrumentation();
+    Probe_memkind_calloc_Entry(get_memkind_partition(kind), num, size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_calloc(kind, num, size);
     if (res != NULL)
     {
-      Extrae_malloctrace_add (res, num*size); 
+      Extrae_malloctrace_add(res, num*size); 
     }
-    Probe_memkind_calloc_Exit (res);
-    Backend_Leave_Instrumentation ();
+    Probe_memkind_calloc_Exit(res);
+    Backend_Leave_Instrumentation();
   }
   else if (real_memkind_calloc != NULL)
   {
@@ -664,7 +668,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
   }
   else
   {
-    fprintf (stderr, PACKAGE_NAME": memkind_calloc is not hooked! exiting!!\n");
+    fprintf(stderr, PACKAGE_NAME": memkind_calloc is not hooked! exiting!!\n");
     abort();
   }
   return res;
@@ -936,7 +940,7 @@ kmpc_calloc( size_t nelem, size_t elsize )
 	                    mpitrace_on                          &&
 	                    Extrae_get_trace_malloc()            &&
 	                    Extrae_get_trace_malloc_allocate()   &&
-	                    elsize >= Extrae_get_trace_malloc_allocate_threshold();
+	                    (nelem * elsize) >= Extrae_get_trace_malloc_allocate_threshold();
 	/* Can't be evaluated before because the compiler optimizes the if's clauses,
 	 * and THREADID calls a null callback if Extrae is not yet initialized */
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
