@@ -61,6 +61,12 @@ static int JAVA_JVMTI_call (event_t* event, unsigned long long current_time,
 			state = STATE_OTHERS;
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
+		case JAVA_JVMTI_THREAD_EV:
+        		Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
+			break;
+		case JAVA_JVMTI_WAIT_EV:
+        		Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
+			break;
 	}
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
@@ -75,6 +81,8 @@ SingleEv_Handler_t PRV_Java_Event_Handlers[] = {
 	{ JAVA_JVMTI_EXCEPTION_EV, JAVA_JVMTI_call },
 	{ JAVA_JVMTI_OBJECT_ALLOC_EV, JAVA_JVMTI_call },
 	{ JAVA_JVMTI_OBJECT_FREE_EV, JAVA_JVMTI_call },
+	{ JAVA_JVMTI_THREAD_EV, JAVA_JVMTI_call },
+	{ JAVA_JVMTI_WAIT_EV, JAVA_JVMTI_call },
 	{ NULL_EV, NULL }
 };
 
