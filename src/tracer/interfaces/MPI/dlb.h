@@ -1208,6 +1208,10 @@ void DLB_MPI_Dist_graph_create_F_enter (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fin
 void DLB_MPI_Dist_graph_create_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Dist_graph_create_adjacent_F_enter (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Dist_graph_create_adjacent_F_leave (void)__attribute__((weak));
+
+
 void DLB_MPI_Neighbor_allgather_F_enter (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)__attribute__((weak));
 void DLB_MPI_Neighbor_allgather_F_leave (void)__attribute__((weak));
 
@@ -1432,6 +1436,10 @@ void DLB_MPI_Graph_create_leave (void)__attribute__((weak));
 
 void DLB_MPI_Dist_graph_create_enter (MPI_Comm comm_old, int n, int *sources, int *degrees, int *destinations, int *weights, MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)__attribute__((weak));
 void DLB_MPI_Dist_graph_create_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Dist_graph_create_adjacent_enter (MPI_Comm comm_old, int indegree, int *sources, int *sourceweighs, int outdegree, int *destinations, int *destweights, MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)__attribute__((weak));
+void DLB_MPI_Dist_graph_create_adjacent_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_Neighbor_allgather_enter (void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)__attribute__((weak));

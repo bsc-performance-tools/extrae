@@ -123,6 +123,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_WIN_UNLOCK_EV:
 		case MPI_GRAPH_CREATE_EV:
 		case MPI_DIST_GRAPH_CREATE_EV:
+		case MPI_DIST_GRAPH_CREATE_ADJACENT_EV:
 		case MPI_WIN_FLUSH_EV:
 		case MPI_WIN_FLUSH_ALL_EV:
 		case MPI_WIN_FLUSH_LOCAL_EV:
@@ -1212,6 +1213,7 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_INTERCOMM_MERGE_EV, Other_MPI_Event },
 	{ MPI_GRAPH_CREATE_EV, Other_MPI_Event },
 	{ MPI_DIST_GRAPH_CREATE_EV, Other_MPI_Event },
+	{ MPI_DIST_GRAPH_CREATE_ADJACENT_EV, Other_MPI_Event },
 	{ MPI_FILE_OPEN_EV, Other_MPI_Event },
 	{ MPI_FILE_CLOSE_EV, Other_MPI_Event },
 	{ MPI_FILE_READ_EV, MPIIO_Event },

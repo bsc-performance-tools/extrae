@@ -4,6 +4,7 @@ ChangeLog
  * 06Jul2021 Fixes calloc() behaviour (closes #60)
  * 06Jul2021 Fixes realloc comment in mpi2prv (closes #59)
  * 06Jul2021 Fix for missing symbols of libraries loaded dynamically (closes #58) 
+ + 27May2021 Adds support for MPI_Dist_graph_create_adjacent and fixes bug in xtr_MPI_Comm_neighbors_count parameters 
  * 26Jan2021 Checks if EXTRAE_PY_CEVENTS is not empty before checking its value
  + 29Sep2020 Adds configure option to disable instrumentation of pthread_cond_* calls
  * 21Ago2020 Fixes bug instrumenting user code inside OpenMP

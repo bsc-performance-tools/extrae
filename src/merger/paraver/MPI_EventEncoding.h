@@ -274,7 +274,8 @@ typedef enum
   MPI_FILE_WRITE_ORDERED_BEGIN_VAL,
   MPI_FILE_WRITE_ORDERED_END_VAL,
   MPI_FILE_WRITE_SHARED_VAL, /* 210 */
-  MPI_COMM_DUP_WITH_INFO_VAL
+  MPI_COMM_DUP_WITH_INFO_VAL,
+  MPI_DIST_GRAPH_CREATE_ADJACENT_VAL
 }
 MPIVal;
 
@@ -360,6 +361,7 @@ MPIVal;
 #define  MPI_GRAPH_MAP_LABEL                "MPI_Graph_map"
 #define  MPI_GRAPH_CREATE_LABEL             "MPI_Graph_create"
 #define  MPI_DIST_GRAPH_CREATE_LABEL        "MPI_Dist_graph_create"
+#define  MPI_DIST_GRAPH_CREATE_ADJACENT_LABEL        "MPI_Dist_graph_create_adjacent"
 #define  MPI_GRAPH_NEIGHBORS_LABEL          "MPI_Graph_neighbors"
 #define  MPI_GRAPHDIMS_GET_LABEL            "MPI_Graphdims_get"
 #define  MPI_GRAPH_NEIGHBORS_COUNT_LABEL    "MPI_Graph_neighbors_count"

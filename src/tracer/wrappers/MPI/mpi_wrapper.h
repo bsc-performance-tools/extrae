@@ -187,6 +187,7 @@ void PMPI_Graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *
 
 void PMPI_Dist_graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
 
+void PMPI_Dist_graph_create_adjacent_Wrapper (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
 
 #endif /* defined(FORTRAN_SYMBOLS) */
 
@@ -253,6 +254,10 @@ int MPI_Request_free_C_Wrapper (MPI_Request * request);
 int MPI_Graph_create_C_Wrapper (MPI_Comm comm_old, int nnodes, int *index, int *edges, int reorder, MPI_Comm *comm_graph);
 
 int MPI_Dist_graph_create_C_Wrapper (MPI_Comm comm_old, int n, int *sources, int *degrees, int *destinations, int *weights, MPI_Info info, int reorder, MPI_Comm *comm_dist_graph);
+
+int MPI_Dist_graph_create_adjacent_C_Wrapper (MPI_Comm comm_old, int indegree, const int sources[],
+	const int sourceweights[], int outdegree, const int destinations[], const int destweights[],
+	MPI_Info info, int reorder, MPI_Comm *comm_dist_graph);
 
 #endif /* MPI_WRAPPER_DEFINED */
 

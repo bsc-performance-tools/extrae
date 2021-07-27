@@ -1131,6 +1131,37 @@ int NAME_ROUTINE_C(MPI_Dist_graph_create) (MPI_Comm comm_old, int n, const int s
 }
 
 /******************************************************************************
+ ***  MPI_Dist_graph_create_adjacent
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Dist_graph_create_adjacent) (MPI_Comm comm_old, int indegree, const int sources[],
+    const int sourceweights[], int outdegree, const int destinations[], const int destweights[],
+    MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)
+{
+	int res;
+
+	DLB(DLB_MPI_Dist_graph_create_adjacent_enter, comm_old, indegree, MPI3_C_INT_P_CAST sources, MPI3_C_INT_P_CAST sourceweights, outdegree, MPI3_C_INT_P_CAST destinations, MPI3_C_INT_P_CAST destweights, info, reorder, comm_dist_graph);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		res = MPI_Dist_graph_create_adjacent_C_Wrapper (comm_old, indegree, MPI3_C_INT_P_CAST sources, MPI3_C_INT_P_CAST sourceweights, outdegree, MPI3_C_INT_P_CAST destinations, MPI3_C_INT_P_CAST destweights, info, reorder, comm_dist_graph);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		res = PMPI_Dist_graph_create_adjacent (comm_old, indegree, MPI3_C_INT_P_CAST sources, MPI3_C_INT_P_CAST sourceweights, outdegree, MPI3_C_INT_P_CAST destinations, MPI3_C_INT_P_CAST destweights, info, reorder, comm_dist_graph);
+	}
+
+	DLB(DLB_MPI_Dist_graph_create_adjacent_leave);
+
+	return res;
+}
+
+
+
+/******************************************************************************
  ***  MPI_Neighbor_allgather
  ******************************************************************************/
 int NAME_ROUTINE_C(MPI_Neighbor_allgather) (MPI3_CONST void *sendbuf, int sendcount,

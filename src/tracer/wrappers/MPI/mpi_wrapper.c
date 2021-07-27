@@ -1974,11 +1974,11 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-        Spawn_Children_Sync( MPI_Init_start_time );
+	Spawn_Children_Sync( MPI_Init_start_time );
 #endif
 
 	/* Stats Init */
-        global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
+	global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
 	updateStats_OTHER(global_mpi_stats);
 
 	return val;

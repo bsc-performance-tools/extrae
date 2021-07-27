@@ -1312,29 +1312,59 @@ void NAME_ROUTINE_C2F(mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, M
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_dist_graph_create__,mpi_dist_graph_create_,MPI_DIST_GRAPH_CREATE,mpi_dist_graph_create,
-  (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr))
+  (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr))
 
-void NAME_ROUTINE_F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
+void NAME_ROUTINE_F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
 #else
-void NAME_ROUTINE_C2F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
+void NAME_ROUTINE_C2F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
 #endif
 {
-	DLB(DLB_MPI_Dist_graph_create_F_enter, comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_graph, ierr);
+	DLB(DLB_MPI_Dist_graph_create_F_enter, comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph, ierr);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
-		PMPI_Dist_graph_create_Wrapper (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_graph, ierr);
+		PMPI_Dist_graph_create_Wrapper (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph, ierr);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
 	{
-		CtoF77(pmpi_dist_graph_create) (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_graph, ierr);
+		CtoF77(pmpi_dist_graph_create) (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph, ierr);
 	}
 
 	DLB(DLB_MPI_Dist_graph_create_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Dist_graph_create_adjacent
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_dist_graph_create_adjacent__,mpi_dist_graph_create_adjacent_,MPI_DIST_GRAPH_CREATE_ADJACENT,mpi_dist_graph_create_adjacent,
+  (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_dist_graph_create_adjacent) (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_dist_graph_create_adjacent) (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
+#endif
+{
+	DLB(DLB_MPI_Dist_graph_create_adjacent_F_enter, comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph, ierr);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Dist_graph_create_adjacent_Wrapper (comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_dist_graph_create_adjacent) (comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph, ierr);
+	}
+
+	DLB(DLB_MPI_Dist_graph_create_adjacent_F_leave);
 }
 
 /******************************************************************************
