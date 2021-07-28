@@ -723,8 +723,14 @@ given as attribute of the ``<merge>`` node and they are:
   (*default is ``yes``*).
 * :option:`keep-mpits`: whether to keep the intermediate tracefiles after performing
   the merge.
+* :option:`translate-addresses` : whether to identify the calling site of
+  instrumented calls and samples by the specified levels of the callstack
+  (enabled by default); or just by their instruction addresses.
 * :option:`sort-addresses`: whether to sort all addresses that refer to the source
   code (enabled by default).
+* :option:`translate-data-addresses`: whether to identify allocated objects by
+  their full callpath (enabled by default); or just by the tuple
+  <library_base_address, symbol_offset_within_library>.
 * :option:`overwrite`: set to ``yes`` if the new tracefile can overwrite an existing
   tracefile with the same name. If set to ``no``, then the tracefile will be
   given a new name using a consecutive id.

@@ -116,4 +116,7 @@ void set_option_merge_TranslateAddresses (int b);
 int get_option_merge_EmitLibraryEvents (void);
 void set_option_merge_EmitLibraryEvents (int b);
 
+int get_option_merge_TranslateDataAddresses(void);
+void set_option_merge_TranslateDataAddresses(int b);
+
 #endif

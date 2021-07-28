@@ -215,12 +215,23 @@ These are the available options for the sequential |PARAVER| merger:
   than using :option:`-syn`, but, again, it will depend on how the clocks
   advance in time.
 
-.. option:: -translate-addresses, -no-trace-overwrite
+.. option:: -trace-overwrite, -no-trace-overwrite
 
   Tells the merger to overwrite (or not) the final tracefile if it already
   exists. If the tracefile exists and :option:`-no-trace-overwrite` is given,
   the tracefile name will have an increasing numbering in addition to the name
   given by the user.
+
+.. option:: -translate-addresses, -no-translate-addresses
+
+   Identify the calling site of instrumented calls and samples by the specified
+   levels of the callstack (enabled by default); or just by their instruction
+   addresses.
+
+.. option:: -translate-data-addresses, -no-translate-data-addresses
+
+   Identify allocated objects by their full callpath (enabled by default); or
+   just by the tuple <library_base_address, symbol_offset_within_library>.
 
 .. option:: -unique-caller-id
 

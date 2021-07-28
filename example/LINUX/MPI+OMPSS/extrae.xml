@@ -97,7 +97,9 @@
     max-memory="512"
     joint-states="yes"
     keep-mpits="no"
+    translate-addresses="yes"
     sort-addresses="yes"
+    translate-data-addresses="yes"
     overwrite="no"
   />
 

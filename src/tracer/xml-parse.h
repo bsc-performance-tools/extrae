@@ -157,6 +157,8 @@
 #define TRACE_MERGE_SYN_DEFAULT         ((xmlChar*) "default")
 #define TRACE_MERGE_SORTADDRESSES       ((xmlChar*) "sort-addresses")
 #define TRACE_MERGE_STOP_AT_PCT         ((xmlChar*) "stop-at-percentage")
+#define TRACE_MERGE_TRANSLATE_ADDRESSES ((xmlChar*) "translate-addresses")
+#define TRACE_MERGE_TRANSLATE_DATA_ADDRESSES ((xmlChar*) "translate-data-addresses")
 #define TRACE_MERGE_OVERWRITE           ((xmlChar*) "overwrite")
 
 #define TRACE_PEBS_SAMPLING                     ((xmlChar*) "pebs-sampling")

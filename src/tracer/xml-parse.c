@@ -1406,6 +1406,8 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	xmlChar *traceoverwrite;
 	xmlChar *stopatpct_s;
 	long     stopatpct = 0;
+	xmlChar *translate_addresses;
+	xmlChar *translate_data_addresses;
 	char *filename;
 
 	if (tracetype != NULL && !xmlStrcasecmp (tracetype, TRACE_TYPE_DIMEMAS))
@@ -1424,12 +1426,6 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		set_option_merge_TraceOverwrite (!xmlStrcasecmp (traceoverwrite, xmlYES));
 	else
 		set_option_merge_TraceOverwrite (TRUE);
-
-	sortaddresses = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SORTADDRESSES);
-	if (sortaddresses != NULL)
-		set_option_merge_SortAddresses (!xmlStrcasecmp (sortaddresses, xmlYES));
-	else
-		set_option_merge_SortAddresses (FALSE);
 
 	synchronization = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SYNCHRONIZATION);
 	if (synchronization != NULL && !xmlStrcasecmp (synchronization, TRACE_MERGE_SYN_DEFAULT))
@@ -1505,7 +1501,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 #endif
 
 	binary = xmlGetProp_env (rank, current_tag, TRACE_MERGE_BINARY);
-	if (binary != NULL)	
+	if (binary != NULL)
 		set_merge_ExecutableFileName ((const char*)binary);
 
 	jointstates = xmlGetProp_env (rank, current_tag, TRACE_MERGE_JOINT_STATES);
@@ -1513,6 +1509,29 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		set_option_merge_JointStates (FALSE);
 	else
 		set_option_merge_JointStates (TRUE);
+
+	translate_addresses = xmlGetProp_env(rank, current_tag, TRACE_MERGE_TRANSLATE_ADDRESSES);
+	sortaddresses = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SORTADDRESSES);
+	if (translate_addresses != NULL && !xmlStrcasecmp(translate_addresses, xmlNO))
+	{
+		set_option_merge_TranslateAddresses(FALSE);
+		set_option_merge_SortAddresses (FALSE);
+	}
+	else
+	{
+		set_option_merge_TranslateAddresses(TRUE);
+
+		if (sortaddresses != NULL && !xmlStrcasecmp(sortaddresses, xmlNO))
+			set_option_merge_SortAddresses (FALSE);
+		else
+			set_option_merge_SortAddresses (TRUE);
+	}
+
+	translate_data_addresses = xmlGetProp_env(rank, current_tag, TRACE_MERGE_TRANSLATE_DATA_ADDRESSES);
+	if (translate_data_addresses != NULL && !xmlStrcasecmp(translate_data_addresses, xmlNO))
+		set_option_merge_TranslateDataAddresses(FALSE);
+	else
+		set_option_merge_TranslateDataAddresses(TRUE);
 
 	filename = (char*) xmlNodeListGetString_env (rank, xmldoc, current_tag->xmlChildrenNode, 1);
 	if (filename == NULL || strlen(filename) == 0)
@@ -1534,6 +1553,8 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	XML_FREE (jointstates);
 	XML_FREE (keepmpits);
 	XML_FREE (traceoverwrite);
+	XML_FREE (translate_addresses);
+	XML_FREE (translate_data_addresses);
 }
 #endif
 

@@ -147,3 +147,6 @@ static int option_merge_EmitLibraryEvents = FALSE;
 int get_option_merge_EmitLibraryEvents (void) { return option_merge_EmitLibraryEvents; }
 void set_option_merge_EmitLibraryEvents (int b) { option_merge_EmitLibraryEvents = b; }
 
+static int option_merge_TranslateDataAddresses = TRUE;
+int get_option_merge_TranslateDataAddresses(void) { return option_merge_TranslateDataAddresses; }
+void set_option_merge_TranslateDataAddresses(int b) { option_merge_TranslateDataAddresses = b; }

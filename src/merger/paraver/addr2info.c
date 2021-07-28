@@ -324,42 +324,83 @@ UINT64 Address2Info_Translate_MemReference (unsigned ptask, unsigned task, UINT6
 		char tmp[1024];
 		int i;
 
-		snprintf (buffer, sizeof(buffer), "");
+		if (get_option_merge_TranslateDataAddresses())
+		{
+			snprintf (buffer, sizeof(buffer), "");
 
-		/* Trim head and tail for callers that can't be translated */
-		for (i = 0; i < MAX_CALLERS; i++)
-			if (calleraddresses[i] != 0)
-			{
-				Translate_Address (calleraddresses[i], ptask, task, &module,
-				  &sname, &filename, &line);
-				if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
-					calleraddresses[i] = 0;
-				else
-					break;
-			}
+			/* Trim head and tail for callers that can't be translated */
+			for (i = 0; i < MAX_CALLERS; i++)
+				if (calleraddresses[i] != 0)
+				{
+					Translate_Address (calleraddresses[i], ptask, task, &module,
+					  &sname, &filename, &line);
+					if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
+						calleraddresses[i] = 0;
+					else
+						break;
+				}
 
-		for (i = MAX_CALLERS-1; i >= 0; i--)
-			if (calleraddresses[i] != 0)
-			{
-				Translate_Address (calleraddresses[i], ptask, task, &module,
-				  &sname, &filename, &line);
-				if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
-					calleraddresses[i] = 0;
-				else
-					break;
-			}
+			for (i = MAX_CALLERS-1; i >= 0; i--)
+				if (calleraddresses[i] != 0)
+				{
+					Translate_Address (calleraddresses[i], ptask, task, &module,
+					  &sname, &filename, &line);
+					if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
+						calleraddresses[i] = 0;
+					else
+						break;
+				}
 
-		for (i = 0; i < MAX_CALLERS; i++)
-			if (calleraddresses[i] != 0)
+			for (i = 0; i < MAX_CALLERS; i++)
+				if (calleraddresses[i] != 0)
+				{
+					Translate_Address (calleraddresses[i], ptask, task, &module,
+					  &sname, &filename, &line);
+					if (strlen(buffer) > 0)
+						snprintf (tmp, sizeof(tmp), " > %s:%d", filename, line);
+					else
+						snprintf (tmp, sizeof(tmp), "%s:%d", filename, line);
+					strncat (buffer, tmp, sizeof(buffer));
+				}
+		}
+		else
+		{
+			// Export the id for a dynamically allocated object in memory through its callstack
+			// as pointers (not translated references). The pointers refer to the address in the
+			// respective library where it belongs as providing the absolute address won't help
+			// (even if ASLR is disabled) because LD_PRELOADing alters the addresses from the libs
+			// Main binary addresses are given with absolute references
+			const char * mainbinary = ObjectTable_GetBinaryObjectName (ptask, task);
+			UINT64 base_address;
+			buffer[0] = (char)0;
+			for (i = 0; i < MAX_CALLERS; i++)
 			{
-				Translate_Address (calleraddresses[i], ptask, task, &module,
-				  &sname, &filename, &line);
-				if (strlen(buffer) > 0)
-					snprintf (tmp, sizeof(tmp), " > %s:%d", filename, line);
-				else
-					snprintf (tmp, sizeof(tmp), "%s:%d", filename, line);
-				strncat (buffer, tmp, sizeof(buffer));
+				if (calleraddresses[i] != 0)
+				{
+					binary_object_t * obj = ObjectTable_GetBinaryObjectAt (ptask, task, calleraddresses[i]);
+					const char * module;
+
+					if (obj != NULL)
+					{
+						module = obj->module;
+						base_address = (strcmp (mainbinary, module) != 0) ? obj->start_address : 0;
+					}
+					else
+					{
+						if (getenv("EXTRAE_DEBUG"))
+							fprintf (stderr, "DEBUG: cannot translate address %08lx \n", calleraddresses[i]);
+						module = "Unknown";
+						base_address = 0;
+					}
+
+					if (strlen(buffer) > 0)
+						snprintf (tmp, sizeof(tmp), " > %s!%08lx", module, calleraddresses[i] - base_address);
+					else
+						snprintf (tmp, sizeof(tmp), "%s!%08lx", module, calleraddresses[i] - base_address);
+					strncat (buffer, tmp, sizeof(buffer));
+				}
 			}
+		}
 
 		return 1+AddressTable_Insert_MemReference (query, module, "",
 		  strdup(buffer), 0);
