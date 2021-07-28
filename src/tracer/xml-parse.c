@@ -702,6 +702,28 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 
 				XML_FREE (sfrequency);
 				XML_FREE (speriod);
+
+				xmlNodePtr subtag;
+				subtag = tag->xmlChildrenNode;
+
+				while (subtag != NULL)
+				{
+					/* Skip coments */
+					if (!xmlStrcasecmp (subtag->name, xmlTEXT) || !xmlStrcasecmp (subtag->name, xmlCOMMENT))
+					{
+					}
+					/* Is the user passing information related to sampling pebs loads? */
+					else if (!xmlStrcasecmp (subtag->name, TRACE_PEBS_SAMPLING_STORES_OFFCORE_L3Ms))
+					{
+						xmlChar *offcore_stl3m_enabled = xmlGetProp_env (rank, subtag, TRACE_ENABLED);
+						if (offcore_stl3m_enabled != NULL && !xmlStrcasecmp (offcore_stl3m_enabled, xmlYES))
+						{
+							Extrae_IntelPEBS_setOffcoreStoreL3MSampling(TRUE);
+						}
+						XML_FREE(offcore_stl3m_enabled);
+					}
+					subtag = subtag->next;
+				}
 			}
 			XML_FREE(enabled);
 		}

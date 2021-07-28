@@ -159,11 +159,12 @@
 #define TRACE_MERGE_STOP_AT_PCT         ((xmlChar*) "stop-at-percentage")
 #define TRACE_MERGE_OVERWRITE           ((xmlChar*) "overwrite")
 
-#define TRACE_PEBS_SAMPLING             ((xmlChar*) "pebs-sampling")
-#define TRACE_PEBS_SAMPLING_LOADS       ((xmlChar*) "loads")
-#define TRACE_PEBS_SAMPLING_STORES      ((xmlChar*) "stores")
-#define TRACE_PEBS_SAMPLING_LOAD_L3Ms   ((xmlChar*) "load-l3-misses")
-#define TRACE_PEBS_MIN_MEM_LATENCY      ((xmlChar*) "minimum-latency")
+#define TRACE_PEBS_SAMPLING                     ((xmlChar*) "pebs-sampling")
+#define TRACE_PEBS_SAMPLING_LOADS               ((xmlChar*) "loads")
+#define TRACE_PEBS_SAMPLING_STORES              ((xmlChar*) "stores")
+#define TRACE_PEBS_SAMPLING_STORES_OFFCORE_L3Ms ((xmlChar*) "offcore-l3-misses")
+#define TRACE_PEBS_SAMPLING_LOAD_L3Ms           ((xmlChar*) "load-l3-misses")
+#define TRACE_PEBS_MIN_MEM_LATENCY              ((xmlChar*) "minimum-latency")
 
 #define TRACE_CPU_EVENTS		((xmlChar*) "cpu-events")
 #define TRACE_CPU_EVENTS_FREQUENCY	((xmlChar*) "frequency")

@@ -415,6 +415,31 @@ static int User_Event (event_t * current_event,
 }
 
 /******************************************************************************
+ ***  L3_store_miss_Event
+ ******************************************************************************/
+
+static int L3_store_miss_Event (event_t * current_event,
+                                unsigned long long current_time,
+                                unsigned int cpu,
+                                unsigned int ptask,
+                                unsigned int task,
+                                unsigned int thread,
+                                FileSet_t *fset)
+{
+	int EvType;
+	unsigned long long EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+/******************************************************************************
  ***  MPI_Caller_Event
  ******************************************************************************/
 
@@ -1849,6 +1874,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SAMPLING_ADDRESS_MEM_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_TLB_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_REFERENCE_COST_EV, Sampling_Address_MEM_TLB_Event },
+	{ SAMPLING_ADDRESS_L3_STORE_MISSES_EV, L3_store_miss_Event },
 	{ MALLOC_EV, DynamicMemory_Event },
 	{ ADD_RESERVED_MEM_EV, DynamicMemory_Event },
 	{ SUB_RESERVED_MEM_EV, DynamicMemory_Event },

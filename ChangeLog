@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 06Jul2021 Adds L3 store misses offcore counter PEBS sampling (closes #62)
  * 06Jul2021 Fixes calloc() behaviour (closes #60)
  * 06Jul2021 Fixes realloc comment in mpi2prv (closes #59)
  * 06Jul2021 Fix for missing symbols of libraries loaded dynamically (closes #58) 
