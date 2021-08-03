@@ -174,6 +174,12 @@ extern int tracejant_rusage;
 extern int tracejant_memusage;
 #define TRACING_MEMUSAGE (tracejant_memusage)
 
+#if defined(SAMPLING_SUPPORT)
+/** Is time-based sampling enabled?                                     **/
+extern int xtr_sampling_enabled;
+# define TRACING_SAMPLING (xtr_sampling_enabled)
+#endif
+
 extern unsigned long long MinimumTracingTime;
 extern int hasMinimumTracingTime;
 
