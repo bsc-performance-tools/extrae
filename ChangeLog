@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 05Aug2021 Creates new event handler for ADD_RESERVED_MEM_EV and SUB_RESERVED_MEM_EV 
  * 05Aug2021 Fix wrong arguments for mpi_win_lock and mpi_compare_and_swap wrappers
  * 03Aug2021 Makes CPUID event start at 1
  * 03Aug2021 Sampling temporal files not created if disabled in XML

@@ -1748,11 +1748,6 @@ static int DynamicMemory_Event (event_t * event,
 		}
 
 	}
-	else if ((EvType == ADD_RESERVED_MEM_EV) ||
-			 (EvType == SUB_RESERVED_MEM_EV)) {
-			trace_paraver_event (cpu, ptask, task, thread, time,
-			  EvType, EvValue);
-	}
 
 	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
 	{
@@ -1788,6 +1783,19 @@ static int DynamicMemory_Partition_Event (event_t * event,
 
 	return 0;
 }
+
+static int DynamicMemory_Tracking_Event (event_t * event,
+        unsigned long long time, unsigned int cpu, unsigned int ptask,
+        unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+        unsigned EvType = Get_EvEvent (event);
+        unsigned long long EvValue = Get_EvValue (event);
+
+	trace_paraver_event (cpu, ptask, task, thread, time, EvType, EvValue);
+
+	return 0;
+}
+
 
 static int SystemCall_Event (event_t * event,                      
 	unsigned long long time, unsigned int cpu, unsigned int ptask,          
@@ -1876,8 +1884,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SAMPLING_ADDRESS_REFERENCE_COST_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_L3_STORE_MISSES_EV, L3_store_miss_Event },
 	{ MALLOC_EV, DynamicMemory_Event },
-	{ ADD_RESERVED_MEM_EV, DynamicMemory_Event },
-	{ SUB_RESERVED_MEM_EV, DynamicMemory_Event },
+	{ ADD_RESERVED_MEM_EV, DynamicMemory_Tracking_Event },
+	{ SUB_RESERVED_MEM_EV, DynamicMemory_Tracking_Event },
 	{ CALLOC_EV, DynamicMemory_Event },
 	{ FREE_EV, DynamicMemory_Event },
 	{ REALLOC_EV, DynamicMemory_Event },
