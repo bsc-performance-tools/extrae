@@ -358,7 +358,7 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_win_lock__,mpi_win_lock_,MPI_WIN_LOCK,mpi_win_lock,(MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, void *win, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_win_lock__,mpi_win_lock_,MPI_WIN_LOCK,mpi_win_lock,(MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, MPI_Fint *win, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_win_lock)(MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, MPI_Fint *win, MPI_Fint *ierror)
 #else
@@ -471,7 +471,7 @@ void NAME_ROUTINE_C2F(mpi_fetch_and_op)(void *origin_addr, void *result_addr,
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_compare_and_swap__,mpi_compare_and_swap_,MPI_COMPARE_AND_SWAP,mpi_compare_and_swap,
   (void *origin_addr, void *compare_addr, void *result_addr, MPI_Fint *datatype,
-   MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *ierror))
+   MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *win, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_compare_and_swap)(void *origin_addr, void *compare_addr,
   void *result_addr, MPI_Fint *datatype, MPI_Fint *target_rank,

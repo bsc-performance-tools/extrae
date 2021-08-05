@@ -205,7 +205,7 @@ void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
 }
 
 
-void MPI_Win_lock_Fortran_Wrapper (MPI_Fint* lock_type, MPI_Fint* rank, MPI_Fint* assert, void *win, void *ierror)
+void MPI_Win_lock_Fortran_Wrapper (MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, MPI_Fint *win, MPI_Fint *ierror)
 {
 	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_LOCK_EV, EVT_BEGIN, *rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
@@ -217,7 +217,7 @@ void MPI_Win_lock_Fortran_Wrapper (MPI_Fint* lock_type, MPI_Fint* rank, MPI_Fint
 }
 
 
-void MPI_Win_unlock_Fortran_Wrapper (MPI_Fint* rank, void *win, void *ierror)
+void MPI_Win_unlock_Fortran_Wrapper (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror)
 {
 	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_UNLOCK_EV, EVT_BEGIN, *rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
