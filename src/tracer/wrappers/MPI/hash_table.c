@@ -159,6 +159,8 @@ void xtr_hash_free(xtr_hash_t *hash)
  */
 int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 {
+	int added = 1;
+
 	// Apply the hash function to find corresponding cell in the head array
 	xtr_hash_cell_t *cell = XTR_HASH_GET_CELL_FOR_KEY(hash, key);
 	xtr_hash_cell_t *cell_to_add = cell;
@@ -176,13 +178,16 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 	{
 		// There was a previous key stored, get a free collision cell to fill
 		cell_to_add = hash->next_free_collision_cell;
-		if (cell_to_add == XTR_HASH_FULL) return 0;
-		hash->next_free_collision_cell = cell_to_add->next;
-		// Mark the hash cell with 1+ collisions
-		XTR_KEY_HASHED_WITH_COLLISION(cell, cell_to_add);
+
+		if ((added = (cell_to_add != XTR_HASH_FULL))) 
+		{
+			hash->next_free_collision_cell = cell_to_add->next;
+			// Mark the hash cell with 1+ collisions
+			XTR_KEY_HASHED_WITH_COLLISION(cell, cell_to_add);
 #if defined(DEBUG)
-		xtr_hash_stats_update(hash, num_collisions);
+			xtr_hash_stats_update(hash, num_collisions);
 #endif
+		}
 	}
 	else
 	{
@@ -191,10 +196,13 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 	}
 
 	// Store the key and copy the data to the data storage
-	cell_to_add->key = key;
-	if (data != NULL)
+	if (added)
 	{
-		memcpy(cell_to_add->data, data, hash->data_size);
+		cell_to_add->key = key;
+		if (data != NULL)
+		{
+			memcpy(cell_to_add->data, data, hash->data_size);
+		}
 	}
 
 	if (hash->flags & XTR_HASH_LOCK)
@@ -202,7 +210,7 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 		pthread_rwlock_unlock(&hash->lock);
 	}
 
-	return 1;
+	return added;
 }
 
 
@@ -259,6 +267,8 @@ static int xtr_hash_search (xtr_hash_t *hash, uintptr_t key, xtr_hash_cell_t **p
  */
 int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 {
+	int found = 0;
+
 	xtr_hash_cell_t *previous = NULL, *cell = NULL;
 
         if (hash->flags & XTR_HASH_LOCK)
@@ -278,7 +288,7 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 		{
 			memcpy(data, cell->data, hash->data_size);
 		}
-		return 1;
+		found = 1;
 	}
 
         if (hash->flags & XTR_HASH_LOCK)
@@ -286,7 +296,7 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
                 pthread_rwlock_unlock(&hash->lock);
         }
 
-	return 0;
+	return found;
 }
 
 

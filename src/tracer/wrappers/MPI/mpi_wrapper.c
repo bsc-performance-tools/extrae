@@ -3081,6 +3081,8 @@ void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm 
 
 void SaveRequest(MPI_Request request, MPI_Comm comm)
 {
+	static int once = 0;
+
 	if (request != MPI_REQUEST_NULL) 
 	{
 		xtr_hash_data_request_t request_data;
@@ -3088,7 +3090,11 @@ void SaveRequest(MPI_Request request, MPI_Comm comm)
 		request_data.commid = comm;
 		getCommunicatorGroup(comm, &request_data.group);
 
-		xtr_hash_add (hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data);
+		if (!xtr_hash_add (hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data) && !once)
+		{
+			fprintf(stderr, PACKAGE_NAME": WARNING: SaveRequest: Hash table for MPI_Request's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Test*/Wait* routines.\n");
+			once = 1;
+		}
 	}
 }
 
@@ -3153,6 +3159,8 @@ void CancelRequest(MPI_Request request)
 
 void SaveMessage(MPI_Message message, MPI_Comm comm)
 {
+	static int once = 0;
+
 	if (message != MPI_MESSAGE_NULL)
 	{
 		xtr_hash_data_message_t message_data;
@@ -3160,13 +3168,19 @@ void SaveMessage(MPI_Message message, MPI_Comm comm)
 		message_data.commid = comm;
 		getCommunicatorGroup(comm, &message_data.group);
 
-		xtr_hash_add (hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data);
+		if (!xtr_hash_add (hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data) && !once)
+		{
+			fprintf(stderr, PACKAGE_NAME": WARNING: SaveMessage: Hash table for MPI_Message's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Mrecv/Imrecv routines.\n");
+			once = 1;
+		}
 	}
 }
 
 
 MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 {
+	static int once = 0;
+
 	if (message != MPI_MESSAGE_NULL)
 	{	
 		xtr_hash_data_message_t message_data;
@@ -3183,7 +3197,11 @@ MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 				request_data.group  = message_data.group;
 
 				// Save the request in the hash with the message's comm data
-				xtr_hash_add(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), &request_data);
+				if (!xtr_hash_add(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), &request_data) && !once)
+				{
+					fprintf(stderr, PACKAGE_NAME": WARNING: ProcessMessage: Hash table for MPI_Request's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Test*/Wait* routines.\n");
+					once = 1;
+				}
 			}
 
 			return message_data.commid;
