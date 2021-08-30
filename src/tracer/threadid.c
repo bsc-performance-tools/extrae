@@ -34,15 +34,12 @@
 #endif
 
 /*
-   Default routines
+   Default return values
    1 thread in total, and thread id is always 0
 */
 
-static unsigned Extrae_threadid_default_function (void)
-{ return 0; }
-
-static unsigned Extrae_num_threads_default_function (void)
-{ return 1; }
+enum { Extrae_threadid_default = 0 };
+enum { Extrae_num_threads_default = 1};
 
 /* Callback definitions and API */
 
@@ -93,7 +90,7 @@ unsigned Extrae_get_thread_number (void)
 #elif defined(UPC_SUPPORT)
 	return GetUPCthreadID();
 #else
-	return Extrae_threadid_default_function();
+	return Extrae_threadid_default;
 #endif
 }
 
@@ -131,6 +128,6 @@ unsigned Extrae_get_num_threads (void)
 #elif defined(UPC_SUPPORT)
 	return GetNumUPCthreads();
 #else
-	return Extrae_num_threads_default_function();
+	return Extrae_num_threads_default;
 #endif
 }
