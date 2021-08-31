@@ -459,6 +459,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 	FileSet_t *fset;
 	FileItem_t *fitem;
 
+
 	if ((fset = malloc (sizeof (FileSet_t))) == NULL)
 	{
 		perror ("malloc");
@@ -472,10 +473,12 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 	xmalloc(fset->files, nTraces * sizeof(FileItem_t));
 	fset->nfiles = 0;
 	for (file = 0; file < nfiles; file++)
+	{
 		if (IFiles[file].InputForWorker == idtask)
 		{
 			fitem = &(fset->files[fset->nfiles]);
 			fitem->mpit_id = file;
+			fitem->sibling_threads = NULL;
 			if (AddFile_FS (fitem, &(IFiles[file]), idtask) != 0)
 			{
 				perror ("AddFile_FS");
@@ -485,6 +488,36 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 			}
 			fset->nfiles++;
 		}
+	}
+
+	int i = 0;
+	for (i = 0; i < fset->nfiles; i++)
+	{
+		FileItem_t *fitem1 = &(fset->files[i]);
+
+		if (fitem1->sibling_threads == NULL)
+		{
+			int j = 0;
+			TaskFileItem_t *sibling_threads = NULL;
+			xmalloc(sibling_threads, sizeof(TaskFileItem_t));
+			sibling_threads->files = NULL;
+			sibling_threads->nfiles = 0;
+			for (j = 0; j < fset->nfiles; j++)
+			{
+				FileItem_t *fitem2 = &(fset->files[j]);
+
+				if ((fitem1->ptask == fitem2->ptask) &&
+				    (fitem1->task  == fitem2->task))
+				{
+					xrealloc(sibling_threads->files, sibling_threads->files, (sizeof(FileItem_t *) * sibling_threads->nfiles+1));
+					sibling_threads->files[sibling_threads->nfiles] = fitem2;
+					sibling_threads->nfiles++;
+
+					fitem2->sibling_threads = sibling_threads;
+				}
+			}
+		}
+	}
 
 	return fset;
 }
@@ -1137,7 +1170,22 @@ event_t * GetNextEvent_FS (
 /******************************************************************************
  ***  Search_MPI_IRECVED
  ******************************************************************************/
-event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * freceive)
+
+event_t * Search_MPI_IRECVED(event_t * current, long long request, FileItem_t * freceive, int * found_in_thread)
+{
+        if (freceive->sibling_threads->nfiles > 1)
+        {
+                return Search_MPI_IRECVED_threads(current, request, freceive, found_in_thread);
+        }
+        else
+        {
+                event_t *evt = Search_MPI_IRECVED_sequential(current, request, freceive);
+                *found_in_thread = freceive->thread;
+                return evt;
+        }
+}
+
+event_t * Search_MPI_IRECVED_sequential (event_t * current, long long request, FileItem_t * freceive)
 {
 	event_t *irecved = current;
 
@@ -1165,6 +1213,80 @@ event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * 
 
 	return NULL;
 }
+
+event_t * Search_MPI_IRECVED_threads (event_t * current, long long request, FileItem_t * freceive, int * found_in_thread)
+{
+	int i = 0;
+	int nfiles = freceive->sibling_threads->nfiles;
+
+	for (i = 0; i < nfiles; i++)
+	{
+		freceive->sibling_threads->files[i]->tmp = freceive->sibling_threads->files[i]->current;
+	}
+
+	int found_irecved = FALSE;
+	event_t *irecved = NULL;
+	event_t *minimum = NULL;
+	do 
+	{
+		minimum = NULL;
+		FileItem_t *fminimum = NULL;
+
+		for (i = 0; i < nfiles; i++)
+		{
+			FileItem_t *current_file = freceive->sibling_threads->files[i];
+			event_t *current_event = current_file->tmp;
+
+			if (current_event != current_file->last)
+			{
+				if (minimum == NULL)
+		                {
+		                        minimum = current_event;
+	        	                fminimum = current_file;
+				}
+				else 
+				{
+					if (TIMESYNC(fminimum->ptask-1, fminimum->task-1, minimum->time) 
+					     > 
+					    TIMESYNC(current_file->ptask-1, current_file->task-1, current_event->time))
+		                        {
+						minimum = current_event;
+						fminimum = current_file;
+	                        	}
+				}
+			}
+		}
+
+		if (minimum != NULL) 
+		{
+			if ((Get_EvEvent(minimum) == MPI_IRECVED_EV) && (Get_EvAux(minimum) == request))
+			{
+				found_irecved = TRUE;
+				irecved = minimum;
+				*found_in_thread = fminimum->thread;
+			}
+			else 
+			{
+				NextRecvG_FS(fminimum);
+			}
+		}
+	} while ((minimum != NULL) && (!found_irecved));     
+
+	if (found_irecved)
+	{
+		int cancelled = Get_EvValue(irecved);
+		if (cancelled)
+		{
+			return NULL;
+		}
+		else
+		{
+			return irecved;
+		}
+	}
+	else return NULL;
+}
+
 
 void Rewind_FS (FileSet_t * fs)
 {

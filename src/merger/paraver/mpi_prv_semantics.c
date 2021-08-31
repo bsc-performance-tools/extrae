@@ -750,9 +750,10 @@ static int IRecv_Event (event_t * current_event,
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned EvType, EvValue, send_thread, send_vthread;
-	thread_t *thread_info;
+	thread_t *thread_info, *irecved_thread_info;
 	task_t *task_info, *task_info_partner;
 	int EvComm;
+	int irecved_found_in_thread = 0;
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_info = GET_TASK_INFO(ptask, task);
@@ -767,7 +768,9 @@ static int IRecv_Event (event_t * current_event,
 	{
 		if (MatchComms_Enabled(ptask, task))
 		{
-			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
+			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file, &irecved_found_in_thread);
+			irecved_thread_info = GET_THREAD_INFO(ptask, task, irecved_found_in_thread);
+
 			if (NULL != receive)
 			{
 				if (MPI_PROC_NULL != Get_EvTarget(receive))
@@ -788,14 +791,15 @@ static int IRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stderr, "IRECV_CMD DID NOT find COMM\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(receive), Get_EvTag(receive), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, irecved_found_in_thread, irecved_thread_info->virtual_thread, Get_EvTarget(receive), Get_EvTag(receive), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stderr, "IRECV_CMD find COMM (partner times = %lld/%lld)\n", Get_EvTime(send_begin), Get_EvTime(send_end));
+
 #endif
-							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, irecved_found_in_thread, irecved_thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -807,8 +811,8 @@ static int IRecv_Event (event_t * current_event,
 
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
-							thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, irecved_found_in_thread,
+							irecved_thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
 					}
 #endif
 				}
@@ -853,13 +857,14 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	thread_t *thread_info;
+	thread_t *thread_info, *irecved_thread_info;
 	task_t *task_info, *task_info_partner;
 	event_t *recv_begin, *recv_end;
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned recv_thread, send_thread, recv_vthread, send_vthread;
 	int EvComm; 
+	int irecved_found_in_thread = 0;
 
 	EvComm = Get_EvComm( current_event );
 
@@ -927,7 +932,9 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 
 		if (MatchComms_Enabled(ptask, task))
 		{
-			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
+			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file, &irecved_found_in_thread);
+			irecved_thread_info = GET_THREAD_INFO(ptask, task, irecved_found_in_thread);
+
 			if (NULL != receive)
 			{
 				int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
@@ -949,14 +956,14 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stderr, "PER_REQ_IRECV_CMD DID NOT find a partner\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, irecved_found_in_thread, irecved_thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stderr, "PERS_REQ_IRECV_CMD find partner (send position = %llu)\n", (unsigned long long) send_position);
 #endif
-							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, irecved_found_in_thread, irecved_thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -968,8 +975,8 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
-							thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, irecved_found_in_thread-1,
+							irecved_thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
 					}
 #endif
 				}
