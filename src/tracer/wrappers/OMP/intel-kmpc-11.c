@@ -85,6 +85,7 @@ static void (*ompc_set_num_threads_real)(int) = NULL;
 static void (*__kmpc_barrier_real)(void*,int) = NULL;
 
 static void (*__kmpc_critical_real)(void*,int,void*) = NULL;
+static void (*__kmpc_critical_with_hint_real)(void*,int,void*,uint32_t) = NULL;
 static void (*__kmpc_end_critical_real)(void*,int,void*) = NULL;
 
 static void (*__kmpc_set_lock_real)(void *, int, void **) = NULL;
@@ -508,6 +509,35 @@ void __kmpc_critical (void *loc, int global_tid, void *crit)
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
+void __kmpc_critical_with_hint (void *loc, int global_tid, void *crit, uint32_t hint)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical_with_hint enter: @=%p args=(%p %d %p %u)\n ", THREAD_LEVEL_VAR, __kmpc_critical_with_hint_real, loc, global_tid, crit, hint);
+#endif
+
+	RECHECK_INIT(__kmpc_critical_with_hint_real);
+
+	if (TRACE(__kmpc_critical_with_hint_real))
+	{
+		Extrae_OpenMP_Named_Lock_Entry ();
+		__kmpc_critical_with_hint_real (loc, global_tid, crit, hint);
+		Extrae_OpenMP_Named_Lock_Exit (crit);
+	}
+	else if (__kmpc_critical_with_hint_real != NULL)
+	{
+		__kmpc_critical_with_hint_real (loc, global_tid, crit, hint);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical_with_hint: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical_with_hint exit\n ", THREAD_LEVEL_VAR);
 #endif
 }
 
@@ -1456,6 +1486,12 @@ static int intel_kmpc_get_hook_points (int rank)
 		(void(*)(void*,int,void*))
 		dlsym (RTLD_NEXT, "__kmpc_critical");
 	INC_IF_NOT_NULL(__kmpc_critical_real,count);
+
+	/* Obtain @ for __kmpc_critical_with_hint */
+	__kmpc_critical_with_hint_real =
+		(void(*)(void*,int,void*,uint32_t))
+		dlsym (RTLD_NEXT, "__kmpc_critical_with_hint");
+	INC_IF_NOT_NULL(__kmpc_critical_with_hint_real,count);
 
 	/* Obtain @ for __kmpc_end_critical */
 	__kmpc_end_critical_real =
