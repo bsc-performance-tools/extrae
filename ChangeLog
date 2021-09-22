@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 27Sep2021 Fixes states in OpenMP taskgroup and taskloop regions 
+ + 22Sep2021 Adds dependency lines between instantiation and execution of OpenMP tasks for GNU libgomp runtime
  + 06Sep2021 Adds missing wrapper for __kmpc_critical_with_hint
  * 05Aug2021 Creates new event handler for ADD_RESERVED_MEM_EV and SUB_RESERVED_MEM_EV 
  * 05Aug2021 Fix wrong arguments for mpi_win_lock and mpi_compare_and_swap wrappers

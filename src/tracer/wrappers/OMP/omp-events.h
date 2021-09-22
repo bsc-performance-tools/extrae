@@ -24,6 +24,11 @@
 #ifndef OMP_EVENTS_H_INCLUDED
 #define OMP_EVENTS_H_INCLUDED
 
+#include "events.h"
+
+#define XTR_TASK_INSTANTIATION USER_SEND_EV
+#define XTR_TASK_EXECUTION     USER_RECV_EV
+
 /*****************\
 |* OpenMP probes *|
 \*****************/
@@ -64,7 +69,7 @@ void Extrae_OpenMP_GetNumThreads_Entry (void);
 void Extrae_OpenMP_GetNumThreads_Exit (void);
 void Extrae_OpenMP_SetNumThreads_Entry (int p1);
 void Extrae_OpenMP_SetNumThreads_Exit (void);
-void Extrae_OpenMP_TaskID (long long id);
+void Extrae_OpenMP_TaskID (long long id, int inst_or_exec);
 void Extrae_OpenMP_TaskLoopID (long long id);
 void Extrae_OpenMP_Task_Entry (const void* uf);
 void Extrae_OpenMP_Task_Exit (void);

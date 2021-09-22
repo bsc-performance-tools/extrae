@@ -347,12 +347,16 @@ void Probe_OpenMP_SetNumThreads_Exit (void)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPSETNUMTHREADS_EV, EVT_END, EMPTY); 
 }
 
-void Probe_OpenMP_TaskID (long long id)
+void Probe_OpenMP_TaskID (long long id, int inst_or_exec)
 {
 	DEBUG
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKID_EV, EVT_BEGIN, (UINT64) id);
+		if (inst_or_exec != 0)
+		{
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(THREADID, LAST_READ_TIME, inst_or_exec, TASKID, id, 60000000, id);
+		}
 	}
 }
 

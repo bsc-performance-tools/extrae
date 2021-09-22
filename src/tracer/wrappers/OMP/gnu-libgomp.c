@@ -491,7 +491,7 @@ static void callme_task (void *task_helper_ptr)
 	if (task_helper != NULL)
 	{
 		Extrae_OpenMP_TaskUF_Entry (task_helper->fn);
-		Extrae_OpenMP_TaskID (task_helper->counter);
+		Extrae_OpenMP_TaskID (task_helper->counter, XTR_TASK_EXECUTION);
 
 		task_helper->fn (task_helper->data);
 		if (task_helper->buf != NULL)
@@ -2529,7 +2529,7 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 		pthread_mutex_unlock (&__GOMP_task_ctr_mtx);
 #endif
 
-		Extrae_OpenMP_TaskID (task_helper->counter);
+		Extrae_OpenMP_TaskID (task_helper->counter, XTR_TASK_INSTANTIATION);
 
 		if (strcmp(__GOMP_version, GOMP_API_3_1) == 0) {
 			GOMP_task_real (callme_task, &task_helper, NULL, sizeof(task_helper), arg_align, if_clause, flags);

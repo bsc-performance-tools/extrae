@@ -793,7 +793,7 @@ void Extrae_OMPT_event_task_switch (ompt_task_id_t stid, ompt_task_id_t rtid)
 		{
 			Extrae_OMPT_OpenMP_TaskUF_Entry ((UINT64)tf, rtid);
 			Extrae_OMPT_tf_task_id_set_running (rtid, TRUE);
-			Extrae_OpenMP_TaskID (taskcounter);
+			Extrae_OpenMP_TaskID (taskcounter, 0);
 		}
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
