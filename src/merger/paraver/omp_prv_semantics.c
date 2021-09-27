@@ -335,11 +335,7 @@ static int TaskGroup_Event (
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	if (EvType == TASKGROUP_START_EV)
-		Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
-	else if (EvType == TASKGROUP_END_EV)
-		Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
-
+	Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	if (EvType == TASKGROUP_START_EV)
@@ -619,8 +615,12 @@ static int TaskLoop_Event (
 {
         UNREFERENCED_PARAMETER(fset);
 
+	unsigned int EvValue = Get_EvValue (event);
+	Switch_State(STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
+	trace_paraver_state (cpu, ptask, task, thread, time);
+
         trace_paraver_event (cpu, ptask, task, thread, time,
-          TASKLOOP_EV, Get_EvValue (event));
+          TASKLOOP_EV, EvValue);
 
         return 0;
 }
