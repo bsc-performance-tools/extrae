@@ -43,6 +43,7 @@
 #include "queue.h"
 #include "mpi_comunicadors.h"
 #include "trace_to_prv.h"
+#include "xalloc.h"
 
 typedef struct
 {
@@ -107,32 +108,24 @@ void initialize_comunicadors (int n_ptasks)
 	fprintf (stderr, "DEBUG: Initializing communicators\n");
 #endif
 
-	alies_comunicadors = (CommAliasInfo_t **) malloc (n_ptasks * sizeof (CommAliasInfo_t *));
-	ASSERT(alies_comunicadors!=NULL, "Not enough memory for intra-communicators alias");
+	alies_comunicadors = (CommAliasInfo_t **) xmalloc (n_ptasks * sizeof (CommAliasInfo_t *));
 
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
 		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
-		alies_comunicadors[ii] = (CommAliasInfo_t *) malloc (ptask_info->ntasks * sizeof (CommAliasInfo_t));
-		ASSERT(alies_comunicadors[ii]!=NULL, "Not enough memory for intra-communicators alias");
+		alies_comunicadors[ii] = (CommAliasInfo_t *) xmalloc (ptask_info->ntasks * sizeof (CommAliasInfo_t));
 	}
 
 	/* Init inter-communicator */
-	Intercomm_ptask_task = (InterCommInfoAlias_t ***) malloc (n_ptasks * sizeof (InterCommInfoAlias_t **));
-	ASSERT(Intercomm_ptask_task!=NULL, "Not enough memory for inter-communicators alias");
-	num_InterCommunicatorAlias = (unsigned **) malloc (n_ptasks * sizeof (unsigned *));
-	ASSERT(num_InterCommunicatorAlias!=NULL, "Not enough memory for inter-communicators alias");
+	Intercomm_ptask_task = (InterCommInfoAlias_t ***) xmalloc (n_ptasks * sizeof (InterCommInfoAlias_t **));
+	num_InterCommunicatorAlias = (unsigned **) xmalloc (n_ptasks * sizeof (unsigned *));
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
 		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
 
-		Intercomm_ptask_task[ii] = (InterCommInfoAlias_t**) malloc (ptask_info->ntasks * sizeof (InterCommInfoAlias_t *));
-		ASSERT(Intercomm_ptask_task[ii]!=NULL, "Not enough memory for inter-communicators alias");
-		memset (Intercomm_ptask_task[ii], 0, ptask_info->ntasks*sizeof(InterCommInfoAlias_t*));
+		Intercomm_ptask_task[ii] = (InterCommInfoAlias_t**) xmalloc_and_zero (ptask_info->ntasks * sizeof (InterCommInfoAlias_t *));
 
-		num_InterCommunicatorAlias[ii] = (unsigned*) malloc (ptask_info->ntasks * sizeof(unsigned));
-		ASSERT(num_InterCommunicatorAlias[ii]!=NULL, "Not enough memory for inter-communicators alias");
-		memset (num_InterCommunicatorAlias[ii], 0, ptask_info->ntasks*sizeof(unsigned));
+		num_InterCommunicatorAlias[ii] = (unsigned*) xmalloc_and_zero (ptask_info->ntasks * sizeof(unsigned));
 	}
 
 	for (ii = 0; ii < n_ptasks; ii++)
@@ -225,11 +218,9 @@ static void addInterCommunicatorAlias (uintptr_t InterCommID, uintptr_t alias,
 	{
 		found_pos = num_InterCommunicatorAlias[ptask][task];
 		num_InterCommunicatorAlias[ptask][task]++;
-		Intercomm_ptask_task[ptask][task] = (InterCommInfoAlias_t*) realloc (
+		Intercomm_ptask_task[ptask][task] = (InterCommInfoAlias_t*) xrealloc (
 		  Intercomm_ptask_task[ptask][task],
 		  sizeof(InterCommInfoAlias_t)*num_InterCommunicatorAlias[ptask][task]);
-		ASSERT(NULL != Intercomm_ptask_task[ptask][task],
-		  "Not enough memory for inter-communicators alias");
 
 		Intercomm_ptask_task[ptask][task][found_pos].commid = InterCommID;
 	}
@@ -265,9 +256,8 @@ void addInterCommunicator (uintptr_t InterCommID,
 	{
 		found_pos = num_InterCommunicators;
 		num_InterCommunicators++;
-		InterComm_global = (InterCommInfo_t *) realloc (InterComm_global,
+		InterComm_global = (InterCommInfo_t *) xrealloc (InterComm_global,
 		  sizeof(InterCommInfo_t)*num_InterCommunicators);
-		ASSERT(NULL != InterComm_global, "Not enough memory for inter-communicators alias");
 		InterComm_global[found_pos].comms[0] = CommID1;
 		InterComm_global[found_pos].comms[1] = CommID2;
 		InterComm_global[found_pos].leaders[0] = leader1;
@@ -311,25 +301,13 @@ void afegir_comunicador (TipusComunicador * comm, int ptask, int task)
 
   if (!trobat)
   {
-    info_com = (CommInfo_t *) malloc (sizeof (CommInfo_t));
-    if (info_com == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Not enough memory! (%s:%d)\n",
-				__FILE__,__LINE__);
-      exit (1);
-    }
+    info_com = (CommInfo_t *) xmalloc (sizeof (CommInfo_t));
 #if defined (DEBUG_COMMUNICATORS)
 	fprintf (stderr, "%d,%d: info_comm = %p\n", ptask, task, info_com);
 #endif
 
 		info_com->info.num_tasks = comm->num_tasks;
-		info_com->info.tasks = (int *) malloc (info_com->info.num_tasks*sizeof(int));
-		if (NULL == info_com->info.tasks)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot add communicator alias\n");
-			fflush (stderr);
-			exit (-1);
-		}
+		info_com->info.tasks = (int *) xmalloc (info_com->info.num_tasks*sizeof(int));
 		for (i = 0; i < info_com->info.num_tasks; i++)
 			info_com->info.tasks[i] = comm->tasks[i];
 
@@ -387,13 +365,7 @@ static void afegir_alies (TipusComunicador * comm, CommInfo_t * info_com,
     /*
      * Cal crear un nou alies 
      */
-    info_alies = (CommAliasInfo_t *) malloc (sizeof (CommAliasInfo_t));
-    if (info_alies == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Not enough memory! (%s:%d)\n",
-				__FILE__,__LINE__);
-      exit (1);
-    }
+    info_alies = (CommAliasInfo_t *) xmalloc (sizeof (CommAliasInfo_t));
     info_alies->commid_de_la_task = comm->id;
     info_alies->alies = info_com->info.id;
     ENQUEUE_ITEM (&(alies_comunicadors[ptask][task]), info_alies);

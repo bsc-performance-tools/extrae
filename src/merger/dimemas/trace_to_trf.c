@@ -90,6 +90,7 @@
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
 #include "addr2info.h"
+#include "xalloc.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -128,13 +129,7 @@ static void Dimemas_GenerateOffsets (unsigned num_appl, unsigned long long **ptr
 	}
 
 	/* Allocate memory for the offsets of those threads */
-	offsets = (unsigned long long*) malloc (sizeof(unsigned long long)*i);
-	if (NULL == offsets)
-	{
-		fprintf (stderr, "mpi2dim: Unable to allocate memory for %d offsets\n", i);
-		fflush (stderr);
-		exit (-1);
-	}
+	offsets = (unsigned long long*) xmalloc (sizeof(unsigned long long)*i);
 
 	/* Put the dimemas_size field on the offsets */
 	i = 0;

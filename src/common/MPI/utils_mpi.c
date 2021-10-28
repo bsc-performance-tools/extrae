@@ -47,6 +47,7 @@
 # include "sion.h"
 #endif
 
+#include "xalloc.h"
 #include "utils.h"
 #include "utils_mpi.h"
 
@@ -78,12 +79,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 			int ret;
 			unsigned res = 1;
 			unsigned length = strlen(directory)+strlen("/shared-disk-testXXXXXX")+1;
-			char *template = malloc (length*sizeof(char));
-			if (!template)
-			{
-				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
-				exit (-1);
-			}
+			char *template = xmalloc (length*sizeof(char));
 			sprintf (template, "%s/shared-disk-testXXXXXX", directory);
 			ret = mkstemp (template);
 			if (ret < 0)
@@ -97,7 +93,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 			PMPI_Bcast (&s, sizeof(struct stat), MPI_BYTE, 0, MPI_COMM_WORLD);
 			PMPI_Reduce (&res, &howmany, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 			unlink (template);
-			free (template);
+			xfree (template);
 			result = howmany == size;
 			PMPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		}
@@ -108,12 +104,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 			char *template;
 			unsigned length;
 			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-			template = malloc (length*sizeof(char));
-			if (!template)
-			{
-				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
-				exit (-1);
-			}
+			template = xmalloc (length*sizeof(char));
 			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
 			PMPI_Bcast (&master_s, sizeof(struct stat), MPI_BYTE, 0, MPI_COMM_WORLD);
 			ret = stat (template, &s);
@@ -123,7 +114,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 			  (master_s.st_ino == s.st_ino) &&
 			  (master_s.st_mode == s.st_mode);
 			PMPI_Reduce (&res, NULL, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-			free (template);
+			xfree (template);
 			PMPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		}
 		return result;
@@ -132,94 +123,6 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 		return __Extrae_Utils_directory_exists(directory);
 }
 
-
-/* A "slower" alternative? */
-#if 0
-static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
-{
-	int rank, size;
-	PMPI_Comm_rank (MPI_COMM_WORLD, &rank);
-	PMPI_Comm_size (MPI_COMM_WORLD, &size);
-
-	if (size > 1)
-	{
-		int result;
-		int howmany;
-		char name[MPI_MAX_PROCESSOR_NAME];
-		char name_master[MPI_MAX_PROCESSOR_NAME];
-		int len;
-
-		if (rank == 0)
-		{
-			PMPI_Get_processor_name(name, &len);
-			PMPI_Bcast (name, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, 0, MPI_COMM_WORLD);
-		}
-		else
-			PMPI_Bcast (name_master, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, 0, MPI_COMM_WORLD);
-
-		if (rank == 0)
-		{
-			unsigned res = 1;
-			unsigned length = strlen(directory)+strlen("/shared-disk-testXXXXXX")+1;
-			char *template = malloc (length*sizeof(char));
-			if (!template)
-			{
-				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
-				exit (-1);
-			}
-			sprintf (template, "%s/shared-disk-testXXXXXX", directory);
-			int ret = mkstemp (template);
-			if (ret < 0)
-			{
-				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to create temporal file!\n", directory);
-				exit (-1);
-			}
-			ssize_t r = write (ret, name, strlen(name)+1);
-			if (r != (ssize_t) (strlen(name)+1))
-			{
-				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to write to temporal file!\n", directory);
-				exit (-1);
-			}
-			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
-			PMPI_Reduce (&res, &howmany, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-			unlink (template);
-			free (template);
-			result = howmany == size;
-			PMPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		}
-		else
-		{
-			int fd;
-			unsigned res = 0;
-			char *template;
-			unsigned length;
-			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-			template = malloc (length*sizeof(char));
-			if (!template)
-			{
-				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
-				exit (-1);
-			}
-			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
-			fd = open(template, O_RDONLY);
-			if (fd >= 0)
-			{
-				ssize_t r = read (fd, name, sizeof(name));
-				if (r > 0 && r < (ssize_t) (sizeof(name)))
-					if (strncmp (name, name_master, r) == 0)
-						res = 1;
-			}
-			PMPI_Reduce (&res, NULL, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-			free (template);
-			PMPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		}
-		return result;
-	}
-	else
-		return __Extrae_Utils_directory_exists(directory);
-}
-#endif
 
 #ifdef HAVE_SIONLIB
 #define FNAMELEN 255
@@ -393,13 +296,7 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 	if (rank == 0)
 	{
 		/* Copy the filename */
-		result_file = (char*) malloc ((strlen(file)+1)*sizeof(char));
-		if (result_file == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML file!\n");
-			exit (0);
-		}
-		memset (result_file, 0, (strlen(file)+1)*sizeof(char));
+		result_file = (char*) xmalloc_and_zero ((strlen(file)+1)*sizeof(char));
 		strncpy (result_file, file, strlen(file));
 
 		/* Open the file */
@@ -422,12 +319,7 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 		}
 
 		/* Allocate & Read the file */
-		storage = (char*) malloc ((file_size)*sizeof(char));
-		if (storage == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML distribution!\n");
-			exit (0);
-		}
+		storage = (char*) xmalloc ((file_size)*sizeof(char));
 		if (file_size != read (fd, storage, file_size))
 		{
 			fprintf (stderr, PACKAGE_NAME": Unable to read XML file for its distribution on host %s\n", has_hostname?hostname:"unknown");
@@ -439,7 +331,7 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 
 		/* Close the file */
 		close (fd);
-		free (storage);
+		xfree (storage);
 
 		return result_file;
 	}
@@ -453,12 +345,7 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 		    exit (0);
 		}
 
-		storage = (char*) malloc ((file_size)*sizeof(char));
-		if (storage == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML distribution!\n");
-			exit (0);
-		}
+		storage = (char*) xmalloc ((file_size)*sizeof(char));
 
 		/* Build the temporal file pattern */
 		if (getenv("TMPDIR"))
@@ -469,13 +356,13 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 				__Extrae_Utils_mkdir_recursive (getenv("TMPDIR"));
 
 			/* 14 is the length from /XMLFileXXXXXX */
-			result_file = (char*) malloc (len * sizeof(char));
+			result_file = (char*) xmalloc (len * sizeof(char));
 			snprintf (result_file, len, "%s/XMLFileXXXXXX", getenv ("TMPDIR"));
 		}
 		else
 		{
 			/* 13 is the length from XMLFileXXXXXX */
-			result_file = (char*) malloc ((13+1)*sizeof(char));
+			result_file = (char*) xmalloc ((13+1)*sizeof(char));
 			sprintf (result_file, "XMLFileXXXXXX");
 		}
 
@@ -494,7 +381,7 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 
 		/* Close the file, free and return it! */
 		close (fd);
-		free (storage);
+		xfree (storage);
 
 		return result_file;
 	}

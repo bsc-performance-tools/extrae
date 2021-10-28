@@ -53,6 +53,8 @@
 #include "trace_macros.h"
 #include "threadid.h"
 #include "wrapper.h"
+#include "utils.h"
+#include "xalloc.h"
 
 #if defined(SAMPLING_SUPPORT)
 int SamplingSupport = FALSE;
@@ -214,7 +216,7 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	int signum;
 	int ret;
 
-	memset (&signalaction, 0, sizeof(signalaction));
+	xmemset (&signalaction, 0, sizeof(signalaction));
 
 	ret = sigemptyset(&signalaction.sa_mask);
 	if (ret != 0)
@@ -292,7 +294,7 @@ void setTimeSampling_postfork (void)
 
 	if (Extrae_isSamplingEnabled())
 	{
-		memset (&signalaction, 0, sizeof(signalaction));
+		xmemset (&signalaction, 0, sizeof(signalaction));
 
 		ret = sigemptyset(&signalaction.sa_mask);
 		if (ret != 0)

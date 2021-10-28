@@ -345,6 +345,7 @@ static int TaskGroup_Event (
 	EvValue = Get_EvValue (current_event);
 
 	Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
+
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	if (EvType == TASKGROUP_START_EV)
@@ -488,16 +489,13 @@ static int TaskEvent_IfSetPredecessor (const void *dependency_event, void *userd
 	{
 		struct TaskFunction_Event_Info_SetPredecessor *tfeisp =
 		  (struct TaskFunction_Event_Info_SetPredecessor *)
-		    malloc (sizeof(struct TaskFunction_Event_Info_SetPredecessor));
-		if (tfeisp != NULL)
-		{
-			tfeisp->ptask = tfei->ptask;
-			tfeisp->task = tfei->task;
-			tfeisp->cpu = tfei->cpu;
-			tfeisp->thread = tfei->thread;
-			tfeisp->time = tfei->time;
-			*predecessordata = tfeisp;
-		}
+		    xmalloc (sizeof(struct TaskFunction_Event_Info_SetPredecessor));
+		tfeisp->ptask = tfei->ptask;
+		tfeisp->task = tfei->task;
+		tfeisp->cpu = tfei->cpu;
+		tfeisp->thread = tfei->thread;
+		tfeisp->time = tfei->time;
+		*predecessordata = tfeisp;
 
 		return TRUE;
 	}

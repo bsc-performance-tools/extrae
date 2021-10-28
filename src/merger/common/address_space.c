@@ -31,6 +31,7 @@
 #endif
 
 #include "object_tree.h"
+#include "xalloc.h"
 
 struct AddressSpaceRegion_st
 {
@@ -52,13 +53,8 @@ struct AddressSpace_st
 
 struct AddressSpace_st* AddressSpace_create (void)
 {
-	struct AddressSpace_st * as = (struct AddressSpace_st*) malloc (
+	struct AddressSpace_st * as = (struct AddressSpace_st*) xmalloc (
 	  sizeof(struct AddressSpace_st));
-	if (NULL == as)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory to allocate address space!\n");
-		exit (-1);
-	}
 	as->Regions = NULL;
 	as->nRegions = as->aRegions = 0;
 	return as;
@@ -73,13 +69,8 @@ void AddressSpace_add (struct AddressSpace_st *as, uint64_t AddressBegin,
 
 	if (as->nRegions == as->aRegions)
 	{
-		as->Regions = (struct AddressSpaceRegion_st *) realloc (as->Regions,
+		as->Regions = (struct AddressSpaceRegion_st *) xrealloc (as->Regions,
 		  (as->nRegions+ADDRESS_SPACE_ALLOC_SIZE)*sizeof(struct AddressSpaceRegion_st));
-		if (NULL == as->Regions)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory to allocate address space!\n");
-			exit (-1);
-		}
 
 		for (u = as->aRegions; u < as->aRegions+ADDRESS_SPACE_ALLOC_SIZE; u++)
 			as->Regions[u].in_use = FALSE;

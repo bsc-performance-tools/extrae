@@ -64,6 +64,7 @@ int *__errno_location(void)
 #include "misc_prv_semantics.h"
 #include "addr2info_hashcache.h"
 #include "options.h"
+#include "xalloc.h"
 
 static void AddressTable_Initialize (void);
 static int  AddressTable_Insert (UINT64 address, int event_type,
@@ -240,21 +241,11 @@ static void AddressTable_Initialize (void)
 
 	for (type=0; type < COUNT_ADDRESS_TYPES; type++)
 	{
-		AddressTable[type] = (struct address_table *)malloc(sizeof(struct address_table));
-		if (AddressTable[type] == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for AddressTable[type=%d]\n", type);
-			exit (-1);
-		}
+		AddressTable[type] = (struct address_table *)xmalloc(sizeof(struct address_table));
 		AddressTable[type]->address = NULL;
 		AddressTable[type]->num_addresses = 0;
 
-		FunctionTable[type] = (struct function_table *)malloc(sizeof(struct function_table));
-		if (FunctionTable[type] == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for FunctionTable[type=%d]\n", type);
-			exit (-1);
-		}
+		FunctionTable[type] = (struct function_table *)xmalloc(sizeof(struct function_table));
 		FunctionTable[type]->function = NULL;
 		FunctionTable[type]->address_id = NULL;
 		FunctionTable[type]->num_functions = 0;
@@ -690,14 +681,9 @@ static int AddressTable_Insert_MemReference (int addr_type,
 	}
 
 	/* If we're here, we haven't find it! */
-	AddressObjectInfo.objects = (struct address_object_info_st*) realloc (
+	AddressObjectInfo.objects = (struct address_object_info_st*) xrealloc (
 	  AddressObjectInfo.objects,
 	  (AddressObjectInfo.num_objects+1)*sizeof(struct address_object_info_st));
-	if (NULL == AddressObjectInfo.objects)
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for memory object identifiers\n");
-		exit (-1);
-	}
 
 	i = AddressObjectInfo.num_objects;
 	AddressObjectInfo.objects[i].is_static = addr_type == MEM_REFERENCE_STATIC;
@@ -744,15 +730,10 @@ static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
 	FuncTab = FunctionTable[addr_type];
 
 	new_address_id = AddrTab->num_addresses ++;
-	AddrTab->address = (struct address_info *) realloc (
+	AddrTab->address = (struct address_info *) xrealloc (
 		AddrTab->address,
 		AddrTab->num_addresses * sizeof(struct address_info)
 	);
-	if (NULL == AddrTab->address)
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for AddressTable\n");
-		exit (-1);
-	}
 	
 	AddrTab->address[new_address_id].address = address;
 	AddrTab->address[new_address_id].file_name = filename;
@@ -772,24 +753,14 @@ static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
 	if (!found) 
 	{
 		function_id = FuncTab->num_functions ++;
-		FuncTab->function = (char **) realloc (
+		FuncTab->function = (char **) xrealloc (
 			FuncTab->function, 
 			FuncTab->num_functions * sizeof(char*)
 		);
-		if (NULL == FuncTab->function)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for function-identifiers table in FuncTab\n");
-			exit (-1);
-		}
-		FuncTab->address_id = (UINT64*) realloc (
+		FuncTab->address_id = (UINT64*) xrealloc (
 			FuncTab->address_id,
 			FuncTab->num_functions * sizeof (UINT64)
 		);
-		if (NULL == FuncTab->address_id)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for address-identifiers table in FuncTab\n");
-			exit (-1);
-		}
 		FuncTab->function[function_id] = funcname;
 		FuncTab->address_id[function_id] = new_address_id;
 	}
@@ -1486,12 +1457,7 @@ void Share_Callers_Usage (void)
 
 	if (MPI_Caller_Labels_Used == NULL)
 	{
-		MPI_Caller_Labels_Used = malloc(sizeof(int)*MAX_CALLERS);
-		if (MPI_Caller_Labels_Used == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for used MPI Caller labels\n");
-			exit (-1);
-		}
+		MPI_Caller_Labels_Used = xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++)
 			MPI_Caller_Labels_Used[i] = FALSE;
 	}
@@ -1502,12 +1468,7 @@ void Share_Callers_Usage (void)
 
 	if (Sample_Caller_Labels_Used == NULL)
 	{
-		Sample_Caller_Labels_Used = malloc(sizeof(int)*MAX_CALLERS);
-		if (Sample_Caller_Labels_Used == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for used sample Caller labels\n");
-			exit (-1);
-		}
+		Sample_Caller_Labels_Used = xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++)
 			Sample_Caller_Labels_Used[i] = FALSE;
 	}

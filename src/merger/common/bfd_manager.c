@@ -39,6 +39,7 @@
 #include "debug.h"
 #include "bfd_manager.h"
 #include "object_tree.h"
+#include "xalloc.h"
 
 static loadedModule_t *loadedModules = NULL;
 static unsigned numLoadedModules = 0;
@@ -108,10 +109,7 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 			data_symbol_t *DataSyms = NULL;
 #endif
 
-			bfdSymbols = (asymbol**) malloc (size);
-			if (bfdSymbols == NULL)
-				FATAL_ERROR ("Cannot allocate memory to translate addresses into source code references\n");
-
+			bfdSymbols = (asymbol**) xmalloc (size);
 #if 0
 			/* HSG This is supposed to be space-efficient, but showed some errors .... :( */
 			symcount = bfd_read_minisymbols (bfdImage, FALSE, (PTR) bfdSymbols, &usize);
@@ -137,9 +135,7 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 						if (bfd_get_flavour(bfdImage) == bfd_target_elf_flavour)
 							sz = ((elf_symbol_type*) bfdSymbols[s])->internal_elf_sym.st_size;
 
-						DataSyms = (data_symbol_t*) realloc (DataSyms, sizeof(data_symbol_t)*(nDataSyms+1));
-						if (DataSyms == NULL)
-							FATAL_ERROR ("Cannot allocate memory to allocate data symbols\n");
+						DataSyms = (data_symbol_t*) xrealloc (DataSyms, sizeof(data_symbol_t)*(nDataSyms+1));
 						DataSyms[nDataSyms].name = strdup (syminfo.name);
 						DataSyms[nDataSyms].address = (void*) syminfo.value;
 						DataSyms[nDataSyms].size = sz;
@@ -188,10 +184,8 @@ void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols,
 			return;
 		}
 
-	loadedModules = (loadedModule_t*) realloc (loadedModules,
+	loadedModules = (loadedModule_t*) xrealloc (loadedModules,
 	  (numLoadedModules+1)*sizeof(loadedModule_t));
-	if (loadedModules == NULL)
-		FATAL_ERROR("Cannot obtain memory to load a binary");
 
 	idx = numLoadedModules;
 	loadedModules[idx].module = strdup (file);

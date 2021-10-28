@@ -141,7 +141,7 @@ void Extrae_CUDA_deInitialize (int devid)
 	{
 		if (devices[devid].initialized)
 		{
-			free (devices[devid].Stream);
+			xfree (devices[devid].Stream);
 			devices[devid].Stream = NULL;
 			devices[devid].initialized = FALSE;
 		}
@@ -159,12 +159,7 @@ void Extrae_CUDA_Initialize (int devid)
 		err = cudaGetDeviceCount (&CUDAdevices);
 		CHECK_CU_ERROR (err, cudaGetDeviceCount);
 
-		devices = (struct CUDAdevices_t*) malloc (sizeof(struct CUDAdevices_t)*CUDAdevices);
-		if (devices == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate information for CUDA devices!\n");
-			exit (-1);
-		}
+		devices = (struct CUDAdevices_t*) xmalloc (sizeof(struct CUDAdevices_t)*CUDAdevices);
 
 		for (i = 0; i < CUDAdevices; i++)
 			devices[i].initialized = FALSE;
@@ -180,13 +175,8 @@ void Extrae_CUDA_Initialize (int devid)
 
 		devices[devid].nstreams = 1;
 
-		devices[devid].Stream = (struct RegisteredStreams_t*) malloc (
+		devices[devid].Stream = (struct RegisteredStreams_t*) xmalloc (
 		  devices[devid].nstreams*sizeof(struct RegisteredStreams_t));
-		if (devices[devid].Stream == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate information for CUDA default stream in device %d!\n", devid);
-			exit (-1);
-		}
 
 		/* Was the thread created before (i.e. did we executed a cudadevicereset?) */
 		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
@@ -272,23 +262,15 @@ static void Extrae_CUDA_unRegisterStream (int devid, cudaStream_t stream)
 
 	int nstreams = devices[devid].nstreams - 1;
 
-	struct RegisteredStreams_t *rs_tmp = (struct RegisteredStreams_t*) malloc (nstreams*sizeof(struct RegisteredStreams_t));
+	struct RegisteredStreams_t *rs_tmp = (struct RegisteredStreams_t*) xmalloc (nstreams*sizeof(struct RegisteredStreams_t));
 
-	if (rs_tmp != NULL)
-	{
-		memmove (rs_tmp, devices[devid].Stream, stid * sizeof(struct RegisteredStreams_t));
-		memmove (rs_tmp+stid, devices[devid].Stream + stid + 1, (devices[devid].nstreams - stid - 1)*sizeof(struct RegisteredStreams_t));
+	memmove (rs_tmp, devices[devid].Stream, stid * sizeof(struct RegisteredStreams_t));
+	memmove (rs_tmp+stid, devices[devid].Stream + stid + 1, (devices[devid].nstreams - stid - 1)*sizeof(struct RegisteredStreams_t));
 
-		devices[devid].nstreams = nstreams;
+	devices[devid].nstreams = nstreams;
 
-		free (devices[devid].Stream);
-		devices[devid].Stream = rs_tmp;
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Couldn't reallocate information for CUDA stream in device %d!\n", devid);
-		exit (-1);
-	}
+	xfree (devices[devid].Stream);
+	devices[devid].Stream = rs_tmp;
 }
 
 static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
@@ -297,65 +279,57 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 
 	i = devices[devid].nstreams;
 
-	devices[devid].Stream = (struct RegisteredStreams_t *) realloc (
+	devices[devid].Stream = (struct RegisteredStreams_t *) xrealloc (
 	  devices[devid].Stream, (i+1)*sizeof(struct RegisteredStreams_t));
 
-	if (devices[devid].Stream != NULL)
-	{
-		devices[devid].nstreams++;
+	devices[devid].nstreams++;
 
-		/*
-		 * XXX Should this be Backend_getMaximumOfThreads()? If we
-		 * previously increased the number of threads in another runtime,
-		 * and then decreased them, we will end up with a line with mixed
-		 * semantics (thread&stream).
-		 */
-		Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads()+1);
+	/*
+	 * XXX Should this be Backend_getMaximumOfThreads()? If we
+	 * previously increased the number of threads in another runtime,
+	 * and then decreased them, we will end up with a line with mixed
+	 * semantics (thread&stream).
+	 */
+	Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads()+1);
 
-		devices[devid].Stream[i].threadid = Backend_getNumberOfThreads()-1;
-		devices[devid].Stream[i].stream = stream;
-		devices[devid].Stream[i].nevents = 0;
+	devices[devid].Stream[i].threadid = Backend_getNumberOfThreads()-1;
+	devices[devid].Stream[i].stream = stream;
+	devices[devid].Stream[i].nevents = 0;
 
 #ifdef DEBUG
-		fprintf(stderr, "Extrae_CUDA_RegisterStream (devid=%d, stream=%p assigned to streamid => %d\n", devid, stream, i);
+	fprintf(stderr, "Extrae_CUDA_RegisterStream (devid=%d, stream=%p assigned to streamid => %d\n", devid, stream, i);
 #endif
 
-		/* Set thread name */
-		{
-			char _threadname[THREAD_INFO_NAME_LEN];
-			char _hostname[HOST_NAME_MAX];
-
-			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-				sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, _hostname);
-			else
-				sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, "unknown-host");
-			Extrae_set_thread_name(devices[devid].Stream[i].threadid, _threadname);
-		}
-
-		/* Create an event record and process it through the stream! */
-		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-		err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].device_reference_time), 0);
-		CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
-		Extrae_CUDA_SynchronizeStream(devid, i);
-
-		/*
-		 * Necessary to change the base state of CUDA streams from NOT_TRACING
-		 * to IDLE. We manually emit a TRACING_MODE_DETAIL event because CUDA
-		 * doesn't have burst mode yet. Will need a revision when supported.
-		 */
-		THREAD_TRACE_MISCEVENT(devices[devid].Stream[i].threadid, devices[devid].Stream[i].host_reference_time, TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
-
-		for (j = 0; j < MAX_CUDA_EVENTS; j++)
-		{
-			/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-			err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].ts_events[j]), 0);
-			CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
-		}
-	}
-	else
+	/* Set thread name */
 	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot register stream %p on device %d\n", stream, devid);
-		exit (-1);
+		char _threadname[THREAD_INFO_NAME_LEN];
+		char _hostname[HOST_NAME_MAX];
+
+		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
+			sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, _hostname);
+		else
+			sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, "unknown-host");
+		Extrae_set_thread_name(devices[devid].Stream[i].threadid, _threadname);
+	}
+
+	/* Create an event record and process it through the stream! */
+	/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
+	err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].device_reference_time), 0);
+	CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
+	Extrae_CUDA_SynchronizeStream(devid, i);
+
+	/*
+	 * Necessary to change the base state of CUDA streams from NOT_TRACING
+	 * to IDLE. We manually emit a TRACING_MODE_DETAIL event because CUDA
+	 * doesn't have burst mode yet. Will need a revision when supported.
+	 */
+	THREAD_TRACE_MISCEVENT(devices[devid].Stream[i].threadid, devices[devid].Stream[i].host_reference_time, TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
+
+	for (j = 0; j < MAX_CUDA_EVENTS; j++)
+	{
+		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
+		err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].ts_events[j]), 0);
+		CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
 	}
 }
 
@@ -1069,7 +1043,7 @@ void Extrae_cudaMemset_Exit()
 
 void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads)
 {
-	Extrae_CUDA_saved_params = (Extrae_cuda_saved_params_t*) realloc (
+	Extrae_CUDA_saved_params = (Extrae_cuda_saved_params_t*) xrealloc (
 		Extrae_CUDA_saved_params, sizeof(Extrae_cuda_saved_params_t)*nthreads);
 
 	memset(&Extrae_CUDA_saved_params[old_threads], 0, sizeof(Extrae_cuda_saved_params_t)*(nthreads-old_threads));

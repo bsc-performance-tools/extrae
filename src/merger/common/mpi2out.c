@@ -55,6 +55,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "semantics.h"
 #include "dump.h"
 #include "file_set.h"
@@ -166,22 +167,10 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 	int has_node_separator;
 	int hostname_len;
 
-	xrealloc(InputTraces, InputTraces, sizeof(struct input_t) * (nTraces + 1));
-	if (InputTraces == NULL)
-	{
-		perror ("realloc");
-		fprintf (stderr, "mpi2prv: Cannot allocate InputTraces memory for MPIT %d. Dying...\n", nTraces + 1);
-		exit (1);
-	}
+	InputTraces = xrealloc(InputTraces, sizeof(struct input_t) * (nTraces + 1));
 
 	InputTraces[nTraces].InputForWorker = -1;
-	InputTraces[nTraces].name = (char *) malloc (strlen (file) + 1);
-	if (InputTraces[nTraces].name == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Error cannot obtain memory for namefile\n");
-		fflush (stderr);
-		exit (1);
-	}
+	InputTraces[nTraces].name = (char *) xmalloc (strlen (file) + 1);
 	strcpy (InputTraces[nTraces].name, file);
 
 	pos = strlen(file)-strlen(EXT_MPIT)-DIGITS_PID-DIGITS_TASK
@@ -193,14 +182,8 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 		has_node_separator = file[pos] == TEMPLATE_NODE_SEPARATOR_CHAR;
 		if (has_node_separator)
 		{
-			InputTraces[nTraces].node = (char*) malloc (
-			  (hostname_len+1)*sizeof(char));
-			if (InputTraces[nTraces].node == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot obtain memory for NODE information!\n");
-				fflush (stderr);
-				exit (1);
-			}
+			InputTraces[nTraces].node = (char*) xmalloc((hostname_len+1)*sizeof(char));
+
 			snprintf (InputTraces[nTraces].node, hostname_len, "%s", &file[pos+1]);
 			break;
 		}
@@ -283,13 +266,8 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 		int res;
 
 		/* 7+4 for THREAD + (ptask + three dots) THREAD 1.1.1 */
-		InputTraces[nTraces].threadname = malloc (sizeof(char)*(10+DIGITS_TASK+DIGITS_THREAD+1));
-		if (InputTraces[nTraces].threadname == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Error cannot obtain memory for THREAD NAME information!\n");
-			fflush (stderr);
-			exit (1);
-		}
+		InputTraces[nTraces].threadname = xmalloc (sizeof(char)*(10+DIGITS_TASK+DIGITS_THREAD+1));
+
 		res = sprintf (InputTraces[nTraces].threadname, "THREAD %d.%d.%d",
 		  InputTraces[nTraces].ptask, InputTraces[nTraces].task,
 		  InputTraces[nTraces].thread);
@@ -388,12 +366,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 		return;
 	}
 
-	MPITS_Files = (char**) realloc (MPITS_Files, sizeof(char*)*(Num_MPITS_Files+1));
-	if (MPITS_Files == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Unable to allocate memory for MPITS file: %s\n", file);
-		exit (-1);
-	}
+	MPITS_Files = (char**) xrealloc (MPITS_Files, sizeof(char*)*(Num_MPITS_Files+1));
 	MPITS_Files[Num_MPITS_Files] = strdup (file);
 	Num_MPITS_Files++;
 
@@ -437,7 +410,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 							sprintf (dir_file, "%s%s", directory, stripped_basename);
 							Process_MPIT_File (dir_file, (info==2)?thdname:NULL, cptask, taskid);
 
-							free (duplicate);
+							xfree (duplicate);
 						}
 						else
 							Process_MPIT_File (&stripped_basename[1], (info==2)?thdname:NULL, cptask, taskid);
@@ -468,7 +441,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 						sprintf (dir_file, "%s%s", directory, stripped_basename);
 						Process_MPIT_File (dir_file, (info==2)?thdname:NULL, cptask, taskid);
 
-						free (duplicate);
+						xfree (duplicate);
 					}
 					else
 						Process_MPIT_File (&stripped_basename[1], (info==2)?thdname:NULL, cptask, taskid);
@@ -569,7 +542,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		set_option_merge_ForceFormat (FALSE);
 		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
-	free (BinaryName);
+	xfree (BinaryName);
 
 	for (CurArg = 1; CurArg < argc; CurArg++)
 	{
@@ -1113,8 +1086,8 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 	fprintf(stderr, "[DEBUG] num_apps = %d\n", num_apps);
 #endif
 
-	xmalloc(num_tasks_per_app, num_apps * sizeof(unsigned));
-	xmalloc(task_sizes_per_app, num_apps * sizeof(unsigned *));
+	num_tasks_per_app = xmalloc(num_apps * sizeof(unsigned));
+	task_sizes_per_app = xmalloc(num_apps * sizeof(unsigned *));
 
 	for (i = 0; i < num_apps; i++)
 	{
@@ -1132,7 +1105,7 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 		fprintf(stderr, "[DEBUG] num_tasks_per_app[%d]=%d\n", i, num_tasks_per_app[i]);
 #endif
 
-		xmalloc(task_sizes_per_app[i], num_tasks_per_app[i] * sizeof(unsigned));
+		task_sizes_per_app[i] = xmalloc(num_tasks_per_app[i] * sizeof(unsigned));
 		for (j = 0; j < num_tasks_per_app[i]; j++)
 		{
 			task_sizes_per_app[i][j] = 0;
@@ -1152,7 +1125,7 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 		task_sizes_per_app[ InputTraces[i].ptask - 1 ][ InputTraces[i].task - 1 ] += InputTraces[i].filesize;
 	}
 
-	xmalloc(all_tasks_ids, all_tasks * sizeof(all_tasks_ids_t));
+	all_tasks_ids = xmalloc(all_tasks * sizeof(all_tasks_ids_t));
 	index = 0;
 	for (i = 0; i < num_apps; i ++)
 	{
@@ -1302,13 +1275,13 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 	{
 		for (i = 0; i < num_apps; i++)
 			if (task_sizes_per_app[i])
-				free (task_sizes_per_app[i]);
-		free (task_sizes_per_app);
+				xfree (task_sizes_per_app[i]);
+		xfree (task_sizes_per_app);
 	}
 	if (num_tasks_per_app)
-		free (num_tasks_per_app);
+		xfree (num_tasks_per_app);
 	if (all_tasks_ids)
-		free (all_tasks_ids);
+		xfree (all_tasks_ids);
 }
 
 
@@ -1345,13 +1318,7 @@ static void merger_post_share_file_sizes (int taskid)
 	unsigned i;
 	unsigned long long *sizes;
 
-	sizes = malloc (sizeof(unsigned long long)*nTraces);
-	if (sizes == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Cannot allocate memory to share trace file sizes\n");
-		perror ("malloc");
-		exit (1);
-	}
+	sizes = xmalloc (sizeof(unsigned long long)*nTraces);
 
 	if (taskid == 0)
 		for (i = 0; i < nTraces; i++)
@@ -1364,7 +1331,7 @@ static void merger_post_share_file_sizes (int taskid)
 		for (i = 0; i < nTraces; i++)
 			InputTraces[i].filesize = sizes[i]; 
 
-	free (sizes);
+	xfree (sizes);
 }
 #endif
 

@@ -42,6 +42,8 @@
 #include "threadinfo.h"
 #include "java_probe.h"
 
+#include "xalloc.h"
+
 #define CHECK_JVMTI_ERROR(x,call) \
 	{ if (x != JVMTI_ERROR_NONE) { fprintf (stderr, PACKAGE_NAME": Error during %s in %s:%d\n", #call, __FILE__, __LINE__); } }
 
@@ -155,7 +157,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved)
     }
 
     /* Get/Add JVMTI capabilities */
-    memset(&capabilities, 0, sizeof(capabilities));
+    xmemset(&capabilities, 0, sizeof(capabilities));
     capabilities.can_generate_garbage_collection_events = 1;
 	capabilities.can_generate_exception_events = 1;
 	capabilities.can_tag_objects = 1;
@@ -167,7 +169,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved)
 	CHECK_JVMTI_ERROR(r, AddCapabilities);
 
     /* Set callbacks and enable event notifications */
-    memset(&callbacks, 0, sizeof(callbacks));
+    xmemset(&callbacks, 0, sizeof(callbacks));
     callbacks.GarbageCollectionStart  = &Extraej_cb_GarbageCollector_begin;
     callbacks.GarbageCollectionFinish = &Extraej_cb_GarbageCollector_end;
 	callbacks.Exception               = &Extraej_cb_Exception;

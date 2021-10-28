@@ -61,13 +61,8 @@
 #include "dimemas_generator.h"
 #include "utils.h"
 #include "labels.h"
+#include "xalloc.h"
 
-/* Future compatibility with Alex's patch for malloc tracking */
-#define xrealloc(ptr, size) realloc(ptr, size)
-#define xmalloc(size) malloc(size)
-#define xfree(ptr) free(ptr)
-#define xmemset(src, c, size) memset(src, c, size)
-#define xmalloc_and_zero(size) xmemset(xmalloc(size), 0, size)
 
 // Local to global counter ID's per ptask 
 local_hwc_data_t LocalHWCData = { NULL, 0 };
@@ -685,9 +680,6 @@ void HardwareCounters_Show (const event_t * Event, int ncounters)
 
 #include <perfmon/pfmlib.h>
 #include <string.h>
-
-#define xmemset(src, c, size) memset(src, c, size)
-#define xfree(ptr) free(ptr)
 
 
 /**

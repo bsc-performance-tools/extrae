@@ -28,6 +28,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "semantics.h"
 #include "events.h"
 
@@ -94,7 +95,7 @@ static void Register_Handler (int range_min, int range_max, Ev_Handler_t *handle
 {
 	num_Registered_Handlers ++;
 
-	xrealloc(Event_Handlers, Event_Handlers, num_Registered_Handlers * sizeof(RangeEv_Handler_t));
+	Event_Handlers = xrealloc(Event_Handlers, num_Registered_Handlers * sizeof(RangeEv_Handler_t));
 	Event_Handlers[num_Registered_Handlers - 1].range_min = range_min;
 	Event_Handlers[num_Registered_Handlers - 1].range_max = range_max;
 	Event_Handlers[num_Registered_Handlers - 1].handler = handler;

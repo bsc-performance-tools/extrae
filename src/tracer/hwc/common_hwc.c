@@ -37,6 +37,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "events.h"
 #include "clock.h"
 #include "threadid.h"
@@ -129,7 +130,7 @@ int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds)
 
 	num_counters = HWC_sets[set_id].num_counters;
     
-	xmalloc(HWCIds, MAX_HWC * sizeof(int));
+	HWCIds = xmalloc(MAX_HWC * sizeof(int));
 
 	for (i=0; i<num_counters; i++)
 		HWCIds[i] = HWC_sets[set_id].counters[i];
@@ -331,16 +332,12 @@ void HWC_Initialize (int options)
 {
 	int num_threads = Backend_getMaximumOfThreads();
 
-	HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
-	ASSERT(HWC_current_set != NULL, "Cannot allocate memory for HWC_current_set");
-	memset (HWC_current_set, 0, sizeof(int) * num_threads);
+	HWC_current_set = (int *)xmalloc_and_zero(sizeof(int) * num_threads);
 
-	HWC_current_timebegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
-	ASSERT(HWC_current_timebegin != NULL, "Cannot allocate memory for HWC_current_timebegin");
+	HWC_current_timebegin = (unsigned long long *)xmalloc(sizeof(unsigned long long) * num_threads);
 
-	HWC_current_glopsbegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
-	ASSERT(HWC_current_glopsbegin != NULL, "Cannot allocate memory for HWC_current_glopsbegin");
-
+	HWC_current_glopsbegin = (unsigned long long *)xmalloc(sizeof(unsigned long long) * num_threads);
+	
 	HWCBE_INITIALIZE(options);
 }
 
@@ -379,23 +376,19 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	/* Allocate memory if this process has not been forked */
 	if (!forked)
 	{
-		HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
-		ASSERT(HWC_Thread_Initialized!=NULL, "Cannot allocate memory for HWC_Thread_Initialized!");
-
+		HWC_Thread_Initialized = (int *) xmalloc (sizeof(int) * num_threads);
+		
 		/* Mark all the threads as uninitialized */
 		for (i = 0; i < num_threads; i++)
 			HWC_Thread_Initialized[i] = FALSE;
 
-		Accumulated_HWC_Valid = (int *)malloc(sizeof(int) * num_threads);
-		ASSERT(Accumulated_HWC_Valid!=NULL, "Cannot allocate memory for Accumulated_HWC_Valid");
-
-		Accumulated_HWC = (long long **)malloc(sizeof(long long *) * num_threads);
-		ASSERT(Accumulated_HWC!=NULL, "Cannot allocate memory for Accumulated_HWC");
-
+		Accumulated_HWC_Valid = (int *)xmalloc(sizeof(int) * num_threads);
+		
+		Accumulated_HWC = (long long **)xmalloc(sizeof(long long *) * num_threads);
+		
 		for (i = 0; i < num_threads; i++)
 		{
-			Accumulated_HWC[i] = (long long *)malloc(sizeof(long long) * MAX_HWC);
-			ASSERT(Accumulated_HWC[i]!=NULL, "Cannot allocate memory for Accumulated_HWC");
+			Accumulated_HWC[i] = (long long *)xmalloc(sizeof(long long) * MAX_HWC);
 			HWC_Accum_Reset(i);
 		}
 
@@ -436,35 +429,28 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 		HWCBE_PAPI_Allocate_eventsets_per_thread (i, old_num_threads, new_num_threads);
 #endif
 
-	HWC_Thread_Initialized = (int *) realloc (HWC_Thread_Initialized, sizeof(int) * new_num_threads);
-	ASSERT(HWC_Thread_Initialized!=NULL, "Cannot reallocate memory for HWC_Thread_Initialized!");
-
+	HWC_Thread_Initialized = (int *) xrealloc (HWC_Thread_Initialized, sizeof(int) * new_num_threads);
+	
 	/* Mark all the threads as uninitialized */
 	for (i = old_num_threads; i < new_num_threads; i++)
 		HWC_Thread_Initialized[i] = FALSE;
 
-	Accumulated_HWC_Valid = (int *) realloc (Accumulated_HWC_Valid, sizeof(int) * new_num_threads);
-	ASSERT(Accumulated_HWC_Valid!=NULL, "Cannot reallocate memory for Accumulated_HWC_Valid");
-
-	Accumulated_HWC = (long long **) realloc (Accumulated_HWC, sizeof(long long *) * new_num_threads);
-	ASSERT(Accumulated_HWC!=NULL, "Cannot reallocate memory for Accumulated_HWC");
-
+	Accumulated_HWC_Valid = (int *) xrealloc (Accumulated_HWC_Valid, sizeof(int) * new_num_threads);
+	
+	Accumulated_HWC = (long long **) xrealloc (Accumulated_HWC, sizeof(long long *) * new_num_threads);
+	
 	for (i = old_num_threads; i < new_num_threads; i++)
 	{
-		Accumulated_HWC[i] = (long long *)malloc(sizeof(long long) * MAX_HWC);
-		ASSERT(Accumulated_HWC[i]!=NULL, "Cannot reallocate memory for Accumulated_HWC");
+		Accumulated_HWC[i] = (long long *)xmalloc(sizeof(long long) * MAX_HWC);
 		HWC_Accum_Reset(i);
 	}
 
-	HWC_current_set = (int *) realloc (HWC_current_set, sizeof(int) * new_num_threads);
-	ASSERT(HWC_current_set!=NULL, "Cannot reallocate memory for HWC_current_set");
-
-	HWC_current_timebegin = (unsigned long long *) realloc (HWC_current_timebegin, sizeof(unsigned long long) * new_num_threads);
-	ASSERT(HWC_current_timebegin!=NULL, "Cannot reallocate memory for HWC_current_timebegin");
-
-	HWC_current_glopsbegin = (unsigned long long *) realloc (HWC_current_glopsbegin, sizeof(unsigned long long) * new_num_threads);
-	ASSERT(HWC_current_glopsbegin!=NULL, "Cannot reallocate memory for HWC_current_glopsbegin");
-
+	HWC_current_set = (int *) xrealloc (HWC_current_set, sizeof(int) * new_num_threads);
+	
+	HWC_current_timebegin = (unsigned long long *) xrealloc (HWC_current_timebegin, sizeof(unsigned long long) * new_num_threads);
+	
+	HWC_current_glopsbegin = (unsigned long long *) xrealloc (HWC_current_glopsbegin, sizeof(unsigned long long) * new_num_threads);
+	
 	for (i = old_num_threads; i < new_num_threads; i++)
 	{
 		HWC_current_set[i] = 0;
@@ -662,7 +648,7 @@ int HWC_Accum_Reset (unsigned int tid)
 	if (HWCEnabled)
 	{
 		Accumulated_HWC_Valid[tid] = FALSE;
-		memset(Accumulated_HWC[tid], 0, MAX_HWC * sizeof(long long));
+		xmemset(Accumulated_HWC[tid], 0, MAX_HWC * sizeof(long long));
 		return 1;
 	}
 	else return 0;
@@ -740,12 +726,7 @@ int HWC_Add_Set (int pretended_set, int rank, int ncounters, char **counters,
     }
     if (!found)
     {
-      CommonHWCs = (HWC_Set_Count_t *)realloc(CommonHWCs, (AllHWCs + 1) * sizeof(HWC_Set_Count_t));
-      if (CommonHWCs == NULL)
-      {
-        fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for CommonHWCs");
-        exit(-1);
-      } 
+      CommonHWCs = (HWC_Set_Count_t *)xrealloc(CommonHWCs, (AllHWCs + 1) * sizeof(HWC_Set_Count_t));
       CommonHWCs[ AllHWCs ].hwc_id     = hwc_id;
       CommonHWCs[ AllHWCs ].sets_count = 1;
 

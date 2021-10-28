@@ -55,6 +55,7 @@
 
 #include "buffers.h"
 #include "utils.h"
+#include "xalloc.h"
 
 #define EVENT_INDEX(buffer, event) (event - Buffer_GetFirst(buffer))
 #define ALL_BITS_SET 0xFFFFFFFF
@@ -82,11 +83,11 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 	int rc;
 #endif
 
-	xmalloc(buffer, sizeof(Buffer_t));
+	buffer = xmalloc(sizeof(Buffer_t));
 	buffer->FillCount = 0;
 	buffer->MaxEvents = n_events;
 
-	xmalloc(buffer->FirstEvt, n_events * sizeof(event_t));
+	buffer->FirstEvt = xmalloc(n_events * sizeof(event_t));
 	buffer->LastEvt = buffer->FirstEvt + n_events;
 	buffer->HeadEvt = buffer->FirstEvt;
 	buffer->CurEvt = buffer->FirstEvt;
@@ -141,7 +142,7 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 #endif
 #endif
 
-	xmalloc(buffer->Masks, n_events * sizeof(Mask_t));
+	buffer->Masks = xmalloc(n_events * sizeof(Mask_t));
 	Mask_Wipe(buffer);
 
 	buffer->FlushCallback = CALLBACK_FLUSH;
@@ -182,7 +183,7 @@ void Buffer_AddCachedEvent(Buffer_t *buffer, INT32 event_type)
   if ((buffer != NULL) && (buffer->VictimCache != NULL))
   {
     buffer->NumberOfCachedEvents ++;
-    xrealloc(buffer->CachedEvents, buffer->CachedEvents, sizeof(INT32) * buffer->NumberOfCachedEvents);
+    buffer->CachedEvents = xrealloc(buffer->CachedEvents, sizeof(INT32) * buffer->NumberOfCachedEvents);
     buffer->CachedEvents[ buffer->NumberOfCachedEvents - 1 ] = event_type;
   }
 }
@@ -637,7 +638,7 @@ static DataBlocks_t * new_DataBlocks (Buffer_t *buffer)
 {  
     DataBlocks_t *blocks = NULL;
    
-    xmalloc (blocks, sizeof(DataBlocks_t));
+    blocks = xmalloc (sizeof(DataBlocks_t));
 
     if (blocks != NULL)
     {
@@ -646,7 +647,7 @@ static DataBlocks_t * new_DataBlocks (Buffer_t *buffer)
     
         blocks->MaxBlocks = BLOCKS_CHUNK;
         blocks->NumBlocks = 0;
-        xmalloc (blocks->BlocksList, sizeof(struct iovec) * blocks->MaxBlocks);
+        blocks->BlocksList = xmalloc (sizeof(struct iovec) * blocks->MaxBlocks);
     }
     return blocks;
 }
@@ -659,7 +660,7 @@ static void DataBlocks_AddSorted (DataBlocks_t *blocks, void *ini_address, void 
     {
         blocks->MaxBlocks += BLOCKS_CHUNK;
 
-        xrealloc (blocks->BlocksList, blocks->BlocksList, sizeof(struct iovec) * blocks->MaxBlocks);
+        blocks->BlocksList = xrealloc (blocks->BlocksList, sizeof(struct iovec) * blocks->MaxBlocks);
     }
     blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_base = (void *)ini_address;
 	blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_len  = end_address - ini_address;
@@ -707,7 +708,7 @@ static BufferIterator_t * new_Iterator(Buffer_t *buffer)
 
 	ASSERT_VALID_BUFFER(buffer);
 
-	xmalloc(it, sizeof(BufferIterator_t));
+	it = xmalloc(sizeof(BufferIterator_t));
 
 	it->Buffer         = buffer;
 	it->OutOfBounds    = Buffer_IsEmpty(buffer);
@@ -730,7 +731,7 @@ BufferIterator_t * BufferIterator_Copy (BufferIterator_t *orig)
   BufferIterator_t *copy = NULL; 
   if (orig != NULL)
   {
-    xmalloc(copy, sizeof(BufferIterator_t));
+    copy = xmalloc(sizeof(BufferIterator_t));
     copy->Buffer         = orig->Buffer;
     copy->OutOfBounds    = orig->OutOfBounds;
     copy->CurrentElement = orig->CurrentElement;
@@ -882,7 +883,7 @@ void BufferIterator_Free (BufferIterator_t *it)
 
 void Mask_Wipe (Buffer_t *buffer)
 {
-    memset (buffer->Masks, 0, buffer->MaxEvents * sizeof(Mask_t));
+    xmemset (buffer->Masks, 0, buffer->MaxEvents * sizeof(Mask_t));
 }
 
 void Mask_Set (Buffer_t *buffer, event_t *event, int mask_id)

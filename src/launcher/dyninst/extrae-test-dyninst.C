@@ -23,6 +23,7 @@
 
 #include "common.h"
 #include "cpp_utils.h"
+#include "xalloc.h"
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>
@@ -127,7 +128,7 @@ void errorFunc (BPatchErrorLevel level, int num, const char* const* params)
 
 char * printUsage()
 {
-    char * buffer = (char*) malloc(1024*sizeof(char*));
+    char * buffer = (char*) xmalloc(1024*sizeof(char*));
     strcat(buffer, "Extrae dyninst utility\n\n");
     strcat(buffer, "Usage: extrae OPTIONS binary\n\n");
     strcat(buffer, "-list-functions       List functions found in the binary/process image.\n");
@@ -336,12 +337,7 @@ int main (int argc, char *argv[])
 
 	if ((env_var = getenv ("DYNINSTAPI_RT_LIB")) == NULL)
 	{
-		env_var = (char*) malloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
-		if (env_var == NULL)
-		{
-			cerr << PACKAGE_NAME << ": Cannot allocate memory to define DYNINSTAPI_RT_LIB!" << endl;
-			exit (-1);
-		}
+		env_var = (char*) xmalloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
 		sprintf (env_var, "DYNINSTAPI_RT_LIB=%s", DYNINST_RT_LIB);
 		putenv (env_var);
 	}

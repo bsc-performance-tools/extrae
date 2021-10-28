@@ -38,6 +38,7 @@
 #include "intercommunicators.h"
 #include "common.h"
 #include "utils.h"
+#include "xalloc.h"
 
 ptask_to_spawn_group_t *AppToSpawnGroupTable = NULL;
 int num_SpawnGroups = 0;
@@ -96,7 +97,7 @@ void intercommunicators_load( char *spawns_file_path, int ptask )
 void intercommunicators_map_ptask_to_spawn_group( int SpawnGroup, int ptask )
 {
   /* Store the translation between ptask and spawn group */
-  xrealloc(AppToSpawnGroupTable, AppToSpawnGroupTable, (num_SpawnGroups+1) * sizeof(ptask_to_spawn_group_t));
+  AppToSpawnGroupTable = xrealloc(AppToSpawnGroupTable, (num_SpawnGroups+1) * sizeof(ptask_to_spawn_group_t));
   AppToSpawnGroupTable[num_SpawnGroups].ptask = ptask;
   AppToSpawnGroupTable[num_SpawnGroups].spawn_group = SpawnGroup;
   num_SpawnGroups ++;
@@ -109,7 +110,7 @@ void intercommunicators_allocate_links( int SpawnGroup )
   /* Allocate room for storing the links of this spawn group */
   if (IntercommTable == NULL)
   {
-    IntercommTable = (spawn_group_table_t *)malloc(sizeof(spawn_group_table_t));
+    IntercommTable = (spawn_group_table_t *)xmalloc(sizeof(spawn_group_table_t));
     IntercommTable->groups     = NULL;
     IntercommTable->num_groups = 0;
   }
@@ -117,7 +118,7 @@ void intercommunicators_allocate_links( int SpawnGroup )
   {
     for (i=IntercommTable->num_groups; i<SpawnGroup; i++)
     {
-      xrealloc(IntercommTable->groups, IntercommTable->groups, SpawnGroup * sizeof(spawn_group_t));
+      IntercommTable->groups = xrealloc(IntercommTable->groups, SpawnGroup * sizeof(spawn_group_t));
 
       IntercommTable->groups[ i ].num_links = 0;
       IntercommTable->groups[ i ].links     = NULL;
@@ -130,7 +131,7 @@ void intercommunicators_new_link(int from_spawn_group, int from_task, int from_c
 {
   spawn_group_t *group = &(IntercommTable->groups[from_spawn_group - 1]);
 
-  xrealloc(group->links, group->links, (group->num_links+1) * sizeof(link_t));
+  group->links = xrealloc(group->links, (group->num_links+1) * sizeof(link_t));
 
   group->links[ group->num_links ].from_task = from_task;  
   group->links[ group->num_links ].from_comm = from_comm;  

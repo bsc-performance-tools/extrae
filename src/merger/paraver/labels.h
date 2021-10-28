@@ -26,6 +26,7 @@
 
 #include "mpi2out.h"
 #include "events.h"
+#include "xalloc.h"
 #include <extrae_vector.h>
 
 typedef enum {
@@ -48,18 +49,15 @@ typedef struct fcounter_t {
 
 }fcounter_t;
 
-#define INSERTAR_CONTADOR(fcounter,EvCnt) \
-{\
- struct fcounter_t* aux_fc;\
- \
- aux_fc=(struct fcounter_t*) malloc (sizeof(fcounter_t)); \
- if(aux_fc!=NULL) {		\
-  aux_fc->counter=EvCnt;\
-  aux_fc->prev=fcounter;	\
-  if(fcounter!=NULL)  \
-   fcounter->next=aux_fc;	\
-  fcounter=aux_fc; \
- }\
+#define INSERTAR_CONTADOR(fcounter,EvCnt)                  \
+{                                                          \
+ struct fcounter_t* aux_fc;                                \
+ aux_fc=(struct fcounter_t*) xmalloc (sizeof(fcounter_t)); \
+  aux_fc->counter=EvCnt;                                   \
+  aux_fc->prev=fcounter;                                   \
+  if(fcounter!=NULL)                                       \
+   fcounter->next=aux_fc;                                  \
+  fcounter=aux_fc;                                         \
 }
 
 /* Fi codi David Vicente */

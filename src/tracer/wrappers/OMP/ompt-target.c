@@ -34,6 +34,7 @@
 #include "wrapper.h"
 #include "threadid.h"
 #include "threadinfo.h"
+#include "xalloc.h"
 
 #include "ompt-helper.h"
 #include "ompt-target.h"
@@ -80,18 +81,10 @@ void Extrae_ompt_target_buffer_request( ompt_target_buffer_t **buffer, size_t *b
 {
   int buf_size = sizeof(ompt_record_ompt_t) * EXTRAE_OMPT_TARGET_BUFFER_SIZE;
 
-  ompt_target_buffer_t *buf = malloc( buf_size );
+  ompt_target_buffer_t *buf = xmalloc( buf_size );
 
-  if (buf != NULL)
-  {
-    *buffer = buf;
-    *bytes  = buf_size;
-  }
-  else
-  {
-    *buffer = NULL;
-    *bytes  = 0;
-  }
+  *buffer = buf;
+  *bytes  = buf_size;
 }
 
 /**
@@ -330,7 +323,7 @@ int ompt_target_initialize(ompt_function_lookup_t lookup)
 
     /* Save a mapping to translate from the OMPT device id to the logical thread id in Extrae, 
        and also store all the information about the device that we'll be needing later */
-    List_of_Devices = realloc( List_of_Devices, (device_id + 1) * sizeof(extrae_device_info_t) );
+    List_of_Devices = xrealloc( List_of_Devices, (device_id + 1) * sizeof(extrae_device_info_t) );
 
     List_of_Devices[device_id].ompt_device_id   = device_id; 
     List_of_Devices[device_id].lookup           = device_lookup;

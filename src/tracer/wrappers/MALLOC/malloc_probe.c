@@ -28,6 +28,10 @@
 #include "trace_macros.h"
 #include "malloc_probe.h"
 
+#ifdef HAVE_MALLOC_H
+#include "malloc.h"
+#endif
+
 static int trace_malloc = FALSE;
 static int trace_malloc_allocate = TRUE;
 static int trace_malloc_free     = FALSE;

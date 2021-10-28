@@ -37,6 +37,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "events.h"
 #include "clock.h"
 #include "threadid.h"
@@ -101,12 +102,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 		fprintf (stderr, PACKAGE_NAME": PMAPI layer just supports 1 HWC group per set (see set %d)\n", pretended_set);
 	}
 	
-	HWC_sets = (struct HWC_Set_t *) realloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
-	if (HWC_sets == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for HWC_set (rank %d)\n", rank);
-		return 0;
-	}
+	HWC_sets = (struct HWC_Set_t *) xrealloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
 
 	/* Initialize this set */
 	HWC_sets[num_set].pmprog.mode.w = 0;

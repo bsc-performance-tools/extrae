@@ -39,6 +39,7 @@
 #include "mpi_comunicadors.h"
 #include "paraver_generator.h"
 #include "dimemas_generator.h"
+#include "xalloc.h"
 
 //#define DEBUG_COMMUNICATORS
 
@@ -107,13 +108,8 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 	/* New communicator definition starts */
 	new_comm.id = Get_EvComm (current_event);
 	new_comm.num_tasks = Get_EvSize (current_event);
-	new_comm.tasks = (int*) malloc(sizeof(int)*new_comm.num_tasks);
-	if (NULL == new_comm.tasks)
-	{
-		fprintf (stderr, "mpi2prv: Can't allocate memory for a COMM SELF alias\n");
-		fflush (stderr);
-		exit (-1);
-	}
+	new_comm.tasks = (int*) xmalloc(sizeof(int)*new_comm.num_tasks);
+
 #if defined(DEBUG_COMMUNICATORS)
 	fprintf (stderr, "DEBUG: New comm: id=%lu, num_tasks=%u\n", new_comm.id, new_comm.num_tasks);
 #endif
@@ -163,7 +159,7 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 #endif
 	}
 
-	free (new_comm.tasks);
+	xfree (new_comm.tasks);
 
 	return i;
 }
@@ -207,13 +203,7 @@ int GenerateAliesComunicator (
 
 			new_comm.id = Get_EvComm (current_event);
 			new_comm.num_tasks = Get_EvSize (current_event);
-			new_comm.tasks = (int*) malloc(sizeof(int)*new_comm.num_tasks);
-			if (NULL == new_comm.tasks)
-			{
-				fprintf (stderr, "mpi2prv: Can't allocate memory for a COMM WORLD alias\n");
-				fflush (stderr);
-				exit (-1);
-			}
+			new_comm.tasks = (int*) xmalloc(sizeof(int)*new_comm.num_tasks);
 			for (i = 0; i < new_comm.num_tasks; i++)
 				new_comm.tasks[i] = i;
 #if defined(PARALLEL_MERGE)
@@ -221,7 +211,7 @@ int GenerateAliesComunicator (
 #else
 			afegir_comunicador (&new_comm, ptask, task);
 #endif
-			free (new_comm.tasks);
+			xfree (new_comm.tasks);
 		}
 		/* Build COMM SELF communicator */
 		else if (MPI_COMM_SELF_ALIAS == EvCommType)
@@ -234,20 +224,14 @@ int GenerateAliesComunicator (
 
 			new_comm.id = Get_EvComm (current_event);
 			new_comm.num_tasks = 1;
-			new_comm.tasks = (int*) malloc(sizeof(int)*new_comm.num_tasks);
-			if (NULL == new_comm.tasks)
-			{
-				fprintf (stderr, "mpi2prv: Can't allocate memory for a COMM SELF alias\n");
-				fflush (stderr);
-				exit (-1);
-			}
+			new_comm.tasks = (int*) xmalloc(sizeof(int)*new_comm.num_tasks);
 			new_comm.tasks[0] = task-1;
 #if defined(PARALLEL_MERGE)
 			ParallelMerge_AddIntraCommunicator (ptask, task, MPI_COMM_SELF_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
 			afegir_comunicador (&new_comm, ptask, task);
 #endif
-			free (new_comm.tasks);
+			xfree (new_comm.tasks);
 		}
 		else if (MPI_NEW_INTERCOMM_ALIAS == EvCommType)
 		{

@@ -32,6 +32,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "threadinfo.h"
 
 static Extrae_thread_info_t *thread_info = NULL;
@@ -46,7 +47,7 @@ void Extrae_allocate_thread_info (unsigned nthreads)
 {
 	unsigned u;
 
-	thread_info = (Extrae_thread_info_t*) realloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
+	thread_info = (Extrae_thread_info_t*) xrealloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
 
 	for (u = 0; u < nthreads; u++)
 		Extrae_set_thread_name (u, "");
@@ -58,7 +59,7 @@ void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads)
 {
 	unsigned u;
 
-	thread_info = (Extrae_thread_info_t*) realloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
+	thread_info = (Extrae_thread_info_t*) xrealloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
 
 	for (u = prevnthreads; u < nthreads; u++)
 		Extrae_set_thread_name (u, "");
@@ -71,7 +72,7 @@ void Extrae_set_thread_name (unsigned thread, char *name)
 	size_t i;
 
 	/* Clear space */
-	memset (thread_info[thread].ThreadName, 0, THREAD_INFO_NAME_LEN);
+	xmemset (thread_info[thread].ThreadName, 0, THREAD_INFO_NAME_LEN);
 
 	/* Copy name */
 	snprintf (thread_info[thread].ThreadName, THREAD_INFO_NAME_LEN, "%s", name);

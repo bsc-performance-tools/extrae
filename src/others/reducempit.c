@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "xalloc.h"
 
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -45,7 +46,7 @@ char **fitxers = NULL;
 void AddFile (char *file)
 {
 	int task = 0;
-	char *tmp = (char*) malloc((strlen(file)+1)*sizeof(char));
+	char *tmp = (char*) xmalloc((strlen(file)+1)*sizeof(char));
 	char *tmp_name;
 	int i;
 
@@ -94,7 +95,7 @@ int main (int argc, char *argv[])
 	int numOfEvents;
 	int i;
 
-	fitxers = (char**) malloc (MAX_MPIT_FILES*sizeof(char*));
+	fitxers = (char**) xmalloc (MAX_MPIT_FILES*sizeof(char*));
 	for (i = 0; i < MAX_MPIT_FILES; i++)
 		fitxers[i] = NULL;
 
@@ -134,7 +135,7 @@ int main (int argc, char *argv[])
 		}
 
 
-	free (fitxers);
+	xfree (fitxers);
 
 	return 0;
 }

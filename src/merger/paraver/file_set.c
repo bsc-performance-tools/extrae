@@ -65,6 +65,7 @@
 #endif
 #include "labels.h"
 #include "utils.h"
+#include "xalloc.h"
 #include "semantics.h"
 #include "cpunode.h"
 #include "timesync.h"
@@ -360,13 +361,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 #endif
 	}
 
-	fitem->first = (event_t*) malloc (fitem->size);
-	if (fitem->first == NULL)
-	{
-		fprintf (stderr, "mpi2prv: `malloc` failed to allocate memory for file %s\n",
-			IFile->name);
-		exit (1);
-	}
+	fitem->first = (event_t*) xmalloc (fitem->size);
 
 	/* Read files */
 	res = fread (fitem->first, 1, trace_file_size, fd_trace);
@@ -459,18 +454,12 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 	FileSet_t *fset;
 	FileItem_t *fitem;
 
-
-	if ((fset = malloc (sizeof (FileSet_t))) == NULL)
-	{
-		perror ("malloc");
-		fprintf (stderr, "mpi2prv: Error creating file set\n");
-		return NULL;
-	}
+	fset = xmalloc (sizeof (FileSet_t));
 
 	fset->input_files = IFiles;
 	fset->num_input_files = nfiles;
 	fset->traceformat = trace_format;
-	xmalloc(fset->files, nTraces * sizeof(FileItem_t));
+	fset->files = xmalloc(nTraces * sizeof(FileItem_t));
 	fset->nfiles = 0;
 	for (file = 0; file < nfiles; file++)
 	{
@@ -483,7 +472,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 			{
 				perror ("AddFile_FS");
 				fprintf (stderr, "mpi2prv: Error creating file set\n");
-				free (fset);
+				xfree (fset);
 				return NULL;
 			}
 			fset->nfiles++;
@@ -499,7 +488,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 		{
 			int j = 0;
 			TaskFileItem_t *sibling_threads = NULL;
-			xmalloc(sibling_threads, sizeof(TaskFileItem_t));
+			sibling_threads = xmalloc(sizeof(TaskFileItem_t));
 			sibling_threads->files = NULL;
 			sibling_threads->nfiles = 0;
 			for (j = 0; j < fset->nfiles; j++)
@@ -509,7 +498,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 				if ((fitem1->ptask == fitem2->ptask) &&
 				    (fitem1->task  == fitem2->task))
 				{
-					xrealloc(sibling_threads->files, sibling_threads->files, (sizeof(FileItem_t *) * sibling_threads->nfiles+1));
+					sibling_threads->files = xrealloc(sibling_threads->files, (sizeof(FileItem_t *) * sibling_threads->nfiles+1));
 					sibling_threads->files[sibling_threads->nfiles] = fitem2;
 					sibling_threads->nfiles++;
 
@@ -546,10 +535,10 @@ void Free_FS (FileSet_t *fset)
 		{
 			fitem = &(fset->files[i]);
 			if (fitem->first != NULL)
-				free (fitem->first);
+				xfree (fitem->first);
 			fitem->first = fitem->last = fitem->current = NULL;
 		}
-		free (fset);
+		xfree (fset);
 	}
 }
 
@@ -566,16 +555,10 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 	*num_of_events = total;
 
 
-	if ((prvfset = malloc (sizeof (PRVFileSet_t))) == NULL)
-	{
-		perror ("malloc");
-		fprintf (stderr, "mpi2prv: Error creating PRV file set\n");
-		return 0;
-	}
+	prvfset = xmalloc (sizeof (PRVFileSet_t));
 
 	prvfset->fset = fset;
-
-        xmalloc(prvfset->files, nTraces * sizeof(PRVFileItem_t));
+	prvfset->files = xmalloc(nTraces * sizeof(PRVFileItem_t));
 	prvfset->nfiles = fset->nfiles;
 	prvfset->records_per_block = records_per_block / (fset->nfiles + tree_fan_out);
 
@@ -780,7 +763,7 @@ void Free_Map_Paraver_Files (PRVFileSet_t * infset)
 	/* Frees memory allocated by Read_PRV_LocalFile and Read_PRV_RemoteFile */
 	for (i = 0; i < infset->nfiles; i++)
 		{
-			xfree (infset->files[i].first_mapped_p)
+			xfree (infset->files[i].first_mapped_p);
 			infset->files[i].first_mapped_p = NULL;
 		}
 }
@@ -804,12 +787,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 
 	*num_of_events = total;
 
-	if ((prvfset = malloc (sizeof (PRVFileSet_t))) == NULL)
-	{
-		perror ("malloc");
-		fprintf (stderr, "mpi2prv: Error creating PRV file set\n");
-		return 0;
-	}
+	prvfset = xmalloc (sizeof (PRVFileSet_t));
 
 	prvfset->fset = fset;
 
@@ -824,7 +802,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 		prvfset->nfiles = fset->nfiles;
 
 
-        xmalloc(prvfset->files, nTraces * sizeof(PRVFileItem_t));
+        prvfset->files = xmalloc(nTraces * sizeof(PRVFileItem_t));
 	/* Set local files first */
 	for (i = 0; i < fset->nfiles; i++)
 	{
@@ -869,8 +847,8 @@ static void Read_PRV_LocalFile (PRVFileItem_t *file, unsigned records_per_block)
 	if (nrecords != file->mapped_records)
 	{
 		if (file->first_mapped_p != NULL)
-			free (file->first_mapped_p);
-		file->first_mapped_p = (paraver_rec_t*) malloc (want_to_read);
+			xfree (file->first_mapped_p);
+		file->first_mapped_p = (paraver_rec_t*) xmalloc (want_to_read);
 		file->mapped_records = nrecords;
 	}
 
@@ -917,16 +895,9 @@ static void Read_PRV_RemoteFile (PRVFileItem_t *file)
 	if (0 != howmany)
 	{
 		if (file->first_mapped_p != NULL)
-			free (file->first_mapped_p);
+			xfree (file->first_mapped_p);
 
-		file->first_mapped_p = (paraver_rec_t*) malloc (howmany*sizeof(paraver_rec_t));
-		if (file->first_mapped_p == NULL)
-		{
-			perror ("malloc");
-			fprintf (stderr, "mpi2prv: Failed to obtain memory for block of %u remote events\n", howmany);
-			fflush (stderr);
-			exit (0);
-		}
+		file->first_mapped_p = (paraver_rec_t*) xmalloc (howmany*sizeof(paraver_rec_t));
 
 		file->current_p = file->first_mapped_p;
 		tmp = (char *) file->first_mapped_p;
@@ -1407,7 +1378,6 @@ int MatchComms_Enabled(unsigned int ptask, unsigned int task)
   return task_info->MatchingComms;
 }
 
-
 #if defined(HETEROGENEOUS_SUPPORT)
 /******************************************************************************
  *** EndianCorrection (fset)
@@ -1527,12 +1497,7 @@ void EndianCorrection (FileSet_t *fset, int numtasks, int taskid)
 		fflush (stdout);
 	}
 	
-	changes = malloc (fset->nfiles*sizeof(int));
-	if (changes == NULL)
-	{
-		fprintf (stderr, "mpi2prv: ERROR couldn't allocate memory for endian correction!\n");
-		exit (1);
-	}
+	changes = xmalloc (fset->nfiles*sizeof(int));
 		
 	/* Just check all the TASKS for their endianness */
 	/* Only MASTER thread have APPL_EV info, so search this info at the MASTER
@@ -1620,7 +1585,7 @@ void EndianCorrection (FileSet_t *fset, int numtasks, int taskid)
 	MPI_CHECK(res, MPI_Barrier, "Synchronizing endianess");
 #endif
 
-	free (changes);
+	xfree (changes);
 }
 
 #endif /* HETEROGENEOUS_SUPPORT */

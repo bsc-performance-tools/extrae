@@ -103,6 +103,7 @@
 #include "hwc.h"
 #include "signals.h"
 #include "utils.h"
+#include "xalloc.h"
 #include "calltrace.h"
 #include "xml-parse.h"
 #include "UF_gcc_instrument.h"
@@ -1080,7 +1081,7 @@ void Parse_Callers (int me, char * mpi_callers, int type)
    char * callers, * caller, * error;
    int from, to, i, tmp;
 
-   callers = (char *)malloc(sizeof(char)*(strlen(mpi_callers)+1));
+   callers = (char *)xmalloc(sizeof(char)*(strlen(mpi_callers)+1));
    strcpy(callers, mpi_callers);
 
    while ((caller = strtok(callers, (const char *)",")) != NULL) {
@@ -1124,12 +1125,12 @@ void Parse_Callers (int me, char * mpi_callers, int type)
 
       /* Reservamos memoria suficiente para el vector */
       if (Trace_Caller[type] == NULL) {
-         Trace_Caller[type] = (int *)malloc(sizeof(int) * to);
+         Trace_Caller[type] = (int *)xmalloc(sizeof(int) * to);
          for (i = 0; i < to; i++) Trace_Caller [type][i] = 0;
          Caller_Deepness[type] = i;
       }
       else if (to > Caller_Deepness[type]) {
-         Trace_Caller[type] = (int *)realloc(Trace_Caller[type], sizeof(int) * to);
+         Trace_Caller[type] = (int *)xrealloc(Trace_Caller[type], sizeof(int) * to);
          for (i = Caller_Deepness[type]; i < to; i++) Trace_Caller [type][i] = 0;
          Caller_Deepness[type] = i;
       }
@@ -1190,7 +1191,7 @@ static void Add_GlOp_Interval (int glop_id, int trace_status)
 {
    int idx;
    idx = glops_intervals.n_glops ++;
-   glops_intervals.glop_list = (GlOp_t *)realloc(glops_intervals.glop_list, glops_intervals.n_glops * sizeof(GlOp_t));
+   glops_intervals.glop_list = (GlOp_t *)xrealloc(glops_intervals.glop_list, glops_intervals.n_glops * sizeof(GlOp_t));
    glops_intervals.glop_list[idx].glop_id = glop_id;
    glops_intervals.glop_list[idx].trace_status = trace_status;
 }
@@ -1414,13 +1415,13 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 
 	if (!forked)
 	{
-		xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
-		xmalloc(LastCPUEmissionTime, num_threads * sizeof(iotimer_t));
-		xmalloc(LastCPUEvent, num_threads * sizeof(int));
+		TracingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
+		LastCPUEmissionTime = xmalloc(num_threads * sizeof(iotimer_t));
+		LastCPUEvent = xmalloc(num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
 		if (TRACING_SAMPLING)
 		{
-			xmalloc(SamplingBuffer, num_threads * sizeof(Buffer_t *));
+			SamplingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
 		}
 #endif
 	}
@@ -1440,13 +1441,13 @@ static int Reallocate_buffers_and_files (int new_num_threads)
 {
 	int i;
 
-	xrealloc(TracingBuffer, TracingBuffer, new_num_threads * sizeof(Buffer_t *));
-	xrealloc(LastCPUEmissionTime, LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
-	xrealloc(LastCPUEvent, LastCPUEvent, new_num_threads * sizeof(int));
+	TracingBuffer = xrealloc(TracingBuffer, new_num_threads * sizeof(Buffer_t *));
+	LastCPUEmissionTime = xrealloc(LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
+	LastCPUEvent = xrealloc(LastCPUEvent, new_num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
 	if (TRACING_SAMPLING)
 	{
-		xrealloc(SamplingBuffer, SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
+		SamplingBuffer = xrealloc(SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
 	}
 #endif
 
@@ -1466,12 +1467,7 @@ int Extrae_Allocate_Task_Bitmap (int size)
 {
 	int i;
 
-	TracingBitmap = (int *) realloc (TracingBitmap, size*sizeof (int));
-	if (TracingBitmap == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot obtain memory for tasks bitmap\n");
-		exit (-1);
-	}
+	TracingBitmap = (int *) xrealloc (TracingBitmap, size*sizeof (int));
 
 	for (i = 0; i < size; i++)
 		TracingBitmap[i] = TRUE;
@@ -1513,7 +1509,7 @@ static pthread_mutex_t pThreadIdentifier_mtx;
 
 static void Extrae_reallocate_pthread_info (int new_num_threads)
 {
-	xrealloc(pThreads, pThreads, new_num_threads * sizeof(pthread_t));
+	pThreads = xrealloc(pThreads, new_num_threads * sizeof(pthread_t));
 	numpThreads = new_num_threads;
 }
 
@@ -1717,12 +1713,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 		   allows instrumenting OpenMP */
 		numProcessors = getnumProcessors();
 
-		new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
-		if (NULL == new_num_omp_threads_clause)
-		{
-			fprintf (stderr, PACKAGE_NAME": Unable to allocate memory for tentative OMP_NUM_THREADS\n");
-			exit (-1);
-		}
+		new_num_omp_threads_clause = (char*) xmalloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
 		if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
 		{
 			fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
@@ -1891,7 +1882,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 						hwc_defs[u].description, (char)0, 0, NULL, NULL);
 					u++;
 				}
-				free (hwc_defs);
+				xfree (hwc_defs);
 			}
 		}
 	
@@ -2068,10 +2059,8 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 
 	TimeSync_Initialize (1, &world_size);
 
-	xmalloc(StartingTimes, world_size * sizeof(UINT64));
-	memset (StartingTimes, 0, world_size * sizeof(UINT64));
-	xmalloc(SynchronizationTimes, world_size * sizeof(UINT64));
-	memset (SynchronizationTimes, 0, world_size * sizeof(UINT64));
+	StartingTimes = xmalloc_and_zero(world_size * sizeof(UINT64));
+	SynchronizationTimes = xmalloc_and_zero(world_size * sizeof(UINT64));
 
 #if defined(MPI_SUPPORT)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT &&
@@ -2620,20 +2609,8 @@ void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
 
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 {
-	Extrae_inInstrumentation = (int*) realloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
-	if (Extrae_inInstrumentation == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME
-		  ": Failed to allocate memory for inInstrumentation structure\n");
-		exit (-1);
-	}
-	Extrae_inSampling = (int*) realloc (Extrae_inSampling, sizeof(int)*nthreads);
-	if (Extrae_inSampling == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME
-		  ": Failed to allocate memory for inSampling structure\n");
-		exit (-1);
-	}
+	Extrae_inInstrumentation = (int*) xrealloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
+	Extrae_inSampling = (int*) xrealloc (Extrae_inSampling, sizeof(int)*nthreads);
 }
 
 void Backend_Enter_Instrumentation ()

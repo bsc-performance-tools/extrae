@@ -49,6 +49,8 @@
 #include "intel-kmpc-11-intermediate/intel-kmpc-11-intermediate.h"
 #include "intel-kmpc-11-intermediate/intel-kmpc-11-taskloop-helpers.h"
 
+#include "xalloc.h"
+
 /*
  * This global variable stores the pointer to the outlined task from the parent thread,
  * and is queried from the child threads inside the parallel region. FIXME: in order
@@ -181,12 +183,7 @@ static void preallocate_kmpc_helpers()
 
 	if (hl__kmpc_task == NULL)
 	{
-    hl__kmpc_task = (struct helper_list__kmpc_task_t *)malloc(sizeof(struct helper_list__kmpc_task_t));
-		if (hl__kmpc_task == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "preallocate_kmpc_helpers: ERROR! Invalid initialization of 'hl__kmpc_task'\n ", THREAD_LEVEL_VAR);
-			exit(-1);
-		}
+    hl__kmpc_task = (struct helper_list__kmpc_task_t *)xmalloc(sizeof(struct helper_list__kmpc_task_t));
 
 		/*                                                                          
      * If the environment variable ENV_VAR_EXTRAE_OPENMP_HELPERS is defined, this
@@ -208,12 +205,7 @@ static void preallocate_kmpc_helpers()
 
 		hl__kmpc_task->count = 0;
 		hl__kmpc_task->max_helpers = num_helpers;
-    hl__kmpc_task->list = (struct helper__kmpc_task_t *)malloc(sizeof(struct helper__kmpc_task_t) * num_helpers);
-		if (hl__kmpc_task->list == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "preallocate_kmpc_helpers: ERROR! Invalid initialization of 'hl__kmpc_task->list' (%d helpers)\n ", THREAD_LEVEL_VAR, num_helpers);
-			exit(-1);	
-		}
+    hl__kmpc_task->list = (struct helper__kmpc_task_t *)xmalloc(sizeof(struct helper__kmpc_task_t) * num_helpers);
 		for (i=0; i<num_helpers; i++)
 		{
 			hl__kmpc_task->list[i].wrap_task = NULL;
@@ -227,12 +219,7 @@ static void preallocate_kmpc_helpers()
 
 	if (hl__kmpc_taskloop == NULL)
 	{
-    hl__kmpc_taskloop = (struct helper_list__kmpc_taskloop_t *)malloc(sizeof(struct helper_list__kmpc_taskloop_t));
-		if (hl__kmpc_taskloop == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "preallocate_kmpc_helpers: ERROR! Invalid initialization of 'hl__kmpc_taskloop'\n ", THREAD_LEVEL_VAR);
-		  exit(-1);
-		}
+    hl__kmpc_taskloop = (struct helper_list__kmpc_taskloop_t *)xmalloc(sizeof(struct helper_list__kmpc_taskloop_t));
 
 		hl__kmpc_taskloop->next_id = 0;
 		for (i=0; i<MAX_TASKLOOP_HELPERS; i++)
@@ -870,7 +857,7 @@ void __kmpc_fork_call (void *loc, int argc, void *microtask, ...)
 	}
 
 	/* Grab parameters */
-	memset(args, 0, sizeof(args));
+	xmemset(args, 0, sizeof(args));
 
 	va_start (ap, microtask);
 	for (i=0; i<argc; i++)
@@ -966,7 +953,7 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 	}
 
 	/* Grab parameters */
-	memset(args, 0, sizeof(args));
+	xmemset(args, 0, sizeof(args));
 
 	va_start (ap, microtask);
   for (i=0; i<argc; i++)

@@ -24,6 +24,7 @@
 #include "PhaseStats.h"
 #include "taskid.h"
 #include "utils.h"
+#include "xalloc.h"
 #if defined(BACKEND)
 # include "timesync.h"
 # include "online_buffers.h"

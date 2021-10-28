@@ -29,33 +29,6 @@
 #endif
 #include "debug.h"
 
-#define xmalloc(ptr,size)             \
-{                                     \
-   ptr = malloc(size);                \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xrealloc(ptr,src,size)        \
-{                                     \
-   ptr = realloc(src, size);          \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xfree(ptr)                    \
-{                                     \
-   if (ptr != NULL)                   \
-   {                                  \
-      free(ptr);                      \
-   }                                  \
-   ptr = NULL;                        \
-} 
-
 #define FS_SYNC_MAX_ATTEMPTS 60
 #define FS_SYNC_RETRY_IN      1
 #define FS_SYNC_TIMEOUT      FS_SYNC_MAX_ATTEMPTS * FS_SYNC_RETRY_IN

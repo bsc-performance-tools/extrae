@@ -30,6 +30,7 @@
 #include "object_tree.h"
 #include "utils.h"
 #include "debug.h"
+#include "xalloc.h"
 
 appl_t ApplicationTable;
 
@@ -50,14 +51,12 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	for (i = 0; i < nfiles; i++)
 		ntasks[files[i].ptask-1] = MAX(files[i].task, ntasks[files[i].ptask-1]);
 
-	nthreads = (unsigned**) malloc (num_appl*sizeof(unsigned*));
-	ASSERT(nthreads!=NULL, "Cannot allocate memory to store nthreads for whole applications");
-
+	nthreads = (unsigned**) xmalloc (num_appl*sizeof(unsigned*));
+	
 	for (i = 0; i < num_appl; i++)
 	{
-		nthreads[i] = (unsigned*) malloc (ntasks[i]*sizeof(unsigned));
-		ASSERT(nthreads[i]!=NULL, "Cannot allocate memory to store nthreads for application");
-
+		nthreads[i] = (unsigned*) xmalloc (ntasks[i]*sizeof(unsigned));
+		
 		for (j = 0; j < ntasks[i]; j++)
 			nthreads[i][j] = 0;
 	}
@@ -67,16 +66,14 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 
 	/* Second step, allocate structures respecting the number of apps, tasks and threads found */
 	ApplicationTable.nptasks = num_appl;
-	ApplicationTable.ptasks = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
-	ASSERT(ApplicationTable.ptasks!=NULL, "Unable to allocate memory for ptasks");
-
+	ApplicationTable.ptasks = (ptask_t*) xmalloc (sizeof(ptask_t)*num_appl);
+	
 	for (i = 0; i < ApplicationTable.nptasks; i++)
 	{
 		/* Allocate per task information within each ptask */
 		ApplicationTable.ptasks[i].ntasks = ntasks[i];
-		ApplicationTable.ptasks[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks[i]);
-		ASSERT(ApplicationTable.ptasks[i].tasks!=NULL, "Unable to allocate memory for tasks");
-
+		ApplicationTable.ptasks[i].tasks = (task_t*) xmalloc (sizeof(task_t)*ntasks[i]);
+		
 		for (j = 0; j < ApplicationTable.ptasks[i].ntasks; j++)
 		{
 			/* Initialize pending communication queues for each task */
@@ -85,8 +82,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			  &(ApplicationTable.ptasks[i].tasks[j].recv_queue));
 
 			/* Allocate per thread information within each task */
-			ApplicationTable.ptasks[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*nthreads[i][j]);
-			ASSERT(ApplicationTable.ptasks[i].tasks[j].threads!=NULL,"Unable to allocate memory for threads");
+			ApplicationTable.ptasks[i].tasks[j].threads = (thread_t*) xmalloc (sizeof(thread_t)*nthreads[i][j]);
 		}
 	}
 
@@ -157,8 +153,8 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	{
 		for (i = 0; i < num_appl; i++)
 			if (nthreads[i] != NULL)
-				free (nthreads[i]);
-		free (nthreads);		
+				xfree (nthreads[i]);
+		xfree (nthreads);		
 	}
 }
 
@@ -181,14 +177,9 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 	if (!found)
 	{
 		unsigned last_index = task_info->num_binary_objects;
-		task_info->binary_objects = (binary_object_t*) realloc (
+		task_info->binary_objects = (binary_object_t*) xrealloc (
 		  task_info->binary_objects,
 		  (last_index+1) * sizeof(binary_object_t));
-		if (task_info->binary_objects == NULL)
-		{
-			fprintf (stderr, "Fatal error! Cannot allocate memory for binary object!\n");
-			exit (-1);
-		}
 		task_info->binary_objects[last_index].module = strdup (binary);
 		task_info->binary_objects[last_index].start_address = start;
 		task_info->binary_objects[last_index].end_address = end;

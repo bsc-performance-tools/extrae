@@ -9,6 +9,7 @@ ChangeLog
  * 16Feb2022 Changes user function instrumentation to work with function names only, using function adresses as fallback
  + 16Feb2022 Adds support for GOMP_taskloop_ull and changes interposition mechanism for a more robust one
  + 24Jan2022 Adds OPENACC instrumentation in host and CUDA devices
+ * 14Jan2022 Reworks allocated memory tracker and removes need for critical zones
  + 04Jan2022 Adds XML option to exclude some MPI_Comm_* calls from tracing 
  * 16Dec2022 Assigns same ID's to Infiniband counters ignoring Mellanox driver version
  * 09Nov2021 Updates and upgrades CUDA support

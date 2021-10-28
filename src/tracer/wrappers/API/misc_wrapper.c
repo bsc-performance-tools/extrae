@@ -69,6 +69,7 @@
 #include "common_hwc.h"
 #include "threadinfo.h"
 #include "sampling-common.h"
+#include "xalloc.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -387,12 +388,12 @@ void Extrae_fini_Wrapper (void)
 
 void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr)
 {
-	memset (ptr, 0, sizeof(struct extrae_UserCommunication));
+	xmemset (ptr, 0, sizeof(struct extrae_UserCommunication));
 }
 
 void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 {
-	memset (ptr, 0, sizeof(struct extrae_CombinedEvents));
+	xmemset (ptr, 0, sizeof(struct extrae_CombinedEvents));
 	ptr->UserFunction = EXTRAE_USER_FUNCTION_NONE;
 }
 

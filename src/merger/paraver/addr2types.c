@@ -31,17 +31,12 @@
 #endif
 
 #include "addr2types.h"
+#include "xalloc.h"
 
 Extrae_Addr2Type_t * Extrae_Addr2Type_New (int FunctionType,
 	unsigned FunctionType_lbl, int LineType, unsigned LineType_lbl)
 {
-	Extrae_Addr2Type_t *r = (Extrae_Addr2Type_t*) malloc (sizeof(Extrae_Addr2Type_t));
-
-	if (r == NULL)
-	{
-		fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory for Extrae_Addr2Type_New\n", __FILE__, __LINE__);
-		exit (-1);
-	}
+	Extrae_Addr2Type_t *r = (Extrae_Addr2Type_t*) xmalloc (sizeof(Extrae_Addr2Type_t));
 
 	r->FunctionType = FunctionType;
 	r->FunctionType_lbl = FunctionType_lbl;

@@ -17,7 +17,9 @@ common_SRCS = \
  common.h \
  num_hwc.h \
  types.h \
- hwc_version.h
+ hwc_version.h \
+ xalloc.h \
+ symptr.h
 
 common_INCLUDES = -I$(COMMON_INC)
 

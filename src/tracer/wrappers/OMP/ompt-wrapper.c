@@ -51,6 +51,7 @@
 #include "misc_wrapper.h"
 #include "wrapper.h"
 #include "threadid.h"
+#include "xalloc.h"
 
 #include "omp-probe.h"
 #include "omp-events.h"
@@ -112,9 +113,8 @@ static void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid,
 	/* If not empty, allocate space for a new entry */
 	if (!found_empty)
 	{
-		ompt_thids = (omptthid_threadid_t*) realloc (ompt_thids,
+		ompt_thids = (omptthid_threadid_t*) xrealloc (ompt_thids,
 		  (n_ompt_thids+1)*sizeof(omptthid_threadid_t));
-		assert (ompt_thids != NULL);
 		free_slot = n_ompt_thids;
 		n_ompt_thids++;
 	}

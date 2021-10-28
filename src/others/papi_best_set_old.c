@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "xalloc.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -40,12 +41,7 @@ int* CreateBitmask (int numberofbits)
 	int i;
 	int *result;
 
-	result = (int*) malloc (numberofbits*sizeof(int));
-	if (result == NULL)
-	{
-		fprintf (stderr, "Error! Unable to allocate bitmask memory! Dying.\n");
-		exit (-5);
-	}
+	result = (int*) xmalloc (numberofbits*sizeof(int));
 
 	for (i = 0; i < numberofbits; i++)
 		result[i] = 0;
@@ -159,15 +155,9 @@ void CheckMaxEventSet (int ncounters, unsigned *counters)
 				if (Bitmask_CountActiveBits (bitmask, ncounters) > Bitmask_CountActiveBits (maxs[0], ncounters))
 				{
 					int i;
-					for (i = 0; i < nmaxs; i++)
-						free (maxs[i]);
+					for (i = 0; i < nmaxs; i++) xfree (maxs[i]);
 
-					maxs = (int **) realloc (maxs, (sizeof(int*)));
-					if (maxs == NULL)
-					{
-						fprintf (stderr, "Error! Cannot re-allocate memory for maximum eventsets\n");
-						exit (-6);
-					}
+					maxs = (int **) xrealloc (maxs, (sizeof(int*)));
 					maxs[0] = CreateBitmask (ncounters);
 					Bitmask_Copy (bitmask, maxs[0], ncounters);
 					nmaxs = 1;
@@ -175,12 +165,7 @@ void CheckMaxEventSet (int ncounters, unsigned *counters)
 				/* This set has the same number of counters than maximum set. Add it */
 				else if (Bitmask_CountActiveBits (bitmask, ncounters) == Bitmask_CountActiveBits (maxs[0], ncounters))
 				{
-					maxs = (int **) realloc (maxs, ((nmaxs+1)*sizeof(int*)));
-					if (maxs == NULL)
-					{
-						fprintf (stderr, "Error! Cannot re-allocate memory for maximum eventsets\n");
-						exit (-6);
-					}
+					maxs = (int **) xrealloc (maxs, ((nmaxs+1)*sizeof(int*)));
 					maxs[nmaxs] = CreateBitmask (ncounters);
 					Bitmask_Copy (bitmask, maxs[nmaxs], ncounters);
 					nmaxs++;
@@ -188,12 +173,7 @@ void CheckMaxEventSet (int ncounters, unsigned *counters)
 			}
 			else
 			{
-				maxs = (int **) malloc (sizeof(int*));
-				if (maxs == NULL)
-				{
-					fprintf (stderr, "Error! Cannot allocate memory for maximum eventsets\n");
-					exit (-6);
-				}
+				maxs = (int **) xmalloc (sizeof(int*));
 				maxs[0] = CreateBitmask (ncounters);
 				Bitmask_Copy (bitmask, maxs[0], ncounters);
 				nmaxs = 1;
@@ -304,12 +284,7 @@ int main (int argc, char *argv[])
 		return -2;
 	}
 
-	events = (unsigned*) malloc (sizeof(unsigned)*(argc-1));
-	if (events == NULL)
-	{
-		fprintf (stderr, "Error: Cannot allocate memory for %d events\n", argc-1);
-		return -3;
-	}
+	events = (unsigned*) xmalloc (sizeof(unsigned)*(argc-1));
 
 	fprintf (stdout, "This binary was built using PAPI found in %s\n", PAPI_HOME);
 

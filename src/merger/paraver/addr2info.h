@@ -42,6 +42,7 @@
 #include "common.h"
 #include "labels.h"
 #include "addr2types.h"
+#include "xalloc.h"
 
 #define ADDR_UNRESOLVED "Unresolved"
 #define ADDR_NOT_FOUND  "_NOT_Found"
@@ -142,24 +143,24 @@ struct function_table
 	int num_functions;
 };
 
-#define COPY_STRING(source, destination) {                         \
-    if (source == NULL)                                            \
-    {                                                              \
-        destination = NULL;                                        \
-    }                                                              \
-    else                                                           \
-    {                                                              \
-        destination = (char *)malloc(strlen((const char *)source)+1);     \
+#define COPY_STRING(source, destination) {                                \
+    if (source == NULL)                                                   \
+    {                                                                     \
+        destination = NULL;                                               \
+    }                                                                     \
+    else                                                                  \
+    {                                                                     \
+        destination = (char *)xmalloc(strlen((const char *)source)+1);    \
         destination = strcpy ((char *)destination, (const char *)source); \
-        if (destination == NULL)                                   \
-        {                                                          \
-            fprintf(stderr,                                        \
-                    "Error while copying string '%s' into %p\n", \
-                    source,                                        \
-                    destination);                                  \
-            exit(-1);                                    \
-        }                                                          \
-    }                                                              \
+        if (destination == NULL)                                          \
+        {                                                                 \
+            fprintf(stderr,                                               \
+                    "Error while copying string '%s' into %p\n",          \
+                    source,                                               \
+                    destination);                                         \
+            exit(-1);                                                     \
+        }                                                                 \
+    }                                                                     \
 }
 
 

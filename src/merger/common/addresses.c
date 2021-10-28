@@ -34,6 +34,7 @@
 #endif
 
 #include "addresses.h"
+#include "xalloc.h"
 
 #define AC_ALLOC_CHUNK 256
 
@@ -65,30 +66,10 @@ void AddressCollector_Add (struct address_collector_t *ac, unsigned ptask,
 	{
 		if (ac->allocated == ac->count)
 		{
-			ac->addresses = (UINT64*) realloc (ac->addresses, (ac->count + AC_ALLOC_CHUNK)*sizeof(UINT64));
-			if (ac->addresses == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
-				exit (-1);
-			}
-			ac->types = (int*) realloc (ac->types, (ac->count + AC_ALLOC_CHUNK)*sizeof(int));
-			if (ac->types == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
-				exit (-1);
-			}
-			ac->ptasks = (unsigned*) realloc (ac->ptasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
-			if (ac->ptasks == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
-				exit (-1);
-			}
-			ac->tasks = (unsigned*) realloc (ac->tasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
-			if (ac->tasks == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
-				exit (-1);
-			}
+			ac->addresses = (UINT64*) xrealloc (ac->addresses, (ac->count + AC_ALLOC_CHUNK)*sizeof(UINT64));
+			ac->types = (int*) xrealloc (ac->types, (ac->count + AC_ALLOC_CHUNK)*sizeof(int));
+			ac->ptasks = (unsigned*) xrealloc (ac->ptasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
+			ac->tasks = (unsigned*) xrealloc (ac->tasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
 			ac->allocated += AC_ALLOC_CHUNK;
 		}
 		ac->ptasks[ac->count] = ptask;

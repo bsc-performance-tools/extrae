@@ -181,7 +181,7 @@ int open(const char *pathname, int flags, ...)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_open == NULL)
   {
-    real_open = EXTRAE_DL_INIT(__func__);
+    real_open = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -272,7 +272,7 @@ int open64(const char *pathname, int flags, ...)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_open64 == NULL)
   {
-    real_open64 = EXTRAE_DL_INIT(__func__);
+    real_open64 = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -354,7 +354,7 @@ FILE * fopen(const char *path, const char *mode)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen == NULL)
   {
-    real_fopen = EXTRAE_DL_INIT(__func__);
+    real_fopen = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -442,7 +442,7 @@ FILE * fopen64(const char *path, const char *mode)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen64 == NULL)
   {
-    real_fopen64 = EXTRAE_DL_INIT(__func__);
+    real_fopen64 = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -529,7 +529,7 @@ int ioctl(int fd, unsigned long request, char *argp)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_ioctl == NULL)
   {
-    real_ioctl = EXTRAE_DL_INIT(__func__);
+    real_ioctl = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -610,7 +610,7 @@ ssize_t read (int fd, void *buf, size_t count)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_read == NULL)
   {
-    real_read = EXTRAE_DL_INIT(__func__);
+    real_read = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -691,7 +691,7 @@ ssize_t write (int fd, const void *buf, size_t count)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_write == NULL)
   {
-    real_write = EXTRAE_DL_INIT(__func__);
+    real_write = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -772,7 +772,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fread == NULL)
   {
-    real_fread = EXTRAE_DL_INIT(__func__);
+    real_fread = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -852,7 +852,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 
   if (real_fwrite == NULL)
   {
-    real_fwrite = EXTRAE_DL_INIT(__func__);
+    real_fwrite = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -933,7 +933,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pread == NULL)
   {
-    real_pread = EXTRAE_DL_INIT(__func__);
+    real_pread = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1014,7 +1014,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwrite == NULL)
   {
-    real_pwrite = EXTRAE_DL_INIT(__func__);
+    real_pwrite = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1095,7 +1095,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_readv == NULL)
   {
-    real_readv = EXTRAE_DL_INIT(__func__);
+    real_readv = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1185,7 +1185,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_writev == NULL)
   {
-    real_writev = EXTRAE_DL_INIT(__func__);
+    real_writev = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1275,7 +1275,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv == NULL)
   {
-    real_preadv = EXTRAE_DL_INIT(__func__);
+    real_preadv = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1365,7 +1365,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv64 == NULL)
   {
-    real_preadv64 = EXTRAE_DL_INIT(__func__);
+    real_preadv64 = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1455,7 +1455,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev == NULL)
   {
-    real_pwritev = EXTRAE_DL_INIT(__func__);
+    real_pwritev = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1545,7 +1545,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev64 == NULL)
   {
-    real_pwritev64 = EXTRAE_DL_INIT(__func__);
+    real_pwritev64 = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)
@@ -1641,7 +1641,7 @@ close(int fildes)
 	/* Initialize the module if the pointer to the real call is not yet set */
 	if (real_close == NULL)
 	{
-		real_close = EXTRAE_DL_INIT(__func__);
+		real_close = XTR_FIND_SYMBOL(__func__);
 	}
 
 #if defined(DEBUG)
@@ -1733,7 +1733,7 @@ fclose(FILE *stream)
 	/* Initialize the module if the pointer to the real call is not yet set */
 	if (real_fclose == NULL)
 	{
-		real_fclose = EXTRAE_DL_INIT(__func__);
+		real_fclose = XTR_FIND_SYMBOL(__func__);
 	}
 
 #if defined(DEBUG)

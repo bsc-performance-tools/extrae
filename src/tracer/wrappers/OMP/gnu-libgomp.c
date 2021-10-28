@@ -50,6 +50,8 @@
 #include "wrapper.h"
 #include <omp.h>
 
+#include "xalloc.h"
+
 //#define DEBUG
 #define GOMP_API_3_1 "3.1"
 #define GOMP_API_4_0 "4.0"
@@ -202,12 +204,7 @@ static void preallocate_GOMP_helpers()
 
 	if (__GOMP_helpers == NULL)                                                      
 	{                                                                             
-		__GOMP_helpers = (struct helpers_queue_t *)malloc(sizeof(struct helpers_queue_t));
-		if (__GOMP_helpers == NULL)                                                 
-		{                                                                           
-			fprintf (stderr, PACKAGE_NAME": ERROR! Invalid initialization of '__GOMP_helpers'\n");
-			exit(-1);                                                                 
-		}                                                                           
+		__GOMP_helpers = (struct helpers_queue_t *)xmalloc(sizeof(struct helpers_queue_t));                                                                        
 
 		/*
 		 * If the environment variable ENV_VAR_EXTRAE_OPENMP_HELPERS is defined, this
@@ -229,12 +226,7 @@ static void preallocate_GOMP_helpers()
 
 		__GOMP_helpers->current_helper = 0;                                           
 		__GOMP_helpers->max_helpers = num_helpers;                                    
-		__GOMP_helpers->queue = (struct parallel_helper_t *)malloc(sizeof(struct parallel_helper_t) * num_helpers);
-		if (__GOMP_helpers->queue == NULL)                                          
-		{                                                                           
-			fprintf (stderr, PACKAGE_NAME": ERROR! Invalid initialization of '__GOMP_helpers->queue' (%d helpers)\n", num_helpers);
-			exit(-1);                                                                 
-		}                                                                           
+		__GOMP_helpers->queue = (struct parallel_helper_t *)xmalloc(sizeof(struct parallel_helper_t) * num_helpers);                                                                          
 	}                                                                             
 
 	pthread_mutex_unlock(&__GOMP_helpers_mtx);
@@ -480,8 +472,8 @@ static void callme_task (void *task_helper_ptr)
 
 		task_helper->fn (task_helper->data);
 		if (task_helper->buf != NULL)
-			free(task_helper->buf);
-		free(task_helper);
+			xfree(task_helper->buf);
+		xfree(task_helper);
 
 		Extrae_OpenMP_Notify_NewExecutedTask();
 		Extrae_OpenMP_TaskUF_Exit ();
@@ -2346,13 +2338,13 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 		 * Helpers for GOMP_task don't use the array of active helpers, as we know 
 		 * that we can free them right away after the task is executed.
 		 */
-		struct task_helper_t *task_helper = (struct task_helper_t *) malloc(sizeof(struct task_helper_t));
+		struct task_helper_t *task_helper = (struct task_helper_t *) xmalloc(sizeof(struct task_helper_t));
 		task_helper->fn = fn;
 		task_helper->data = data;
 
 		if (cpyfn != NULL)
 		{
-			char *buf = malloc(sizeof(char) * (arg_size + arg_align - 1));
+			char *buf = xmalloc(sizeof(char) * (arg_size + arg_align - 1));
 			char *arg = (char *) (((uintptr_t) buf + arg_align - 1)
 			            & ~(uintptr_t) (arg_align - 1));
 			cpyfn (arg, data);
@@ -2362,7 +2354,7 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 		}
 		else
 		{
-			char *buf = malloc(sizeof(char) * (arg_size + arg_align - 1));
+			char *buf = xmalloc(sizeof(char) * (arg_size + arg_align - 1));
 			memcpy (buf, data, arg_size);
 			task_helper->data = buf;
 			// Saved for deallocation purposes, arg is not valid since includes offset
@@ -2446,7 +2438,7 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 #endif
 
     	        // Append the helper to the end of data
-		void *data_trailer = malloc(arg_size + helper_size);
+		void *data_trailer = xmalloc(arg_size + helper_size);
 		memcpy (data_trailer, data, arg_size);
 		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
 
@@ -2473,7 +2465,6 @@ void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long a
 #endif
 
 	RECHECK_INIT(GOMP_taskloop_ull_real);
-
 	if (TRACE(GOMP_taskloop_ull_real) && (getTrace_OMPTaskloop()))
 	{
 		struct taskloop_helper_t taskloop_helper;
@@ -2490,9 +2481,8 @@ void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long a
 		taskloop_helper.id = __GOMP_taskloop_ctr++;
 		pthread_mutex_unlock (&__GOMP_taskloop_ctr_mtx);
 #endif
-
     	        // Append the helper to the end of data
-		void *data_trailer = malloc(arg_size + helper_size);
+		void *data_trailer = xmalloc(arg_size + helper_size);
 		memcpy (data_trailer, data, arg_size);
 		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
 

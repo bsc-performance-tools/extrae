@@ -34,6 +34,7 @@
 #endif
 
 #include "ompt-helper.h"
+#include "xalloc.h"
 
 
 /* Relation between parallel id and parallel function */
@@ -64,9 +65,8 @@ void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid,
 		fprintf (stdout, "OMPT: allocating container ompt_pid - pf for %u buckets\n", n_allocated_ompt_pids_pf+N_ALLOCATE_OMPT_PIDS);
 #endif
 		/* Allocate container */
-		ompt_pids_pf = (ompt_parallel_id_pf_t*) realloc (ompt_pids_pf, 
+		ompt_pids_pf = (ompt_parallel_id_pf_t*) xrealloc (ompt_pids_pf, 
 		  (n_allocated_ompt_pids_pf+N_ALLOCATE_OMPT_PIDS)*sizeof(ompt_parallel_id_pf_t));
-		assert (ompt_pids_pf != NULL);
 
 		/* Clear data */
 		for (u = n_allocated_ompt_pids_pf; u < n_allocated_ompt_pids_pf+N_ALLOCATE_OMPT_PIDS; u++)
@@ -173,9 +173,8 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid,
 		fprintf (stdout, "OMPT: allocating container ompt_tid - pf for %u buckets\n", n_allocated_ompt_tids_tf+N_ALLOCATE_OMPT_TIDS);
 #endif
 		/* Allocate container */
-		ompt_tids_tf = (ompt_task_id_tf_t*) realloc (ompt_tids_tf, 
+		ompt_tids_tf = (ompt_task_id_tf_t*) xrealloc (ompt_tids_tf, 
 		  (n_allocated_ompt_tids_tf+N_ALLOCATE_OMPT_TIDS)*sizeof(ompt_task_id_tf_t));
-		assert (ompt_tids_tf != NULL);
 
 		/* Clear data */
 		for (u = n_allocated_ompt_tids_tf; u < n_allocated_ompt_tids_tf+N_ALLOCATE_OMPT_TIDS; u++)

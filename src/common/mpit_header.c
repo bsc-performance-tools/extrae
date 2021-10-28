@@ -30,6 +30,7 @@
 #endif
 #include "mpit_header.h"
 #include "utils.h"
+#include "xalloc.h"
 
 MPIT_Header_t * new_MPIT_Header()
 {

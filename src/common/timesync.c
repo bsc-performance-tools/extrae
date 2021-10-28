@@ -40,6 +40,7 @@
 #include "types.h"
 #include "timesync.h"
 #include "utils.h"
+#include "xalloc.h"
 
 //#define DEBUG
 
@@ -73,8 +74,8 @@ static int Get_NodeId (char *node)
 
 	/* Not found */
 	TotalNodes ++;
-	NodeList = (char **)realloc(NodeList, TotalNodes * sizeof(char *));
-	NodeList[TotalNodes - 1] = (char *)malloc(strlen(node) + 1);
+	NodeList = (char **)xrealloc(NodeList, TotalNodes * sizeof(char *));
+	NodeList[TotalNodes - 1] = (char *)xmalloc(strlen(node) + 1);
 	strcpy (NodeList[TotalNodes - 1], node);
 
 	return TotalNodes - 1;
@@ -97,8 +98,7 @@ int TimeSync_Initialize (int num_appls, int *num_tasks)
 	ASSERT(num_tasks!=NULL, "Invalid set of tasks in TimeSync_Initialize");
 
 	TotalAppsToSync = num_appls;
-	TotalTasksToSync = (int*) malloc (sizeof(int)*num_appls);
-	ASSERT(TotalTasksToSync!=NULL, "Cannot allocate memory to synchronize application tasks");
+	TotalTasksToSync = (int*) xmalloc (sizeof(int)*num_appls);
 	for (i = 0; i < num_appls; i++)
 	{
 #if defined(DEBUG)
@@ -107,19 +107,15 @@ int TimeSync_Initialize (int num_appls, int *num_tasks)
 		TotalTasksToSync[i] = num_tasks[i];
 	}
 
-	LatencyTable = (INT64**) malloc (sizeof(INT64*)*num_appls);
-	ASSERT(LatencyTable!=NULL, "Cannot allocate latency table to synchronize application tasks");
+	LatencyTable = (INT64**) xmalloc (sizeof(INT64*)*num_appls);
 	for (i = 0; i < num_appls; i++)
 	{
-		LatencyTable[i] = (INT64*) malloc (sizeof(INT64)*num_tasks[i]);
-		ASSERT(LatencyTable[i]!=NULL, "Cannot allocate latency table to synchronize application task");
+		LatencyTable[i] = (INT64*) xmalloc (sizeof(INT64)*num_tasks[i]);
 	}
-	SyncInfo = (SyncInfo_t **) malloc (sizeof(SyncInfo_t*)*num_appls);
-	ASSERT(SyncInfo!=NULL, "Cannot allocate synchronization table to synchronize application tasks");
+	SyncInfo = (SyncInfo_t **) xmalloc (sizeof(SyncInfo_t*)*num_appls);
 	for (i = 0; i < num_appls; i++)
 	{
-		SyncInfo[i] = (SyncInfo_t*) malloc (sizeof(SyncInfo_t)*num_tasks[i]);
-		ASSERT(SyncInfo[i]!=NULL, "Cannot allocate synchronization table to synchronize application task");
+		SyncInfo[i] = (SyncInfo_t*) xmalloc (sizeof(SyncInfo_t)*num_tasks[i]);
 	}
 
 	for (i = 0; i < num_appls; i++)
@@ -218,8 +214,7 @@ int TimeSync_CalculateLatencies (int sync_strategy, int align_apps)
 		UINT64 *max_sync_time_per_app;
 		UINT64  abs_max_sync_time = 0;
 
-		max_sync_time_per_app = (UINT64 *)malloc(sizeof(UINT64) * TotalAppsToSync);
-		memset(max_sync_time_per_app, 0, sizeof(UINT64) * TotalAppsToSync);
+		max_sync_time_per_app = (UINT64 *)xmalloc_and_zero(sizeof(UINT64) * TotalAppsToSync);
 
 		/* Calculate the maximum synchronization time per app */
 		for (i = 0; i < TotalAppsToSync; i++)
@@ -252,11 +247,10 @@ int TimeSync_CalculateLatencies (int sync_strategy, int align_apps)
 		UINT64  *max_sync_time_per_app;
 		UINT64   abs_max_sync_time = 0;
 
-		max_sync_time_per_node_per_app = (UINT64 **)malloc(sizeof(UINT64*) * TotalAppsToSync);
+		max_sync_time_per_node_per_app = (UINT64 **)xmalloc(sizeof(UINT64*) * TotalAppsToSync);
 		for (i = 0; i < TotalAppsToSync; i++)
 		{
-			max_sync_time_per_node_per_app[i] = (UINT64 *)malloc(sizeof(UINT64) * TotalNodes);
-			memset(max_sync_time_per_node_per_app[i], 0, sizeof(UINT64) * TotalNodes);
+			max_sync_time_per_node_per_app[i] = (UINT64 *)xmalloc_and_zero(sizeof(UINT64) * TotalNodes);
 		}
 
 		/* Calculate the maximum synchronization time of each app per node */
@@ -268,8 +262,7 @@ int TimeSync_CalculateLatencies (int sync_strategy, int align_apps)
 			}
 		}
 
-		max_sync_time_per_app = (UINT64 *)malloc(sizeof(UINT64) * TotalAppsToSync);
-		memset(max_sync_time_per_app, 0, sizeof(UINT64) * TotalAppsToSync);
+		max_sync_time_per_app = (UINT64 *)xmalloc_and_zero(sizeof(UINT64) * TotalAppsToSync);
 		/* Calculate the absolute maximum synchronization time of each app */
 		for (i = 0; i < TotalAppsToSync; i++)
 		{
@@ -292,11 +285,11 @@ int TimeSync_CalculateLatencies (int sync_strategy, int align_apps)
 			{
 				LatencyTable[i][j] = (align_apps ? abs_max_sync_time : max_sync_time_per_app[i]) - max_sync_time_per_node_per_app[i][SyncInfo[i][j].node_id];
 			}
-			free(max_sync_time_per_node_per_app[i]);
+			xfree(max_sync_time_per_node_per_app[i]);
 		}
 
-		free(max_sync_time_per_node_per_app);
-		free(max_sync_time_per_app);
+		xfree(max_sync_time_per_node_per_app);
+		xfree(max_sync_time_per_app);
 	}
 
 	/* Calculate the minimum first time (latencies are already applied) */

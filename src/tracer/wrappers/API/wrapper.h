@@ -40,6 +40,7 @@
 #include "common.h"
 #include "buffers.h"
 #include "calltrace.h" 
+#include "symptr.h"
 
 #include "extrae_types.h"
 
@@ -294,34 +295,5 @@ void Extrae_core_set_current_threads(int current_threads);
 void Extrae_core_set_maximum_threads(int maximum_threads);
 
 #endif /* STANDALONE */
-
-/**
- * EXTRAE_DL_INIT
- *
- * Initialization routine for the dynamic libraries tracing module. Performs a
- * discovery of the address of the real implementation of the calls through
- * dlsym. The initialization is deferred until any of the instrumented symbols
- * is used for the first time.
- */
-
-#if defined(PIC) /* Only available for .so libraries */
-# if !defined(DEBUG)
-#  define EXTRAE_DL_INIT(func)                                                \
-   ({                                                                         \
-	dlsym (RTLD_NEXT, func);                                              \
-   })
-# else /* DEBUG */
-#  define EXTRAE_DL_INIT(func)                                                \
-   ({                                                                         \
-	fprintf (stderr, PACKAGE_NAME": [DEBUG] hooking %s\n", func);         \
-	dlsym (RTLD_NEXT, func);                                              \
-   })
-# endif /* DEBUG */
-#else /* PIC */
-# define EXTRAE_DL_INIT(func)                                                 \
-  ({                                                                          \
-	fprintf (stderr, PACKAGE_NAME": Warning! %s instrumentation requires linking with shared library!\n", func); \
-  })
-#endif /* PIC */
 
 #endif /* __WRAPPER_H__ */

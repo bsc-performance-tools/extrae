@@ -46,6 +46,7 @@
 #include "sampling-common.h"
 #include "sampling-intel-pebs.h"
 
+#include "xalloc.h"
 #include "wrapper.h"
 #include "trace_macros.h"
 
@@ -788,49 +789,39 @@ static int Extrae_IntelPEBS_enable (void)
 		int i;
 
 		/* Extend the data structures to the maximum number of threads seen so far */
-		extrae_intel_pebs_mmap = (void ***) realloc(extrae_intel_pebs_mmap, (thread_id+1) * sizeof(void **));
-		assert (extrae_intel_pebs_mmap);
+		extrae_intel_pebs_mmap = (void ***) xrealloc(extrae_intel_pebs_mmap, (thread_id+1) * sizeof(void **));
 
-		perf_pebs_fd = (int **)realloc(perf_pebs_fd, (thread_id+1) * sizeof(int*));
-		assert (perf_pebs_fd);
+		perf_pebs_fd = (int **)xrealloc(perf_pebs_fd, (thread_id+1) * sizeof(int*));
 
-		prev_head = (long long **) realloc (prev_head, (thread_id+1) * sizeof(long long*));
-		assert (prev_head);
+		prev_head = (long long **) xrealloc (prev_head, (thread_id+1) * sizeof(long long*));
 
-		group_fd = (int*) realloc (group_fd, (thread_id+1) * sizeof(int));
-		assert (group_fd);
+		group_fd = (int*) xrealloc (group_fd, (thread_id+1) * sizeof(int));
 
-		data_thread_buffer = (char **) realloc (data_thread_buffer, (thread_id+1) * sizeof(char *));
-		assert (data_thread_buffer);
+		data_thread_buffer = (char **) xrealloc (data_thread_buffer, (thread_id+1) * sizeof(char *));
 
-		prev_value_fd = (uint64_t**) realloc (prev_value_fd, (thread_id+1) * sizeof(uint64_t *));
-		assert (prev_value_fd);
+		prev_value_fd = (uint64_t**) xrealloc (prev_value_fd, (thread_id+1) * sizeof(uint64_t *));
 
 		for (i=pebs_init_threads; i<(thread_id+1); i++)
 		{
-			extrae_intel_pebs_mmap[i] = malloc (sizeof(void*)*NUM_SAMPLING_TYPES);
-			assert (extrae_intel_pebs_mmap[i]);
+			extrae_intel_pebs_mmap[i] = xmalloc (sizeof(void*)*NUM_SAMPLING_TYPES);
 			extrae_intel_pebs_mmap[i][LOAD_INDEX] =
 			  extrae_intel_pebs_mmap[i][STORE_INDEX] =
 			  extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] =
 			  extrae_intel_pebs_mmap[i][OFFCORE_STORE_L3M_INDEX] = NULL;
 
-			perf_pebs_fd[i] = malloc (sizeof(int)*NUM_SAMPLING_TYPES);
-			assert (perf_pebs_fd[i]);
+			perf_pebs_fd[i] = xmalloc (sizeof(int)*NUM_SAMPLING_TYPES);
 			perf_pebs_fd[i][LOAD_INDEX] =
 			  perf_pebs_fd[i][STORE_INDEX] =
 			  perf_pebs_fd[i][LOAD_L3M_INDEX] =
 			  perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX] = -1;
 
-			prev_head[i] = (long long*) malloc  (sizeof (long long)*NUM_SAMPLING_TYPES);
-			assert (prev_head[i]);
+			prev_head[i] = (long long*) xmalloc  (sizeof (long long)*NUM_SAMPLING_TYPES);
 			prev_head[i][LOAD_INDEX] =
 			  prev_head[i][STORE_INDEX] =
 			  prev_head[i][LOAD_L3M_INDEX] =
 			  prev_head[i][OFFCORE_STORE_L3M_INDEX] = 0;
 
-			prev_value_fd[i] = (uint64_t*) malloc (sizeof(uint64_t)*NUM_SAMPLING_TYPES);
-			assert (prev_value_fd[i]);
+			prev_value_fd[i] = (uint64_t*) xmalloc (sizeof(uint64_t)*NUM_SAMPLING_TYPES);
 			prev_value_fd[i][LOAD_INDEX] =
 			  prev_value_fd[i][STORE_INDEX] =
 			  prev_value_fd[i][LOAD_L3M_INDEX] =
@@ -838,15 +829,14 @@ static int Extrae_IntelPEBS_enable (void)
 
 			group_fd[i] = -1;
 
-			data_thread_buffer[i] = malloc (ALLOCATED_SIZE);
-			assert (data_thread_buffer[i]);
+			data_thread_buffer[i] = xmalloc (ALLOCATED_SIZE);
 		}
 
 		pebs_init_threads = thread_id+1;
 	}
 	pthread_mutex_unlock (&pebs_init_lock);
 
-	memset(&sa, 0, sizeof(struct sigaction));
+	xmemset(&sa, 0, sizeof(struct sigaction));
 	sa.sa_sigaction = extrae_intel_pebs_handler;
 	sa.sa_flags = SA_SIGINFO;
 	if (sigaction( SIGIO, &sa, NULL) < 0)
@@ -861,7 +851,7 @@ static int Extrae_IntelPEBS_enable (void)
 
 	if (PEBS_load_enabled && get_latency_load_event (&hwc) >= 0)
 	{
-		memset (&pe,0,sizeof(struct perf_event_attr));
+		xmemset (&pe,0,sizeof(struct perf_event_attr));
 		pe.config = hwc;
 		pe.type = PERF_TYPE_RAW;
 		pe.config1 = PEBS_minimumLoadLatency;
@@ -908,7 +898,7 @@ static int Extrae_IntelPEBS_enable (void)
 
 	if (PEBS_store_enabled && get_store_event (&hwc) >= 0)
 	{
-		memset (&pe,0,sizeof(struct perf_event_attr));
+		xmemset (&pe,0,sizeof(struct perf_event_attr));
 		pe.config = hwc;
 		pe.type = PERF_TYPE_RAW;
 		pe.size = sizeof(struct perf_event_attr);
@@ -963,7 +953,7 @@ static int Extrae_IntelPEBS_enable (void)
 
 	if (PEBS_load_l3m_enabled && get_load_l3m_event (&hwc) >= 0)
 	{
-		memset (&pe,0,sizeof(struct perf_event_attr));
+		xmemset (&pe,0,sizeof(struct perf_event_attr));
 		pe.config = hwc;
 		pe.type = PERF_TYPE_RAW;
 		pe.size = sizeof(struct perf_event_attr);
@@ -1023,7 +1013,7 @@ static int Extrae_IntelPEBS_enable (void)
 	{
 		if (get_offcore_store_l3m_event(&hwc) >= 0)
 		{
-			memset (&pe,0,sizeof(struct perf_event_attr));
+			xmemset (&pe,0,sizeof(struct perf_event_attr));
 			pe.config = 0x01b7;
 			pe.type = PERF_TYPE_RAW;
 			pe.size = sizeof(struct perf_event_attr);

@@ -37,6 +37,7 @@
 
 #include "wrapper.h"
 #include "utils.h"
+#include "xalloc.h"
 #include "UF_xl_instrument.h"
 
 static int LookForUF (const char *fname);
@@ -88,12 +89,7 @@ static void AddUFtoInstrument (char *fname)
 	if (UF_names_count == UF_names_allocated)
 	{
 		UF_names_allocated += 128;
-		UF_names = (char**) realloc (UF_names, sizeof(char*)*UF_names_allocated);
-		if (UF_names == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Cannot reallocate UF_names buffer\n");
-			exit (0);	
-		}
+		UF_names = (char**) xrealloc (UF_names, sizeof(char*)*UF_names_allocated);
 	}
 
 	UF_names[UF_names_count] = strdup (fname);

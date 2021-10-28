@@ -30,6 +30,7 @@
 #include <spectral-api.h>
 #include "Signal.h"
 #include "tags.h"
+#include "xalloc.h"
 
 /**
  * Empty signal constructor.
@@ -116,7 +117,7 @@ void Signal::Sum(vector<Signal *> SignalsList)
   signal_t  *SumSignal   = NULL;
   
   num_signals = SignalsList.size();
-  all_signals = (signal_t **)malloc( (num_signals + 1) * sizeof (signal_t *));
+  all_signals = (signal_t **)xmalloc( (num_signals + 1) * sizeof (signal_t *));
   for (i=0; i<num_signals; i++)
   {
     all_signals[i] = SignalsList[i]->GetSignal();
@@ -131,7 +132,7 @@ void Signal::Sum(vector<Signal *> SignalsList)
 
   SumSignal = Spectral_AddSortedN(num_signals, all_signals);
 
-  free(all_signals);
+  xfree(all_signals);
   Spectral_FreeSignal( SpectralSignal );
   SpectralSignal = SumSignal;
 }
@@ -157,9 +158,9 @@ void Signal::Serialize(STREAM *OutputStream)
     Deltas, SignalSize,
     Values, SignalSize);
 
-  free(Times);
-  free(Deltas);
-  free(Values);
+  xfree(Times);
+  xfree(Deltas);
+  xfree(Values);
 }
 
 /**
@@ -207,8 +208,8 @@ void Signal::Unpack(PACKET_PTR InputPacket)
 
   SpectralSignal = Spectral_AssembleSignal(SignalSize, Times, Deltas, Values);
 
-  free(Times);
-  free(Deltas);
-  free(Values);
+  xfree(Times);
+  xfree(Deltas);
+  xfree(Values);
 }
 

@@ -27,6 +27,7 @@
 #include <string.h>
 #include <pthread.h>
 #include "hash_table.h"
+#include "xalloc.h"
 
 
 /*** Prototypes ***/
@@ -53,37 +54,17 @@ xtr_hash_t * xtr_hash_new (xtr_hash_size_t hash_size, int data_size, int flags)
 	xtr_hash_t *hash = NULL;
 
 	// Allocate memory for the new hash
-	if ((hash = malloc(sizeof(xtr_hash_t))) == NULL)
-	{
-		perror("xtr_hash_new: malloc");
-		exit(-1);
-	}
-	memset(hash, 0, sizeof(xtr_hash_t));
-	//hash = xmalloc_and_zero(sizeof(xtr_hash_t));
+	hash = xmalloc_and_zero(sizeof(xtr_hash_t));
 
 	// Allocate memory for head and collision arrays
 	hash->head_size = hash_size;
-	if ((hash->head = malloc(hash->head_size * sizeof(xtr_hash_cell_t))) == NULL)
-	{
-		perror("xtr_hash_new: hash->head: malloc");
-		exit(-1);
-	}
+	hash->head = xmalloc(hash->head_size * sizeof(xtr_hash_cell_t));
 	hash->collision_size = XTR_HASH_COLLISION_ARRAY_SIZE(hash->head_size);
-	if ((hash->collision = malloc(hash->collision_size * sizeof(xtr_hash_cell_t))) == NULL)
-	{
-		perror("xtr_hash_new: hash->collision: malloc");
-		exit(-1);
-	}
+	hash->collision = xmalloc(hash->collision_size * sizeof(xtr_hash_cell_t));
 
 	// Allocate memory for the data storage pool
 	hash->data_size = data_size;
-	if ((hash->data_pool = malloc(data_size * (hash->head_size + hash->collision_size))) == NULL)
-	{
-		perror("xtr_hash_new: hash->data_pool: malloc");
-		exit(-1);
-	}
-	memset(hash->data_pool, 0, data_size * (hash->head_size + hash->collision_size));
-	//hash->data_pool = xmalloc_and_zero(data_size * (hash->head_size + hash->collision_size));
+	hash->data_pool = xmalloc_and_zero(data_size * (hash->head_size + hash->collision_size));
 
 	// Set statistics to zero
 	xtr_hash_stats_reset(hash);
@@ -132,17 +113,17 @@ void xtr_hash_free(xtr_hash_t *hash)
 	{
 		if (hash->data_pool != NULL)
 		{
-			free(hash->data_pool);
+			xfree(hash->data_pool);
 		}
 		if (hash->collision != NULL)
 		{
-			free(hash->collision);
+			xfree(hash->collision);
 		}
 		if (hash->head != NULL)
 		{
-			free(hash->head);
+			xfree(hash->head);
 		}
-		free(hash);
+		xfree(hash);
 	}
 }
 

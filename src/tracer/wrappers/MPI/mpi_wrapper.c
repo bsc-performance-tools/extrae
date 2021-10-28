@@ -55,6 +55,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "utils_mpi.h"
 #include "mpi_wrapper.h"
 #include "wrapper.h"
@@ -263,16 +264,17 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_loc
 
 				PMPI_Comm_remote_group(comm, &remote_group);
 				PMPI_Group_size(remote_group, &remote_group_size);
-				local_ranks = (int *)malloc(sizeof(int) * remote_group_size);
-				world_ranks = (int *)malloc(sizeof(int) * remote_group_size);
+				local_ranks = (int *)xmalloc(sizeof(int) * remote_group_size);
+				world_ranks = (int *)xmalloc(sizeof(int) * remote_group_size);
+
 				for (i = 0; i < remote_group_size; i++) local_ranks[i] = i;
 
 				PMPI_Group_translate_ranks (remote_group, remote_group_size, local_ranks, CommWorldRanks, world_ranks); 
 
 				*partner_world = world_ranks[partner_local];
 
-				free(local_ranks);
-				free(world_ranks);
+				xfree(local_ranks);
+				xfree(world_ranks);
 			}
 		}
 		else
@@ -431,12 +433,7 @@ static void InitMPICommunicators (void)
 	unsigned i;
 
 	/** Inicialitzacio de les variables per la creacio de comunicadors **/
-	ranks_global = malloc (sizeof(int)*Extrae_get_num_tasks());
-	if (ranks_global == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_global'");
-		exit (0);
-	}
+	ranks_global = xmalloc (sizeof(int)*Extrae_get_num_tasks());
 
 	for (i = 0; i < Extrae_get_num_tasks(); i++)
 		ranks_global[i] = i;
@@ -489,36 +486,21 @@ static void Gather_Nodes_Info (void)
 			hostname[s] = '_';
 
 	/* Share information among all tasks */
-	buffer_names = (char*) malloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);
-	if (buffer_names == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for nodes name\n");
-		exit (-1);
-	}
+	buffer_names = (char*) xmalloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);
 	rc = PMPI_Allgather (hostname, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, buffer_names, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD);
 	MPI_CHECK(rc, PMPI_Allgather);
 
 	/* Store the information in a global array */
-	TasksNodes = (char **)malloc (Extrae_get_num_tasks() * sizeof(char *));
-	if (TasksNodes == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for nodes info\n");
-		exit (-1);
-	}
+	TasksNodes = (char **)xmalloc (Extrae_get_num_tasks() * sizeof(char *));
 	for (u=0; u<Extrae_get_num_tasks(); u++)
 	{
 		char *tmp = &buffer_names[u*MPI_MAX_PROCESSOR_NAME];
-		TasksNodes[u] = (char *)malloc((strlen(tmp)+1) * sizeof(char));
-		if (TasksNodes[u] == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for node info %u\n", u);
-			exit (-1);
-		}
+		TasksNodes[u] = (char *)xmalloc((strlen(tmp)+1) * sizeof(char));
 		strcpy (TasksNodes[u], tmp);
 	}
 
 	/* Free the local array, not the global one */
-	free (buffer_names);
+	xfree (buffer_names);
 }
 
 
@@ -537,14 +519,9 @@ int MPI_Generate_Task_File_List ()
 
 	if (TASKID == 0)
 	{
-		buffer = (unsigned *) malloc (sizeof(unsigned) * Extrae_get_num_tasks() * 3);
+		buffer = (unsigned *) xmalloc (sizeof(unsigned) * Extrae_get_num_tasks() * 3);
 		/* we store pid, nthreads and taskid on each position */
 
-		if (buffer == NULL)
-		{
-			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer MPITS info\n");
-			exit (-1);
-		}
 	}
 
 	tmp[0] = TASKID; 
@@ -664,12 +641,7 @@ int MPI_Generate_Task_File_List ()
 
 				int foo;
 				MPI_Status s;
-				char *tmp = (char*)malloc (NTHREADS*THREAD_INFO_NAME_LEN*sizeof(char));
-				if (tmp == NULL)
-				{
-					fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
-					exit (-1);
-				}
+				char *tmp = (char*)xmalloc (NTHREADS*THREAD_INFO_NAME_LEN*sizeof(char));
 
 				/* Ask to slave */
 				PMPI_Send (&foo, 1, MPI_INT, TID, 123456, MPI_COMM_WORLD);
@@ -691,7 +663,7 @@ int MPI_Generate_Task_File_List ()
 						return -1;
 					}
 				}
-				free (tmp);
+				xfree (tmp);
 			}
 		}
 		close (filedes);
@@ -701,12 +673,7 @@ int MPI_Generate_Task_File_List ()
 		MPI_Status s;
 		int foo;
 
-		char *tmp = (char*)malloc (Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char));
-		if (tmp == NULL)
-		{
-			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
-			exit (-1);
-		}
+		char *tmp = (char*)xmalloc (Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char));
 		for (u = 0; u < Backend_getMaximumOfThreads(); u++)
 			memcpy (&tmp[u*THREAD_INFO_NAME_LEN], Extrae_get_thread_name(u), THREAD_INFO_NAME_LEN);
 
@@ -717,12 +684,12 @@ int MPI_Generate_Task_File_List ()
 		PMPI_Send (tmp, Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN,
 		  MPI_CHAR, 0, 123457, MPI_COMM_WORLD);
 
-		free (tmp);
+		xfree (tmp);
 	}
 
 	if (TASKID == 0)
 	{
-		free (buffer);
+		xfree (buffer);
 	}
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
@@ -769,7 +736,7 @@ static void MPI_Generate_Spawns_List (void)
 
   if (TASKID != 0)
   {
-    SpawnsFileName = (char *)malloc((namelen+1) * sizeof(char));
+    SpawnsFileName = (char *)xmalloc((namelen+1) * sizeof(char));
   }
   
   PMPI_Bcast (SpawnsFileName, namelen+1, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -839,8 +806,8 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm *inte
 
     /* Gather the parent comm id's from the participating tasks */
     PMPI_Comm_size(spawn_comm, &num_parents);
-    all_parents_comms = (int *)malloc( num_parents * sizeof(int) );
-    all_parents_ranks = (int *)malloc( num_parents * sizeof(int) );
+    all_parents_comms = (int *)xmalloc( num_parents * sizeof(int) );
+    all_parents_ranks = (int *)xmalloc( num_parents * sizeof(int) );
 
     PMPI_Gather(&intercomm, 1, MPI_INT, all_parents_comms, 1, MPI_INT, 0, spawn_comm);
     PMPI_Gather(&world_rank, 1, MPI_INT, all_parents_ranks, 1, MPI_INT, 0, spawn_comm);
@@ -927,7 +894,7 @@ static void Spawn_Children_Sync(iotimer_t init_time)
     
     /* Gather the children communicators to the parent */
     PMPI_Comm_size(MPI_COMM_WORLD, &num_children);
-    all_children_comms = (int *)malloc(sizeof(int) * num_children);
+    all_children_comms = (int *)xmalloc(sizeof(int) * num_children);
     PMPI_Gather(&parent, 1, MPI_INT, all_children_comms, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     /* Exchange the spawn group id's */
@@ -936,7 +903,7 @@ static void Spawn_Children_Sync(iotimer_t init_time)
 
     /* Receive the parent's world ranks */
     PMPI_Bcast (&num_parents, 1, MPI_INT, 0, parent);
-    all_parents_ranks = (int *)malloc(sizeof(num_parents) * sizeof(int));
+    all_parents_ranks = (int *)xmalloc(sizeof(num_parents) * sizeof(int));
     PMPI_Bcast (all_parents_ranks, num_parents, MPI_INT, 0, parent);
     ParentWorldRanks = all_parents_ranks;
   
@@ -1049,7 +1016,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{
@@ -1167,7 +1134,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{
@@ -1932,7 +1899,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{
@@ -2048,7 +2015,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{

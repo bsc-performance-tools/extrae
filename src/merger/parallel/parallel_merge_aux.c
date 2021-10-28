@@ -46,6 +46,7 @@
 #include "cuda_prv_events.h"
 #include "addr2info.h"
 #include "options.h"
+#include "xalloc.h"
 
 //#define DEBUG
 
@@ -111,7 +112,7 @@ void ParallelMerge_AddIntraCommunicator (int ptask, int task, int type, int id, 
 	{
 		IntraCommunicators.size += INTRA_COMMUNICATORS_RESIZE_STEP;
 		IntraCommunicators.comms = (struct IntraCommunicator_t*)
-			realloc (IntraCommunicators.comms,
+			xrealloc (IntraCommunicators.comms,
 			IntraCommunicators.size*sizeof(struct IntraCommunicator_t));
 	}
 	IntraCommunicators.comms[count].ptask = ptask;
@@ -123,13 +124,7 @@ void ParallelMerge_AddIntraCommunicator (int ptask, int task, int type, int id, 
 	{
 		int i;
 
-		IntraCommunicators.comms[count].tasks = (int*) malloc (sizeof(int)*ntasks);
-		if (NULL == IntraCommunicators.comms[count].tasks)
-		{
-			fprintf (stderr, "mpi2prv: ERROR! Unable to store communicator information\n");
-			fflush (stderr);
-			exit (-1);
-		}
+		IntraCommunicators.comms[count].tasks = (int*) xmalloc (sizeof(int)*ntasks);
 		for (i = 0; i < ntasks; i++)
 			IntraCommunicators.comms[count].tasks[i] = tasks[i];
 	}
@@ -148,7 +143,7 @@ void ParallelMerge_AddInterCommunicator (int ptask, int task, int id, int comm1,
 	{
 		InterCommunicators.size += INTER_COMMUNICATORS_RESIZE_STEP;
 		InterCommunicators.comms = (struct InterCommunicator_t*)
-			realloc (InterCommunicators.comms,
+			xrealloc (InterCommunicators.comms,
 			InterCommunicators.size*sizeof(struct InterCommunicator_t));
 	}
 
@@ -180,7 +175,7 @@ void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
 	{
 		PendingComms.size += PENDING_COMM_RESIZE_STEP;
 		PendingComms.data = (struct PendingCommunication_t*) 
-			realloc (PendingComms.data, 
+			xrealloc (PendingComms.data, 
 			PendingComms.size*sizeof(struct PendingCommunication_t));
 	}
 #if defined(DEBUG)
@@ -221,7 +216,7 @@ void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int ptask_r, int task
 	{
 		ForeignRecvs[group].size += FOREIGN_RECV_RESIZE_STEP;
 		ForeignRecvs[group].data = (struct ForeignRecv_t*) 
-			realloc (ForeignRecvs[group].data, 
+			xrealloc (ForeignRecvs[group].data, 
 					ForeignRecvs[group].size*sizeof(struct ForeignRecv_t));
 	}
 
@@ -247,7 +242,7 @@ void InitForeignRecvs (int numtasks)
 {
 	int i;
 
-	ForeignRecvs = (struct ForeignRecvs_t *) malloc (sizeof(struct ForeignRecvs_t)*numtasks);
+	ForeignRecvs = (struct ForeignRecvs_t *) xmalloc (sizeof(struct ForeignRecvs_t)*numtasks);
 
 	for (i = 0; i < numtasks; i++)
 	{
@@ -368,32 +363,21 @@ static int RecvMine (int taskid, int from, int match, int *out_count, struct For
 
 	if (count > 0)
 	{
-		data = (struct ForeignRecv_t*) malloc (count*sizeof(struct ForeignRecv_t));
-		if (NULL == data)
-		{
-			fprintf (stderr, "mpi2prv: Error! Failed to allocate memory to receive foreign receives\n");
-			fflush (stderr);
-			exit (0);
-		}
+		data = (struct ForeignRecv_t*) xmalloc (count*sizeof(struct ForeignRecv_t));
 
 		res = MPI_Recv (data, count*sizeof(struct ForeignRecv_t), MPI_BYTE, from, BUFFER_FOREIGN_RECVS_TAG, MPI_COMM_WORLD, &s);
 		MPI_CHECK(res, MPI_Recv, "Failed to receive foreign receives");
 		if (match)
 		{
 			num_match = MatchRecvs (data, count);
-			free (data);
+			xfree (data);
 		}
 		else
 		{
 			int i;
 			char *data_used;
 
-			data_used = (char*) malloc (sizeof(char)*count);
-			if (NULL == data_used)
-			{
-				fprintf (stderr, "mpi2prv: Error! Cannot create 'used' structure for foreign receives.\n");
-				exit (-1);
-			}
+			data_used = (char*) xmalloc (sizeof(char)*count);
 			for (i = 0; i < count; i++)
 				data_used[i] = FALSE;
 
@@ -458,24 +442,10 @@ void NewDistributePendingComms (int numtasks, int taskid, int match)
 
 	if (!match)
 	{
-		myForeignRecvs = (struct ForeignRecv_t**) malloc (sizeof(struct ForeignRecv_t*)*numtasks);
-		if (NULL == myForeignRecvs)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot allocate memory to control foreign receives!\n");
-			exit (-1);
-		}
-		myForeignRecvs_used = (char**) malloc (sizeof(char*)*numtasks);
-		if (NULL == myForeignRecvs_used)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot allocate memory to control foreign receives!\n");
-			exit (-1);
-		}
-		myForeignRecvs_count = (int*) malloc (sizeof(int)*numtasks);
-		if (NULL == myForeignRecvs_count)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot allocate memory to control the number of foreign receives!\n");
-			exit (-1);
-		}
+		myForeignRecvs = (struct ForeignRecv_t**) xmalloc (sizeof(struct ForeignRecv_t*)*numtasks);
+		myForeignRecvs_used = (char**) xmalloc (sizeof(char*)*numtasks);
+		myForeignRecvs_count = (int*) xmalloc (sizeof(int)*numtasks);
+
 		for (i = 0; i < numtasks; i++)
 		{
 			myForeignRecvs_count[i] = 0;
@@ -501,7 +471,7 @@ void NewDistributePendingComms (int numtasks, int taskid, int match)
 			MPI_Wait (&send_req2, &sts);
 
 		/* Free data */
-		free (ForeignRecvs[to].data);
+		xfree (ForeignRecvs[to].data);
 
 /*
 		res = MPI_Barrier (MPI_COMM_WORLD);
@@ -531,7 +501,7 @@ void NewDistributePendingComms (int numtasks, int taskid, int match)
 
 	/* Free pending communication info */
 	if (PendingComms.count > 0)
-		free (PendingComms.data);
+		xfree (PendingComms.data);
 }
 
 
@@ -554,13 +524,7 @@ static void BuildIntraCommunicator (struct IntraCommunicator_t *new_comm)
 
 	com.id = new_comm->id;
 	com.num_tasks = new_comm->ntasks;
-	com.tasks = (int*) malloc(sizeof(int)*com.num_tasks);
-	if (NULL == com.tasks)
-	{
-		fprintf (stderr, "mpi2prv: Error! Unable to allocate memory for transferred communicator!\n");
-		fflush (stderr);
-		exit (-1);
-	}
+	com.tasks = (int*) xmalloc(sizeof(int)*com.num_tasks);
 
 	if (MPI_COMM_WORLD_ALIAS == new_comm->type)
 		for (j = 0; j < com.num_tasks; j++)
@@ -573,7 +537,7 @@ static void BuildIntraCommunicator (struct IntraCommunicator_t *new_comm)
 
 	afegir_comunicador (&com, new_comm->ptask, new_comm->task);
 
-	free (com.tasks);
+	xfree (com.tasks);
 }
 
 static void BroadCastIntraCommunicator (int id, struct IntraCommunicator_t *new_comm)
@@ -602,13 +566,7 @@ static void ReceiveIntraCommunicator (int id)
 	/* If comm isn't a predefined, receive the involved tasks */
 	if (MPI_COMM_SELF_ALIAS != tmp.type && MPI_COMM_WORLD_ALIAS != tmp.type)
 	{
-		tmp.tasks = (int*) malloc (sizeof(int)*tmp.ntasks);
-		if (NULL == tmp.tasks)
-		{
-			fprintf (stderr, "mpi2prv: ERROR! Failed to allocate memory for a new intra-communicator body\n");
-			fflush (stderr);
-			exit (0);
-		}
+		tmp.tasks = (int*) xmalloc (sizeof(int)*tmp.ntasks);
 		res = MPI_Bcast (tmp.tasks, tmp.ntasks, MPI_INT, id, MPI_COMM_WORLD);
 		MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated communicators");
 	}
@@ -616,7 +574,7 @@ static void ReceiveIntraCommunicator (int id)
 
 	/* Free data structures */
 	if (tmp.tasks != NULL)
-		free (tmp.tasks);
+		xfree (tmp.tasks);
 }
 
 static void ParallelMerge_BuildIntraCommunicators (int num_tasks, int taskid)
@@ -640,8 +598,8 @@ static void ParallelMerge_BuildIntraCommunicators (int num_tasks, int taskid)
 			/* Free data structures */
 			for (j = 0; j < IntraCommunicators.count; j++)
 				if (IntraCommunicators.comms[j].tasks != NULL)
-					free (IntraCommunicators.comms[j].tasks);
-			free (IntraCommunicators.comms);
+					xfree (IntraCommunicators.comms[j].tasks);
+			xfree (IntraCommunicators.comms);
 		}
 		else
 		{
@@ -698,7 +656,7 @@ static void ParallelMerge_BuildInterCommunicators (int num_tasks, int taskid)
 				BroadCastInterCommunicator (i, &(InterCommunicators.comms[j]));
 
 			/* Free data structures */
-			free (InterCommunicators.comms);
+			xfree (InterCommunicators.comms);
 		}
 		else
 		{
@@ -855,13 +813,7 @@ void Gather_Dimemas_Traces (int numtasks, int taskid, FILE *fd, unsigned int max
 	int res;
 	int i;
 
-	buffer = malloc (maxmem);
-	if (NULL == buffer)
-	{
-		fprintf (stderr, "Error: mpi2trf was unable to allocate gathering buffers for Dimemas trace\n");
-		fflush (stderr);
-		exit (-1);
-	}
+	buffer = xmalloc (maxmem);
 
 	for (i = 1; i < numtasks; i++)
 	{
@@ -874,7 +826,7 @@ void Gather_Dimemas_Traces (int numtasks, int taskid, FILE *fd, unsigned int max
 		MPI_CHECK(res, MPI_Barrier, "Failed to synchronize while gathering Dimemas trace");
 	}
 
-	free (buffer);
+	xfree (buffer);
 }
 
 
@@ -890,13 +842,7 @@ void Gather_Dimemas_Offsets (int numtasks, int taskid, int count,
 
 	if (0 == taskid)	
 	{
-		temp = (unsigned long long*) malloc (count*sizeof(unsigned long long));
-		if (NULL == temp)
-		{
-			fprintf (stderr, "mpi2trf: Error! Unable to allocate memory for computing the offsets!\n");
-			fflush (stderr);
-			exit (-1);
-		}
+		temp = (unsigned long long*) xmalloc (count*sizeof(unsigned long long));
 	}
 
 	for (i = 0; i < numtasks-1; i++)
@@ -939,21 +885,21 @@ void ShareNodeNames (int numtasks, char ***nodenames)
 			hostname[s] = '_';
 
 	/* Share information among all tasks */
-	buffer_names = (char*) malloc (sizeof(char) * numtasks * MPI_MAX_PROCESSOR_NAME);
+	buffer_names = (char*) xmalloc (sizeof(char) * numtasks * MPI_MAX_PROCESSOR_NAME);
 	rc = MPI_Allgather (hostname, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, buffer_names, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD);
 	MPI_CHECK(rc, MPI_Allgather, "Cannot gather processor names");
 
 	/* Store the information in a global array */
-	TasksNodes = (char **) malloc (numtasks * sizeof(char *));
+	TasksNodes = (char **) xmalloc (numtasks * sizeof(char *));
 	for (i = 0; i < numtasks; i++)
 	{
 		char *tmp = &buffer_names[i*MPI_MAX_PROCESSOR_NAME];
-		TasksNodes[i] = (char *) malloc((strlen(tmp)+1) * sizeof(char));
+		TasksNodes[i] = (char *) xmalloc((strlen(tmp)+1) * sizeof(char));
 		strcpy (TasksNodes[i], tmp);
 	}
 
 	/* Free the local array, not the global one */
-	free (buffer_names);
+	xfree (buffer_names);
 
 	*nodenames = TasksNodes;
 }
@@ -971,23 +917,11 @@ unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
 		fprintf (stdout, "mpi2prv: Sharing thread accounting information for ptask %d", ptask);
 	fflush (stdout);
 
-	temp = (unsigned*) malloc (ntasks*sizeof(unsigned));
-	if (NULL == temp)
-	{
-		fprintf (stderr, "mpi2prv: Error! Task %d unable to allocate memory to gather virtual threads!\n", taskid);
-		fflush (stderr);
-		exit (-1);
-	}
+	temp = (unsigned*) xmalloc (ntasks*sizeof(unsigned));
 
 	if (taskid == 0)
 	{
-		temp_out = (unsigned*) malloc (ntasks*sizeof(unsigned));
-		if (NULL == temp_out)
-		{
-			fprintf (stderr, "mpi2prv: Error! Task %d unable to allocate memory to gather virtual threads!\n", taskid);
-			fflush (stderr);
-			exit (-1);
-		}
+		temp_out = (unsigned*) xmalloc (ntasks*sizeof(unsigned));
 	}
 
 	for (u = 0; u < ntasks; u++)
@@ -1008,7 +942,7 @@ unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
 		fprintf (stdout, " done\n");
 	fflush (stdout);
 
-	free (temp);
+	xfree (temp);
 
 	return temp_out;
 }

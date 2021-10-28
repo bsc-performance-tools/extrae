@@ -184,6 +184,7 @@ core_SRCS = \
  mode.c mode.h                               \
  threadid.h threadid.c                       \
  taskid.h taskid.c                           \
+ xalloc.c                                    \
  defines.h                                   \
  $(COMMON_INC)/events.h                      \
  $(COMMON_INC)/record.h                      \

@@ -72,6 +72,7 @@
 #include "options.h"
 #include "object_tree.h"
 #include "utils.h"
+#include "xalloc.h"
 #include "online_events.h"
 #include "HardwareCounters.h"
 #include "queue.h"
@@ -110,13 +111,8 @@ static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t ty
 		}
 	}
 
-	labels_codelocation = (codelocation_label_t*) realloc (labels_codelocation,
+	labels_codelocation = (codelocation_label_t*) xrealloc (labels_codelocation,
 	  (num_labels_codelocation+1)*sizeof(codelocation_label_t));
-	if (labels_codelocation == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to add a new code location label\n");
-		exit (-1);
-	}
 
 	labels_codelocation[num_labels_codelocation].eventcode = eventcode;
 	labels_codelocation[num_labels_codelocation].type = type;
@@ -627,7 +623,7 @@ int Assign_File_Global_Id(char *file_name)
   }
   
   /* If not found, store this file in the array and return the new index (from 1 to N) */
-  GlobalFiles = (char **)realloc(GlobalFiles, sizeof(char *) * (NumberOfGlobalFiles + 1));
+  GlobalFiles = (char **)xrealloc(GlobalFiles, sizeof(char *) * (NumberOfGlobalFiles + 1));
   GlobalFiles[NumberOfGlobalFiles] = strdup(file_name);
  
   NumberOfGlobalFiles ++;
@@ -783,12 +779,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 					}
 					if (!evt_value)
 					{
-						evt_value = (value_t*) malloc (sizeof (value_t));
-						if (evt_value == NULL)
-						{
-							fprintf (stderr, PACKAGE_NAME"(%s,%d): Fatal error! Cannot allocate memory to store the 'd' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-							exit(-1);
-						}
+						evt_value = (value_t*) xmalloc (sizeof (value_t));
 						evt_value->value = eventvalue;
 						strcpy(evt_value->label, value_description);
 						Extrae_Vector_Append (&last_event_type_used->event_values, evt_value);
@@ -823,16 +814,11 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 
 					if (!evt_type)
 					{
-						evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
-						if (evt_type == NULL)
-						{
-							fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'D' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-							exit(-1);
-						}
+						evt_type = (event_type_t*) xmalloc (sizeof (event_type_t));
 						evt_type->event_type.type = eventcode;
 						strcpy(evt_type->event_type.label, code_description);
 						Extrae_Vector_Init(&evt_type->event_values);
-    
+   
 						Extrae_Vector_Append(&defined_user_event_types, evt_type);
 						other_count++;
 					}
@@ -852,12 +838,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 					if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 					if (max==0)
 					{
-						evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
-						if (evt_type == NULL)
-						{
-							fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-							exit(-1);
-						}
+						evt_type = (event_type_t*) xmalloc (sizeof (event_type_t));
 						evt_type->event_type.type = USRFUNC_EV_BB;
 						strcpy(evt_type->event_type.label, "BASIC_BLOCKS");
 						Extrae_Vector_Init(&evt_type->event_values);
@@ -867,7 +848,6 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 					{
 						evt_type = Extrae_Vector_Get (&defined_basic_block_labels, 0); // There is only one event type in the vector
 					}
-
 					max = Extrae_Vector_Count (&evt_type->event_values);
 
 					for (i = 0; i < max; i++)
@@ -886,12 +866,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 
 					if (!evt_value)
 					{
-						evt_value = (value_t*) malloc (sizeof (value_t));
-						if (evt_value == NULL)
-						{
-							fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
-							exit(-1);
-						}
+						evt_value = (value_t*) xmalloc (sizeof (value_t));
 						evt_value->value = eventvalue;
 						strcpy(evt_value->label, bb_description);
 						Extrae_Vector_Append (&evt_type->event_values, evt_value);
@@ -1125,10 +1100,8 @@ void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
 	UINT64 *SynchronizationTimes = NULL;
 
 	/* Allocate space for the synchronization times of each task */
-	xmalloc(StartingTimes, nfiles * sizeof(UINT64));
-	memset (StartingTimes, 0, nfiles * sizeof(UINT64));
-	xmalloc(SynchronizationTimes, nfiles * sizeof(UINT64));
-	memset (SynchronizationTimes, 0, nfiles * sizeof(UINT64));
+	StartingTimes = xmalloc_and_zero (nfiles * sizeof(UINT64));
+	SynchronizationTimes = xmalloc_and_zero (nfiles * sizeof(UINT64));
 
 	if (taskid == 0)
 	{
@@ -1183,10 +1156,10 @@ void Share_File_Names(int taskid)
   MPI_Bcast ( &NumberOfOpenFiles, 1, MPI_INT, 0, MPI_COMM_WORLD );
 
   /* Allocate arrays to serialize the translation table (well, it's a list not a table, see open_file_t) */
-  ptask_array          = (unsigned *)malloc(sizeof(unsigned) * NumberOfOpenFiles);
-  task_array           = (unsigned *)malloc(sizeof(unsigned) * NumberOfOpenFiles);
-  local_file_id_array  = (int *)malloc(sizeof(int) * NumberOfOpenFiles);
-  global_file_id_array = (int *)malloc(sizeof(int) * NumberOfOpenFiles);
+  ptask_array          = (unsigned *)xmalloc(sizeof(unsigned) * NumberOfOpenFiles);
+  task_array           = (unsigned *)xmalloc(sizeof(unsigned) * NumberOfOpenFiles);
+  local_file_id_array  = (int *)xmalloc(sizeof(int) * NumberOfOpenFiles);
+  global_file_id_array = (int *)xmalloc(sizeof(int) * NumberOfOpenFiles);
 
   if (taskid == 0)
   {
@@ -1209,7 +1182,7 @@ void Share_File_Names(int taskid)
   if (taskid > 0)
   {
     /* All the other tasks reconstruct their local translation table */
-    OpenFilesPerTask = (open_file_t *)malloc(sizeof(open_file_t) * NumberOfOpenFiles);
+    OpenFilesPerTask = (open_file_t *)xmalloc(sizeof(open_file_t) * NumberOfOpenFiles);
 
     for (i=0; i<NumberOfOpenFiles; i++)
     { 

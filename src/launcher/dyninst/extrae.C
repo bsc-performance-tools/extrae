@@ -23,6 +23,7 @@
 
 #include "common.h"
 #include "cpp_utils.h"
+#include "xalloc.h"
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>
@@ -224,7 +225,7 @@ static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch
 
 char * printUsage()
 {
-    char * buffer = (char*) malloc(1024*sizeof(char*));
+    char * buffer = (char*) xmalloc(1024*sizeof(char*));
     strcat(buffer, "Extrae dyninst utility\n\n");
     strcat(buffer, "Usage: extrae OPTIONS binary\n\n");
     strcat(buffer, "OPTIONS:\n");
@@ -838,12 +839,7 @@ int main (int argc, char *argv[])
 
 	if ((env_var = getenv ("DYNINSTAPI_RT_LIB")) == NULL)
 	{
-		env_var = (char*) malloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
-		if (env_var == NULL)
-		{
-			cerr << PACKAGE_NAME << ": Cannot allocate memory to define DYNINSTAPI_RT_LIB!" << endl;
-			exit (-1);
-		}
+		env_var = (char*) xmalloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
 		sprintf (env_var, "DYNINSTAPI_RT_LIB=%s", DYNINST_RT_LIB);
 		putenv (env_var);
 	}
@@ -854,12 +850,7 @@ int main (int argc, char *argv[])
 	/* Parse the params */
 	index = processParams (argc, argv);
 
-	char * envvar_dyn = (char *) malloc ((strlen("EXTRAE_DYNINST_RUN=yes")+1)*sizeof (char));
-	if (NULL == envvar_dyn)
-	{
-		cerr << PACKAGE_NAME << ": Error! Unable to allocate memory for EXTRAE_DYNINST_RUN environment variable" << endl;
-		exit (-1);
-	}
+	char * envvar_dyn = (char *) xmalloc ((strlen("EXTRAE_DYNINST_RUN=yes")+1)*sizeof (char));
 	sprintf (envvar_dyn, "EXTRAE_DYNINST_RUN=yes");
 	putenv (envvar_dyn);
 
@@ -867,12 +858,7 @@ int main (int argc, char *argv[])
 	{
 		if (configXML != NULL)
 		{
-			char * envvar = (char *) malloc ((strlen(configXML)+strlen("EXTRAE_CONFIG_FILE=")+1)*sizeof (char));
-			if (NULL == envvar)
-			{
-				cerr << PACKAGE_NAME << ": Error! Unable to allocate memory for EXTRAE_CONFIG_FILE environment variable" << endl;
-				exit (-1);
-			}
+			char * envvar = (char *) xmalloc ((strlen(configXML)+strlen("EXTRAE_CONFIG_FILE=")+1)*sizeof (char));
 			sprintf (envvar, "EXTRAE_CONFIG_FILE=%s", configXML);
 			putenv (envvar);
 		}

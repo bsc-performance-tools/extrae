@@ -32,6 +32,7 @@
 #endif
 
 #include "debug.h"
+#include "xalloc.h"
 
 #define EXTRAE_VECTOR_ALLOC_SIZE 32
 
@@ -44,7 +45,7 @@ void Extrae_Vector_Init (Extrae_Vector_t *v)
 void Extrae_Vector_Destroy (Extrae_Vector_t *v)
 {
 	if (v->data != NULL)
-		free (v->data);
+		xfree (v->data);
 	v->data = NULL;
 	v->count = v->allocated = 0;
 }
@@ -53,13 +54,8 @@ void Extrae_Vector_Append (Extrae_Vector_t *v, void *element)
 {
 	if (v->count == v->allocated)
 	{
-		v->data = (void**) realloc (
+		v->data = (void**) xrealloc (
 		  v->data, (v->allocated+EXTRAE_VECTOR_ALLOC_SIZE)*sizeof(void*));
-		if (v->data == NULL)
-		{
-			fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory for Extrae_Vector_Append\n", __FILE__, __LINE__);
-			exit (-1);
-		}
 		v->allocated += EXTRAE_VECTOR_ALLOC_SIZE;
 	}
 	v->data[v->count] = element;

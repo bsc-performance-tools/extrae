@@ -103,6 +103,7 @@
 #include "addr2info.h"
 #include "timesync.h"
 #include "vector.h"
+#include "xalloc.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -119,46 +120,22 @@ static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 {
   int i, j;
 
-  EnabledTasks = (int **) malloc (sizeof (int *) * numberofapplications);
-  if (EnabledTasks == NULL)
-  {
-    fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks'\n");
-    fflush (stderr);
-    exit (-1);
-  }
+  EnabledTasks = (int **) xmalloc (sizeof (int *) * numberofapplications);
   for (i = 0; i < numberofapplications; i++)
   {
-    EnabledTasks[i] = (int *) malloc (sizeof (int) * numberoftasks);
-    if (EnabledTasks[i] == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks[%d]'\n", i);
-      fflush (stderr);
-      exit (-1);
-    }
+    EnabledTasks[i] = (int *) xmalloc (sizeof (int) * numberoftasks);
     for (j = 0; j < numberoftasks; j++)
       EnabledTasks[i][j] = TRUE;
   }
 
   EnabledTasks_time =
-    (unsigned long long **) malloc (sizeof (unsigned long long *) *
+    (unsigned long long **) xmalloc (sizeof (unsigned long long *) *
                                     numberofapplications);
-  if (EnabledTasks_time == NULL)
-  {
-    fprintf (stderr, "mpi2prv: Error Unable to allocate memory for 'EnabledTasks_time'\n");
-    fflush (stderr);
-    exit (-1);
-  }
   for (i = 0; i < numberofapplications; i++)
   {
     EnabledTasks_time[i] =
-      (unsigned long long *) malloc (sizeof (unsigned long long) *
+      (unsigned long long *) xmalloc (sizeof (unsigned long long) *
                                      numberoftasks);
-    if (EnabledTasks_time[i] == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks_time[%d]'\n", i);
-      fflush (stderr);
-      exit (-1);
-    }
     for (j = 0; j < numberoftasks; j++)
       EnabledTasks_time[i][j] = 0LL;
   }
@@ -190,13 +167,8 @@ static void HandleStackedType (unsigned ptask, unsigned task, unsigned thread,
 			   this task/thread, create it */
 			pos = att->num_stacks;
 
-			att->stacked_type = (active_task_thread_stack_type_t*) realloc
+			att->stacked_type = (active_task_thread_stack_type_t*) xrealloc
 			  (att->stacked_type, sizeof(active_task_thread_stack_type_t)*(pos+1));
-			if (att->stacked_type == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Fatal error! Cannot reallocate stacked_type for the task/thread\n");
-				exit (0);
-			}
 			att->stacked_type[pos].stack = Stack_Init();
 			att->stacked_type[pos].type = EvType;
 			att->num_stacks++;
@@ -271,7 +243,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			sprintf (prvfile, "%s.prv", basename(FirstBinaryName));
 			set_merge_OutputTraceName (prvfile);
 			set_merge_GivenTraceName (TRUE);
-			free (FirstBinaryName);
+			xfree (FirstBinaryName);
 		}
 	}
 

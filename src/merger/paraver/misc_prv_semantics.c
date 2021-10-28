@@ -60,6 +60,7 @@
 
 #include "events.h"
 #include "paraver_state.h"
+#include "xalloc.h"
 
 int MPI_Caller_Multiple_Levels_Traced = FALSE;
 int *MPI_Caller_Labels_Used = NULL;
@@ -468,7 +469,7 @@ static int MPI_Caller_Event (event_t * current_event,
 		MPI_Caller_Multiple_Levels_Traced = TRUE;	
 		if (MPI_Caller_Labels_Used == NULL) 
 		{
-			MPI_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+			MPI_Caller_Labels_Used = (int *)xmalloc(sizeof(int)*MAX_CALLERS);
 			for (i = 0; i < MAX_CALLERS; i++) 
 			{
 				MPI_Caller_Labels_Used[i] = FALSE;
@@ -695,7 +696,7 @@ static int Sampling_Address_Event (event_t * current,
 
 	if (Sample_Caller_Labels_Used == NULL) 
 	{
-		Sample_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+		Sample_Caller_Labels_Used = (int *)xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++) 
 			Sample_Caller_Labels_Used[i] = FALSE;
 	}	     
@@ -804,7 +805,7 @@ static int Sampling_Caller_Event (event_t * current,
 
 	if (Sample_Caller_Labels_Used == NULL) 
 	{
-		Sample_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+		Sample_Caller_Labels_Used = (int *)xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++) 
 			Sample_Caller_Labels_Used[i] = FALSE;
 	}	     
@@ -1353,13 +1354,8 @@ static int Resume_Virtual_Thread_Event (event_t * current_event,
 		if (task_info->num_active_task_threads < new_active_task_thread)
 		{
 			/* Allocate memory for the new coming threads */
-			task_info->active_task_threads = (active_task_thread_t*) realloc (task_info->active_task_threads,
+			task_info->active_task_threads = (active_task_thread_t*) xrealloc (task_info->active_task_threads,
 			  new_active_task_thread*sizeof(active_task_thread_t));
-			if (task_info->active_task_threads == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate information for active task threads\n");
-				exit (0);
-			}
 
 			/* Init their structures */
 			for (u = task_info->num_active_task_threads; u < new_active_task_thread; u++)

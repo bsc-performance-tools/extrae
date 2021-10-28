@@ -58,6 +58,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "hwc.h"
 #include "xml-parse.h"
 #include "wrapper.h"
@@ -146,7 +147,7 @@ static xmlChar * deal_xmlChar_env (int rank, xmlChar *str)
 		if (sublen > 1 && tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
 		{
 			char tmp2[sublen];
-			memset (tmp2, 0, sublen);
+			xmemset (tmp2, 0, sublen);
 			strncpy (tmp2, (const char*) &tmp[1], sublen-2);
 
 			if (getenv (tmp2) == NULL)
@@ -1082,19 +1083,9 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 
 	if (num_sampling_hwc > 0)
 	{
-		t_counters = (char **) malloc (sizeof(char*) * num_sampling_hwc);
-		if (t_counters == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! cannot allocate information for the sampling counters\n");
-			exit (-1);
-		}
-		t_periods = (unsigned long long *) malloc (sizeof(unsigned long long) * num_sampling_hwc);
-		if (t_periods == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! cannot allocate information for the sampling periods\n");
-			exit (-1);
-		}
-	
+		t_counters = (char **) xmalloc (sizeof(char*) * num_sampling_hwc);
+		t_periods = (unsigned long long *) xmalloc (sizeof(unsigned long long) * num_sampling_hwc);
+		
 		/* Parse all HWC sets, and annotate them to use them later */
 		set_tag = current->xmlChildrenNode;
 		i = 0;

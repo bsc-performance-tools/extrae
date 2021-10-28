@@ -54,6 +54,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 
 int __Extrae_Utils_is_Whitespace(char c)
 {
@@ -102,7 +103,7 @@ char *__Extrae_Utils_trim (char *sourceStr)
 
   /* Create a new string */
   retLen = (right - left + 1) + 1; // Extra 1 for the final '\0' 
-  xmalloc(retStr, retLen * sizeof(char));
+  retStr = xmalloc(retLen * sizeof(char));
   retStr = strncpy (retStr, &sourceStr[left], retLen-1);
   retStr[retLen-1] = '\0';
 
@@ -143,7 +144,7 @@ int __Extrae_Utils_explode (char *sourceStr, const char *delimiter, char ***toke
             {
                /* Save the token in a new position of the resulting vector */
                num_tokens ++;
-               xrealloc(retArray, retArray, num_tokens * sizeof(char *));
+               retArray = xrealloc(retArray, num_tokens * sizeof(char *));
                retArray[num_tokens-1] = strdup(trimmed_token);
                xfree (trimmed_token);
             }
@@ -496,7 +497,7 @@ int __Extrae_Utils_mkdir_recursive (const char *path)
 		else
 			result = mkdir (path, 0755) == 0;
 
-		free (original_path);
+		xfree (original_path);
 
 		return result;
 	}
@@ -509,7 +510,7 @@ int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char
 {
 	assert (__Extrae_Utils_buffersize >= nprefix+nsufix+strlen(infix)+1);
 
-	memset (buffer, 0, __Extrae_Utils_buffersize);
+	xmemset (buffer, 0, __Extrae_Utils_buffersize);
 
 	/* Split if it does not fit */
 	if (strlen(string) >= nprefix+nsufix+strlen(infix))
