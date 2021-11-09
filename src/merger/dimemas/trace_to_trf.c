@@ -469,17 +469,17 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					int i;
 					unsigned int hwctype[2*MAX_HWC];
 					unsigned long long hwcvalue[2*MAX_HWC];
+					int num_hwc = 0;
 
-					HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE);
-					for (i = 0; i < MAX_HWC; i++)
-						if (NO_COUNTER != hwctype[i])
-							Dimemas_User_Event (fset->output_file, task-1, thread-1, hwctype[i], hwcvalue[i]);
+					num_hwc = HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE);
+					for (i = 0; i < num_hwc; i++)
+						Dimemas_User_Event (fset->output_file, task-1, thread-1, hwctype[i], hwcvalue[i]);
+
 					if (get_option_merge_AbsoluteCounters())
 					{
-						HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE);
-						for (i = 0; i < MAX_HWC; i++)
-							if (NO_COUNTER != hwctype[i])
-								Dimemas_User_Event (fset->output_file, task-1, thread-1, hwctype[i], hwcvalue[i]);
+						num_hwc = HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE);
+						for (i = 0; i < num_hwc; i++)
+							Dimemas_User_Event (fset->output_file, task-1, thread-1, hwctype[i], hwcvalue[i]);
 					}
 				}
 #endif

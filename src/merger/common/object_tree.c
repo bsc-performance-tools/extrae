@@ -90,10 +90,6 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 		}
 	}
 
-#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-	INIT_QUEUE (&CountersTraced);
-#endif
-
 	/* 3rd step, Initialize the object table structure */
 	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++)
 		for (task = 0; task < ApplicationTable.ptasks[ptask].ntasks; task++)
@@ -134,7 +130,6 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 					thread_info->AddressSpace_calleraddresses[v] = 0;
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
-				thread_info->HWCSets_types = NULL;
 				thread_info->num_HWCSets = 0;
 				thread_info->current_HWCSet = 0;
 #endif

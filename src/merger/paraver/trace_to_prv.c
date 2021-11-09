@@ -515,19 +515,19 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 					if (Sthread->last_hw_group_change != current_time)
 					{
 						int i;
-						int hwctype[MAX_HWC];
+						unsigned int hwctype[MAX_HWC];
 						unsigned long long hwcvalue[MAX_HWC];
+						int num_hwc = 0;
 
-						if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE))
-							for (i = 0; i < MAX_HWC; i++)
-								if (NO_COUNTER != hwctype[i])
-									trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+						num_hwc = HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE);
+						for (i = 0; i < num_hwc; i++)
+							trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+
 						if (get_option_merge_AbsoluteCounters())
 						{
-							if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE))
-								for (i = 0; i < MAX_HWC; i++)
-									if (NO_COUNTER != hwctype[i])
-										trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+							num_hwc = HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE);
+							for (i = 0; i < num_hwc; i++)
+								trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
 						}
 					}
 				}

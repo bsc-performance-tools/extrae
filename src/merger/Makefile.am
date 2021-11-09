@@ -83,13 +83,19 @@ libmpi2prv_la_SOURCES = \
 mpi2prv_SOURCES = \
  merger.c
 
+if HAVE_PAPI
+if !HAVE_PAPI_EMBEDDED
+  PAPI_LINKER_FLAGS = @PAPI_LDFLAGS@ @PAPI_RPATH@ @PAPI_LIBS@
+endif
+endif
+
 libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
 if HAVE_BINUTILS
 libmpi2prv_la_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@ 
 endif
 
 mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
-mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_LIB)/libcommon.la
+mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_LIB)/libcommon.la $(PAPI_LINKER_FLAGS)
 if HAVE_BINUTILS
 mpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
 mpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_RPATH@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_RPATH@ @LIBERTY_LIBS@

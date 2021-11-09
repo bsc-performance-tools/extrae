@@ -947,79 +947,20 @@ static int HWC_Change_Ev (
    FileSet_t *fset)
 {
 	int i;
-	int hwctype[MAX_HWC+1];
-	int prev_hwctype[MAX_HWC];
+	unsigned int hwctype[MAX_HWC+1];
 	unsigned long long hwcvalue[MAX_HWC+1];
-	thread_t * Sthread;
-	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
-	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
 
 	UNREFERENCED_PARAMETER(fset);
 
-	Sthread = GET_THREAD_INFO(ptask, task, thread);
-	Sthread->last_hw_group_change = current_time;
-	Sthread->HWCChange_count++;
 	int newSet = Get_EvValue(current_event);
 
-	/* HSG changing the HWC set do not should change the application state */
-	/* trace_paraver_state (cpu, ptask, task, thread, current_time); */
-
-	/* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
-	for (i=0; i<MAX_HWC; i++)
-	{
-#if defined(PMAPI_COUNTERS)
-		prev_hwctype[i] = HWC_COUNTER_TYPE(i, oldsIds[i]);
-#else
-		prev_hwctype[i] = HWC_COUNTER_TYPE(oldIds[i]);
-#endif
-	}
-
 	ResetCounters (ptask, task, thread);
-	HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
 
-	/* This loop starts at 0 and goes to MAX_HWC+1 because HardwareCounters_Change
-	   reports in hwctype[0] the counter group identifier */
-	for (i = 0; i < MAX_HWC+1; i++)
+	int num_new_hwc = HardwareCounters_Change (ptask, task, thread, current_time, newSet, hwctype, hwcvalue);
+
+	for (i = 0; i < num_new_hwc; i++)
 	{
-		if (NO_COUNTER != hwctype[i] && Sthread->HWCChange_count > 1)
-		{
-			int found = FALSE, k = 0;
-
-			/* Check the current counter (hwctype[i]) did not appear on the previous set. We don't want
-			 * it to appear twice in the same timestamp. This may happen because the HWC_CHANGE_EV is traced
-			 * right after the last valid emission of counters with the previous set, at the same timestamp.
-			 */
-
-			while (!found && k < MAX_HWC)
-			{
-				if (hwctype[i] == prev_hwctype[k])
-					found = TRUE;
-				k ++;
-			}
-
-			if (!found)
-			{
-				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-			}
-		}
-		/*
-		 * The first time we read the counters we cannot rely on their value, so
-		 * we set them to 0.
-		 */
-		else if (NO_COUNTER != hwctype[i] && Sthread->HWCChange_count == 1)
-		{
-			if (i > 0)
-			{
-				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], 0);
-			}
-			else
-			{
-				/* Index [0] contains the active set, not a counter. We always have to
-				 * emit its actual value.
-				 */
-				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[0], hwcvalue[0]);
-			}
-		}
+		trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
 	}
 	return 0;
 }

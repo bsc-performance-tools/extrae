@@ -88,6 +88,8 @@ static WorkDistribution_t WorkDistribution= Block;
 static char **MPITS_Files = NULL;
 static unsigned Num_MPITS_Files = 0;
 
+#define NOT_USED 0
+
 /******************************************************************************
  ***  Help
  ******************************************************************************/
@@ -98,52 +100,50 @@ void Help (const char *ProgName)
 		  "       %s -f file.mpits [-o <OutputFile>] [otheroptions]\n"
 		  "       %s -h\n"
 		  "Options:\n"
-		  "    -h                           Get this help.\n"
-		  "    -v                           Increase verbosity.\n"
-		  "    -absolute-counters           Emit hardware counters in absolute form in addition to relative form.\n"
-		  "    -o file                      Output trace file name.\n"
-		  "    -e file                      Uses the executable file to obtain some information.\n"
-		  "    -f file                      MpitFILE File with the names of the \".mpit\" input files.\n"
-		  "    -syn                         Synchronize traces at the MPI task-level using the MPI_Init information.\n"
-		  "    -syn-node                    Synchronize traces at the MPI node-level using the MPI_Init information.\n"
-		  "    -no-syn                      Do not synchronize traces at the end of MPI_Init.\n"
-		  "    -maxmem M                    Uses up to M megabytes of memory at the last step of merging process.\n"
-		  "    -dimemas                     Force the generation of a Dimemas trace.\n"
-		  "    -paraver                     Force the generation of a Paraver trace.\n"
-		  "    -keep-mpits                  Keeps MPIT files after trace generation (default)\n"
-		  "    -no-keep-mpits               Removes MPIT files after trace generation.\n"
-		  "    -trace-overwrite             Overwrites the tracefile.\n"
-		  "    -no-trace-overwrite          Do not overwrite the tracefile, renaming the new one.\n"
-		  "    -stop-at-percentage          Stops the merging process at the specified percentage.\n"
+		  "    -h                   Get this help.\n"
+		  "    -v                   Increase verbosity.\n"
+		  "    -absolute-counters   Emit hardware counters in absolute form in addition to relative form.\n"
+		  "    -o file              Output trace file name.\n"
+		  "    -e file              Uses the executable file to obtain some information.\n"
+		  "    -f file              MpitFILE File with the names of the \".mpit\" input files.\n"
+		  "    -syn                 Synchronize traces at the MPI task-level using the MPI_Init information.\n"
+		  "    -syn-node            Synchronize traces at the MPI node-level using the MPI_Init information.\n"
+		  "    -no-syn              Do not synchronize traces at the end of MPI_Init.\n"
+		  "    -maxmem M            Uses up to M megabytes of memory at the last step of merging process.\n"
+		  "    -dimemas             Force the generation of a Dimemas trace.\n"
+		  "    -paraver             Force the generation of a Paraver trace.\n"
+		  "    -keep-mpits          Keeps MPIT files after trace generation (default)\n"
+		  "    -no-keep-mpits       Removes MPIT files after trace generation.\n"
+		  "    -trace-overwrite     Overwrites the tracefile.\n"
+		  "    -no-trace-overwrite  Do not overwrite the tracefile, renaming the new one.\n"
+		  "    -stop-at-percentage  Stops the merging process at the specified percentage.\n"
 #if defined(IS_BG_MACHINE)
-		  "    -xyzt                        Generates additional output file with BG/L torus coordinates.\n"
+		  "    -xyzt                Generates additional output file with BG/L torus coordinates.\n"
 #endif
 #if defined(PARALLEL_MERGE)
-		  "    -tree-fan-out N              Orders the parallel merge to distribute its work in a N-order tree.\n"
-		  "    -cyclic                      Distributes MPIT files cyclically among tasks.\n"
-		  "    -block                       Distributes MPIT files in a block fashion among tasks.\n"
-		  "    -size                        Distributes MPIT trying to build groups of equal size.\n"
-		  "    -consecutive-size            Distributes MPIT files in a block fashion considering file size.\n"
-		  "    -use-disk-for-comms          Uses the disk instead of memory to match foreign communications.\n"
+		  "    -tree-fan-out N      Orders the parallel merge to distribute its work in a N-order tree.\n"
+		  "    -cyclic              Distributes MPIT files cyclically among tasks.\n"
+		  "    -block               Distributes MPIT files in a block fashion among tasks.\n"
+		  "    -size                Distributes MPIT trying to build groups of equal size.\n"
+		  "    -consecutive-size    Distributes MPIT files in a block fashion considering file size.\n"
+		  "    -use-disk-for-comms  Uses the disk instead of memory to match foreign communications.\n"
 #endif
-		  "    -s file                      Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
-		  "    -d/-dump                     Sequentially dumps the contents of every *.mpit file.\n"
-		  "    -dump-without-time           Do not show event time in when dumping events (useful for testing purposes).\n"
-		  "    -remove-files                Remove intermediate files after processing them.\n"
-		  "    -split-states                Do not merge consecutives states that are the same.\n"
-		  "    -skip-sendrecv               Do not emit communication for SendReceive operations.\n"
-		  "    -unique-caller-id            Choose whether use a unique value identifier for different callers.\n"
-		  "    -translate-addresses         Translate code addresses into code references if available.\n"
-		  "    -no-translate-addresses      Do not translate code addresses into code references if available.\n"
-		  "    -translate-data-addresses    Identify allocated objects by their full callpath.\n"
-		  "    -no-translate-data-addresses Identify allocated objects by the tuple <library, symbol_offset>\n"
-		  "    -emit-library-events         Emit library information for unknown references if possible.\n"
-		  "    -sort-addresses              Sort source code references by <line, file name>.\n"
-		  "    -task-view                   Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
-		  "    -without-addresses           Do not emit address information into PCF (useful for testing purposes).\n"
-		  "    --                           Take the next trace files as a diferent parallel task.\n"
+		  "    -s file              Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
+		  "    -d/-dump             Sequentially dumps the contents of every *.mpit file.\n"
+		  "    -dump-without-time   Do not show event time in when dumping events (valuable for test purposes).\n"
+		  "    -remove-files        Remove intermediate files after processing them.\n"
+		  "    -split-states        Do not merge consecutives states that are the same.\n"
+		  "    -skip-sendrecv       Do not emit communication for SendReceive operations.\n"
+		  "    -unique-caller-id    Choose whether use a unique value identifier for different callers.\n"
+		  "    -translate-addresses Translate code addresses into code references if available.\n"
+		  "    -no-translate-addresses Do not translate code addresses into code references if available.\n"
+		  "    -emit-library-events Emit library information for unknown references if possible.\n"
+		  "    -sort-addresses      Sort file name, line events in information linked with source code.\n"
+		  "    -task-view           Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
+          "    -without-addresses   Do not emit address information into PCF (valuable for test purposes).\n"
+		  "    --                   Take the next trace files as a diferent parallel task.\n"
 		  "\n",
-		  ProgName, ProgName, ProgName);
+          ProgName, ProgName, ProgName);
 }
 
 /******************************************************************************
@@ -464,6 +464,41 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 #endif
 }
 
+
+/**
+ * loadGlobalSYMfile
+ *
+ * Loads the specified global SYM file if 'sym_file' is given. Otherwise,
+ * loads the global SYM file with the same name as the given 'mpits_file', 
+ * if present.
+ */
+static int loadGlobalSYMfile(int rank, char *sym_file, char *mpits_file, int ptask)
+{
+	if ((sym_file != NULL) && (__Extrae_Utils_file_exists(sym_file)))
+	{
+		Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, sym_file, TRUE);
+		return 1;
+	}
+	else if (mpits_file != NULL)
+	{
+		char global_SYM_file[1024];
+
+		strncpy(global_SYM_file, mpits_file, sizeof(global_SYM_file)-1);
+		if (strcmp(&global_SYM_file[strlen(global_SYM_file)-strlen(".mpits")], ".mpits") == 0)
+		{
+			strncpy (&global_SYM_file[strlen(global_SYM_file)-strlen(".mpits")], ".sym", strlen(".sym")+1);
+
+			if (__Extrae_Utils_file_exists(global_SYM_file)) 
+			{
+				Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, global_SYM_file, TRUE);
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+
 /******************************************************************************
  ***  ProcessArgs
  ******************************************************************************/
@@ -474,6 +509,9 @@ void ProcessArgs (int rank, int argc, char *argv[])
 	int CurArg;
 	unsigned int cur_ptask = 1;   /* Ptask counter. Each -- the ptask number is
 	                               * incremented. */
+	int found_MPITS_for_current_ptask = FALSE;
+	int found_SYM_for_current_ptask = FALSE;
+
 	if (argc == 1)                /* No params? */
 	{
 		Help (argv[0]);
@@ -602,14 +640,12 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				set_merge_SymbolFileName (argv[CurArg]);
-			}
-			else 
-			{
-				if (0 == rank)
-					fprintf (stderr, PACKAGE_NAME": Option -s: You must specify the path of the symbol file.\n");
-				Help(argv[0]);
-				exit(0);
+				char *global_SYM_file = argv[CurArg];
+
+				if ((rank == 0) && (loadGlobalSYMfile(rank, global_SYM_file, NULL, cur_ptask)))
+				{
+					found_SYM_for_current_ptask = TRUE;
+				}
 			}
 			continue;
 		}
@@ -650,6 +686,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
+				found_MPITS_for_current_ptask = TRUE;
 				Read_MPITS_file (argv[CurArg], &cur_ptask, FileOpen_Default, rank);
 			}
 			else 
@@ -737,7 +774,6 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		}
 		if (!strcmp (argv[CurArg], "-sort-addresses"))
 		{
-			set_option_merge_TranslateAddresses(TRUE);
 			set_option_merge_SortAddresses (TRUE);
 			continue;
 		}
@@ -920,18 +956,14 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			set_option_merge_RemoveFiles (FALSE);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-translate-data-addresses"))
-		{
-			set_option_merge_TranslateDataAddresses(TRUE);
-			continue;
-		}
-		if (!strcmp (argv[CurArg], "-no-translate-data-addresses"))
-		{
-			set_option_merge_TranslateDataAddresses(FALSE);
-			continue;
-		}
 		if (!strcmp (argv[CurArg], "--"))
 		{
+			if (!found_SYM_for_current_ptask && found_MPITS_for_current_ptask && rank == 0)
+			{
+				loadGlobalSYMfile(rank, NULL, last_mpits_file, cur_ptask);
+			}
+			found_MPITS_for_current_ptask = FALSE;
+			found_SYM_for_current_ptask = FALSE;
 			cur_ptask++;
 			continue;
 		}
@@ -943,6 +975,11 @@ void ProcessArgs (int rank, int argc, char *argv[])
 	/* Specific things to be applied per format */
 	if (rank == 0)
 	{
+		if (!found_SYM_for_current_ptask && found_MPITS_for_current_ptask)
+		{
+			loadGlobalSYMfile(rank, NULL, last_mpits_file, cur_ptask);
+		}
+
 		if (!get_option_merge_ParaverFormat())
 		{
 			/* Dimemas traces doesn't know about synchronization */
@@ -966,6 +1003,10 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			fprintf (stdout, "merger: Output trace format is: Paraver\n");
 		}
 	}
+
+#if defined(PARALLEL_MERGE)
+	Share_HWC_Before_Processing_MPITS (rank);
+#endif
 }
 
 static void PrintNodeNames (int numtasks, int processor_id, char **nodenames)
@@ -1411,24 +1452,7 @@ int merger_post (int numtasks, int taskid)
 	}
 #endif
 
-	if (taskid == 0 &&
-		strlen(get_merge_SymbolFileName()) == 0 &&
-		last_mpits_file != NULL)
-	{
-		char tmp[1024];
-		strncpy (tmp, last_mpits_file, sizeof(tmp));
-
-		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
-		{
-			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
-			Labels_loadSYMfile (taskid, TRUE, 0, 0, tmp, TRUE);
-		}
-	}
-	else
-	{
-		if (taskid == 0)
-			Labels_loadSYMfile (taskid, FALSE, 0, 0, get_merge_SymbolFileName(), TRUE);
-	}
+	unsigned i;
 
 	if (taskid == 0)
 	{
@@ -1468,7 +1492,7 @@ int merger_post (int numtasks, int taskid)
 			for (u = 0; u < Num_MPITS_Files; u++)
 			{
 				char tmp[1024];
-				strncpy (tmp, MPITS_Files[u], sizeof(tmp));
+				strncpy (tmp, MPITS_Files[u], sizeof(tmp)-1);
 
 				if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
 				{
@@ -1486,7 +1510,7 @@ int merger_post (int numtasks, int taskid)
 				/* Remove the local .sym file for that .mpit file */
 				{
 					char tmp[1024];
-					strncpy (tmp, InputTraces[u].name, sizeof(tmp));
+					strncpy (tmp, InputTraces[u].name, sizeof(tmp)-1);
 					strncpy (&tmp[strlen(tmp)-strlen(".mpit")], ".sym", strlen(".sym")+1);
 					unlink (tmp);
 				}
@@ -1505,4 +1529,46 @@ int merger_post (int numtasks, int taskid)
 #endif
 
 	return 0;
+}
+
+/**
+ * mergerLoadFilesInEmbeddedMode
+ *
+ * This is called from Backend_Finalize when XML merge option is enabled. Since the embedded
+ * merger can not pass parameters by command-line to mpi2prv binary, the function ProcessArgs
+ * is not called, and thus, the global sym file is not loaded. This function loads the 
+ * necessary files for the embedded merger to start the merging process, including the 
+ * global sym file.
+ */
+void mergerLoadFilesInEmbeddedMode(int taskid, int num_tasks, char *mpits_filename)
+{
+	int ptask = 1;
+
+	if (taskid == 0)
+		fprintf(stdout, "mpi2prv: Proceeding with the merge of the intermediate tracefiles.\n");
+
+#if defined(MPI_SUPPORT)
+	/* Synchronize all tasks at this point so none overtakes the master and
+	   gets and invalid/blank trace file list (.mpits file) */
+	if (taskid == 0)
+		fprintf(stdout, "mpi2prv: Waiting for all tasks to reach the checkpoint.\n");
+
+	PMPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+	merger_pre(num_tasks);
+	
+	if (taskid == 0)
+	{
+		loadGlobalSYMfile(taskid, NULL, mpits_filename, ptask);
+	}
+#if defined(PARALLEL_MERGE)
+	Share_HWC_Before_Processing_MPITS(taskid);
+#endif
+	Read_MPITS_file(mpits_filename, &ptask, FileOpen_Default, taskid);
+
+	if (taskid == 0)
+		fprintf(stdout, "mpi2prv: Executing the merge process (using %s).\n", mpits_filename);
+
+	merger_post(num_tasks, taskid);
 }

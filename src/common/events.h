@@ -282,8 +282,11 @@ enum {
 #define FUNCT_BASE               41000000
 #define FUNCT_MAX                    1000
 
-#define HWC_BASE                 42000000 /* Base for preset PAPI counters */
-#define HWC_BASE_NATIVE          42001000 /* Base for native PAPI counters */
+#define HWC_BASE_PAPI_PRESET     42000000
+#define HWC_BASE_PAPI_NATIVE     44000000
+#define HWC_BASE_PAPI_UNCORE     46000000
+#define HWC_BASE_PMAPI           48000000
+
 #define HWC_DELTA_ABSOLUTE        1000000 /* Add this if using absolute values */
 #define HWC_GROUP_ID             41999999 /* Identifier of the active hwc set */
 

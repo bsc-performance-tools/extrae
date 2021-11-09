@@ -69,10 +69,6 @@ static char callback_file[1024] = "";
 char * get_merge_CallbackFileName (void) { return callback_file; }
 void set_merge_CallbackFileName (const char* s) { strcpy (callback_file, s); }
 
-static char symbol_file[1024] = "";
-char * get_merge_SymbolFileName (void) { return symbol_file; }
-void set_merge_SymbolFileName (const char* s) { strcpy (symbol_file, s); }
-
 static char executable_file[1024] = ""; 
 char * get_merge_ExecutableFileName (void) { return executable_file; }
 void set_merge_ExecutableFileName (const char* s) { strcpy (executable_file, s); }

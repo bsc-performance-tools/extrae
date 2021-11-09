@@ -121,6 +121,7 @@ endif
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
   libmpimpi2prv_la_CFLAGS += @PAPI_CFLAGS@
+  libmpimpi2prv_la_LDFLAGS += @PAPI_LDFLAGS@ @PAPI_RPATH@ @PAPI_LIBS@
   mpimpi2prv_CFLAGS += @PAPI_CFLAGS@
 endif
 endif

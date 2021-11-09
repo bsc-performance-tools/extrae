@@ -56,6 +56,34 @@ static pm_groups_info_t HWCGroup_Info;
 
 int MAX_HWC_reported_by_PMAPI = 0;
 
+static HWC_Definition_t *hwc_used = NULL;
+static unsigned num_hwc_used = 0;
+
+static void HWCBE_PMAPI_AddDefinition (unsigned event_code, char *code, char *description)
+{
+        int found = FALSE;
+        unsigned u;
+
+        for (u = 0; !found && (u < num_hwc_used); u++)
+                found = hwc_used[u].event_code == event_code;
+
+        if (!found)
+        {
+                hwc_used = (HWC_Definition_t*) xrealloc (hwc_used,
+                        sizeof(HWC_Definition_t)*(num_hwc_used+1));
+                if (hwc_used == NULL)
+                {
+                        fprintf (stderr, "ERROR! Cannot allocate memory to add definitions for hardware counters\n");
+                        return;
+                }
+                hwc_used[num_hwc_used].event_code = event_code;
+                snprintf (hwc_used[num_hwc_used].description,
+                        MAX_HWC_DESCRIPTION_LENGTH, "%s [%s]", code, description);
+                num_hwc_used++;
+        }
+}
+
+
 int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **counters,
 	char *domain, char *change_at_globalops, char *change_at_time, 
 	int num_overflows, char **overflow_counters, unsigned long long *overflow_values)
@@ -233,7 +261,11 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 						break;    
 				}
 				if (evp != NULL)
+				{
 					printf("%s (0x%08x) ", evp->short_name, event);
+					
+					HWCBE_PMAPI_AddDefinition(evp->event_id, evp->short_name, evp->description);
+				}
 			}
 		} /* for (counter = 0; ... */
 			
@@ -319,9 +351,8 @@ void HWCBE_PMAPI_CleanUp (unsigned nthreads)
 
 HWC_Definition_t *HWCBE_PMAPI_GetCounterDefinitions(unsigned *count)
 {
-	/* This is currently unimplemented */
-	*count = 0;
-	return NULL;
+	*count = num_hwc_used;
+	return hwc_used;
 }
 
 /******************************************************************************

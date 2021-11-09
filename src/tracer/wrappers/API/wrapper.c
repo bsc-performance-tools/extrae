@@ -2590,35 +2590,13 @@ void Backend_Finalize (void)
 		/* Launch the merger */
 		if (MergeAfterTracing)
 		{
-			int ptask = 1;
 			char tmp[1024];
-
-			if (TASKID == 0)
-				fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");
-
-#if defined(MPI_SUPPORT)
-			/* Synchronize all tasks at this point so none overtakes the master and
-			   gets and invalid/blank trace file list (.mpits file) */
-			if (TASKID == 0)
-				fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
-
-			PMPI_Barrier (MPI_COMM_WORLD);
-#endif
-
-			merger_pre (Extrae_get_num_tasks());
-
 #if defined(MPI_SUPPORT)
 			sprintf (tmp, "%s", Extrae_core_get_mpits_file_name());
 #else
 			sprintf (tmp, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 #endif
-
-			Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
-
-			if (TASKID == 0)
-				fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);
-
-			merger_post (Extrae_get_num_tasks(), TASKID);
+			mergerLoadFilesInEmbeddedMode(TASKID, Extrae_get_num_tasks(), tmp);
 		}
 #endif /* EMBED_MERGE_IN_TRACE */
 	}

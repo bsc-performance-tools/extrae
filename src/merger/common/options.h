@@ -57,9 +57,6 @@ void set_merge_GivenTraceName (int b);
 char * get_merge_CallbackFileName (void);
 void set_merge_CallbackFileName (const char* s);
 
-char * get_merge_SymbolFileName (void);
-void set_merge_SymbolFileName (const char* s);
-
 char * get_merge_ExecutableFileName (void);
 void set_merge_ExecutableFileName (const char* s);
 

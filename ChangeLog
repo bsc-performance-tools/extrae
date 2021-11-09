@@ -5,6 +5,7 @@ ChangeLog
  + 16Feb2022 Adds support for GOMP_taskloop_ull and changes interposition mechanism for a more robust one
  + 24Jan2022 Adds OPENACC instrumentation in host and CUDA devices
  + 04Jan2022 Adds XML option to exclude some MPI_Comm_* calls from tracing 
+ * 09Nov2021 Ensures native and uncore counters are uniquely identified
  * 19Oct2021 Fixes trace control file checks, skipping them if needed structures are not allocated
  * 27Sep2021 Fixes states in OpenMP taskgroup and taskloop regions 
  + 22Sep2021 Adds dependency lines between instantiation and execution of OpenMP tasks for GNU libgomp runtime

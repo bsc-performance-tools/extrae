@@ -11,6 +11,7 @@ common_SRCS = \
  timesync.c timesync.h \
  new-queue.c new-queue.h \
  extrae_vector.c extrae_vector.h \
+ MurmurHash2.c MurmurHash2.h \
  intel-pebs-types.h \
  debug.h \
  common.h \

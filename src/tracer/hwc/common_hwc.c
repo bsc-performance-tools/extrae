@@ -141,7 +141,21 @@ int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds)
 	return num_counters;
 }
 
-#include "../../merger/paraver/HardwareCounters.h" /* XXX: Include should be moved to common files */
+#include "../../merger/paraver/HardwareCounters.h" /* XXX: Include should be moved to common files? */
+
+/* #ONLINE-HWC-IDS# 
+ *        Passing NULL to GET_PARAVER_CODE_FOR_HWC makes not to consider the hash of the counter short name 
+ *        to calculate the final Paraver type. This behavior differs with the merger, that always computes
+ *        the hash to avoid counter id collisions with other ptasks. We can do this because the online mode
+ *        is for the current ptask only, hence there aren't counter id collisions. However, the online mode 
+ *        will select different types for the counters than the regular tracing. To unify this, the online 
+ *        should pass the counter name as 2nd parameter, which can be found in the "static HWC_Definition_t *hwc_used" 
+ *        struct in papi_hwc.c and pmapi_hwc.c, searching the corresponding event_code by HWCIds[i]. The
+ *        HWC_Definition_t struct could be moved to common_hwc.c so as not to have multiple local copies, 
+ *        or we could add a query function HWC_Get_Name_By_Id in the common API, implemented in each 
+ *        PAPI/PMAPI/etc backends.
+ */
+
 int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds)
 {
 	int i=0, num_counters=0;
@@ -152,11 +166,7 @@ int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds)
 	/* Convert PAPI/PMAPI Ids to Paraver Ids */
 	for (i=0; i<num_counters; i++)
 	{
-#if defined(PMAPI_COUNTERS)
-		HWCIds[i] = HWC_COUNTER_TYPE(i, HWCIds[i]);
-#else
-		HWCIds[i] = HWC_COUNTER_TYPE(HWCIds[i]);
-#endif
+		HWCIds[i] = GET_PARAVER_CODE_FOR_HWC(HWCIds[i], NULL /* See #ONLINE-HWC-IDS# */);
 	}
 
     *io_HWCParaverIds = HWCIds;
@@ -173,11 +183,7 @@ int HWC_Get_Position_In_Set (int set_id, int hwc_id)
 	for (i=0; i<num_counters; i++)
 	{
 		int cur_hwc_id;
-#if defined(PMAPI_COUNTERS)
-		cur_hwc_id = HWC_COUNTER_TYPE(i, HWC_sets[set_id].counters[i]);
-#else
-		cur_hwc_id = HWC_COUNTER_TYPE(HWC_sets[set_id].counters[i]);
-#endif
+		cur_hwc_id = GET_PARAVER_CODE_FOR_HWC(HWC_sets[set_id].counters[i], NULL /* See #ONLINE-HWC-IDS# */);
 		if (cur_hwc_id == hwc_id) return i;
 	}
 	return -1;

@@ -130,50 +130,6 @@ static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t ty
 	num_labels_codelocation++;
 }
 
-typedef struct label_hw_counter_st
-{
-	int eventcode;
-	char *description;
-} label_hw_counter_t;
-static label_hw_counter_t *labels_hw_counters = NULL;
-static unsigned num_labels_hw_counters = 0;
-
-static void Labels_AddHWCounter_Code_Description (int eventcode, char *description)
-{
-	labels_hw_counters = (label_hw_counter_t*) realloc (labels_hw_counters, (num_labels_hw_counters+1)*sizeof(label_hw_counter_t));
-	if (labels_hw_counters == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to add a hardware counter description\n");
-		exit (-1);
-	}
-
-	labels_hw_counters[num_labels_hw_counters].eventcode = eventcode;
-	labels_hw_counters[num_labels_hw_counters].description = strdup (description);
-	if (labels_hw_counters[num_labels_hw_counters].description == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to duplicate hardware counter description\n");
-		exit (-1);
-	}
-
-	num_labels_hw_counters++;
-}
-
-int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description)
-{
-	unsigned u;
-
-	for (u = 0; u < num_labels_hw_counters; u++)
-		if (labels_hw_counters[u].eventcode == eventcode)
-		{
-			*position = u;
-			if (description != NULL)
-				*description = labels_hw_counters[u].description;
-			return TRUE;
-		}
-
-	return FALSE;
-}
-
 struct color_t states_inf[STATES_NUMBER] = {
   {STATE_0, STATE0_LBL, STATE0_COLOR},
   {STATE_1, STATE1_LBL, STATE1_COLOR},
@@ -402,104 +358,47 @@ static void Paraver_default_options (FILE * fd)
 }
 
 #if USE_HARDWARE_COUNTERS
-static int Exist_Counter (fcounter_t *fcounter, long long EvCnt) 
-{
-  struct fcounter_t *aux_fc = fcounter;
-
-  while (aux_fc != NULL)
-  {
-    if (aux_fc->counter == EvCnt)
-      return 1;
-    else
-      aux_fc = aux_fc->prev;
-  }
-  return 0;
-}
-
 
 /******************************************************************************
  *** HWC_PARAVER_Labels
 ******************************************************************************/
 
-static void HWC_PARAVER_Labels (FILE * pcfFD)
+static void HWC_PARAVER_Labels (FILE *pcfFD)
 {
-#if defined(PAPI_COUNTERS)
-	struct fcounter_t *fcounter=NULL;
-#elif defined(PMAPI_COUNTERS)
-	pm_info2_t ProcessorMetric_Info; /* On AIX pre 5.3 it was pm_info_t */
-	pm_groups_info_t HWCGroup_Info;
-	pm_events2_t *evp = NULL;
-	int j;
-	int rc;
-#endif
-	int cnt = 0;
-	int AddedCounters = 0;
-	CntQueue *queue;
-	CntQueue *ptmp;
+	int i = 0;
+	hwc_info_t **used_counters_info;
+	int num_used_counters = HardwareCounters_GetUsed(&used_counters_info);
 
-#if defined(PMAPI_COUNTERS)
-	rc = pm_initialize (PM_VERIFIED|PM_UNVERIFIED|PM_CAVEAT|PM_GET_GROUPS, &ProcessorMetric_Info, &HWCGroup_Info, PM_CURRENT);
-	if (rc != 0)
-		pm_error ("pm_initialize", rc);
-#endif
-
-	queue = &CountersTraced;
-
-	for (ptmp = (queue)->prev; ptmp != (queue); ptmp = ptmp->prev)
+	if (num_used_counters > 0)
 	{
-		for (cnt = 0; cnt < MAX_HWC; cnt++)
+		fprintf (pcfFD, "%s\n", TYPE_LABEL);
+
+		for (i = 0; i < num_used_counters; i ++)
 		{
-			if (ptmp->Traced[cnt])
+			fprintf (pcfFD, "%d  %d %s (%s)\n", 7, 
+				used_counters_info[i]->global_id, 
+				used_counters_info[i]->name, 
+				used_counters_info[i]->description);
+
+			if (get_option_merge_AbsoluteCounters())
 			{
-#if defined(PAPI_COUNTERS)
-				if (!Exist_Counter(fcounter,ptmp->Events[cnt]))
-				{
-					unsigned position;
-					char *description;
-
-					INSERTAR_CONTADOR (fcounter, ptmp->Events[cnt]);
-
-					if (Labels_LookForHWCCounter (ptmp->Events[cnt], &position, &description))
-					{
-						if (AddedCounters == 0)
-							fprintf (pcfFD, "%s\n", TYPE_LABEL);
-						AddedCounters++;
-
-						/* fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(position), description); */
-						fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(ptmp->Events[cnt]), description);
-						if (get_option_merge_AbsoluteCounters())
-							fprintf (pcfFD, "%d  %d Absolute %s\n", 7, (HWC_COUNTER_TYPE(ptmp->Events[cnt]))+HWC_DELTA_ABSOLUTE, description);
-					}
-				}
-#elif defined(PMAPI_COUNTERS)
-				/* find pointer to the event */
-				for (j = 0; j < ProcessorMetric_Info.maxevents[cnt]; j++)
-				{ 
-					evp = ProcessorMetric_Info.list_events[cnt]+j;  
-					if (EvCnt == evp->event_id)
-						break;    
-				}
-				if (evp != NULL)
-				{
-					if (AddedCounters == 0)
-						fprintf (pcfFD, "%s\n", TYPE_LABEL);
-
-					fprintf (pcfFD, "%d  %d %s (%s)\n", 7, HWC_COUNTER_TYPE(cnt, EvCnt), evp->short_name, evp->long_name);
-					if (get_option_merge_AbsoluteCounters())
-						fprintf (pcfFD, "%d  %d Absolute %s (%s)\n", 7, (HWC_COUNTER_TYPE(cnt, EvCnt))+HWC_DELTA_ABSOLUTE, evp->short_name, evp->long_name);
-					AddedCounters++;
-				}
-#endif
+				fprintf (pcfFD, "%d  %d Absolute %s (%s)\n", 7, 
+					used_counters_info[i]->global_id + HWC_DELTA_ABSOLUTE,
+					used_counters_info[i]->name,
+					used_counters_info[i]->description);
 			}
 		}
-	}
 
-	if (AddedCounters > 0)
 		fprintf (pcfFD, "%d  %d %s\n", 7, HWC_GROUP_ID, "Active hardware counter set");
 
-	LET_SPACES (pcfFD);
+		LET_SPACES (pcfFD);
+
+		xfree(used_counters_info);
+	}
 }
-#endif
+
+#endif /* USE_HARDWARE_COUNTERS */
+
 
 static char * Rusage_Event_Label (int rusage_evt) {
    int i;
@@ -843,7 +742,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						if (res != 2)
 							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 
-						Labels_AddHWCounter_Code_Description (eventcode, hwc_description);
+						HardwareCounters_AssignGlobalID (ptask, eventcode, hwc_description);
 						hwc_count++;
 					}
 					break;

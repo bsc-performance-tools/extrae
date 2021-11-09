@@ -753,7 +753,7 @@ void ShareTraceInformation (int numtasks, int taskid)
 	if (0 == taskid)
 		fprintf (stdout, " HWC");
 	fflush (stdout);
-	Share_Counters_Usage (numtasks, taskid);
+	Share_HWC_After_Processing_MPITS (taskid);
 #endif
 
 	if (0 == taskid)
