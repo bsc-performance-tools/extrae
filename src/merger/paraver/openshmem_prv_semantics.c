@@ -184,7 +184,7 @@ static int Other_OPENSHMEM_Event (event_t * current_event,
 {
         UNREFERENCED_PARAMETER(fset);
         unsigned int  EvType  = Get_EvEvent(current_event);
-        unsigned long EvValue = ((Get_EvValue (current_event) > 0) ? EvType - OPENSHMEM_BASE_EVENT + 1 : 0);
+        UINT64 EvValue = ((Get_EvValue (current_event) > 0) ? EvType - OPENSHMEM_BASE_EVENT + 1 : 0);
 
         Switch_State (Get_State(EvType), (EvValue != EVT_END), ptask, task, thread);
 
@@ -205,7 +205,7 @@ static int Any_Outgoing_OPENSHMEM_Event (event_t * current_event,
 {
         UNREFERENCED_PARAMETER(fset);
         unsigned int  EvType  = Get_EvEvent(current_event);
-        unsigned long EvValue = ((Get_EvValue (current_event) > 0) ? EvType - OPENSHMEM_BASE_EVENT + 1 : 0);
+        UINT64 EvValue = ((Get_EvValue (current_event) > 0) ? EvType - OPENSHMEM_BASE_EVENT + 1 : 0);
 	unsigned int  EvSize  = Get_EvSize  (current_event);
 
         Switch_State (Get_State(EvType), (EvValue != EVT_END), ptask, task, thread);
@@ -229,7 +229,7 @@ static int Any_Incoming_OPENSHMEM_Event (event_t * current_event,
 {
         UNREFERENCED_PARAMETER(fset);
         unsigned int  EvType  = Get_EvEvent(current_event);
-        unsigned long EvValue = ((Get_EvValue (current_event) > 0) ? EvType - OPENSHMEM_BASE_EVENT + 1 : 0);
+        UINT64 EvValue = ((Get_EvValue (current_event) > 0) ? EvType - OPENSHMEM_BASE_EVENT + 1 : 0);
 	unsigned int  EvSize  = Get_EvSize  (current_event);
 
         Switch_State (Get_State(EvType), (EvValue != EVT_END), ptask, task, thread);

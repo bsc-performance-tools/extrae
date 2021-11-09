@@ -28,11 +28,11 @@ libwrap_openacc_la_SOURCES = $(WRAPPERS_OPENACC)
 
 WRAPPERS_OPENACCCUDA_CFLAGS =
 
-if WANT_CUPTI
+if HAVE_CUPTI 
 WRAPPERS_OPENACCCUDA_CFLAGS += @CUPTI_CFLAGS@
 endif
 
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 libwrap_openacccuda_la_SOURCES = $(WRAPPERS_OPENACC)
 libwrap_openacccuda_la_CFLAGS = $(libwrap_openacc_la_CFLAGS) @CUDA_CFLAGS@ $(WRAPPERS_OPENACCCUDA_CFLAGS) -I$(WRAPPERS_INC)/CUDA -DCUDA_SUPPORT
 libwrap_openacccuda_la_LDFLAGS = $(libwrap_openacc_la_LDFLAGS)

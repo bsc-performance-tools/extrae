@@ -13,7 +13,7 @@ if HAVE_MPI
 SUBDIRS += MPI
 endif
 
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 SUBDIRS += CUDA
 endif
 

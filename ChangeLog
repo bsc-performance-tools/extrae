@@ -7,6 +7,7 @@ ChangeLog
  + 24Jan2022 Adds OPENACC instrumentation in host and CUDA devices
  + 04Jan2022 Adds XML option to exclude some MPI_Comm_* calls from tracing 
  * 16Dec2022 Assigns same ID's to Infiniband counters ignoring Mellanox driver version
+ * 09Nov2021 Updates and upgrades CUDA support
  * 09Nov2021 Ensures native and uncore counters are uniquely identified
  * 19Oct2021 Fixes trace control file checks, skipping them if needed structures are not allocated
  * 27Sep2021 Fixes states in OpenMP taskgroup and taskloop regions 

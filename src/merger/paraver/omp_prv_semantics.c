@@ -65,7 +65,8 @@ static int WorkSharing_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -88,7 +89,8 @@ static int Parallel_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -111,7 +113,8 @@ static int Join_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue, EvParam;
+	unsigned int EvType, EvParam;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -135,7 +138,8 @@ static int Work_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -198,7 +202,8 @@ static int BarrierOMP_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -221,7 +226,8 @@ static int Critical_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -249,7 +255,8 @@ static int SetGetNumThreads_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -306,7 +313,8 @@ static int Taskwait_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -329,7 +337,8 @@ static int TaskGroup_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -367,7 +376,8 @@ static int OMPT_event (event_t * current_event,
 	unsigned thread,
 	FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -634,7 +644,8 @@ static int Ordered_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-        unsigned int EvType, EvValue;
+        unsigned int EvType;
+		UINT64 EvValue;
         UNREFERENCED_PARAMETER(fset);
 
         EvType  = Get_EvEvent (current_event);

@@ -2,130 +2,68 @@
 # --------------------
 AC_DEFUN([AX_CUDA],
 [
-	AC_ARG_WITH(cuda,
-		AC_HELP_STRING(
-			[--with-cuda@<:@=DIR@:>@],
-			[Enable support for tracing CUDA - may be superseded and still necessary by CUPTI if the latter is enabled]
-		),
-		[cuda_path="${withval}"],
-		[cuda_path="no"]
-	)
+  AX_FLAGS_SAVE()
+  AC_ARG_WITH(cuda,
+  AC_HELP_STRING(
+    [--with-cuda@<:@=DIR@:>@],
+    [Enable support for tracing CUDA]
+  ),
+    [cuda_root_path="${withval}"],
+    [cuda_root_path="no"]
+  )
 
-	enable_cuda="no"
+  if test "${cuda_root_path}" != "no" ; then
+    AX_FIND_INSTALLATION([CUDA], [${cuda_root_path}], [nvcc], [], [cuda_runtime_api.h], [], [cudart], [],
+      [ AC_MSG_NOTICE([CUDA tracing support enabled]) ],
+      [ AC_MSG_ERROR([CUDA tracing support is enabled but could not find a valid CUDA installation. Check that --with-cuda points to the proper CUDA directory.]) ]
+    )
+  fi
 
-	if test -z "${cuda_path}" ; then
-		AC_MSG_ERROR([Cannot find CUDA])
-	fi
-
-	NVCC=""
-	if test "${cuda_path}" != "no" ; then
-		AC_MSG_CHECKING([for CUDA])
-		if test -d "${cuda_path}" ; then
-			if test -x ${cuda_path}/bin/nvcc ; then
-				NVCC=${cuda_path}/bin/nvcc
-			elif test -x ${cuda_path}/bin64/nvcc ; then
-				NVCC=${cuda_path}/bin64/nvcc
-			fi
-			if test "${NVCC}" != ""; then
-				if test -r ${cuda_path}/include/cuda_runtime_api.h ; then
-					enable_cuda="yes"
-					AC_MSG_RESULT(${cuda_path})
-				else
-					AC_MSG_ERROR([Cannot find the necessary header files in the CUDA path])
-				fi
-			else
-				AC_MSG_ERROR([Cannot find the CUDA compiler in the given path])
-			fi
-		else
-			AC_MSG_ERROR([The specified path for CUDA does not exist])
-		fi
-		AX_FLAGS_SAVE()
-		AX_FIND_INSTALLATION([CUDA], [${cuda_path}], [], [], [], [], [], [], [], [])
-		AX_FLAGS_RESTORE()
-	fi
-	AC_SUBST(NVCC)
+  AM_CONDITIONAL(HAVE_CUDA, test "${CUDA_INSTALLED}" = "yes")
+  AX_FLAGS_RESTORE()
 ])
 
 # AX_CUPTI
 # --------------------
 AC_DEFUN([AX_CUPTI],
 [
-	AC_REQUIRE([AX_CUDA])
+  AX_FLAGS_SAVE()
+  AC_REQUIRE([AX_CUDA])
 
-	AC_ARG_WITH(cupti,
-		AC_HELP_STRING(
-		[--with-cupti@<:@=DIR@:>@],
-		[specify where to find CUPTI libraries and includes]
-	),
-		[cupti_path="${withval}"],
-		[cupti_path="no"]
-	)
+  if test "${CUDA_INSTALLED}" = "yes"; then
+    AC_ARG_WITH(cupti,
+      AC_HELP_STRING(
+        [--with-cupti],
+        [Enable support for tracing CUDA through CUPTI interface]
+      ),
+      [cuda_cupti_path="${withval}"],
+      [cuda_cupti_path="${CUDA_HOME}/extras/CUPTI"]
+    )
 
-	if test -z "${cupti_path}" ; then
-		AC_MSG_ERROR([Cannot find CUPTI])
-	fi
+    if test "$cuda_cupti_path" != "no"; then
+      AX_FIND_INSTALLATION([CUPTI], [${cuda_cupti_path}], [], [], [cupti.h cupti_events.h], [], [cupti], [],
+        [ AC_MSG_NOTICE([CUDA tracing support enabled through CUPTI interface]) ],
+        [ AC_MSG_ERROR([CUPTI tracing support is enabled but could not find valid CUPTI installation. Check that CUPTI is available for the CUDA installation pointed by --with-cuda.]) ]
+      )
+    fi
+  fi
 
-	if test "${cupti_path}" != "no" -a "${enable_cuda}" = "no" ; then
-		AC_MSG_ERROR([In order to use --with-cupti, you should pass also --with-cuda])
-	fi
-
-	enable_cupti="no"
-
-	if test "${cupti_path}" != "no" ; then
-		AC_MSG_CHECKING([for CUPTI directory])
-		if test -d "${cupti_path}" ; then
-			AC_MSG_RESULT(found)
-			AC_MSG_CHECKING([for CUPTI header files])
-			if test -r ${cupti_path}/include/cupti.h -a -r ${cupti_path}/include/cupti_events.h ; then
-				AC_MSG_RESULT(found)
-				AC_MSG_CHECKING([for CUPTI header files])
-				if test -r ${cupti_path}/lib/libcupti.so -o \
-				        -r ${cupti_path}/lib${BITS}/libcupti.so ; then
-					AC_MSG_RESULT(found)
-					enable_cupti="yes"
-				else
-					AC_MSG_ERROR([Cannot locate library files in the CUPTI specified directory])
-				fi
-			else
-				AC_MSG_ERROR([Cannot locate header files in the CUPTI specified directory])
-			fi
-		else
-			AC_MSG_ERROR([The specified path for CUPTI does not exist])
-		fi
-		AX_FLAGS_SAVE()
-		AX_FIND_INSTALLATION([CUPTI], [${cupti_path}], [], [], [], [], [], [], [], [])
-		AX_FLAGS_RESTORE()
-	fi
-
-	if test "${enable_cupti}" = "yes" ; then
-		AC_DEFINE([CUDA_WITH_CUPTI_INSTRUMENTATION], [1], [Determine if CUDA instrumentation must rely on CUPTI])
-	else
-		if test "${enable_cuda}" = "yes" ; then
-			AC_DEFINE([CUDA_WITHOUT_CUPTI_INSTRUMENTATION], [1], [Determine if CUDA instrumentation must NOT rely on CUPTI])
-		fi
-	fi
-
-	#
-	# CUDA is superseded by CUPTI. If CUPTI is available, use it instead dlopen alternative.
-	#
-	AM_CONDITIONAL(WANT_CUPTI, test "${enable_cupti}" = "yes" )
-	AM_CONDITIONAL(WANT_CUDA, test "${enable_cuda}" = "yes" -a "${enable_cupti}" = "no" )
-	AM_CONDITIONAL(WANT_CUDAorCUPTI, test "${enable_cuda}" = "yes" -o "${enable_cupti}" = "yes" )
-
+  AM_CONDITIONAL(HAVE_CUPTI, test "${CUPTI_INSTALLED}" = "yes")
+  AX_FLAGS_RESTORE()
 ])
 
 # AX_CUDA_SHOW_CONFIGURATION
 # --------------------
 AC_DEFUN([AX_CUDA_SHOW_CONFIGURATION],
 [
-	if test "${enable_cupti}" = "yes" ; then
+	if test "${CUPTI_INSTALLED}" = "yes" ; then
 		echo CUDA instrumentation: yes, through CUPTI
-		echo -e \\\tCUDA home : ${cuda_path}
-		echo -e \\\tCUPTI home: ${cupti_path}
+		echo -e \\\tCUDA : ${CUDA_HOME}
+		echo -e \\\tCUPTI: ${CUPTI_HOME}
 	else
-		if test "${enable_cuda}" = "yes" ; then
-			echo CUDA instrumentation: yes, through LD_PRELOAD
-			echo -e \\\tCUDA home : ${cuda_path}
+		if test "${CUDA_INSTALLED}" = "yes" ; then
+			echo CUDA instrumentation: yes, through wrappers
+			echo -e \\\tCUDA: ${CUDA_HOME}
 		else
 			echo CUDA instrumentation: no
 		fi

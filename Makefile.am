@@ -378,11 +378,6 @@ install-data-hook:
 	$(top_srcdir)/substitute $(SED) "@sub_ZLIB_HOME@" "${LIBZ_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_ZLIB_LIBS@" "${LIBZ_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_DL_LIBS@" "${DL_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
-if WANT_CUPTI
-	$(top_srcdir)/substitute $(SED) "@sub_CUPTI_LIBS@" "-L${CUPTI_HOME}/lib -lcupti" $(DESTDIR)$(datadir)/example/Makefile.inc
-else
-	$(top_srcdir)/substitute $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
-endif
 if WANT_OPENCL
 	$(top_srcdir)/substitute $(SED) "@sub_OPENCL_HOME@" "${OPENCL_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_OPENCL_LDFLAGS@" "${OPENCL_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
@@ -403,8 +398,8 @@ else
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF77@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF90@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
-if WANT_CUDAorCUPTI
-	$(top_srcdir)/substitute $(SED) "@sub_NVCC@" "`which ${NVCC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+if HAVE_CUDA
+	$(top_srcdir)/substitute $(SED) "@sub_NVCC@" "${CUDA_BIN_nvcc}" $(DESTDIR)$(datadir)/example/Makefile.inc
 else
 	$(top_srcdir)/substitute $(SED) "@sub_NVCC@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
@@ -436,7 +431,7 @@ if HAVE_MPI
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI
 	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
 	cd $(DESTDIR)$(datadir)/example/MPI ; cp ../Makefile.inc .
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+CUDA
 	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
 	cd $(DESTDIR)$(datadir)/example/MPI+CUDA ; cp ../Makefile.inc .
@@ -472,7 +467,7 @@ if WANT_PTHREAD
 	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
 	cd $(DESTDIR)$(datadir)/example/PTHREAD ; cp ../Makefile.inc .
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/CUDA
 	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
 	cd $(DESTDIR)$(datadir)/example/CUDA ; cp ../Makefile.inc .
@@ -509,7 +504,7 @@ uninstall-local:
 	      $(DESTDIR)$(datadir)/example/PYTHON
 if HAVE_MPI
 	rm -r $(DESTDIR)$(datadir)/example/MPI
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	rm -r $(DESTDIR)$(datadir)/example/MPI+CUDA
 endif
 if WANT_OPENCL
@@ -531,7 +526,7 @@ endif
 if WANT_PTHREAD
 	rm -r $(DESTDIR)$(datadir)/example/PTHREAD
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	rm -r $(DESTDIR)$(datadir)/example/CUDA
 endif
 if WANT_OPENCL

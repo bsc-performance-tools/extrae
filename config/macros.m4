@@ -23,7 +23,6 @@ AC_DEFUN([AX_FLAGS_RESTORE],
    LDFLAGS="${saved_LDFLAGS}"
 ])
 
-
 # AX_FIND_INSTALLATION
 #   (package, [list-of-possible-root-paths], 
 #    [list-of-required-bins], [list-of-optional-bins],
@@ -35,7 +34,7 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 [
   AC_REQUIRE([AX_SELECT_BINARY_TYPE])
 
-  dnl AX_FLAGS_SAVE()
+dnl AX_FLAGS_SAVE()
 
   dnl Generate lowercase and uppercase tokens for the package name (e.g. MPI), later used
   dnl to add --with flags (e.g. --with-mpi-libs) and to declare the output variables (e.g. MPI_HOME)
@@ -290,7 +289,7 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 
       found=0
       for lib_path in $all_libs_dirs; do
-        for lib_extension in ".so .dylib .a"; do
+        for lib_extension in .so .dylib .a; do
           if test -f "${lib_path}/lib[]lib_name[]${lib_extension}" ; then
             AC_MSG_RESULT([${lib_path}/lib[]lib_name[]${lib_extension}])
             __PKG_LIBS+="-l[]lib_name "
@@ -317,7 +316,7 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 
       found=0
       for lib_path in $all_libs_dirs; do
-        for lib_extension in ".so .dylib .a"; do
+        for lib_extension in .so .dylib .a; do
           if test -f "${lib_path}/lib[]lib_name[]${lib_extension}" ; then
             AC_MSG_RESULT([${lib_path}/lib[]lib_name[]${lib_extension}])
             __PKG_LIBS+="-l[]lib_name "

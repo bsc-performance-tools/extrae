@@ -50,7 +50,7 @@ install-data-hook:
 if HAVE_MPI
 	cp -rL pyextrae/mpi $(DESTDIR)$(libexecdir)/pyextrae
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	cp -rL pyextrae/cuda $(DESTDIR)$(libexecdir)/pyextrae
 endif
 if WANT_PTHREAD

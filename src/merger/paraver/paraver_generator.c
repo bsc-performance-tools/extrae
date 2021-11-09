@@ -636,11 +636,15 @@ static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == CUDAFUNC_EV)
+	{
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_FUNCTION, get_option_merge_UniqueCallerID());
+	}
 	else if (eventtype == CUDAFUNC_LINE_EV)
+	{
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
+	}
 	else
 	{
 		if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)

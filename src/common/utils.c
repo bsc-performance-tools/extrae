@@ -527,3 +527,12 @@ int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char
 	}
 }
 
+void __Extrae_Utils_free_array(char **array, int size)
+{
+	int i = 0;
+	for (i = 0; i < size; ++i)
+	{
+		xfree(array[i]);
+	}
+	xfree(array);
+}

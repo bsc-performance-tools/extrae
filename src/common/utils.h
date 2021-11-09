@@ -73,11 +73,16 @@ int __Extrae_Utils_file_exists (const char *file);
 int __Extrae_Utils_directory_exists (const char *file);
 int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
 	unsigned __Extrae_Utils_buffersize, char *buffer, const char *string);
+void __Extrae_Utils_free_array(char **, int);
 
 #if defined(__cplusplus)
 }
 #endif
 
 #define STRINGIFY(s) #s
+
+#if DEBUG
+# define DBG(x, ...) fprintf(stderr, "DEBUG: " x, ##__VA_ARGS__)
+#endif
 
 #endif /* __UTILS_H__ */

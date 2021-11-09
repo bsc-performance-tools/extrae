@@ -27,7 +27,7 @@ AC_DEFUN([AX_PROG_OPENACC],
 	fi
 
 	dnl Search for OPENACC installation
-	AX_FIND_INSTALLATION([OPENACC], [$openacc_paths], [openacc])
+	AX_FIND_INSTALLATION([OPENACC], [$openacc_paths], [], [], [], [], [], [], [], [])
 
 	if test "${OPENACC_INSTALLED}" = "yes" ; then
 		if test -d "${OPENACC_INCLUDES}/openacc" ; then

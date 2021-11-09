@@ -54,7 +54,7 @@ static int OpenCL_Acc_Call (event_t * event, unsigned long long time,
 {
 	unsigned state;
 	unsigned EvType, nEvType;
-	unsigned long long EvValue, nEvValue;
+	UINT64 EvValue, nEvValue;
 	
 	UNREFERENCED_PARAMETER(fset);
 
@@ -134,7 +134,7 @@ static int OpenCL_Host_Call (event_t * event, unsigned long long time,
 {
 	unsigned state;
 	unsigned EvType, nEvType;
-	unsigned long long EvValue, nEvValue;
+	UINT64 EvValue, nEvValue;
 	
 	UNREFERENCED_PARAMETER(fset);
 

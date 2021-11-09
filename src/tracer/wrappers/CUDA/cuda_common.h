@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#if CUDA_WITHOUT_CUPTI_INSTRUMENTATION
+#if HAVE_CUDA && !HAVE_CUPTI
 
 /**
  ** The following lines are convenient hacks to avoid including cupti.h -- these seem to be provided by cuda.h now, include that header and remove definitions below
@@ -116,13 +116,13 @@ cudaError_t cudaGetDeviceCount(int *);
 cudaError_t cudaEventElapsedTime(float *, cudaEvent_t, cudaEvent_t);
 */
 
-#else /* CUDA_WITHOUT_CUPTI_INSTRUMENTATION */
+#else /* HAVE_CUDA && !HAVE_CUPTI */
 
 # include <cuda_runtime_api.h>
 # include <cupti.h>
 # include <cupti_events.h>
 
-#endif /* CUDA_WITHOUT_CUPTI_INSTRUMENTATION */
+#endif /* HAVE_CUDA && !HAVE_CUPTI */
 
 #define MAX_CUDA_EVENTS 327680
 
@@ -179,9 +179,9 @@ void Extrae_cudaConfigureCall_Exit (void);
 void Extrae_cudaLaunch_Enter (const char*, cudaStream_t);
 void Extrae_cudaLaunch_Exit (void);
 void Extrae_cudaMalloc_Enter(unsigned int, void **, size_t);
-void Extrae_cudaMalloc_Exit();
+void Extrae_cudaMalloc_Exit(unsigned int);
 void Extrae_cudaFree_Enter(unsigned int, void *);
-void Extrae_cudaFree_Exit();
+void Extrae_cudaFree_Exit(unsigned int);
 void Extrae_cudaHostAlloc_Enter(void **, size_t);
 void Extrae_cudaHostAlloc_Exit();
 void Extrae_cudaThreadSynchronize_Enter (void);

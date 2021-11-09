@@ -128,7 +128,8 @@ static int Flush_Event (event_t * current_event,
                         unsigned int thread,
                         FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -151,7 +152,7 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 	FileSet_t *fset)
 {
 	unsigned int EvType;
-	unsigned long EvValue, EvParam;
+	UINT64 EvValue, EvParam;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (event);
@@ -269,7 +270,8 @@ static int Tracing_Event (event_t * current_event,
                           unsigned int thread,
                           FileSet_t *fset)
 {
-	unsigned int EvType, EvValue, i;
+	unsigned int EvType, i;
+	UINT64 EvValue;
 	task_t * task_info;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -305,7 +307,8 @@ static int Appl_Event (event_t * current_event,
                        unsigned int thread,
                        FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -335,7 +338,8 @@ static int CPUEventInterval_Event (event_t * current_event,
                        unsigned int thread,
                        FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -362,7 +366,7 @@ static int User_Event (event_t * current_event,
                        FileSet_t *fset)
 {
 	int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the user event type.  */
@@ -512,7 +516,7 @@ static int GetRusage_Event (
 {
 	int i;
 	unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
@@ -549,7 +553,7 @@ static int Memusage_Event (
 {
     int i;
     unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
     UNREFERENCED_PARAMETER(fset);
 
     EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
@@ -585,7 +589,7 @@ static int MPI_Stats_Event (
 {
 	int i;
 	unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
@@ -872,7 +876,8 @@ static int Tracing_Mode_Event (event_t * current_event,
     unsigned long long current_time, unsigned int cpu, unsigned int ptask,
     unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -1058,7 +1063,8 @@ static int Online_Event (event_t * current_event,
     unsigned long long current_time, unsigned int cpu, unsigned int ptask,
     unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-  unsigned int EvType, EvValue;
+  unsigned int EvType;
+  UINT64 EvValue;
   UNREFERENCED_PARAMETER(fset);
 
   EvType  = Get_EvValue (current_event);
@@ -1489,7 +1495,8 @@ static int ForkWaitSystem_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	unsigned int state = 0;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -1573,7 +1580,7 @@ static int DynamicMemory_Event (event_t * event,
 
 	unsigned EvType = Get_EvEvent (event);
 	unsigned long long EvParam = Get_EvParam (event);
-	unsigned long long EvValue = Get_EvValue (event);
+	UINT64 EvValue = Get_EvValue (event);
 	int isBegin = EvValue == EVT_BEGIN;
 
 	if ((EvType == MALLOC_EV)                 ||
@@ -1718,7 +1725,7 @@ static int DynamicMemory_Partition_Event (event_t * event,
         unsigned int task, unsigned int thread, FileSet_t *fset)
 {
         unsigned EvType = Get_EvEvent (event);
-        unsigned long long EvValue = Get_EvValue (event);
+        UINT64 EvValue = Get_EvValue (event);
 
 	trace_paraver_event (cpu, ptask, task, thread, time, MEMKIND_PARTITION_EV, EvValue);
 
@@ -1744,7 +1751,7 @@ static int SystemCall_Event (event_t * event,
 {                                                                               
 	int i = 0;
 	unsigned EvType = Get_EvEvent (event);                                  
-	unsigned long long EvValue = Get_EvValue (event);
+	UINT64 EvValue = Get_EvValue (event);
 	unsigned long long SysCallID = Get_EvMiscParam (event);
 
   if (!Syscall_Events_Found)                                                  

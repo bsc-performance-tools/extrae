@@ -6,11 +6,11 @@ if HAVE_ONLINE
   SUBDIRS += online
 endif
 
-if WANT_CUDA
+if HAVE_CUDA
 WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@
 endif
 
-if WANT_CUPTI
+if HAVE_CUPTI
 WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@ @CUPTI_CFLAGS@
 endif
 
@@ -32,7 +32,7 @@ lib_LTLIBRARIES = libseqtrace.la
 #  lib_LTLIBRARIES += libextrae-openmp.la
 #endif
 
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
   lib_LTLIBRARIES += libcudatrace.la
 endif
 
@@ -42,7 +42,7 @@ endif
 
 if WANT_OPENACC
   lib_LTLIBRARIES += liboacctrace.la
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
     lib_LTLIBRARIES += liboacccudatrace.la
 endif
 endif
@@ -58,7 +58,7 @@ if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += libompitracecf.la
 endif
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
   lib_LTLIBRARIES += libcudampitrace.la libcudampitracef.la
 if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += libcudampitracecf.la
@@ -82,7 +82,7 @@ endif
 
 if HAVE_MPI
 if WANT_OPENMP
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
   lib_LTLIBRARIES += libcudaompitrace.la libcudaompitracef.la
 if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += libcudaompitracecf.la
@@ -97,7 +97,7 @@ if WANT_OPENACC
 if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += liboaccmpitracecf.la
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
   lib_LTLIBRARIES += liboacccudampitrace.la liboacccudampitracef.la
 if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += liboacccudampitracecf.la
@@ -147,7 +147,7 @@ if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += lib_dyn_ompitracecf.la
 endif
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
   lib_LTLIBRARIES += lib_dyn_cudampitracec.la lib_dyn_cudampitracef.la
 if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += lib_dyn_cudampitracecf.la
@@ -405,7 +405,7 @@ ADDITIONAL_OPENCL_LIBS = $(WRAPPERS_LIB)/OPENCL/libwrap_opencl.la
 ADDITIONAL_CUDA_LIBS = $(WRAPPERS_LIB)/CUDA/libwrap_cuda.la
 ADDITIONAL_OPENSHMEM_LIBS = $(WRAPPERS_LIB)/openshmem/libwrap_openshmem.la
 ADDITIONAL_OPENACC_LIBS = $(WRAPPERS_LIB)/OPENACC/libwrap_openacc.la
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 ADDITIONAL_OPENACCCUDA_LIBS = $(WRAPPERS_LIB)/OPENACC/libwrap_openacccuda.la
 endif
 
@@ -707,13 +707,6 @@ COMMON_LINKER_FLAGS = \
  $(LIBZ_LINKER_FLAGS) \
  $(MRNET_LINKER_FLAGS)
 
-libcudaompitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-libcudaompitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-
-if SINGLE_MPI_LIBRARY
-  libcudaompitracecf_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-endif
-
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
@@ -730,32 +723,39 @@ if SINGLE_MPI_LIBRARY
   libptmpitracecf_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) # -static 
 endif
 
-libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-libcudampitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-libcudampitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-
-if SINGLE_MPI_LIBRARY
-  libcudampitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-endif
-
 liboacctrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 liboaccmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS)
 liboaccmpitracef_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS)
-liboacccudatrace_la_LDFLAGS = $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-liboacccudampitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
-liboacccudampitracef_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
+liboacccudatrace_la_LDFLAGS = $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+liboacccudampitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+liboacccudampitracef_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 
 if SINGLE_MPI_LIBRARY
   liboaccmpitracecf_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS)
-  liboacccudampitracecf_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS@ -lcudart # when in conflict with HEAD, keep HEAD
+  liboacccudampitracecf_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 endif
 
-libocltrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-liboclmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-liboclmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
+libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudampitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudampitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 
 if SINGLE_MPI_LIBRARY
-  liboclmpitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS)
+  libcudampitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+endif
+
+libcudaompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudaompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+
+if SINGLE_MPI_LIBRARY
+  libcudaompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+endif
+
+libocltrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @OPENCL_LDFLAGS_RPATH@ @OPENCL_LIBS@
+liboclmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @OPENCL_LDFLAGS_RPATH@ @OPENCL_LIBS@
+liboclmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @OPENCL_LDFLAGS_RPATH@ @OPENCL_LIBS@
+
+if SINGLE_MPI_LIBRARY
+  liboclmpitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @OPENCL_LDFLAGS_RPATH@ @OPENCL_LIBS@
 endif
 
 libomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)

@@ -508,7 +508,7 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 		case ADDR2CUDA_FUNCTION:
 		case ADDR2CUDA_LINE:
 			Address2Info_Labels[A2I_CUDA] = TRUE;
-			caller_address = address-1;
+			caller_address = address;
 			addr_type = uniqueID?UNIQUE_TYPE:CUDAKERNEL_TYPE;
 			break;
 		case ADDR2UF_FUNCTION:

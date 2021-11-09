@@ -239,7 +239,8 @@ static int Any_Send_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned recv_thread, recv_vthread, EvType, EvValue;
+	unsigned recv_thread, recv_vthread, EvType;
+	UINT64 EvValue;
 	thread_t *thread_info;
 	task_t *task_info, *task_info_partner;
 	event_t * recv_begin, * recv_end;
@@ -547,7 +548,8 @@ static int GlobalOP_event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	unsigned int comm_id, send_size, receive_size, is_root;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -593,7 +595,8 @@ static int Other_MPI_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask, 
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -637,7 +640,8 @@ static int MPIIO_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -666,7 +670,8 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 {
 	event_t *send_begin, *send_end;
 	off_t send_position;
-	unsigned EvType, EvValue, send_thread, send_vthread;
+	unsigned EvType, send_thread, send_vthread;
+	UINT64 EvValue;
 	thread_t *thread_info;
 	task_t *task_info, *task_info_partner;
 	int EvComm;
@@ -749,8 +754,9 @@ static int IRecv_Event (event_t * current_event,
 {
 	event_t *send_begin, *send_end;
 	off_t send_position;
-	unsigned EvType, EvValue, send_thread, send_vthread;
 	thread_t *thread_info, *irecved_thread_info;
+	unsigned EvType, send_thread, send_vthread;
+	UINT64 EvValue;
 	task_t *task_info, *task_info_partner;
 	int EvComm;
 	int irecved_found_in_thread = 0;
@@ -834,7 +840,8 @@ int MPI_PersistentRequest_Init_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -995,7 +1002,8 @@ int MPI_PersistentRequest_Free_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -1018,7 +1026,8 @@ int MPI_Start_Event (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	thread_t * thread_info;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -1054,7 +1063,8 @@ int MPI_Software_Counter_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -1077,7 +1087,7 @@ int MPI_Elapsed_Time_In_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UINT64 elapsed_time;
 	UNREFERENCED_PARAMETER(fset);
 

@@ -58,36 +58,36 @@ static int inuse[MAX_CUDA_INDEX] = { FALSE };
 
 void Enable_CUDA_Operation (int type)
 {
-	if (type == CUDALAUNCH_EV || type == CUDAKERNEL_GPU_EV)
+	if (type == CUDALAUNCH_VAL || type == CUDAKERNEL_GPU_VAL)
 		inuse[CUDALAUNCH_INDEX] = TRUE;
-	else if (type == CUDAMEMCPY_EV || type == CUDAMEMCPY_GPU_EV)
+	else if (type == CUDAMEMCPY_VAL || type == CUDAMEMCPY_GPU_VAL)
 		inuse[CUDAMEMCPY_INDEX] = TRUE;
-	else if (type == CUDASTREAMBARRIER_EV)
+	else if (type == CUDASTREAMBARRIER_VAL)
 		inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
-	else if (type == CUDATHREADBARRIER_EV || type == CUDATHREADBARRIER_GPU_EV)
+	else if (type == CUDATHREADBARRIER_VAL || type == CUDATHREADBARRIER_GPU_VAL)
 		inuse[CUDATHREADBARRIER_INDEX] = TRUE;
-	else if (type == CUDACONFIGCALL_EV || type == CUDACONFIGKERNEL_GPU_EV)
+	else if (type == CUDACONFIGCALL_VAL || type == CUDACONFIGKERNEL_GPU_VAL)
 		inuse[CUDACONFIGCALL_INDEX] = TRUE;
-	else if (type == CUDAMEMCPYASYNC_EV || type == CUDAMEMCPYASYNC_GPU_EV)
+	else if (type == CUDAMEMCPYASYNC_VAL || type == CUDAMEMCPYASYNC_GPU_VAL)
 		inuse[CUDAMEMCPYASYNC_INDEX] = TRUE;
-	else if (type == CUDADEVICERESET_EV)
+	else if (type == CUDADEVICERESET_VAL)
 		inuse[CUDADEVICERESET_INDEX] = TRUE;
-	else if (type == CUDATHREADEXIT_EV)
+	else if (type == CUDATHREADEXIT_VAL)
 		inuse[CUDATHREADEXIT_INDEX] = TRUE;
-	else if (type == CUDASTREAMCREATE_EV)
+	else if (type == CUDASTREAMCREATE_VAL)
 		inuse[CUDASTREAMCREATE_INDEX] = TRUE;
-	else if (type == CUDASTREAMDESTROY_EV)
+	else if (type == CUDASTREAMDESTROY_VAL)
 		inuse[CUDASTREAMDESTROY_INDEX] = TRUE;
-	else if (type == CUDAMALLOC_EV || type == CUDAMALLOCPITCH_EV ||
-	  type == CUDAFREE_EV || type == CUDAMALLOCARRAY_EV ||
-	  type == CUDAFREEARRAY_EV || type == CUDAMALLOCHOST_EV ||
-	  type == CUDAFREEHOST_EV)
+	else if (type == CUDAMALLOC_VAL || type == CUDAMALLOCPITCH_VAL ||
+	  type == CUDAFREE_VAL || type == CUDAMALLOCARRAY_VAL ||
+	  type == CUDAFREEARRAY_VAL || type == CUDAMALLOCHOST_VAL ||
+	  type == CUDAFREEHOST_VAL)
 		inuse[CUDAMALLOC_INDEX] = TRUE;
-	else if (type == CUDAHOSTALLOC_EV)
+	else if (type == CUDAHOSTALLOC_VAL)
 		inuse[CUDAHOSTALLOC_INDEX] = TRUE;
-	else if (type == CUDAMEMSET_EV)
+	else if (type == CUDAMEMSET_VAL)
 		inuse[CUDAMEMSET_INDEX] = TRUE;
-	else if (type == CUDAUNTRACKED_EV)
+	else if (type == CUDA_UNTRACKED_EV)
 		inuse[CUDAUNTRACKED_INDEX] = TRUE;
 }
 
@@ -126,51 +126,51 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 		             "0 End\n");
 
 		if (inuse[CUDALAUNCH_INDEX])
-			fprintf (fd, "%d cudaLaunch\n", CUDALAUNCH_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaLaunch\n", CUDALAUNCH_VAL);
 
 		if (inuse[CUDACONFIGCALL_INDEX])
-			fprintf (fd, "%d cudaConfigureCall\n", CUDACONFIGCALL_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaConfigureCall\n", CUDACONFIGCALL_VAL);
 
 		if (inuse[CUDAMEMCPY_INDEX])
-			fprintf (fd, "%d cudaMemcpy\n", CUDAMEMCPY_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaMemcpy\n", CUDAMEMCPY_VAL);
 
 		if (inuse[CUDATHREADBARRIER_INDEX])
-			fprintf (fd, "%d cudaThreadSynchronize/cudaDeviceSynchronize\n", CUDATHREADBARRIER_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaThreadSynchronize/cudaDeviceSynchronize\n", CUDATHREADBARRIER_VAL);
 
 		if (inuse[CUDASTREAMBARRIER_INDEX])
-			fprintf (fd, "%d cudaStreamSynchronize\n", CUDASTREAMBARRIER_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaStreamSynchronize\n", CUDASTREAMBARRIER_VAL);
 
 		if (inuse[CUDAMEMCPYASYNC_INDEX])
-			fprintf (fd, "%d cudaMemcpyAsync\n", CUDAMEMCPYASYNC_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaMemcpyAsync\n", CUDAMEMCPYASYNC_VAL);
 
 		if (inuse[CUDADEVICERESET_INDEX])
-			fprintf (fd, "%d cudaDeviceReset\n", CUDADEVICERESET_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaDeviceReset\n", CUDADEVICERESET_VAL);
 
 		if (inuse[CUDATHREADEXIT_INDEX])
-			fprintf (fd, "%d cudaThreadExit\n", CUDATHREADEXIT_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaThreadExit\n", CUDATHREADEXIT_VAL);
 
 		if (inuse[CUDASTREAMCREATE_INDEX])
-			fprintf (fd, "%d cudaStreamCreate\n", CUDASTREAMCREATE_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaStreamCreate\n", CUDASTREAMCREATE_VAL);
 
 		if (inuse[CUDASTREAMDESTROY_INDEX])
-			fprintf (fd, "%d cudaStreamDestroy\n", CUDASTREAMDESTROY_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaStreamDestroy\n", CUDASTREAMDESTROY_VAL);
 
 		if (inuse[CUDAMALLOC_INDEX])
 		{
-			fprintf(fd, "%d cudaMalloc\n", CUDAMALLOC_EV - CUDABASE_EV);
-			fprintf(fd, "%d cudaMallocPitch\n", CUDAMALLOCPITCH_EV - CUDABASE_EV);
-			fprintf(fd, "%d cudaFree\n", CUDAFREE_EV - CUDABASE_EV);
-			fprintf(fd, "%d cudaMallocArray\n", CUDAMALLOCARRAY_EV - CUDABASE_EV);
-			fprintf(fd, "%d cudaFreeArray\n", CUDAFREEARRAY_EV - CUDABASE_EV);
-			fprintf(fd, "%d cudaMallocHost\n", CUDAMALLOCHOST_EV - CUDABASE_EV);
-			fprintf(fd, "%d cudaFreeHost\n", CUDAFREEHOST_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaMalloc\n", CUDAMALLOC_VAL);
+			fprintf(fd, "%d cudaMallocPitch\n", CUDAMALLOCPITCH_VAL);
+			fprintf(fd, "%d cudaFree\n", CUDAFREE_VAL);
+			fprintf(fd, "%d cudaMallocArray\n", CUDAMALLOCARRAY_VAL);
+			fprintf(fd, "%d cudaFreeArray\n", CUDAFREEARRAY_VAL);
+			fprintf(fd, "%d cudaMallocHost\n", CUDAMALLOCHOST_VAL);
+			fprintf(fd, "%d cudaFreeHost\n", CUDAFREEHOST_VAL);
 		}
 
 		if (inuse[CUDAHOSTALLOC_INDEX])
-			fprintf(fd, "%d cudaHostAlloc\n", CUDAHOSTALLOC_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaHostAlloc\n", CUDAHOSTALLOC_VAL);
 
 		if (inuse[CUDAMEMSET_INDEX])
-			fprintf(fd, "%d cudaMemset\n", CUDAMEMSET_EV - CUDABASE_EV);
+			fprintf(fd, "%d cudaMemset\n", CUDAMEMSET_VAL);
 
 		fprintf (fd, "\n");
 
@@ -199,6 +199,6 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			fprintf(fd, "EVENT_TYPE\n"
 			  "%d\t%d\tCUDA Untracked event\n"
 			  "\n",
-			  0, CUDAUNTRACKED_EV);
+			  0, CUDA_UNTRACKED_EV);
 	}
 }
