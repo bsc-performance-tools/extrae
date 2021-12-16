@@ -114,6 +114,33 @@ static void dump_counter_data()
 
 
 /**
+ * Manipulate_HWC_Names
+ *
+ * Edits the given counter name in order to ignore parts of the name that may change but 
+ * still refer to the same counter, so that we assign the same ID's to all variations.
+ *
+ * @param hwc_name Original counter name
+ * @return Modified counter name
+ */
+static char * Manipulate_HWC_Names(char *hwc_name)
+{
+	char *hwc_modified_name = strdup(hwc_name);
+
+	/* Infiniband counters look like: infiniband:::mlx5_0_1:port_xmit_data,
+	 * where the 3 digits in mlx5_0_1 represent the driver version, NIC identifier, 
+	 * and port identifier. The following patch overrides the driver version so that
+	 * we assign the same ID's to the same counters for mlx4 and mlx5 versions.
+	 */
+	if ((strlen(hwc_name) > 17) && (!strncmp(hwc_name, "infiniband:::mlx", 16)))
+	{
+		hwc_modified_name[16] = '_';
+	}
+
+	return hwc_modified_name;
+}
+
+
+/**
  * HardwareCounters_AssignGlobalID
  *
  * Called for each H entry in the global SYM that declares a new counter for the given ptask.
@@ -156,8 +183,11 @@ void HardwareCounters_AssignGlobalID (int ptask, int local_id, char *definition)
         local_to_global->ptask = ptask;
 
         ntokens = __Extrae_Utils_explode(definition, " ", &tokensCounterName);
-        char *hwc_short_name = tokensCounterName[0];
+        char *hwc_original_name = tokensCounterName[0];
         char *hwc_long_description = index(definition, '[');
+
+	// Hack to ignore driver version in the counter name (for Infiniband counters, etc.)
+	char *hwc_short_name = Manipulate_HWC_Names(hwc_original_name);
 
         // Compute global id for this counter and verify there's no colliding ID's with counters from any other ptask
         char rehash_trailer[9];
@@ -185,7 +215,7 @@ void HardwareCounters_AssignGlobalID (int ptask, int local_id, char *definition)
                         {
                                 assigned = TRUE;
 
-                                if (strcmp(GlobalHWCData.counters_info[i].name, hwc_short_name) == 0)
+                                if (strcmp(GlobalHWCData.counters_info[i].name, hwc_original_name) == 0)
                                 {
                                         to_same_counter = TRUE;
                                 }
@@ -203,7 +233,7 @@ void HardwareCounters_AssignGlobalID (int ptask, int local_id, char *definition)
                         int idx = GlobalHWCData.num_counters ++;
 
                         GlobalHWCData.counters_info = xrealloc(GlobalHWCData.counters_info, GlobalHWCData.num_counters * sizeof(hwc_info_t));
-                        GlobalHWCData.counters_info[idx].name = strdup(hwc_short_name);
+                        GlobalHWCData.counters_info[idx].name = strdup(hwc_original_name);
                         GlobalHWCData.counters_info[idx].description = strdup(hwc_long_description);
                         GlobalHWCData.counters_info[idx].global_id = local_to_global->global_id;
                         GlobalHWCData.counters_info[idx].used = FALSE;
@@ -217,13 +247,14 @@ void HardwareCounters_AssignGlobalID (int ptask, int local_id, char *definition)
                 // There was a collision in the counters identifiers
                 fprintf(stderr, "mpi2prv: WARNING: Local ID %d for hardware counter %s from ptask %d collided with another counter. This was rehashed into ID %d only for this trace.\n",
                         local_to_global->local_id,
-                        hwc_short_name,
+                        hwc_original_name,
                         local_to_global->ptask,
                         local_to_global->global_id);
         }
 
         for (i=0; i<ntokens; i++) xfree(tokensCounterName[i]);
         xfree(tokensCounterName);
+	xfree(hwc_short_name);
 }
 
 
