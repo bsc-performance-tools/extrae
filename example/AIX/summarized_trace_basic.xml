@@ -8,11 +8,12 @@
 
   <mpi enabled="yes">
     <counters enabled="yes" />
+    <comm-calls enabled="yes" />
   </mpi>
 
   <openmp enabled="yes" ompt="no">
     <locks enabled="no" />
-		<taskloop enabled="no" />
+      <taskloop enabled="no" />
     <counters enabled="yes" />
   </openmp>
 

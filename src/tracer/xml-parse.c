@@ -63,6 +63,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #include "signals.h"
 #if defined(MPI_SUPPORT)
+# include "mpi_interface.h"
 # include "mpi_wrapper.h"
 #endif
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
@@ -227,6 +228,15 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <MPI> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
 			tracejant_hwc_mpi = FALSE;
 #endif
+			XML_FREE(enabled);
+		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_MPI_COMM_CALLS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			capture_mpi_comm_calls = enabled != NULL && !xmlStrcasecmp (enabled, xmlYES);
+			mfprintf (stdout, PACKAGE_NAME": %s MPI_Comm_* calls will be %s.\n", 
+			          (capture_mpi_comm_calls ? "All" : "Some"),
+			          (capture_mpi_comm_calls ? "traced" : "excluded")); 
 			XML_FREE(enabled);
 		}
 		else

@@ -8,7 +8,7 @@
 
   <openmp enabled="yes" ompt="no">
     <locks enabled="no" />
-		<taskloop enabled="no" />
+    <taskloop enabled="no" />
     <counters enabled="yes" />
   </openmp>
 
@@ -68,7 +68,7 @@
 
   <input-output enabled="no" internals="no"/>
 
-	<syscall enabled="no" />
+  <syscall enabled="no" />
 
   <merge enabled="yes" 
     synchronization="default"

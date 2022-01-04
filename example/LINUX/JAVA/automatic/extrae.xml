@@ -79,6 +79,5 @@
     translate-data-addresses="yes"
     overwrite="yes"
   > PiExample.prv </merge>
-  
 
 </trace>

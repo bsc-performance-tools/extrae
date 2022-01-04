@@ -93,7 +93,9 @@ The MPI configuration part is nested in the config file (see section
 
 MPI calls can gather performance information at the begin and end of MPI calls.
 To activate this behavior, just set to ``yes`` the attribute of the nested
-``<counters>`` node.
+``<counters>`` node. When ``<comm-calls>`` is set to ``no``, the calls to
+certain MPI_Comm_* calls (_rank, _size) are excluded from instrumentation to
+reduce tracing overhead.
 
 .. seealso::
 

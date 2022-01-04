@@ -59,9 +59,9 @@
     <free  enabled="yes" />
   </dynamic-memory>
 
-	<input-output enabled="no" internals="no"/>
+  <input-output enabled="no" internals="no"/>
 
-	<syscall enabled="no" />
+  <syscall enabled="no" />
 
   <merge enabled="no" 
     synchronization="default"
@@ -74,6 +74,5 @@
     translate-data-addresses="yes"
     overwrite="yes"
   />
-
 
 </trace>

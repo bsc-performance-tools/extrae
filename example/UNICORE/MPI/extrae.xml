@@ -8,6 +8,7 @@
 
   <mpi enabled="yes">
     <counters enabled="yes" />
+    <comm-calls enabled="yes" />
   </mpi>
 
   <callers enabled="yes">

@@ -16,6 +16,8 @@
   <mpi enabled="yes">
     <!-- Gather counters in the MPI routines? -->
     <counters enabled="yes" />
+    <!-- Capture all MPI_Comm_* calls? -->
+    <comm-calls enabled="yes" />
   </mpi>
 
   <!-- Emit information of the callstack -->
@@ -32,16 +34,15 @@
          Obtaining such information can make the final trace quite large.
     -->
     <locks enabled="no" />
-		<!-- Gather info about taskloops? -->
-		<taskloop enabled="no" />
+    <!-- Gather info about taskloops? -->
+    <taskloop enabled="no" />
     <!-- Gather counters in the OpenMP routines? -->
     <counters enabled="yes" />
   </openmp>
 
   <!-- Configuration of some pthread dependant values -->
   <pthread enabled="no">
-    <!-- If the library instruments pthread, shall we gather info about locks,
-	       mutexs and conds?
+    <!-- If the library instruments pthread, shall we gather info about locks, mutexs and conds?
          Obtaining such information can make the final trace quite large.
     -->
     <locks enabled="no" />
@@ -138,13 +139,13 @@
   <trace-control enabled="no">
     <!-- We can start the application with a "latent tracing" and wake it up
          once a control file is created. Use the property 'frequency' to
-         choose at which frequency this check must be done. If not supplied,
-         it will be checked every 100 global operations on MPI_COMM_WORLD.
+         choose at which frequency this check must be done. 
     -->
     <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
-    <!-- 
+    <!-- Alternatively, you can specify a start[-end] range of collective operations
+         over MPI_COMM_WORLD to start/stop the tracing.
     -->
-    <global-ops enabled="no"></global-ops>
+    <global-ops enabled="no">50-100</global-ops>
   </trace-control>
 
   <!-- Other options -->

@@ -53,5 +53,6 @@
  */
 #define INSTRUMENT_THIS_MPI ((mpitrace_on) && (!Backend_inInstrumentation(THREADID)))
 
+extern int capture_mpi_comm_calls;
 
 #endif /* __MPI_INTERFACE_H__ */

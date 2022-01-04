@@ -62,6 +62,9 @@
 #	define DEBUG_INTERFACE(enter)
 #endif
 
+// Controls whether MPI_Comm_rank, _size calls are traced 
+int capture_mpi_comm_calls = TRUE;
+
 /*
 	NAME_ROUTINE_C/F/C2F are macros to translate MPI interface names to 
 	patches that will be hooked by the DynInst mutator.
@@ -325,7 +328,7 @@ void NAME_ROUTINE_C2F(mpi_comm_rank) (MPI_Fint *comm, MPI_Fint *rank,
 
 	DLB(DLB_MPI_Comm_rank_F_enter, comm, rank, ierror);
 
-	if (INSTRUMENT_THIS_MPI)
+	if ((INSTRUMENT_THIS_MPI) && (capture_mpi_comm_calls))
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -355,7 +358,7 @@ void NAME_ROUTINE_C2F(mpi_comm_size) (MPI_Fint *comm, MPI_Fint *size,
 
 	DLB(DLB_MPI_Comm_size_F_enter, comm, size, ierror);
 
-	if (INSTRUMENT_THIS_MPI)
+	if ((INSTRUMENT_THIS_MPI) && (capture_mpi_comm_calls))
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1023,7 +1026,7 @@ int NAME_ROUTINE_C(MPI_Comm_rank) (MPI_Comm comm, int *rank)
 
 	DLB(DLB_MPI_Comm_rank_enter, comm, rank);
 
-	if (INSTRUMENT_THIS_MPI)
+	if ((INSTRUMENT_THIS_MPI) && (capture_mpi_comm_calls))
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1050,7 +1053,7 @@ int NAME_ROUTINE_C(MPI_Comm_size) (MPI_Comm comm, int *size)
 
 	DLB(DLB_MPI_Comm_size_enter, comm, size);
 
-	if (INSTRUMENT_THIS_MPI)
+	if ((INSTRUMENT_THIS_MPI) && (capture_mpi_comm_calls))
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();

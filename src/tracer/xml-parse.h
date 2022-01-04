@@ -71,6 +71,7 @@
 #define TRACE_CIRCULAR                  ((xmlChar*) "circular")
 #define TRACE_PREFIX                    ((xmlChar*) "trace-prefix")
 #define TRACE_MPI                       ((xmlChar*) "mpi")
+#define TRACE_MPI_COMM_CALLS            ((xmlChar*) "comm-calls")
 #define TRACE_SHMEM                     ((xmlChar*) "shmem")
 #define TRACE_OPENCL                    ((xmlChar*) "opencl")
 #define TRACE_CUDA                      ((xmlChar*) "cuda")

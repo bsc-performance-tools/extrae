@@ -8,7 +8,7 @@
 
   <openmp enabled="no" ompt="no">
     <locks enabled="no" />
-		<taskloop enabled="no" />
+    <taskloop enabled="no" />
     <counters enabled="yes" />
   </openmp>
 
@@ -62,12 +62,11 @@
     <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
 
-
   <sampling enabled="no" type="virtual" period="50m" variability="10m" />
 
   <dynamic-memory enabled="no" />
 
-	<input-output enabled="no" internals="no"/>
+  <input-output enabled="no" internals="no"/>
 
   <syscall enabled="no" />
 

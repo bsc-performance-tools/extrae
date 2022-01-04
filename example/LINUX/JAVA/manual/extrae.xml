@@ -57,7 +57,6 @@
     <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
 
-
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 
   <dynamic-memory enabled="no">
@@ -67,7 +66,7 @@
 
   <input-output enabled="no" internals="no"/>
 
-	<syscall enabled="no" />
+  <syscall enabled="no" />
 
   <merge enabled="yes" 
     synchronization="default"
@@ -81,5 +80,4 @@
     overwrite="yes"
   > PiExample.prv </merge>
   
-
 </trace>
