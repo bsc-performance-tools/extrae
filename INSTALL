@@ -12,6 +12,21 @@ without warranty of any kind.
 Basic Installation
 ==================
 
+Installing from Git
+~~~~~~~~~~~~~~~~~~~
+
+  If installing from Git, you will need to generate a configure file.
+Use
+
+git clone https://github.com/bsc-performance-tools/extrae
+cd extrae
+./boostrap
+
+then continue with installation as if from a release.
+
+Installing a Release
+~~~~~~~~~~~~~~~~~~~~
+
    Briefly, the shell command `./configure && make && make install'
 should configure, build, and install this package.  The following
 more-detailed instructions are generic; see the `README' file for
