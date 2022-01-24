@@ -131,6 +131,10 @@
 #if defined(OPENCL_SUPPORT)
 # include "opencl_wrapper.h"
 #endif
+#if defined(OPENACC_SUPPORT)
+# include "openacc_wrapper.h"
+#endif
+
 #include "common_hwc.h"
 
 #if defined(EMBED_MERGE_IN_TRACE)
@@ -1721,6 +1725,10 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	Extrae_OpenCL_init (me);
 #endif
 
+#if defined(OPENACC_SUPPORT)
+	Extrae_OACC_init(me);
+#endif
+
 #if defined(OMP_SUPPORT)
 
 # if defined(OMPT_SUPPORT)
@@ -1872,7 +1880,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 
 #if defined(CUDA_SUPPORT)
 	/* Allocate thread info for CUDA execs */
-	Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads());
+	Extrae_reallocate_CUDA_info (0, get_maximum_NumOfThreads());
 #endif
 
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))
@@ -2015,7 +2023,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 	
 #if defined(CUDA_SUPPORT)
 			/* Allocate thread info for CUDA execs */
-			Extrae_reallocate_CUDA_info (new_num_threads);
+			Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads(), new_num_threads);
 #endif
 	
 #if defined(PTHREAD_SUPPORT)

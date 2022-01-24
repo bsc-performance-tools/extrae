@@ -8,6 +8,7 @@ WRAPPERS_CUDA = \
 if WANT_CUDA
 WRAPPERS_CUDA += cuda_wrapper.c cuda_wrapper.h
 WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@
+WRAPPERS_CUDA_LDFLAGS = @CUDA_LDFLAGS@
 endif
 if WANT_CUPTI
 WRAPPERS_CUDA += cuda_wrapper_cupti.c cuda_wrapper_cupti.h

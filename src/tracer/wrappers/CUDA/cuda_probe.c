@@ -63,7 +63,6 @@ void Probe_Cuda_Launch_Entry (UINT64 p1)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, CUDALAUNCH_EV, EVT_BEGIN, TRUE);
 		TRACE_EVENT(LAST_READ_TIME, CUDAFUNC_EV, p1);
-		TRACE_EVENT(LAST_READ_TIME, CUDAFUNC_LINE_EV, p1);
 	}
 }
 
@@ -71,7 +70,10 @@ void Probe_Cuda_Launch_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDALAUNCH_EV, EVT_END, EMPTY);
+		TRACE_EVENT(LAST_READ_TIME, CUDAFUNC_EV, EVT_END);
+	}
 }
 
 void Probe_Cuda_Malloc_Entry(unsigned int event, UINT64 ptr, size_t size)

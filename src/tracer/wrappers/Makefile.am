@@ -27,3 +27,7 @@ endif
 if WANT_JAVA_JVMTI
 SUBDIRS += JAVA
 endif
+
+if WANT_OPENACC
+SUBDIRS += OPENACC
+endif

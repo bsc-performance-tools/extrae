@@ -50,7 +50,7 @@
 #define CUDAMALLOC_INDEX          10
 #define CUDAHOSTALLOC_INDEX       11
 #define CUDAMEMSET_INDEX          12
-#define CUDAUNKNOWN_INDEX         13
+#define CUDAUNTRACKED_INDEX       13
 
 #define MAX_CUDA_INDEX            14
 
@@ -87,8 +87,8 @@ void Enable_CUDA_Operation (int type)
 		inuse[CUDAHOSTALLOC_INDEX] = TRUE;
 	else if (type == CUDAMEMSET_EV)
 		inuse[CUDAMEMSET_INDEX] = TRUE;
-	else if (type == CUDAUNKNOWN_EV)
-		inuse[CUDAUNKNOWN_INDEX] = TRUE;
+	else if (type == CUDAUNTRACKED_EV)
+		inuse[CUDAUNTRACKED_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -195,10 +195,10 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
                          "\n",
                          0, CUDASTREAMBARRIER_THID_EV);
 
-		if (inuse[CUDAUNKNOWN_INDEX])
+		if (inuse[CUDAUNTRACKED_INDEX])
 			fprintf(fd, "EVENT_TYPE\n"
-			  "%d\t%d\tCUDA Unknown event\n"
+			  "%d\t%d\tCUDA Untracked event\n"
 			  "\n",
-			  0, CUDAUNKNOWN_EV);
+			  0, CUDAUNTRACKED_EV);
 	}
 }

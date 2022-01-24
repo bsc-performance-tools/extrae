@@ -99,6 +99,24 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 }
 
 static int
+CUDA_Func_Event(event_t *event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
+{
+	unsigned int state;
+	UINT64 EvValue;
+	UNREFERENCED_PARAMETER(state);
+	UNREFERENCED_PARAMETER(fset);
+
+	EvValue = Get_EvValue(event);
+
+	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDAFUNC_EV, EvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
+
+	return 0;
+}
+
+static int
 CUDA_Punctual_Event(event_t *event, unsigned long long current_time,
     unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
     FileSet_t *fset)
@@ -176,6 +194,7 @@ SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	/* Host calls */
 	{ CUDA_DYNAMIC_MEM_PTR_EV, CUDA_Punctual_Event },
 	{ CUDA_DYNAMIC_MEM_SIZE_EV, CUDA_Punctual_Event },
+	{ CUDAFUNC_EV, CUDA_Func_Event},
 	{ CUDACONFIGCALL_EV, CUDA_Call },
 	{ CUDALAUNCH_EV, CUDA_Call },
 	{ CUDAMALLOC_EV, CUDA_Call },
@@ -195,7 +214,7 @@ SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	{ CUDATHREADEXIT_EV, CUDA_Call },
 	{ CUDASTREAMCREATE_EV, CUDA_Call },
 	{ CUDASTREAMDESTROY_EV, CUDA_Call },
-	{ CUDAUNKNOWN_EV, CUDA_Punctual_Event},
+	{ CUDAUNTRACKED_EV, CUDA_Punctual_Event},
 	/* Accelerator calls */
 	{ CUDAKERNEL_GPU_EV, CUDA_GPU_Call },
 	{ CUDACONFIGKERNEL_GPU_EV, CUDA_GPU_Call },

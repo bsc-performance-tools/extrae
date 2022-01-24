@@ -178,6 +178,9 @@ AX_PROG_MPI
 ## Check if we have OpenSHMEM
 AX_PROG_OPENSHMEM
 
+## Check if we have OpenACC
+AX_PROG_OPENACC
+
 ## Check how we hook PMPI
 AX_PMPI_HOOK
 
@@ -640,6 +643,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/SYSCALL/Makefile \
   src/tracer/wrappers/fork/Makefile \
   src/tracer/wrappers/JAVA/Makefile \
+  src/tracer/wrappers/OPENACC/Makefile \
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \

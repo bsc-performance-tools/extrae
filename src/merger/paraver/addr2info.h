@@ -157,7 +157,7 @@ struct function_table
                     "Error while copying string '%s' into %p\n", \
                     source,                                        \
                     destination);                                  \
-            exit(EXIT_FAILURE);                                    \
+            exit(-1);                                    \
         }                                                          \
     }                                                              \
 }

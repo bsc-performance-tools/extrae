@@ -173,6 +173,8 @@
 #define TRACE_CPU_EVENTS_FREQUENCY	((xmlChar*) "frequency")
 #define TRACE_CPU_EVENTS_EMIT_ALWAYS    ((xmlChar*) "emit-always")
 
+#define TRACE_OPENACC                   ((xmlChar*) "openacc")
+
 short int Parse_XML_File (int rank, int world_size, const char *filename);
 
 #endif

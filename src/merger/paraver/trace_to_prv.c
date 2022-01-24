@@ -94,6 +94,7 @@
 #include "mpi_prv_events.h"
 #include "pthread_prv_events.h"
 #include "openshmem_prv_events.h"
+#include "openacc_prv_events.h"
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
 #include "opencl_prv_events.h"
@@ -452,7 +453,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
 			    Type == MPI_TYPE || Type == CUDA_TYPE || Type == OPENCL_TYPE ||
-			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE)
+			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE || Type == OPENACC_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
@@ -477,8 +478,10 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 						Enable_OPENSHMEM_Operation (EvType);
 					else if (JAVA_TYPE == Type)
 						Enable_Java_Operation (EvType);
+					else if (OPENACC_TYPE == Type)
+						Enable_OPENACC_Operation(EvType);
 				}
-				else	
+				else
 				{
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);
 				}

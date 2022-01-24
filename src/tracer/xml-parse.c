@@ -98,6 +98,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(INSTRUMENT_IO)
 # include "io_wrapper.h"
 #endif
+#if defined(OPENACC_SUPPORT)
+# include "openacc_wrapper.h"
+#endif
 #include "malloc_probe.h"
 
 /* Some global (but local in the module) variables */
@@ -2105,18 +2108,18 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting I/O calls.\n", TRACE_IO);
 #endif
 					}
-          /* Check for syscall instrumentation */                             
-          else if (!xmlStrcasecmp (current_tag->name, TRACE_SYSCALL))                
-          {                                                                     
-#if defined(INSTRUMENT_SYSCALL)                                                      
-            xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-            if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))            
-              SysCallInstrumentation = TRUE;                                         
-            XML_FREE(enabled);                                                  
-#else                                                                           
-            mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting system calls.\n", TRACE_SYSCALL);
-#endif                                                                          
-          }                                                                     
+					/* Check for syscall instrumentation */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_SYSCALL))
+					{
+#if defined(INSTRUMENT_SYSCALL)
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							SysCallInstrumentation = TRUE;
+						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting system calls.\n", TRACE_SYSCALL);
+#endif
+					}
 					/* Check for intel pebs sampling */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_PEBS_SAMPLING))
 					{
@@ -2127,6 +2130,20 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						XML_FREE(enabled);
 #else
 						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support PEBS sampling.\n", TRACE_PEBS_SAMPLING);
+#endif
+					}
+					/* Check for OpenACC instrumentation */
+					else if (!xmlStrcasecmp(current_tag->name, TRACE_OPENACC))
+					{
+#if defined(OPENACC_SUPPORT)
+						xmlChar *enabled = xmlGetProp_env(rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							Extrae_set_trace_OpenACC(TRUE);
+						else
+							Extrae_set_trace_OpenACC(FALSE);
+						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OPENACC instrumentation.\n", TRACE_OPENACC);
 #endif
 					}
 					else
@@ -2173,6 +2190,11 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 
   if (SysCallInstrumentation)                                                        
     mfprintf (stdout, PACKAGE_NAME": System calls instrumentation cannot be enabled using static version of the instrumentation library.\n");
+#endif
+
+#if defined(OPENACC_SUPPORT)
+	mfprintf (stdout, PACKAGE_NAME": OPENACC instrumentation is %s.\n",
+	Extrae_get_trace_OpenACC()?"enabled":"disabled");
 #endif
 
 	mfprintf (stdout, PACKAGE_NAME": Parsing the configuration file (%s) has ended\n", filename);   

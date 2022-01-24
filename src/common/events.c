@@ -197,7 +197,7 @@ unsigned IsJava (unsigned EvType)
 /******************************************************************************
  ***  IsCUDA
  ******************************************************************************/
-#define CUDA_EVENTS 27
+#define CUDA_EVENTS 28
 static unsigned cuda_events[] = {
 	/* Host events */
 	CUDA_DYNAMIC_MEM_PTR_EV, CUDA_DYNAMIC_MEM_SIZE_EV,
@@ -206,10 +206,13 @@ static unsigned cuda_events[] = {
 	CUDAFREEHOST_EV, CUDAMEMCPY_EV, CUDAMEMCPYASYNC_EV, CUDATHREADBARRIER_EV,
 	CUDASTREAMBARRIER_EV, CUDASTREAMCREATE_EV, CUDADEVICERESET_EV,
 	CUDATHREADEXIT_EV, CUDASTREAMDESTROY_EV, CUDAHOSTALLOC_EV, CUDAMEMSET_EV,
-	CUDAUNKNOWN_EV,
+	CUDAUNTRACKED_EV,
 	/* Accelerator events */
     CUDAKERNEL_GPU_EV, CUDACONFIGKERNEL_GPU_EV, CUDAMEMCPY_GPU_EV,
-	CUDAMEMCPYASYNC_GPU_EV, CUDATHREADBARRIER_GPU_EV };
+	CUDAMEMCPYASYNC_GPU_EV, CUDATHREADBARRIER_GPU_EV,
+    /* Other events */
+	CUDAFUNC_EV
+};
 
 unsigned IsCUDA (unsigned EvType)
 {
@@ -379,6 +382,23 @@ unsigned IsMPICollective(unsigned EvType)
    return FALSE;
 }
 
+#define OPENACC_EVENTS 2
+static unsigned openacc_events[] =
+{
+	OPENACC_EV,
+	OPENACC_DATA_EV,
+};
+
+unsigned
+IsOPENACC(unsigned EvType)
+{
+  unsigned evt;
+
+  for (evt = 0; evt < OPENACC_EVENTS; evt++)
+    if (openacc_events[evt] == EvType)
+      return TRUE;
+  return FALSE;
+}
 
 /******************************************************************************
  ***  getEventType
@@ -429,6 +449,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)
 	{
 		*Type = MPI_COMM_ALIAS_TYPE;
+		return TRUE;
+	}
+	else if (IsOPENACC(EvType))
+	{
+		*Type = OPENACC_TYPE;
 		return TRUE;
 	}
 	return FALSE;

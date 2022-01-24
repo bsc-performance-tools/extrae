@@ -76,9 +76,24 @@ typedef union
 	cudaStreamSynchronize_saved_params_t css;
 	cudaMemcpy_saved_params_t cm;
 	cudaMemcpyAsync_saved_params_t cma;
+} Extrae_cuda_saved_params_union;
+
+typedef struct
+{
+	int instrumentationDepth;
+	Extrae_cuda_saved_params_union punion;
 } Extrae_cuda_saved_params_t;
 
 static Extrae_cuda_saved_params_t *Extrae_CUDA_saved_params = NULL;
+void Extrae_CUDA_updateDepth_(int step)
+{
+	Extrae_CUDA_saved_params[THREADID].instrumentationDepth += step;
+}
+
+int Extrae_CUDA_getDepth()
+{
+	return Extrae_CUDA_saved_params[THREADID].instrumentationDepth;
+}
 
 static unsigned __last_tag = 0xC0DA; /* Fixed tag */
 static unsigned Extrae_CUDA_tag_generator (void)
@@ -113,7 +128,7 @@ static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
 	devices[devid].Stream[streamid].host_reference_time = TIME;
 }
 
-static void Extrae_CUDA_deInitialize (int devid)
+void Extrae_CUDA_deInitialize (int devid)
 {
 	if (devices != NULL)
 	{
@@ -126,7 +141,7 @@ static void Extrae_CUDA_deInitialize (int devid)
 	}
 }
 
-static void Extrae_CUDA_Initialize (int devid)
+void Extrae_CUDA_Initialize (int devid)
 {
 	cudaError_t err;
 	int i;
@@ -696,7 +711,7 @@ void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
 {
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 
-	Extrae_CUDA_saved_params[THREADID].csc.stream = p1;
+	Extrae_CUDA_saved_params[THREADID].punion.csc.stream = p1;
 
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamCreate_Entry ();
@@ -712,7 +727,7 @@ void Extrae_cudaStreamCreate_Exit (void)
 	Extrae_CUDA_Initialize (devid);
 
 	Extrae_CUDA_RegisterStream (devid,
-	  *Extrae_CUDA_saved_params[THREADID].csc.stream);
+	  *Extrae_CUDA_saved_params[THREADID].punion.csc.stream);
 
 	Probe_Cuda_StreamCreate_Exit ();
 	Backend_Leave_Instrumentation ();
@@ -727,12 +742,12 @@ void Extrae_cudaStreamDestroy_Enter (cudaStream_t stream)
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamDestroy_Entry ();
 
-	Extrae_CUDA_saved_params[THREADID].css.stream = stream;
+	Extrae_CUDA_saved_params[THREADID].punion.css.stream = stream;
 
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Extrae_CUDA_unRegisterStream (devid, Extrae_CUDA_saved_params[THREADID].css.stream);
+	Extrae_CUDA_unRegisterStream (devid, Extrae_CUDA_saved_params[THREADID].punion.css.stream);
 }
 
 void Extrae_cudaStreamDestroy_Exit (void)
@@ -750,13 +765,13 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 
-	Extrae_CUDA_saved_params[THREADID].css.stream = p1;
+	Extrae_CUDA_saved_params[THREADID].punion.css.stream = p1;
 
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
 	strid = Extrae_CUDA_SearchStream (devid,
-	  Extrae_CUDA_saved_params[THREADID].css.stream);
+	  Extrae_CUDA_saved_params[THREADID].punion.css.stream);
 
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
@@ -783,7 +798,7 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 	Extrae_CUDA_Initialize (devid);
 
 	strid = Extrae_CUDA_SearchStream (devid,
-	  Extrae_CUDA_saved_params[THREADID].css.stream);
+	  Extrae_CUDA_saved_params[THREADID].punion.css.stream);
 	if (strid == -1)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaStreamSynchronize\n");
@@ -810,8 +825,8 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 
-	Extrae_CUDA_saved_params[THREADID].cm.size = p3;
-	Extrae_CUDA_saved_params[THREADID].cm.kind = p4;
+	Extrae_CUDA_saved_params[THREADID].punion.cm.size = p3;
+	Extrae_CUDA_saved_params[THREADID].punion.cm.kind = p4;
 
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
@@ -858,8 +873,8 @@ void Extrae_cudaMemcpy_Exit (void)
 	   a communication at this point (this will occur at _Enter point).
 	   If the memcpy was started at the accelerator, we pass a tag != 0 to indicate that
 	   the communication arrives at this point. */
-	if (Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyHostToDevice ||
-	  Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyDeviceToDevice)
+	if (Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyHostToDevice ||
+	  Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyDeviceToDevice)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0,
 		  CUDAMEMCPY_GPU_EV, EVT_END, tag, 0);
 	else
@@ -876,11 +891,11 @@ void Extrae_cudaMemcpy_Exit (void)
 	Probe_Cuda_Memcpy_Exit ();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
-	if (Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyDeviceToHost ||
-	  Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyHostToHost)
+	if (Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyDeviceToHost ||
+	  Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-		  TASKID, Extrae_CUDA_saved_params[THREADID].cm.size, tag, tag);
+		  TASKID, Extrae_CUDA_saved_params[THREADID].punion.cm.size, tag, tag);
 	}
 
 	Backend_Leave_Instrumentation ();
@@ -897,9 +912,9 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 
-	Extrae_CUDA_saved_params[THREADID].cma.size = p3;
-	Extrae_CUDA_saved_params[THREADID].cma.kind = p4;
-	Extrae_CUDA_saved_params[THREADID].cma.stream = p5;
+	Extrae_CUDA_saved_params[THREADID].punion.cma.size = p3;
+	Extrae_CUDA_saved_params[THREADID].punion.cma.kind = p4;
+	Extrae_CUDA_saved_params[THREADID].punion.cma.stream = p5;
 
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
@@ -949,7 +964,7 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 	tag = Extrae_CUDA_tag_generator();
 
 	strid = Extrae_CUDA_SearchStream (devid,
-	  Extrae_CUDA_saved_params[THREADID].cma.stream);
+	  Extrae_CUDA_saved_params[THREADID].punion.cma.stream);
 	if (strid == -1)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaMemcpyAsync_Enter\n");
@@ -961,8 +976,8 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 	   a communication at this point (this will occur at _Enter point).
 	   If the memcpy was started at the accelerator, we pass a tag != 0 to indicate that
 	   the communication arrives at this point. */
-	if (Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyHostToDevice ||
-	   Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyDeviceToDevice)
+	if (Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyHostToDevice ||
+	   Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyDeviceToDevice)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, strid,
 		  CUDAMEMCPYASYNC_GPU_EV, EVT_END, tag, 0);
 	else
@@ -972,11 +987,11 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 	Probe_Cuda_MemcpyAsync_Exit ();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
-	if (Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyDeviceToHost ||
-	  Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyHostToHost)
+	if (Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyDeviceToHost ||
+	  Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-		  TASKID, Extrae_CUDA_saved_params[THREADID].cma.size, tag, tag);
+		  TASKID, Extrae_CUDA_saved_params[THREADID].punion.cma.size, tag, tag);
 	}
 
 	Backend_Leave_Instrumentation ();
@@ -1004,10 +1019,12 @@ void Extrae_cudaMemset_Exit()
 	Backend_Leave_Instrumentation();
 }
 
-void Extrae_reallocate_CUDA_info (unsigned nthreads)
+void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads)
 {
 	Extrae_CUDA_saved_params = (Extrae_cuda_saved_params_t*) realloc (
 		Extrae_CUDA_saved_params, sizeof(Extrae_cuda_saved_params_t)*nthreads);
+
+	memset(&Extrae_CUDA_saved_params[old_threads], 0, sizeof(Extrae_cuda_saved_params_t)*(nthreads-old_threads));
 
 	if (Extrae_CUDA_saved_params == NULL)
 	{

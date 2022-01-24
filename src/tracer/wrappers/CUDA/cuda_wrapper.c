@@ -141,7 +141,7 @@ cudaError_t cudaLaunch (const char *p1)
 
 	if (real_cudaLaunch != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaLaunch_Enter (p1);
+		Extrae_cudaLaunch_Enter(p1, NULL);
 		res = real_cudaLaunch (p1);
 		Extrae_cudaLaunch_Exit ();
 	}

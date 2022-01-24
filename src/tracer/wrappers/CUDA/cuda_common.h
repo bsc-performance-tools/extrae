@@ -170,6 +170,9 @@ struct CUDAdevices_t
 #endif
 };
 
+void Extrae_CUDA_updateDepth_(int);
+int  Extrae_CUDA_getDepth();
+
 void Extrae_CUDA_flush_all_streams(int synchronize);
 void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);
 void Extrae_cudaConfigureCall_Exit (void);
@@ -202,6 +205,9 @@ void Extrae_cudaDeviceReset_Exit (void);
 void Extrae_cudaThreadExit_Enter (void);
 void Extrae_cudaThreadExit_Exit (void);
 
-void Extrae_reallocate_CUDA_info (unsigned nthreads);
+void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads);
 
 void Extrae_CUDA_fini (void);
+
+void Extrae_CUDA_Initialize(int);
+void Extrae_CUDA_deInitialize(int);

@@ -36,6 +36,7 @@ unsigned IsMISC (unsigned EvType);
 unsigned IsBurst (unsigned EvType);
 unsigned IsHwcChange (unsigned EvType);
 unsigned IsMPICollective (unsigned EvType);
+unsigned IsOPENACC(unsigned);
 #ifdef __cplusplus
 }
 #endif
@@ -606,7 +607,7 @@ enum {
 #define CUDAMEMCPYTOSYMBOLASYNC_EV    63100032 /*TBD*/
 #define CUDAMEMCPYFROMSYMBOLASYNC_EV  63100033 /*TBD*/
 #define CUDAMEMSET_EV                 63100034
-#define CUDAUNKNOWN_EV                63199999
+#define CUDAUNTRACKED_EV              63199999
 
 #define CUDABASE_GPU_EV          63200000
 #define CUDAKERNEL_GPU_EV        63200001
@@ -701,6 +702,31 @@ enum {
 /* To associate command queue with Paraver thread */
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
+#define OPENACC_EV                                    66000000
+enum
+{
+	OPENACC_INIT_VAL = 1,
+	OPENACC_SHUTDOWN_VAL,
+	OPENACC_ENTER_DATA_VAL,
+	OPENACC_EXIT_DATA_VAL,
+	OPENACC_UPDATE_VAL,
+	OPENACC_COMPUTE_VAL,
+	OPENACC_ENQUEUE_KERNEL_LAUNCH_VAL,
+	OPENACC_ENQUEUE_UPLOAD_VAL,
+	OPENACC_ENQUEUE_DOWNLOAD_VAL,
+	OPENACC_WAIT_VAL,
+	OPENACC_MAX_VAL = OPENACC_WAIT_VAL
+};
+
+#define OPENACC_DATA_EV                               66000001
+enum
+{
+	OPENACC_CREATE_VAL = 1,
+	OPENACC_DELETE_VAL,
+	OPENACC_ALLOC_VAL,
+	OPENACC_FREE_VAL,
+	OPENACC_DATA_MAX_VAL = OPENACC_FREE_VAL
+};
 
 #define CALLER_EV                70000000
 #define CALLER_LINE_EV           80000000
@@ -1027,7 +1053,8 @@ typedef enum
 	CUDA_TYPE,
 	OPENCL_TYPE,
 	OPENSHMEM_TYPE,
-	JAVA_TYPE
+	JAVA_TYPE,
+	OPENACC_TYPE
 } EventType_t;
 
 
