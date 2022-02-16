@@ -25,32 +25,39 @@
 #define GNU_LIBGOMP_WRAPPER_H_
 
 /*
- * Several data helpers to temporarily store the pointers to the real 
- * outlined functions or tasks, and the real data arguments, while we inject 
- * a fake task that will replace the original one to emit instrumentation 
- * events, and then retrieve the original pointers through the helpers to 
+ * Several data helpers to temporarily store the pointers to the real
+ * outlined functions or tasks, and the real data arguments, while we inject
+ * a fake task that will replace the original one to emit instrumentation
+ * events, and then retrieve the original pointers through the helpers to
  * end up calling the real functions.
  */
-struct parallel_helper_t                                                        
-{                                                                               
-  void (*fn)(void *);                                                           
-  void *data;                                                                   
-};                                                                              
-                                                                                
-struct task_helper_t                                                            
-{                                                                               
-  void (*fn)(void *);                                                           
-  void *data;                                                                   
-  void *buf;                                                                    
-  long long counter;                                                            
-};                                                                              
-                                                                                
-struct helpers_queue_t                                                          
-{                                                                               
-  struct parallel_helper_t *queue;                                              
-  int current_helper;                                                             
-  int max_helpers;                                                                
-};                                                                              
+struct parallel_helper_t
+{
+  void (*fn)(void *);
+  void *data;
+};
+
+struct task_helper_t
+{
+  void (*fn)(void *);
+  void *data;
+  void *buf;
+  long long counter;
+};
+
+struct helpers_queue_t
+{
+  struct parallel_helper_t *queue;
+  int current_helper;
+  int max_helpers;
+};
+
+typedef struct taskloop_helper_t
+{
+  void *magicno;
+  void (*fn)(void *);
+  long long id;
+} taskloop_helper_t;
 
 int _extrae_gnu_libgomp_init (int rank);
 

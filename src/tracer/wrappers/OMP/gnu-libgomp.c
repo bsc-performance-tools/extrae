@@ -57,10 +57,10 @@
 
 char *__GOMP_version = NULL;
 
-/*                                                                              
- * In case the constructor initialization didn't trigger                        
- * or the symbols couldn't be found, retry hooking.                        
- */                                                                             
+/*
+ * In case the constructor initialization didn't trigger
+ * or the symbols couldn't be found, retry hooking.
+ */
 #define RECHECK_INIT(real_fn_ptr)                                      \
 {                                                                      \
   if (real_fn_ptr == NULL)                                             \
@@ -159,6 +159,7 @@ static void (*GOMP_taskgroup_end_real)(void) = NULL;
 // Appeared in OpenMP 3.1 but increased the #parameters in 4.0 and later in 4.5
 static void (*GOMP_task_real)(void*,void*,void*,long,long,int,unsigned,...) = NULL;
 static void (*GOMP_taskloop_real)(void*,void*,void*,long,long,unsigned,unsigned long,int,long,long,long) = NULL;
+static void (*GOMP_taskloop_ull_real)(void*,void*,void*,long,long,unsigned,unsigned long,int,unsigned long long,unsigned long long,unsigned long long) = NULL;
 
 static int (*GOMP_loop_doacross_static_start_real)(unsigned, long *, long, long *, long *) = NULL;
 static int (*GOMP_loop_doacross_dynamic_start_real)(unsigned, long *, long, long *, long *) = NULL;
@@ -338,22 +339,6 @@ static volatile long long __GOMP_taskloop_ctr = 1;
 static pthread_mutex_t __GOMP_taskloop_ctr_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-typedef struct tracked_taskloop_helper_t tracked_taskloop_helper_t;
-
-struct tracked_taskloop_helper_t
-{
-  void *taskloop_helper_ptr;
-  tracked_taskloop_helper_t *next;
-
-};
-
-tracked_taskloop_helper_t *tracked_taskloop_helpers = NULL;
-pthread_mutex_t mtx_taskloop_helpers = PTHREAD_MUTEX_INITIALIZER;
-
-void *taskloop_global_fn = NULL;
-void *taskloop_global_data = NULL;
-
-
 /*
  * Instrumentation of doacross is split in several routines. In the *_start 
  * routines (e.g. GOMP_loop_doacross_static_start) we need to save the parameter
@@ -503,167 +488,30 @@ static void callme_task (void *task_helper_ptr)
 	}
 }
 
-static void callme_taskloop (void (*fn)(void *), void *data)
-{
-#if defined(DEBUG)
-	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop enter: fn=%p data=%p data[0]=%ld data[1]=%ld\n", THREAD_LEVEL_VAR, fn, data, *((long *)data), *((long *)(data+sizeof(long))));
-#endif
 
-#if defined(HAVE__SYNC_FETCH_AND_ADD)
-	long long taskloop_ctr = __sync_fetch_and_add(&__GOMP_taskloop_ctr, 1);
-#else
-	pthread_mutex_lock (&__GOMP_taskloop_ctr_mtx);
-	taskloop_ctr = __GOMP_taskloop_ctr++;
-	pthread_mutex_unlock (&__GOMP_taskloop_ctr_mtx);
-#endif
+static void callme_taskloop(void *data_trailer)
+{
+	struct taskloop_helper_t *taskloop_helper = NULL;
+
+	// Search for the magic number 0xdeadbeef to locate the helper
+	int i = sizeof(void *), arg_size = 0;
+	while (*(void **)(data_trailer + i) != 0xdeadbeef)
+	{
+		i ++;
+	}
+	arg_size = i;
+	taskloop_helper = data_trailer + arg_size;
+
+	void (*fn)(void *) = taskloop_helper->fn;
 
 	Extrae_OpenMP_TaskUF_Entry (fn);
-	Extrae_OpenMP_TaskLoopID (taskloop_ctr);
+	Extrae_OpenMP_TaskLoopID (taskloop_helper->id);
 
-	fn(data);
+	fn (data_trailer);
 
-	Extrae_OpenMP_Notify_NewExecutedTask();
-  Extrae_OpenMP_TaskUF_Exit ();
+        Extrae_OpenMP_Notify_NewExecutedTask();
+	Extrae_OpenMP_TaskUF_Exit ();
 }
-
-/*
- * This callback is invoked when taskloop doesn't use copy function. Then the 
- * data helper is prefixed to the argument data in the GOMP_taskloop wrapper.
- *
- * taskloop_helper \             data \
- *                  --------------------------------------------
- *                  | cpyfn? |   *fn   | long start | long end |
- *                  --------------------------------------------
- */
-static void callme_taskloop_prefix_helper (void *data)
-{
-  /* Look for the data argument in our tracked list, if we don't find it, that means
-   * that the runtime did an internal copy of data and our prefixed pointers 
-   * are gone, so we use a fallback mechanism using a global pointer that stores the 
-   * original function and data (this only allows 1 simultaneous taskloop)
-   */
-	pthread_mutex_lock (&mtx_taskloop_helpers);
-	tracked_taskloop_helper_t *current_tracked_taskloop_helper = tracked_taskloop_helpers;
-	int found = 0;
-	while ((current_tracked_taskloop_helper != NULL) && (!found))
-	{
-		if (current_tracked_taskloop_helper->taskloop_helper_ptr == data)
-		{
-			found = 1;
-		}
-		current_tracked_taskloop_helper = current_tracked_taskloop_helper->next;
-	}
-	pthread_mutex_unlock (&mtx_taskloop_helpers);
-
-	if (!found)
-	{
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_prefix_helper: Using fallback global pointers taskloop_global_fn=%p taskloop_global_data=%p\n", THREAD_LEVEL_VAR, taskloop_global_fn, taskloop_global_data);
-#endif
-		callme_taskloop(taskloop_global_fn, taskloop_global_data);
-	}
-	else
-	{
-		/* Retrieve the data helper */
-		void *taskloop_helper = data - sizeof(void *);                                
-		void (*fn)(void *) = *(void **)(taskloop_helper); 
-
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_prefix_helper: Using injected pointers fn=%p data=%p\n", THREAD_LEVEL_VAR, fn, data);
-#endif
-		callme_taskloop(fn, data);
-	}
-}
-
-/*
- * This callback is invoked when taskloop uses copy function. Then the data 
- * helper is suffixed to the argument data in the callme_taskloop_cpyfn callback.
- *
- *            data \       taskloop_helper \
- *                  ---------------------------------
- *                  | long start | long end | *fn ...
- *                  ---------------------------------
- */
-static void callme_taskloop_suffix_helper (void *data)                                        
-{
-  /* Look for the data argument in our tracked list, if we don't find it, that means
-   * that the runtime did an internal copy of data and our suffixed pointers 
-   * are gone, so we use a fallback mechanism using a global pointer that stores the 
-   * original function and data (this only allows 1 simultaneous taskloop)
-   */
-	pthread_mutex_lock (&mtx_taskloop_helpers);
-	tracked_taskloop_helper_t *current_tracked_taskloop_helper = tracked_taskloop_helpers;
-	int found = 0;
-	while ((current_tracked_taskloop_helper != NULL) && (!found))
-	{
-		if (current_tracked_taskloop_helper->taskloop_helper_ptr == data)
-		{
-			found = 1;
-		}
-		current_tracked_taskloop_helper = current_tracked_taskloop_helper->next;
-	}
-	pthread_mutex_unlock (&mtx_taskloop_helpers);
-
-	if (!found)
-	{
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_suffix_helper: Using fallback global pointers taskloop_global_fn=%p taskloop_global_data=%p\n", THREAD_LEVEL_VAR, taskloop_global_fn, taskloop_global_data);
-#endif
-		callme_taskloop(taskloop_global_fn, taskloop_global_data);
-	}
-	else
-	{
-		/* Retrieve the data helper */
-		void *taskloop_helper = data + (2 * sizeof(long));
-		void (*fn)(void *) = *(void **)(taskloop_helper);
-
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_suffix_helper: Using injected pointers fn=%p data=%p\n", THREAD_LEVEL_VAR, fn, data);
-#endif
-		callme_taskloop(fn, data);
-	}
-}
-
-/*
- * This callback is invoked when taskloop uses copy function. The data helper
- * is prefixed to the argument data in the GOMP_taskloop wrapper. The helper is 
- * copied from data to arg by suffixing it (see GOMP_taskloop wrapper), after
- * the real copy takes place.
- *
- * taskloop_helper ↴         data ↴
- *                 ----------------------------------------
- *                 | *cpyfn | *fn | long start | long end |
- *                 ----------------------------------------
- *
- *             arg ↴  arg+(2*sizeof(long)) ↴  arg+arg_size ↴        
- *                 ---------------------------------------------------------------------------
- *                 | long start | long end |   *fn   | ... | long start | long end | *fn | ...
- *                 ---------------------------------------------------------------------------
- */
-void callme_taskloop_cpyfn(void *arg, void *data)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_cpyfn enter: arg=%p data=%p\n", THREAD_LEVEL_VAR, arg, data);
-#endif
-
-  /* Retrieve the data helper */
-	void *taskloop_helper = data - sizeof(void *) - sizeof(void *);
-  void (*cpyfn)(void *, void*) = *((void **)(taskloop_helper));
-	void (*fn)(void *) = *((void **)(taskloop_helper+sizeof(void *)));
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_cpyfn: taskloop_helper=%p cpyfn=%p fn=%p\n", THREAD_LEVEL_VAR, taskloop_helper, cpyfn, fn);
-#endif
-
-	/* Real copy function */
-  cpyfn(arg, data);
-
-	/* Save the pointer to the real fn in arg, after the 2 longs that mark the
-	 * start/end iterations 
-	 */
-  *(void **)(arg+(2 * sizeof(long))) = fn;
-}
-
 
 /******************************************************************************\
  *                                                                            *
@@ -2571,13 +2419,6 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 }
 
 
-/*
- * taskloop_helper ↴         data ↴
- *                 ----------------------------------------
- *                 | *cpyfn | *fn | long start | long end |
- *                 ----------------------------------------
- */
-
 void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, long start, long end, long step)
 {
 #if defined(DEBUG)
@@ -2589,71 +2430,28 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 
 	if (TRACE(GOMP_taskloop_real) && (getTrace_OMPTaskloop()))
 	{
-		/* Store global pointers to fn and data. This is a fallback mechanism in case the runtime changes data, 
-		 * breaking our injected pointers. Using the global pointers only allows 1 simultaneous taskloop.
-		 */
-		taskloop_global_fn = fn;
-		taskloop_global_data = data;
+		struct taskloop_helper_t taskloop_helper;
+		long helper_size = sizeof(struct taskloop_helper_t);
+
+		taskloop_helper.magicno = 0xdeadbeef; // Magic number to locate the helper in callme_taskloop
+		taskloop_helper.fn = fn;
+
+		// Assign a unique id to this taskloop to track when it is scheduled and when executed 
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+		taskloop_helper.id = __sync_fetch_and_add(&__GOMP_taskloop_ctr, 1);
+#else
+		pthread_mutex_lock (&__GOMP_taskloop_ctr_mtx);
+		taskloop_helper.id = __GOMP_taskloop_ctr++;
+		pthread_mutex_unlock (&__GOMP_taskloop_ctr_mtx);
+#endif
+
+    	        // Append the helper to the end of data
+		void *data_trailer = malloc(arg_size + helper_size);
+		memcpy (data_trailer, data, arg_size);
+		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
 
 		Extrae_OpenMP_TaskLoop_Entry ();
-
-		/* Modify the input 'data' to prefix the pointers to cpyfn and fn */
-		long payload = sizeof(void *) + sizeof(void *);
-		void *taskloop_helper = (void *)malloc(payload + arg_size);
-#if defined(DEBUG)
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop taskloop_helper=%p\n", THREAD_LEVEL_VAR, taskloop_helper);
-#endif
-		*((void **)(taskloop_helper)) = cpyfn;
-		*((void **)(taskloop_helper+sizeof(void *))) = fn;
-		memcpy(taskloop_helper+payload, data, arg_size);
-
-		/* Store our modified data in a list */
-		pthread_mutex_lock (&mtx_taskloop_helpers);
-		tracked_taskloop_helper_t *new_tracked_taskloop_helper = malloc(sizeof(tracked_taskloop_helper_t));
-		new_tracked_taskloop_helper->taskloop_helper_ptr = taskloop_helper+payload;
-		new_tracked_taskloop_helper->next = tracked_taskloop_helpers;
-		tracked_taskloop_helpers = new_tracked_taskloop_helper;
-		pthread_mutex_unlock (&mtx_taskloop_helpers);
-
-		if (cpyfn != NULL)
-		{
-			GOMP_taskloop_real (callme_taskloop_suffix_helper, taskloop_helper+payload, callme_taskloop_cpyfn, arg_size+payload, arg_align, flags, num_tasks, priority, start, end, step);
-		}
-		else 
-		{
-			GOMP_taskloop_real (callme_taskloop_prefix_helper, taskloop_helper+payload, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
-		}
-
-		/* At this point the runtime has invoked all loop tasks so the helper can be freed */
-		if (taskloop_helper != NULL)
-		{
-		  free(taskloop_helper);
-		}
-
-		/* Remove our modified data from the list */
-		pthread_mutex_lock (&mtx_taskloop_helpers);
-		tracked_taskloop_helper_t *current_tracked_taskloop_helper = tracked_taskloop_helpers, *prev = NULL;
-		while (current_tracked_taskloop_helper != NULL)
-		{
-			if (current_tracked_taskloop_helper->taskloop_helper_ptr == taskloop_helper+payload)
-			{
-				if (prev != NULL)
-				{
-					prev->next = current_tracked_taskloop_helper->next;
-				}
-				else
-				{
-					tracked_taskloop_helpers = current_tracked_taskloop_helper->next;
-				}
-				free (current_tracked_taskloop_helper);
-
-				break;
-			}
-			prev = current_tracked_taskloop_helper;
-			current_tracked_taskloop_helper = current_tracked_taskloop_helper->next;
-		}
-		pthread_mutex_unlock (&mtx_taskloop_helpers);
-
+		GOMP_taskloop_real(callme_taskloop, data_trailer, cpyfn, arg_size + helper_size, arg_align, flags, num_tasks, priority, start, end, step);
 		Extrae_OpenMP_TaskLoop_Exit ();
 	}
 	else if (GOMP_taskloop_real != NULL)
@@ -2665,13 +2463,59 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
 		exit (-1);
 	}
+}
+
+void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, unsigned long long start, unsigned long long end, unsigned long long step)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %llu %llu %llu)\n", THREAD_LEVEL_VAR, GOMP_taskloop_ull_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
+#endif
+
+	RECHECK_INIT(GOMP_taskloop_ull_real);
+
+	if (TRACE(GOMP_taskloop_ull_real) && (getTrace_OMPTaskloop()))
+	{
+		struct taskloop_helper_t taskloop_helper;
+		long helper_size = sizeof(struct taskloop_helper_t);
+
+		taskloop_helper.magicno = 0xdeadbeef; // Magic number to locate the helper in callme_taskloop
+		taskloop_helper.fn = fn;
+
+		// Assign a unique id to this taskloop to track when it is scheduled and when executed 
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+		taskloop_helper.id = __sync_fetch_and_add(&__GOMP_taskloop_ctr, 1);
+#else
+		pthread_mutex_lock (&__GOMP_taskloop_ctr_mtx);
+		taskloop_helper.id = __GOMP_taskloop_ctr++;
+		pthread_mutex_unlock (&__GOMP_taskloop_ctr_mtx);
+#endif
+
+    	        // Append the helper to the end of data
+		void *data_trailer = malloc(arg_size + helper_size);
+		memcpy (data_trailer, data, arg_size);
+		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
+
+		Extrae_OpenMP_TaskLoop_Entry ();
+		GOMP_taskloop_ull_real(callme_taskloop, data_trailer, cpyfn, arg_size + helper_size, arg_align, flags, num_tasks, priority, start, end, step);
+		Extrae_OpenMP_TaskLoop_Exit ();
+	}
+	else if (GOMP_taskloop_ull_real != NULL)
+	{
+		GOMP_taskloop_ull_real(fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop exit\n", THREAD_LEVEL_VAR);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend) 
+int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
 #if defined(DEBUG)
@@ -3210,26 +3054,31 @@ static int gnu_libgomp_get_hook_points (int rank)
 		(void(*)(void*,void*,void*,long,long,unsigned,unsigned long,int,long,long,long)) dlsym (RTLD_NEXT, "GOMP_taskloop");
 	INC_IF_NOT_NULL(GOMP_taskloop_real,count);
 
+	/* Obtain @ for GOMP_taskloop_ull */
+	GOMP_taskloop_ull_real =
+		(void(*)(void*,void*,void*,long,long,unsigned,unsigned long,int,unsigned long long,unsigned long long,unsigned long long)) dlsym (RTLD_NEXT, "GOMP_taskloop_ull");
+	INC_IF_NOT_NULL(GOMP_taskloop_ull_real,count);
+
 	/* Obtain @ for GOMP_loop_doacross_static_start */
 	GOMP_loop_doacross_static_start_real = (int(*)(unsigned, long *, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_static_start");
 	INC_IF_NOT_NULL(GOMP_loop_doacross_static_start_real,count);
-	
+
 	/* Obtain @ for GOMP_loop_doacross_dynamic_start */
 	GOMP_loop_doacross_dynamic_start_real = (int(*)(unsigned, long *, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_dynamic_start");
 	INC_IF_NOT_NULL(GOMP_loop_doacross_dynamic_start_real,count);
-	
+
 	/* Obtain @ for GOMP_loop_doacross_guided_start */
 	GOMP_loop_doacross_guided_start_real = (int(*)(unsigned, long *, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_guided_start");
 	INC_IF_NOT_NULL(GOMP_loop_doacross_guided_start_real,count);
-	
+
 	/* Obtain @ for GOMP_loop_doacross_runtime_start */
 	GOMP_loop_doacross_runtime_start_real = (int(*)(unsigned, long *, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_runtime_start");
 	INC_IF_NOT_NULL(GOMP_loop_doacross_runtime_start_real,count);
-	
+
 	/* Obtain @ for GOMP_doacross_post */
 	GOMP_doacross_post_real = (void(*)(long *)) dlsym (RTLD_NEXT, "GOMP_doacross_post");
 	INC_IF_NOT_NULL(GOMP_doacross_post_real,count);
-	
+
 	/* Obtain @ for GOMP_doacross_wait */
 	GOMP_doacross_wait_real = (void(*)(long, ...)) dlsym (RTLD_NEXT, "GOMP_doacross_wait");
 	INC_IF_NOT_NULL(GOMP_doacross_wait_real,count);
