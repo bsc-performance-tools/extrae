@@ -78,7 +78,8 @@ int __Extrae_Utils_directory_exists (const char *file);
 int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
 	unsigned __Extrae_Utils_buffersize, char *buffer, const char *string);
 void __Extrae_Utils_free_array(char **, int);
-int __Extrae_Utils_sync_on_file(char *file);
+int  __Extrae_Utils_sync_on_file(char *file);
+void __Extrae_Utils_chomp (char *buffer);
 
 #if defined(__cplusplus)
 }

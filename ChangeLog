@@ -6,6 +6,7 @@ ChangeLog
  + 04Mar2022 Adds option to disable rpath in the objects built
  * 02Mar2022 Fixes OpenACC states
  * 25Feb2022 Adds rpath to MPI libraries and improves the AX_FIND_INSTALLATION macro
+ * 16Feb2022 Changes user function instrumentation to work with function names only, using function adresses as fallback
  + 16Feb2022 Adds support for GOMP_taskloop_ull and changes interposition mechanism for a more robust one
  + 24Jan2022 Adds OPENACC instrumentation in host and CUDA devices
  + 04Jan2022 Adds XML option to exclude some MPI_Comm_* calls from tracing 
@@ -14,7 +15,6 @@ ChangeLog
  * 09Nov2021 Ensures native and uncore counters are uniquely identified
  * 19Oct2021 Fixes trace control file checks, skipping them if needed structures are not allocated
  * 27Sep2021 Fixes states in OpenMP taskgroup and taskloop regions 
- + 22Sep2021 Adds dependency lines between instantiation and execution of OpenMP tasks for GNU libgomp runtime
  + 06Sep2021 Adds missing wrapper for __kmpc_critical_with_hint
  + 31Aug2021 Extends communications matching algorithm to support applications calling MPI_Irecv and MPI_Wait from different threads
  * 24Aug2021 Fixes unreleased mutex in xtr_hash_query and xtr_hash_add

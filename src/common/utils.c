@@ -555,3 +555,13 @@ int __Extrae_Utils_sync_on_file(char *file)
 	return attempts * FS_SYNC_RETRY_IN;
 }
 
+/******************************************************************************
+ **      Function name : __Extrae_Utils_chomp (char*)
+ **      Author : ACP
+ **      Description : Cuts string buffer up to the first \n
+ ******************************************************************************/
+
+void __Extrae_Utils_chomp (char* buffer)
+{
+	buffer[strcspn(buffer, "\r\n")] = 0;
+}

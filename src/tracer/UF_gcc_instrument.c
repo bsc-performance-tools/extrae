@@ -35,6 +35,7 @@
 
 #include <dlfcn.h>
 
+#include "utils.h"
 #include "wrapper.h"
 #include "UF_gcc_instrument.h"
 
@@ -182,19 +183,41 @@ void InstrumentUFroutines_GCC (int rank, char *filename)
 	FILE *f = fopen (filename, "r");
 	if (f != NULL)
 	{
-		char buffer[1024], fname[1024];
-		unsigned long address;
+		char buffer[1024], function[1024];
+		unsigned long fileAddress = 0;
 
 		ResetUFtoInstrument ();
 
 		if (fgets (buffer, sizeof(buffer), f) != NULL)
 			while (!feof(f))
 			{
-				if (sscanf (buffer, "%lx # %s", &address, fname) == 2)
-					AddUFtoInstrument ((void*) address);
+				if (strchr(buffer, '#'))
+					sscanf (buffer, "%s # %lx", function, &fileAddress);
+				else
+					sscanf (buffer, "%s", function);
+
+				void* functionAddress = dlsym(RTLD_DEFAULT, function);
+				if (functionAddress != NULL) {
+					AddUFtoInstrument ((void*) functionAddress);
+#if defined(DEBUG)
+        fprintf (stderr, PACKAGE_NAME": DEBUG TID %d Added UF %s at %p via dlsym\n", THREADID, function, functionAddress);
+#endif
+				} else if (fileAddress != 0) {
+					AddUFtoInstrument((void*) fileAddress);
+#if defined(DEBUG)
+        fprintf (stderr, PACKAGE_NAME": DEBUG TID %d Added UF %s at %p via function adress\n", THREADID, function, (void*)fileAddress);
+#endif
+					fileAddress = 0;
+				} else {
+#if defined(DEBUG)
+        fprintf (stderr, PACKAGE_NAME": DEBUG TID %d Coudn't add UF %s\n", THREADID, function);
+#endif
+				}
+
 				if (fgets (buffer, sizeof(buffer), f) == NULL)
 					break;
 			}
+
 		fclose (f);
 
 		if (rank == 0)

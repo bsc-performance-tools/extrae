@@ -234,20 +234,36 @@ list varies depending of the instrumentation mechanism used:
 
 * GCC and ICC (through :option:`-finstrument-functions`) GNU and Intel compilers
   provide a compile and link flag named :option:`-finstrument-functions` that
-  instruments the routines of a source code file that |TRACE| can use. To take
-  advantage of this functionality the list of routines must point to a list with
-  the format: ``<HEX_addr>#<F_NAME>``, where *<HEX_addr>* refers to the
-  hexadecimal address of the function in the binary file (obtained through
-  :command:`nm <binary>` and *<F_NAME>* is the name of the function to be
-  instrumented. For instance to instrument the routine ``pi_kernel`` from the
-  ``pi`` binary we execute :command:`nm` as follows:
+  instruments the routines of a source code file that |TRACE| can use. To use
+  this functionality a file containing the names of the functions
+  to be instrumented has to be provided.
+  Compile the executable using the flag :option:`-rdynamic` (or link it using
+  :option:`-export-dynamic`) in order to make the functions visible. For instance,
+  to instrument the functions ``foo``, ``bar`` and ``baz`` the user would
+  create a file with:
 
   .. code-block:: sh
-  
+
+    foo
+    bar
+    baz
+
+  In specific cases (e.g., functions declared inside a Fortran CONTAINS construct)
+  the user may also need to provide the function address as given by the command :command:`nm`.
+  For instance, to instrument the routine ``pi_kernel`` from the ``pi`` executable the user
+  would run :command:`nm` as follows:
+
+  .. code-block:: sh
+
     $ nm -a pi | grep pi_kernel
+
     00000000004005ed T pi_kernel
-  
-  and add ``00000000004005ed#pi_kernel`` into the function list.
+
+  and then add ``<FUNCTION_NAME> # <HEX_ADDRESS>`` into the function list:
+
+  .. code-block:: sh
+
+    pi_kernel # 00000000004005ed
 
 The :option:`exclude-automatic-functions` attribute is used only by the DynInst
 instrumenter. By setting this attribute to ``yes`` the instrumenter will avoid
