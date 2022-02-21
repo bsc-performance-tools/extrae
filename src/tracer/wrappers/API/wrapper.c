@@ -2176,7 +2176,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 
 		/* Just disable the tracing until the control file is created */
 		Extrae_shutdown_Wrapper();
-		mpitrace_on = 0;		/* Disable full tracing. It will allow us to know if files must be deleted or kept */
+		mpitrace_on = FALSE;		/* Disable full tracing. It will allow us to know if files must be deleted or kept */
 	}
 	else if (mpitrace_on &&
 	  !Extrae_getCheckControlFile() &&
@@ -2526,7 +2526,7 @@ void Backend_Finalize (void)
 
 			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 		}
-	
+
 		/* Free allocated memory */
 		{
 			if (TASKID == 0)

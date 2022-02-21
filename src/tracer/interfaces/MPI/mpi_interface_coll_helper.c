@@ -44,18 +44,20 @@ void Extrae_MPI_ProcessCollectiveCommunicator (MPI_Comm c)
 {
 	int res;
 
-	PMPI_Comm_compare (MPI_COMM_WORLD, c, &res);
-
-	if (res == MPI_IDENT || res == MPI_CONGRUENT)
+	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
 	{
-		MPI_CurrentOpGlobal = ++MPI_NumOpsGlobals;
+		PMPI_Comm_compare (MPI_COMM_WORLD, c, &res);
 
-		if (Extrae_getCheckControlFile())
-			CheckControlFile();
-		if (Extrae_getCheckForGlobalOpsTracingIntervals())
-			CheckGlobalOpsTracingIntervals();
+		if (res == MPI_IDENT || res == MPI_CONGRUENT)
+		{
+			MPI_CurrentOpGlobal = ++MPI_NumOpsGlobals;
+
+			if (Extrae_getCheckControlFile())
+				CheckControlFile();
+			if (Extrae_getCheckForGlobalOpsTracingIntervals())
+				CheckGlobalOpsTracingIntervals();
+		}
+		else
+			MPI_CurrentOpGlobal = 0;
 	}
-	else
-		MPI_CurrentOpGlobal = 0;
 }
-
