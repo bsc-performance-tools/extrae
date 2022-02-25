@@ -362,9 +362,9 @@ if test "${enable_xml}" = "yes" ; then
    else
       XML_enabled="yes"
       AM_PATH_XML2(
-          [2.5.0],
-          [AC_DEFINE([HAVE_XML2], [1], [Defined if libxml2 exists])],
-          [AC_MSG_ERROR(Cannot find xml2-config of libXML 2.5.0 (or above))]
+         [2.5.0],
+         [AC_DEFINE([HAVE_XML2], [1], [Defined if libxml2 exists])],
+         [AC_MSG_ERROR(Cannot find xml2-config of libXML 2.5.0 (or above))]
       )
       AX_PROG_XML2
    fi

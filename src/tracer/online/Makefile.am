@@ -39,21 +39,21 @@ online_root_bin_LDFLAGS = \
 if HAVE_XML2
 online_root_bin_CFLAGS   += @XML2_CFLAGS@
 online_root_bin_CXXFLAGS += @XML2_CFLAGS@
-online_root_bin_LDFLAGS  += -L@XML2_SHAREDLIBSDIR@ -R @XML2_SHAREDLIBSDIR@ @XML2_LIBS@
+online_root_bin_LDFLAGS  += @XML2_LDFLAGS@ @XML2_RPATH@ @XML2_LIBS@
 endif
 
 if HAVE_SPECTRAL
 online_root_bin_SOURCES += \
   SpectralRoot.cpp SpectralRoot.h
 online_root_bin_CXXFLAGS += @SPECTRAL_CXXFLAGS@
-online_root_bin_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
+online_root_bin_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_RPATH@ @SPECTRAL_LIBS@
 endif
 
 if HAVE_CLUSTERING
 online_root_bin_SOURCES += \
   ClusteringRoot.cpp ClusteringRoot.h
 online_root_bin_CXXFLAGS += @CLUSTERING_CXXFLAGS@
-online_root_bin_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
+online_root_bin_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_RPATH@ @CLUSTERING_LIBS@
 endif
 
 online_root_bin_SOURCES += \
@@ -98,7 +98,7 @@ libonline_la_SOURCES += \
   SpectralWorker.cpp SpectralWorker.h
 
 libonline_la_CXXFLAGS += @SPECTRAL_CXXFLAGS@
-libonline_la_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
+libonline_la_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_RPATH@ @SPECTRAL_LIBS@
 endif
 
 if HAVE_CLUSTERING
@@ -106,7 +106,7 @@ libonline_la_SOURCES += \
   ClusteringWorker.cpp ClusteringWorker.h
 
 libonline_la_CXXFLAGS += @CLUSTERING_CXXFLAGS@
-libonline_la_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
+libonline_la_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_RPATH@ @CLUSTERING_LIBS@
 endif
 
 libonline_la_SOURCES += \
@@ -126,7 +126,7 @@ lib_LTLIBRARIES += libfilterOnlineSpectral.la
 libfilterOnlineSpectral_la_SOURCES  = \
   SpectralFilter.cpp SpectralFilter.h 
 libfilterOnlineSpectral_la_CXXFLAGS = `@SYNAPSE_CONFIG@ --cp-cflags` $(CONTAINERS_INCLUDES) @SPECTRAL_CXXFLAGS@
-libfilterOnlineSpectral_la_LDFLAGS  = @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
+libfilterOnlineSpectral_la_LDFLAGS  = @SPECTRAL_LDFLAGS@ @SPECTRAL_RPATH@ @SPECTRAL_LIBS@
 libfilterOnlineSpectral_la_LIBADD   = extractors/libcontainers-cp.la
 endif
 

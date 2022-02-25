@@ -55,14 +55,14 @@ extrae_header_LDFLAGS = -g -O
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
   extrae_header_CFLAGS += -DPAPI_HOME='"$(PAPI_HOME)"' @PAPI_CFLAGS@
-  extrae_header_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ -R@PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+  extrae_header_LDFLAGS += @PAPI_LDFLAGS@ @PAPI_RPATH@ @PAPI_LIBS@
 else
   extrae_header_CFLAGS += -DPAPI_HOME='"embedded"'
 endif
 endif
 if HAVE_UNWIND
   extrae_header_CFLAGS += -DUNWIND_HOME='"$(UNWIND_HOME)"' @UNWIND_CFLAGS@
-  extrae_header_LDFLAGS += -L@UNWIND_SHAREDLIBSDIR@ -R@UNWIND_SHAREDLIBSDIR@ @UNWIND_LIBS@
+  extrae_header_LDFLAGS += @UNWIND_LDFLAGS@ @UNWIND_RPATH@ @UNWIND_LIBS@
 endif
 if IS_BG_MACHINE
  extrae_header_LDFLAGS += -all-static

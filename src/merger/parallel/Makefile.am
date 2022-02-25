@@ -92,10 +92,10 @@ endif
 libmpimpi2prv_la_LDFLAGS = -o libmpimpi2prv.la $(CFLAGS) 
 
 mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ 
-mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv @MPI_LDFLAGS@ 
+mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv @MPI_LDFLAGS@ @MPI_RPATH@
 if HAVE_BINUTILS
 mpimpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpimpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
+mpimpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_RPATH@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_RPATH@ @LIBERTY_LIBS@
 endif
 mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la
 
@@ -115,7 +115,7 @@ endif
 if HAVE_ZLIB
   libmpimpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpimpi2prv_CFLAGS += @LIBZ_CFLAGS@
-  mpimpi2prv_LDFLAGS += -L@LIBZ_SHAREDLIBSDIR@ -R @LIBZ_SHAREDLIBSDIR@ @LIBZ_LIBS@
+  mpimpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_RPATH@ @LIBZ_LIBS@
 endif
 
 if HAVE_PAPI
@@ -132,7 +132,7 @@ endif
 if HAVE_SIONLIB
   libmpimpi2prv_la_CFLAGS += @SIONLIB_CFLAGS@
   mpimpi2prv_CFLAGS += @SIONLIB_CFLAGS@
-  mpimpi2prv_LDFLAGS += -R @SIONLIB_LIBSDIR@ @SIONLIB_LDFLAGS@ -lsionmpi_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none
+  mpimpi2prv_LDFLAGS += @SIONLIB_LDFLAGS@ @SIONLIB_RPATH@ -lsionmpi_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none
 endif
 
 # Online support

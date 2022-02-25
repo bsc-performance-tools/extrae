@@ -40,7 +40,7 @@ AC_DEFUN([AX_CUDA],
 			AC_MSG_ERROR([The specified path for CUDA does not exist])
 		fi
 		AX_FLAGS_SAVE()
-		AX_FIND_INSTALLATION([CUDA], [${cuda_path}], [cuda])
+		AX_FIND_INSTALLATION([CUDA], [${cuda_path}], [], [], [], [], [], [], [], [])
 		AX_FLAGS_RESTORE()
 	fi
 	AC_SUBST(NVCC)
@@ -93,7 +93,7 @@ AC_DEFUN([AX_CUPTI],
 			AC_MSG_ERROR([The specified path for CUPTI does not exist])
 		fi
 		AX_FLAGS_SAVE()
-		AX_FIND_INSTALLATION([CUPTI], [${cupti_path}], [cupti])
+		AX_FIND_INSTALLATION([CUPTI], [${cupti_path}], [], [], [], [], [], [], [], [])
 		AX_FLAGS_RESTORE()
 	fi
 

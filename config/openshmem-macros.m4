@@ -33,7 +33,7 @@ AC_DEFUN([AX_PROG_OPENSHMEM],
    
    if test "$openshmem_paths" != "no" ; then
       dnl Search for OpenSHMEM installation
-      AX_FIND_INSTALLATION([OPENSHMEM], [$openshmem_paths], [openshmem])
+      AX_FIND_INSTALLATION([OPENSHMEM], [$openshmem_paths], [], [], [], [], [], [], [], [])
 
       if test "${OPENSHMEM_INSTALLED}" = "yes" ; then
 

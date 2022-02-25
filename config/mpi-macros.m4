@@ -36,14 +36,15 @@ AC_DEFUN([AX_PROG_MPI],
    fi
 
    dnl Search for MPI installation
-   AX_FIND_INSTALLATION([MPI], [$mpi_paths], [mpi])
+   AX_FIND_INSTALLATION([MPI], [$mpi_paths], [], [], [], [], [], [], [], [])
 
    if test "${MPI_INSTALLED}" = "yes" ; then
 
       if test -d "${MPI_INCLUDES}/mpi" ; then
          MPI_INCLUDES="${MPI_INCLUDES}/mpi"
          MPI_CFLAGS="-I${MPI_INCLUDES}"
-         CPPFLAGS="${MPI_CFLAGS} ${CPPFLAGS}"
+         CFLAGS="${MPI_CFLAGS} ${CFLAGS}"
+         CPPFLAGS="${MPI_CPPFLAGS} ${CPPFLAGS}"
       fi
 
       dnl This check is for POE over linux -- libraries are installed in /opt/ibmhpc/ppe.poe/lib/libmpi{64}/libmpi_ibm.so
@@ -922,7 +923,7 @@ AC_DEFUN([AX_PROG_GM],
    )
 
    dnl Search for GM installation
-   AX_FIND_INSTALLATION([GM], [${gm_paths}], [gm])
+   AX_FIND_INSTALLATION([GM], [${gm_paths}], [], [], [], [], [], [], [], [])
 
    if test "$GM_INSTALLED" = "yes" ; then
       dnl Check for GM header files.
