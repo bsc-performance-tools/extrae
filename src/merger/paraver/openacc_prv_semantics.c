@@ -66,11 +66,12 @@ OpenACC_Event(event_t *current_event, unsigned long long current_time,
 	UNREFERENCED_PARAMETER(fset);
 	unsigned int  EvType  = Get_EvEvent(current_event);
 	unsigned long EvValue = Get_EvValue(current_event);
+	unsigned long EvParam = Get_EvParam(current_event);
 
-	Switch_State (Get_State(EvType), (EvValue != EVT_END), ptask, task, thread);
+	Switch_State (Get_State(EvParam), (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state(cpu, ptask, task, thread, current_time);
-	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, ((EvValue == EVT_BEGIN) ? EvParam : EVT_END));
 
 	return 0;
 }

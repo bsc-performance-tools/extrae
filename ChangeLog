@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 02Mar2022 Fixes OpenACC states
  * 25Feb2022 Adds rpath to MPI libraries and improves the AX_FIND_INSTALLATION macro
  + 16Feb2022 Adds support for GOMP_taskloop_ull and changes interposition mechanism for a more robust one
  + 24Jan2022 Adds OPENACC instrumentation in host and CUDA devices
