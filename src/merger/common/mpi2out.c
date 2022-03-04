@@ -68,6 +68,7 @@
 #include "options.h"
 #include "addresses.h"
 #include "intercommunicators.h"
+#include "HardwareCounters.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -1005,7 +1006,9 @@ void ProcessArgs (int rank, int argc, char *argv[])
 	}
 
 #if defined(PARALLEL_MERGE)
+# if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 	Share_HWC_Before_Processing_MPITS (rank);
+# endif
 #endif
 }
 
@@ -1563,7 +1566,9 @@ void mergerLoadFilesInEmbeddedMode(int taskid, int num_tasks, char *mpits_filena
 		loadGlobalSYMfile(taskid, NULL, mpits_filename, ptask);
 	}
 #if defined(PARALLEL_MERGE)
+# if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 	Share_HWC_Before_Processing_MPITS(taskid);
+# endif
 #endif
 	Read_MPITS_file(mpits_filename, &ptask, FileOpen_Default, taskid);
 

@@ -733,7 +733,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 #endif /* HAVE_BFD */
 					}
 					break;
-
+#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				case 'H':
 					{
 						int res, eventcode;
@@ -747,7 +747,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						hwc_count++;
 					}
 					break;
-
+#endif
 				case 'c':
 				case 'C':
 					{

@@ -92,7 +92,7 @@ endif
 libmpimpi2prv_la_LDFLAGS = -o libmpimpi2prv.la $(CFLAGS) 
 
 mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ 
-mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv @MPI_LDFLAGS@ @MPI_RPATH@
+mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv @MPI_LDFLAGS@ @MPI_RPATH@ @MPI_LIBS@
 if HAVE_BINUTILS
 mpimpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
 mpimpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_RPATH@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_RPATH@ @LIBERTY_LIBS@

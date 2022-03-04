@@ -49,6 +49,15 @@ AC_PROG_MKDIR_P
 # Specify the output configuration header file
 AC_CONFIG_HEADER(config.h)
 
+AC_ARG_ENABLE(rpath,
+   AC_HELP_STRING(
+      [--enable-rpath],
+      [Hardcodes the run-time search path of required libraries in the objects built (enabled by default)]
+   ),
+   [enable_rpath="${enableval}"],
+   [enable_rpath="yes"]
+)
+
 #############################
 #    Checks for programs    #
 #############################

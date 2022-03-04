@@ -270,12 +270,14 @@ dnl AX_FLAGS_SAVE()
       AC_MSG_RESULT([no])
     fi
     AC_SUBST(__PKG_LIBSDIR_MULTIARCH)
+
+    if test "${enable_rpath}" = "no"; then
+      __PKG_RPATH=""
+    fi
     AC_SUBST(__PKG_RPATH)
     
-    if test -n "${__PKG_RPATH}" ; then
-      m4_define([__PKG_LDFLAGS_RPATH], __pkg_name_ucase[]_LDFLAGS_RPATH) dnl Output variable <PKG>_LDFLAGS_RPATH
-      __PKG_LDFLAGS_RPATH="${__PKG_LDFLAGS} ${__PKG_RPATH}"
-    fi
+    m4_define([__PKG_LDFLAGS_RPATH], __pkg_name_ucase[]_LDFLAGS_RPATH) dnl Output variable <PKG>_LDFLAGS_RPATH
+    __PKG_LDFLAGS_RPATH="${__PKG_LDFLAGS} ${__PKG_RPATH}"
 
     dnl Search for required libraries in any of the possible folders
     required_libs_found="yes"
