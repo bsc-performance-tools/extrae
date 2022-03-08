@@ -41,6 +41,10 @@ static int option_merge_SincronitzaTasks_byNode = FALSE;
 int get_option_merge_SincronitzaTasks_byNode (void) { return option_merge_SincronitzaTasks_byNode; }
 void set_option_merge_SincronitzaTasks_byNode (int b) { option_merge_SincronitzaTasks_byNode = b; }
 
+static int option_merge_SincronitzaApps = FALSE;
+int get_option_merge_SincronitzaApps (void) { return option_merge_SincronitzaApps; }
+void set_option_merge_SincronitzaApps (int b) { option_merge_SincronitzaApps = b; }
+
 static int option_merge_UseDiskForComms = FALSE;
 int get_option_merge_UseDiskForComms (void) { return option_merge_UseDiskForComms; }
 void set_option_merge_UseDiskForComms (int b) { option_merge_UseDiskForComms = b; }

@@ -36,6 +36,9 @@ void set_option_merge_SincronitzaTasks (int b);
 int get_option_merge_SincronitzaTasks_byNode (void);
 void set_option_merge_SincronitzaTasks_byNode (int b);
 
+int get_option_merge_SincronitzaApps (void);
+void set_option_merge_SincronitzaApps (int b);
+
 int get_option_merge_UseDiskForComms (void);
 void set_option_merge_UseDiskForComms (int b);
 

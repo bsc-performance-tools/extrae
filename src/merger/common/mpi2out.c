@@ -107,13 +107,14 @@ void Help (const char *ProgName)
 		  "    -o file              Output trace file name.\n"
 		  "    -e file              Uses the executable file to obtain some information.\n"
 		  "    -f file              MpitFILE File with the names of the \".mpit\" input files.\n"
-		  "    -syn                 Synchronize traces at the MPI task-level using the MPI_Init information.\n"
-		  "    -syn-node            Synchronize traces at the MPI node-level using the MPI_Init information.\n"
+		  "    -syn-by-task         Synchronize traces at the MPI task-level using the MPI_Init information.\n"
+		  "    -syn-by-node         Synchronize traces at the MPI node-level using the MPI_Init information (default).\n"
+		  "    -syn-apps            Align all applications at their synchronization points.\n"
 		  "    -no-syn              Do not synchronize traces at the end of MPI_Init.\n"
 		  "    -maxmem M            Uses up to M megabytes of memory at the last step of merging process.\n"
 		  "    -dimemas             Force the generation of a Dimemas trace.\n"
 		  "    -paraver             Force the generation of a Paraver trace.\n"
-		  "    -keep-mpits          Keeps MPIT files after trace generation (default)\n"
+		  "    -keep-mpits          Keeps MPIT files after trace generation (default).\n"
 		  "    -no-keep-mpits       Removes MPIT files after trace generation.\n"
 		  "    -trace-overwrite     Overwrites the tracefile.\n"
 		  "    -no-trace-overwrite  Do not overwrite the tracefile, renaming the new one.\n"
@@ -916,18 +917,23 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			set_option_merge_SkipSendRecvComms (FALSE);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-syn"))
+		if (!strcmp (argv[CurArg], "-syn-by-task"))
 		{
 			set_option_merge_SincronitzaTasks (TRUE);
 			set_option_merge_SincronitzaTasks_byNode (FALSE);
 			AutoSincronitzaTasks = FALSE;
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-syn-node"))
+		if (!strcmp (argv[CurArg], "-syn-by-node"))
 		{
 			set_option_merge_SincronitzaTasks (TRUE);
 			set_option_merge_SincronitzaTasks_byNode (TRUE);
 			AutoSincronitzaTasks = FALSE;
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-syn-apps"))
+		{
+			set_option_merge_SincronitzaApps(TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-no-syn"))

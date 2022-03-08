@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 08Mar2022 Reworks synchronization methods to work with and among multiple apps
  + 08Mar2022 Adds option to disable rpath per dependency
  + 04Mar2022 Adds option to disable rpath in the objects built
  * 02Mar2022 Fixes OpenACC states

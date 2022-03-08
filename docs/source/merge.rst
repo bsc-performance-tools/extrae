@@ -161,12 +161,6 @@ These are the available options for the sequential |PARAVER| merger:
   :option:`-f-absolute` paramters are given, the merge process will try to
   automatically load the symbol file associated to that ``<FILE.mpits>`` file.
 
-.. option:: no-syn
-
-  If set, the merger will not attempt to synchronize the different tasks. This
-  is useful when merging intermediate files obtained from a single node (and
-  thus, share a single clock).
-
 .. option:: -o <FILE.prv[.gz]>
 
   Choose the name of the target |PARAVER| tracefile, can be compressed with the
@@ -198,7 +192,13 @@ These are the available options for the sequential |PARAVER| merger:
   Stops the generation of the tracefile at a given percentage. Accepts integer
   values from ``1`` to ``99``. All other values disable this option.
 
-.. option:: -syn
+.. option:: no-syn
+
+  If set, the merger will not attempt to synchronize the different tasks. This
+  is useful when merging intermediate files obtained from a single node (and
+  thus, share a single clock).
+
+.. option:: -syn-by-task
 
   If different nodes are used in the execution of a tracing run, there can exist
   some clock differences on all the nodes. This option makes :option:`mpi2prv`
@@ -206,14 +206,19 @@ These are the available options for the sequential |PARAVER| merger:
   will usually lead to "synchronized" tasks, but it will depend on how the
   clocks advance in time.
 
-.. option:: -syn-node
+.. option:: -syn-by-node
 
   If different nodes are used in the execution of a tracing run, there can exist
   some clock differences on all the nodes. This option makes :option:`mpi2prv`
   to recalculate all the timings based on the end of the ``MPI_Init`` call and
   the node where they ran. This will usually lead to better synchronized tasks
-  than using :option:`-syn`, but, again, it will depend on how the clocks
-  advance in time.
+  than using :option:`-syn-by-task`, but, again, it will depend on how the
+  clocks advance in time.
+
+.. option:: -syn-apps
+
+  If synchronization is enabled, also align all applications at their
+  synchronization points.
 
 .. option:: -trace-overwrite, -no-trace-overwrite
 

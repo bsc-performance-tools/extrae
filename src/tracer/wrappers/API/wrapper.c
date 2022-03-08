@@ -2133,7 +2133,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 		TimeSync_SetInitialTime (0, i, StartingTimes[i], SynchronizationTimes[i], node);
 	}
 
-	TimeSync_CalculateLatencies (TS_NODE);
+	TimeSync_CalculateLatencies (TS_NODE, 0);
 
 	xfree(StartingTimes);
 	xfree(SynchronizationTimes);

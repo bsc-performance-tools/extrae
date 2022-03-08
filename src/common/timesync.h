@@ -48,7 +48,7 @@ extern "C" {
 int TimeSync_Initialize (int num_appls, int *num_tasks);
 void TimeSync_CleanUp (void);
 int TimeSync_SetInitialTime (int app, int task, UINT64 init_time, UINT64 sync_time, char *node);
-int TimeSync_CalculateLatencies (int sync_strategy);
+int TimeSync_CalculateLatencies (int sync_strategy, int align_apps);
 UINT64 TimeSync (int app, int task, UINT64 time);
 UINT64 TimeDesync (int app, int task, UINT64 time);
 #ifdef __cplusplus

@@ -76,16 +76,19 @@ static unsigned xtr_set_taskid ()
 	char *envread = NULL;
 	unsigned int localid = 0;
 
-	while ((i < NUM_ENVVARS) && (xtr_taskid == 0))
+	while (i < NUM_ENVVARS)
 	{
 		envread = getenv(envvars[i]);
 
 		if ((envread != NULL) && ((localid = (unsigned int)strtoul(envread, NULL, 10)) != 0))
 		{
-			xtr_taskid = localid;
+			if (localid > xtr_taskid)
+			{
+				 xtr_taskid = localid;
 #if defined(DEBUG)
-			fprintf (stdout, PACKAGE_NAME": Task %u got TASKID from %s\n", xtr_taskid, envvars[i]);
+				fprintf (stdout, PACKAGE_NAME": Task %u got TASKID from %s\n", xtr_taskid, envvars[i]);
 #endif
+			}
 		}
 
 		i++;

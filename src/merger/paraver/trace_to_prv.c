@@ -383,19 +383,19 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	{
 		if (0 == taskid)
 			fprintf (stdout, "mpi2prv: Enabling Time Synchronization (Node).\n");
-		TimeSync_CalculateLatencies (TS_NODE);
+		TimeSync_CalculateLatencies (TS_NODE, get_option_merge_SincronitzaApps());
 	}
 	else if (get_option_merge_SincronitzaTasks())
 	{
 		if (0 == taskid)
 			fprintf (stdout, "mpi2prv: Enabling Time Synchronization (Task).\n");
-		TimeSync_CalculateLatencies (TS_TASK);
+		TimeSync_CalculateLatencies (TS_TASK, get_option_merge_SincronitzaApps());
 	}
 	else 
 	{
 		if (0 == taskid)
 			fprintf(stdout, "mpi2prv: Time Synchronization disabled.\n");
-		TimeSync_CalculateLatencies (TS_NOSYNC);
+		TimeSync_CalculateLatencies (TS_NOSYNC, 0);
 	}
 	
 /**************************************************************************************/

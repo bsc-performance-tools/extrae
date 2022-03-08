@@ -194,10 +194,10 @@ int TimeSync_SetInitialTime (int app, int task, UINT64 init_time, UINT64 sync_ti
  * @param[in] sync_strategy Choose between per task, per node or no synchronization.
  * @return 1 upon success, 0 otherwise
  */
-int TimeSync_CalculateLatencies (int sync_strategy)
+int TimeSync_CalculateLatencies (int sync_strategy, int align_apps)
 {
 	int i, j;
-	UINT64 min_init_time = 0, max_sync_time = 0;
+	UINT64 min_init_time = 0;
 
 #if defined(DEBUG)
 	fprintf(stderr, "DEBUG: TimeSync_CalculateLatencies (%d)\n", sync_strategy);
@@ -214,38 +214,88 @@ int TimeSync_CalculateLatencies (int sync_strategy)
 
 	if (sync_strategy == TS_TASK)
 	{
-		/* Calculate the maximum synchronization time */
-		for (i = 0; i < TotalAppsToSync; i++)
-			for (j = 0; j < TotalTasksToSync[i]; j++)
-				max_sync_time = MAX(max_sync_time, SyncInfo[i][j].sync_time);
+		UINT64 *max_sync_time_per_app;
+		UINT64  abs_max_sync_time = 0;
 
-		/* Move the other tasks to the right to match the synchronization points */
-		for (i = 0; i<TotalAppsToSync; i++)
+		max_sync_time_per_app = (UINT64 *)malloc(sizeof(UINT64) * TotalAppsToSync);
+		memset(max_sync_time_per_app, 0, sizeof(UINT64) * TotalAppsToSync);
+
+		/* Calculate the maximum synchronization time per app */
+		for (i = 0; i < TotalAppsToSync; i++)
+		{
 			for (j = 0; j < TotalTasksToSync[i]; j++)
-				LatencyTable[i][j] = max_sync_time - SyncInfo[i][j].sync_time;
+			{
+				max_sync_time_per_app[i] = MAX(max_sync_time_per_app[i], SyncInfo[i][j].sync_time);
+			}
+		}
+
+		/* Calculate max sync time of all apps */
+		for (i = 0; i< TotalAppsToSync; i++)
+		{
+			abs_max_sync_time = MAX(abs_max_sync_time, max_sync_time_per_app[i]);
+		}
+
+		/* Move the each app's tasks to the right to match the synchronization
+		 * points */
+		for (i = 0; i < TotalAppsToSync; i++)
+		{
+			for (j = 0; j < TotalTasksToSync[i]; j++)
+			{
+				LatencyTable[i][j] = (align_apps ? abs_max_sync_time : max_sync_time_per_app[i]) - SyncInfo[i][j].sync_time;
+			}
+		}
 	}
 	else if ((sync_strategy == TS_NODE) || (sync_strategy == TS_DEFAULT))
 	{
-		UINT64 *max_sync_time_per_node;
+		UINT64 **max_sync_time_per_node_per_app;
+		UINT64  *max_sync_time_per_app;
+		UINT64   abs_max_sync_time = 0;
 
-		max_sync_time_per_node = (UINT64 *)malloc(sizeof(UINT64) * TotalNodes);
-		memset(max_sync_time_per_node, 0,sizeof(UINT64) * TotalNodes);
+		max_sync_time_per_node_per_app = (UINT64 **)malloc(sizeof(UINT64*) * TotalAppsToSync);
+		for (i = 0; i < TotalAppsToSync; i++)
+		{
+			max_sync_time_per_node_per_app[i] = (UINT64 *)malloc(sizeof(UINT64) * TotalNodes);
+			memset(max_sync_time_per_node_per_app[i], 0, sizeof(UINT64) * TotalNodes);
+		}
 
-		/* Calculate the maximum synchronization time per node */
-		for (i=0; i<TotalAppsToSync; i++)
+		/* Calculate the maximum synchronization time of each app per node */
+		for (i = 0; i<TotalAppsToSync; i++)
+		{
 			for (j = 0; j < TotalTasksToSync[i]; j++)
-				max_sync_time_per_node[SyncInfo[i][j].node_id] = MAX(max_sync_time_per_node[SyncInfo[i][j].node_id], SyncInfo[i][j].sync_time);
+			{
+				max_sync_time_per_node_per_app[i][SyncInfo[i][j].node_id] = MAX(max_sync_time_per_node_per_app[i][SyncInfo[i][j].node_id], SyncInfo[i][j].sync_time);
+			}
+		}
 
-		/* Calculate the absolute maximum synchronization time */
-		for (i=0; i<TotalNodes; i++)
-			max_sync_time = MAX(max_sync_time, max_sync_time_per_node[i]);
+		max_sync_time_per_app = (UINT64 *)malloc(sizeof(UINT64) * TotalAppsToSync);
+		memset(max_sync_time_per_app, 0, sizeof(UINT64) * TotalAppsToSync);
+		/* Calculate the absolute maximum synchronization time of each app */
+		for (i = 0; i < TotalAppsToSync; i++)
+		{
+			for (j = 0; j < TotalNodes; j++)
+			{
+				max_sync_time_per_app[i] = MAX(max_sync_time_per_app[i], max_sync_time_per_node_per_app[i][j]);
+			}
+		}
 
-		/* Move all tasks of the other nodes to the right */
-		for (i=0; i<TotalAppsToSync; i++)
-			for (j = 0; j < TotalTasksToSync[i]; j++)
-				LatencyTable[i][j] = max_sync_time - max_sync_time_per_node[SyncInfo[i][j].node_id];
+		/* Calculate max sync time of all apps */
+		for (i = 0; i < TotalAppsToSync; i++)
+		{
+			abs_max_sync_time = MAX(max_sync_time_per_app[i], abs_max_sync_time);
+		}
 
-		free (max_sync_time_per_node);
+		/* Move all tasks to the right per node */
+		for (i = 0; i < TotalAppsToSync; i++)
+		{
+			for (j = 0; j < TotalTasksToSync[i]; j ++)
+			{
+				LatencyTable[i][j] = (align_apps ? abs_max_sync_time : max_sync_time_per_app[i]) - max_sync_time_per_node_per_app[i][SyncInfo[i][j].node_id];
+			}
+			free(max_sync_time_per_node_per_app[i]);
+		}
+
+		free(max_sync_time_per_node_per_app);
+		free(max_sync_time_per_app);
 	}
 
 	/* Calculate the minimum first time (latencies are already applied) */
@@ -295,7 +345,7 @@ int main(int argc, char **argv)
 	TimeSync_SetInitialTime (0, 1, 10, 30, "node1");
 	TimeSync_SetInitialTime (0, 2, 5,  75, "node2");
 	TimeSync_SetInitialTime (0, 3, 15, 60, "node2");
-	TimeSync_CalculateLatencies (TS_NODE);
+	TimeSync_CalculateLatencies (TS_NODE, 0);
 	fprintf(stderr, "TIMESYNC(0, 0, 20) = %llu\n", TIMESYNC(0, 0, 20));	
 	fprintf(stderr, "TIMESYNC(0, 0, 80) = %llu\n", TIMESYNC(0, 0, 80));	
 	fprintf(stderr, "TIMESYNC(0, 1, 10) = %llu\n", TIMESYNC(0, 1, 10));	
