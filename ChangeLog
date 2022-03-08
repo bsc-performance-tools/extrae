@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 08Mar2022 Adds option to disable rpath per dependency
  + 04Mar2022 Adds option to disable rpath in the objects built
  * 02Mar2022 Fixes OpenACC states
  * 25Feb2022 Adds rpath to MPI libraries and improves the AX_FIND_INSTALLATION macro

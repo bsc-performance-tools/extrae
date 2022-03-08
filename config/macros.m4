@@ -57,6 +57,16 @@ dnl AX_FLAGS_SAVE()
   __PKG_HOME=${home_dir}
   AC_SUBST(__PKG_HOME)
 
+  dnl Control rpath setting per dependency
+  AC_ARG_ENABLE(__pkg_name_lcase[]-rpath,
+    AC_HELP_STRING(
+      [--disable-[]__pkg_name_lcase[]-rpath],
+      [Embed rpath for __pkg_name_ucase dependencies (enabled by default)]
+    ),
+    [enable_pkg_rpath="${enableval}"],
+    [enable_pkg_rpath="yes"]
+  )
+
   dnl Did the user pass a bin directory to check first?
   AC_ARG_WITH([__pkg_name_lcase[]-binaries],
     AC_HELP_STRING(
@@ -271,7 +281,7 @@ dnl AX_FLAGS_SAVE()
     fi
     AC_SUBST(__PKG_LIBSDIR_MULTIARCH)
 
-    if test "${enable_rpath}" = "no"; then
+    if test "${enable_rpath}" = "no" -o "${enable_pkg_rpath}" = "no"; then
       __PKG_RPATH=""
     fi
     AC_SUBST(__PKG_RPATH)
