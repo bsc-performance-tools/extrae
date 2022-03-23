@@ -224,7 +224,7 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_loc
 	}
 	else
 	{
-		PMPI_Comm_test_inter (comm, &inter);	
+		PMPI_Comm_test_inter (comm, &inter);
 
 		if (inter)
 		{
@@ -232,14 +232,14 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_loc
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 			// The intercommunicator was created through MPI_Comm_spawn => each process has its own MPI_COMM_WORLD
-			
-			int *was_spawned, flag_spawned = FALSE;
+
+			int was_spawned, flag_spawned = FALSE;
 			PMPI_Comm_get_attr(comm, XTR_SPAWNED_INTERCOMM, &was_spawned, &flag_spawned);
 
 			MPI_Comm parent;
 			PMPI_Comm_get_parent(&parent);
 
-			if (flag_spawned && *was_spawned)
+			if (flag_spawned && was_spawned)
 			{
 				// Parent process sends/recvs to/from children -- When interacting with an specific child, there's no need to translate ranks
 				*partner_world = partner_local;
@@ -535,7 +535,7 @@ int MPI_Generate_Task_File_List ()
 #if MPI_SUPPORTS_MPI_COMM_SPAWN
 	PMPI_Comm_get_parent (&cparent);
 #endif
-	isSpawned = cparent != MPI_COMM_NULL;
+	isSpawned = (cparent != MPI_COMM_NULL);
 
 	/* If I haven't been MPI_Comm_Spawned, let's clean all the *-%d.mpits we
 	   have created in earlier execes */
@@ -790,13 +790,17 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm *inte
     unsigned long long ChildSpawnOffset = 0;
 
     UNREFERENCED_PARAMETER(SpawnStartTime);
+
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] STARTING Spawn_Parent_Sync\n", TASKID);
+#endif
  
     /* Set the attribute XTR_SPAWNED_INTERCOMM in intercomm to mark that this intercommunicator belongs
      * to the parent process of an MPI_Comm_spawn operation. We need this at translateLocalToGlobalRank
      * to know how to translate the local into world ranks.
      */
-    int *was_spawned;
-    *was_spawned = 1;
+    int was_spawned = 1;
+
     PMPI_Comm_set_attr(*intercomm_ptr, XTR_SPAWNED_INTERCOMM, &was_spawned);
 
     PMPI_Comm_rank(spawn_comm, &my_rank);
@@ -805,6 +809,9 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm *inte
     Trace_MPI_Communicator (intercomm, LAST_READ_TIME, FALSE);
 
     /* Gather the parent comm id's from the participating tasks */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] GATHERING all_parents_comms\n", TASKID);
+#endif
     PMPI_Comm_size(spawn_comm, &num_parents);
     all_parents_comms = (int *)xmalloc( num_parents * sizeof(int) );
     all_parents_ranks = (int *)xmalloc( num_parents * sizeof(int) );
@@ -813,10 +820,16 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm *inte
     PMPI_Gather(&world_rank, 1, MPI_INT, all_parents_ranks, 1, MPI_INT, 0, spawn_comm);
 
     /* Exchange the spawn group id's */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] EXCHANGING SpawnGroup and RemoteSpawnGroup\n", TASKID);
+#endif
     PMPI_Bcast( &SpawnGroup, 1, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
     PMPI_Bcast( &RemoteSpawnGroup, 1, MPI_INT, 0, intercomm );
 
     /* Send the parent's world ranks to the children */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] BROADCASTING all_parents_ranks\n", TASKID);
+#endif
     PMPI_Bcast( &num_parents, 1, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
     PMPI_Bcast( all_parents_ranks, num_parents, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
 
@@ -1026,11 +1039,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
-
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
@@ -1143,11 +1151,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	}
 
 	Gather_Nodes_Info ();
-
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
@@ -1909,11 +1912,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
-
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
@@ -1921,7 +1919,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
-#endif 
+#endif
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -2024,11 +2022,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	}
 
 	Gather_Nodes_Info ();
-
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);

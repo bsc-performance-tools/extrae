@@ -321,25 +321,28 @@ void Extrae_init_tracing (int forked)
 
 	Extrae_set_initial_TASKID (TASKID);
 
-	/* Initialize the backend */
+	// Initialize the backend
 	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, forked))
 		return;
 
-	/* Generate a tentative file list if we don't reuse a previous execution through
-	   Extrae cmd commands */
+#if !defined(MPI_SUPPORT) // In MPI libraries this is done later at MPI_Init wrapper
+	// Generate tentative file list if we don't reuse previous execution through extrae-cmd
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))
+	{
 		Generate_Task_File_List();
+	}
+#endif
 
-	/* Take the time */
+	// Take the time
 	temps_init = TIME;
 
-	/* Execute a barrier within tasks so they will be synchronized */
+	// Execute a barrier within tasks so they will be synchronized
 	Extrae_barrier_tasks();
 
-	/* Take the time (a newer one) */
+	// Take the time (a newer one)
 	temps_fini = TIME;
 
-	/* End initialization of the backend */
+	// End initialization of the backend
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), TRACE_INIT_EV, temps_init, temps_fini, NULL))
 		return;
 

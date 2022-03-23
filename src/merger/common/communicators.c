@@ -184,13 +184,6 @@ int GenerateAliesComunicator (
 			EvCommType);
 #endif
 
-		if (PRV_SEMANTICS == traceformat)
-			if (Get_EvAux (current_event)) /* Shall we emit this into tracefile? */ 
-			{
-				trace_paraver_state (cpu, ptask, task, thread, current_time);
-				trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EVT_BEGIN);
-			}
-
 		/* Build COMM WORLD communicator */
 		if (MPI_COMM_WORLD_ALIAS == EvCommType)
 		{
@@ -249,12 +242,6 @@ int GenerateAliesComunicator (
 			i = BuildCommunicatorFromFile (current_event, current_time, cpu, ptask, task,
 				thread, fset);
 		}
-	}
-	else if (EvValue == EVT_END)
-	{
-		if (PRV_SEMANTICS == traceformat)
-			if (Get_EvAux (current_event)) /* Shall we emit this into tracefile? */
-				trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EVT_END);
 	}
 
 	*num_events = i+1;
