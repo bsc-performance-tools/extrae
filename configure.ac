@@ -5,9 +5,9 @@
 #    Initializations    #
 #########################
 
-m4_define([extrae_major], [3])
-m4_define([extrae_minor], [8])
-m4_define([extrae_micro], [3])
+m4_define([extrae_major], [4])
+m4_define([extrae_minor], [0])
+m4_define([extrae_micro], [0])
 
 m4_define([extrae_version], [extrae_major.extrae_minor.extrae_micro])
 
