@@ -211,7 +211,9 @@ dnl AX_FLAGS_SAVE()
 
     dnl Test for optional headers
     if test -n "$6"; then
-      AC_CHECK_HEADERS($6)
+      AC_CHECK_HEADERS($6,
+        [ optional_headers_found="yes" ],
+        [ optional_headers_found="no" ])
     fi
   fi
 

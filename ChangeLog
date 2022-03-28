@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 11May2022 Recovers merger flags [-no]-translate-data-addresses removed by commit cf9e823b32e1441d9b426dc37e7ed7320dd8a59c
  * 11May2022 Fixes incorrect sequence of initialization of CUDA instrumentation components
+ * 28Mar2022 Fixes check for optional headers in AX_FIND_INSTALLATION
  * 23Mar2022 Applies corrections in MPI_Comm_spawn support
  * 08Mar2022 Reworks synchronization methods to work with and among multiple apps
  + 08Mar2022 Adds option to disable rpath per dependency
