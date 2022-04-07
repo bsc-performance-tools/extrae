@@ -54,6 +54,20 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_os="linux"
 	fi
 	
+	AC_ARG_ENABLE(riscv64,
+	   AC_HELP_STRING(
+	      [--enable-riscv64],
+	      [Enable compilation for RISCV64 architecture (disabled by default; needed when cross-compiling for RISCV64)]
+	   ),
+	   [enable_riscv64="${enableval}"],
+	   [enable_riscv64="no"]
+	)
+	IS_RISCV64_MACHINE=${enable_riscv64}
+	if test "${IS_RISCV64_MACHINE}" = "yes" ; then
+		target_cpu="riscv64"
+		target_os="linux"
+	fi
+
 	# Check if this is an Altix machine and if it has an /dev/mmtimer device
 	# (which is a global clock!)
 	AC_ARG_ENABLE(check-altix,
