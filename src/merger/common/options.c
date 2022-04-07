@@ -37,7 +37,7 @@ static int option_merge_SincronitzaTasks = FALSE;
 int get_option_merge_SincronitzaTasks (void) { return option_merge_SincronitzaTasks; }
 void set_option_merge_SincronitzaTasks (int b) { option_merge_SincronitzaTasks = b; }
 
-static int option_merge_SincronitzaTasks_byNode = FALSE;
+static int option_merge_SincronitzaTasks_byNode = TRUE;
 int get_option_merge_SincronitzaTasks_byNode (void) { return option_merge_SincronitzaTasks_byNode; }
 void set_option_merge_SincronitzaTasks_byNode (int b) { option_merge_SincronitzaTasks_byNode = b; }
 
