@@ -6,6 +6,7 @@ ChangeLog
  * 11May2022 Fixes incorrect sequence of initialization of CUDA instrumentation components
  * 02May2022 Fixes uninitialized HWC structures that were causing abnormaly high counter values
  + 08Apr2022 Adds --enable-riscv configure option so ARCH_RISCV64 is enabled and PC is correctly retrieved
+ * 07Apr2022 GASPI labels are not written in the PCF when there are no events present in the trace
  * 31Mar2022 Adds PAPI linker flags to parallel merger and sets merger default synchronization to by_node
  * 28Mar2022 Fixes check for optional headers in AX_FIND_INSTALLATION
  * 23Mar2022 Applies corrections in MPI_Comm_spawn support

@@ -31,6 +31,8 @@
 
 #include "gaspi_prv_events.h"
 
+int GASPI_Present = FALSE;
+
 struct GASPI_event_label_t GASPI_event_type_label[GASPI_MAX_VAL] =
 {
 	{GASPI_INIT_EV,                  FALSE, "gaspi_proc_init"},
@@ -106,6 +108,7 @@ Enable_GASPI_Operation(unsigned evttype, unsigned evtvalue)
 			break;
 		}
 	}
+	GASPI_Present = TRUE;
 }
 
 void
@@ -113,58 +116,70 @@ WriteEnabled_GASPI_Operations(FILE * fd)
 {
 	unsigned u;
 
-	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GASPI_EV, "GASPI call");
-	fprintf (fd, "VALUES\n");
-	fprintf (fd, "0 Outside GASPI\n");
-
-	for (u = 0; u < GASPI_MAX_VAL; u++)
+	if (GASPI_Present)
 	{
-		if (GASPI_event_type_label[u].present)
+		fprintf(fd, "EVENT_TYPE\n");
+		fprintf(fd, "%d    %d    %s\n", 0, GASPI_EV, "GASPI call");
+		fprintf(fd, "VALUES\n");
+		fprintf(fd, "0 Outside GASPI\n");
+
+		for (u = 0; u < GASPI_MAX_VAL; u++)
 		{
-			if (GASPI_event_type_label[u].eventtype == GASPI_INIT_EV)
+			if (GASPI_event_type_label[u].present)
 			{
-				fprintf (fd, "%d %s\n",
-				    1,
-				    GASPI_event_type_label[u].description);
-			} else
-			{
-				fprintf (fd, "%d %s\n",
-				    GASPI_event_type_label[u].eventtype,
-				    GASPI_event_type_label[u].description);
+				if (GASPI_event_type_label[u].eventtype == GASPI_INIT_EV)
+				{
+					fprintf(fd, "%d %s\n",
+					    1,
+					    GASPI_event_type_label[u].description);
+				} else
+				{
+					fprintf(fd, "%d %s\n",
+					    GASPI_event_type_label[u].eventtype,
+					    GASPI_event_type_label[u].description);
+				}
 			}
 		}
-	}
-	LET_SPACES(fd);
+		LET_SPACES(fd);
 
-	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GASPI_SIZE_EV, "GASPI size");
-	LET_SPACES(fd);
+		fprintf(fd, "EVENT_TYPE\n");
+		fprintf(fd, "%d    %d    %s\n", 0, GASPI_SIZE_EV, "GASPI size");
+		LET_SPACES(fd);
 
-	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GASPI_RANK_EV, "GASPI rank");
-	fprintf(fd, "VALUES\n");
-	for (u = 0; u < GASPI_param_type_label[0].present; u++)
-	{
-		fprintf(fd, "%u %u\n", u+1, u);
-	}
-	LET_SPACES(fd);
+		if (GASPI_param_type_label[0].present > 0)
+		{
+			fprintf(fd, "EVENT_TYPE\n");
+			fprintf(fd, "%d    %d    %s\n", 0, GASPI_RANK_EV, "GASPI rank");
+			fprintf(fd, "VALUES\n");
+			for (u = 0; u < GASPI_param_type_label[0].present; u++)
+			{
+				fprintf(fd, "%u %u\n", u+1, u);
+			}
+			LET_SPACES(fd);
+		}
 
-	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GASPI_NOTIFICATION_ID_EV, "GASPI notification_id");
-	fprintf(fd, "VALUES\n");
-	for (u = 0; u < GASPI_param_type_label[1].present; u++)
-	{
-		fprintf(fd, "%u %u\n", u+1, u);
-	}
-	LET_SPACES(fd);
+		if (GASPI_param_type_label[1].present > 0)
+		{
+			fprintf(fd, "EVENT_TYPE\n");
+			fprintf(fd, "%d    %d    %s\n", 0, GASPI_NOTIFICATION_ID_EV, "GASPI notification_id");
+			fprintf(fd, "VALUES\n");
+			for (u = 0; u < GASPI_param_type_label[1].present; u++)
+			{
+				fprintf(fd, "%u %u\n", u+1, u);
+			}
+			LET_SPACES(fd);
+		}
 
-	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GASPI_QUEUE_ID_EV, "GASPI queue");
-	fprintf(fd, "VALUES\n");
-	for (u = 0; u < GASPI_param_type_label[2].present; u++)
-	{
-		fprintf(fd, "%u %u\n", u+1, u);
+		if (GASPI_param_type_label[2].present > 0)
+		{
+			fprintf(fd, "EVENT_TYPE\n");
+			fprintf(fd, "%d    %d    %s\n", 0, GASPI_QUEUE_ID_EV, "GASPI queue");
+			fprintf(fd, "VALUES\n");
+			for (u = 0; u < GASPI_param_type_label[2].present; u++)
+			{
+				fprintf(fd, "%u %u\n", u+1, u);
+			}
+			LET_SPACES(fd);
+		}
 	}
-	LET_SPACES(fd);
 }
