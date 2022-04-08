@@ -102,8 +102,10 @@ typedef struct node {
 static void *xtr_mem_tracked_allocs_initblock ()
 {
 	struct node *free_list = xmalloc(NMALLOCENTRIES_MALLOC * sizeof(struct node));
+	int i = 0;
 
-	for (int i=0; i<NMALLOCENTRIES_MALLOC-1; i++) {
+	for (i=0; i<NMALLOCENTRIES_MALLOC-1; i++)
+	{
         	free_list[i].next = &free_list[i+1];
 	}
 	free_list[NMALLOCENTRIES_MALLOC-1].next = NULL;
@@ -119,7 +121,17 @@ static void xtr_mem_tracked_allocs_initlist () {
 	mallocentries = new_list;
 }
 
-/*Functions in charge of managing the list of registered adresses*/
+/**
+ * xtr_mem_tracked_allocs_add
+ * xtr_mem_tracked_allocs_remove
+ * xtr_mem_tracked_allocs_replace
+ *
+ * Accessing the TLS variable mallocentries results in internal calls to glibc's __tls_get_addr(), 
+ * which in turn calls free(), triggering its tracing wrapper again. So to avoid an infinite loop, 
+ * these functions are only to be called between Backend_Enter_Instrumentation() 
+ * and Backend_Leave_Instrumentation().
+ */
+
 static void xtr_mem_tracked_allocs_add (const void *p, size_t s)
 {
 	if (p)
@@ -279,6 +291,8 @@ void free (void *p)
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
 	                    mpitrace_on                          &&
 	                    Extrae_get_trace_malloc();
+	int present = FALSE;
+
 	/*
 	 * Can't be evaluated before, the compiler optimizes the if's clauses,
 	 * and THREADID calls a null callback if Extrae is not yet initialized
@@ -305,17 +319,24 @@ void free (void *p)
 		__in_free = FALSE;
 	}
 #endif
-	int present = xtr_mem_tracked_allocs_remove (p);
 
 	if (Extrae_get_trace_malloc_free() && real_free != NULL &&
-	    canInstrument && present)
+	    canInstrument)
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
 		Backend_Enter_Instrumentation();
-		Probe_Free_Entry(p);
-		real_free(p);
-		Probe_Free_Exit();
+		present = xtr_mem_tracked_allocs_remove (p);
+		if (present)
+		{
+			Probe_Free_Entry(p);
+			real_free(p);
+			Probe_Free_Exit();
+		}
+		else
+		{
+			real_free(p);
+		}
 		Backend_Leave_Instrumentation();
 	} else if (real_free != NULL)
 	{
@@ -762,6 +783,8 @@ void memkind_free(memkind_t kind, void *ptr)
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc();
+  int present = FALSE;
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
   if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
@@ -779,15 +802,21 @@ void memkind_free(memkind_t kind, void *ptr)
     __in_free = FALSE;
   }
 #endif
-  
-  int present = xtr_mem_tracked_allocs_remove (ptr);
-  
-  if (Extrae_get_trace_malloc_free() && real_memkind_free != NULL && canInstrument && present)
+
+  if (Extrae_get_trace_malloc_free() && real_memkind_free != NULL && canInstrument)
   {
     Backend_Enter_Instrumentation ();
-    Probe_memkind_free_Entry (get_memkind_partition( kind ), ptr);
-    real_memkind_free (kind, ptr);
-    Probe_memkind_free_Exit ();
+    present = xtr_mem_tracked_allocs_remove (ptr);
+    if (present)
+    {
+      Probe_memkind_free_Entry (get_memkind_partition( kind ), ptr);
+      real_memkind_free (kind, ptr);
+      Probe_memkind_free_Exit ();
+    }
+    else
+    {
+      real_memkind_free (kind, ptr);
+    }
     Backend_Leave_Instrumentation ();
   }
   else if (real_memkind_free != NULL)
@@ -1032,6 +1061,8 @@ kmpc_free ( void *ptr )
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
 	                    mpitrace_on                          &&
 	                    Extrae_get_trace_malloc();
+	int present = FALSE;
+
 	/* Can't be evaluated before because the compiler optimizes the if's clauses,
 	 * and THREADID calls a null callback if Extrae is not yet initialized */
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
@@ -1049,19 +1080,24 @@ kmpc_free ( void *ptr )
 	}
 #endif
 
-	int present = xtr_mem_tracked_allocs_remove (ptr);
-
 	if (Extrae_get_trace_malloc_free() &&
 	    real_kmpc_free != NULL         &&
-			canInstrument                  &&
-			present)
+	    canInstrument)
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
 		Backend_Enter_Instrumentation ();
-		Probe_kmpc_free_Entry (ptr);
-		real_kmpc_free (ptr);
-		Probe_kmpc_free_Exit ();
+		present = xtr_mem_tracked_allocs_remove (ptr);
+		if (present)
+		{
+			Probe_kmpc_free_Entry (ptr);
+			real_kmpc_free (ptr);
+			Probe_kmpc_free_Exit ();
+		}
+		else
+		{
+			real_kmpc_free (ptr);
+		}
 		Backend_Leave_Instrumentation ();
 	}
 	else if (real_kmpc_free != NULL)

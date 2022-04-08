@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 12May2022 Fixes allocated memory tracker to prevent infinite recursive calls (closes #66)
  * 11May2022 Recovers merger flags [-no]-translate-data-addresses removed by commit cf9e823b32e1441d9b426dc37e7ed7320dd8a59c
  * 11May2022 Fixes incorrect sequence of initialization of CUDA instrumentation components
  * 02May2022 Fixes uninitialized HWC structures that were causing abnormaly high counter values
