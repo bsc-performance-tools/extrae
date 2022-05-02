@@ -376,20 +376,15 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	/* Allocate memory if this process has not been forked */
 	if (!forked)
 	{
-		HWC_Thread_Initialized = (int *) xmalloc (sizeof(int) * num_threads);
-		
-		/* Mark all the threads as uninitialized */
-		for (i = 0; i < num_threads; i++)
-			HWC_Thread_Initialized[i] = FALSE;
+		/* Allocate and mark all the threads as uninitialized */
+		HWC_Thread_Initialized = (int *) xmalloc_and_zero (sizeof(int) * num_threads);
 
-		Accumulated_HWC_Valid = (int *)xmalloc(sizeof(int) * num_threads);
-		
+		Accumulated_HWC_Valid = (int *)xmalloc_and_zero(sizeof(int) * num_threads);
 		Accumulated_HWC = (long long **)xmalloc(sizeof(long long *) * num_threads);
-		
+
 		for (i = 0; i < num_threads; i++)
 		{
-			Accumulated_HWC[i] = (long long *)xmalloc(sizeof(long long) * MAX_HWC);
-			HWC_Accum_Reset(i);
+			Accumulated_HWC[i] = (long long *)xmalloc_and_zero(sizeof(long long) * MAX_HWC);
 		}
 
 		if (HWC_num_sets <= 0)
