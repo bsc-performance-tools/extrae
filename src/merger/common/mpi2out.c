@@ -133,17 +133,19 @@ void Help (const char *ProgName)
 #endif
 		  "    -s file              Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
 		  "    -d/-dump             Sequentially dumps the contents of every *.mpit file.\n"
-		  "    -dump-without-time   Do not show event time in when dumping events (valuable for test purposes).\n"
+		  "    -dump-without-time   Do not show event time in when dumping events (useful for testing purposes).\n"
 		  "    -remove-files        Remove intermediate files after processing them.\n"
 		  "    -split-states        Do not merge consecutives states that are the same.\n"
 		  "    -skip-sendrecv       Do not emit communication for SendReceive operations.\n"
 		  "    -unique-caller-id    Choose whether use a unique value identifier for different callers.\n"
-		  "    -translate-addresses Translate code addresses into code references if available.\n"
-		  "    -no-translate-addresses Do not translate code addresses into code references if available.\n"
+		  "    -translate-addresses         Translate code addresses into code references if available.\n"
+		  "    -no-translate-addresses      Do not translate code addresses into code references if available.\n"
+		  "    -translate-data-addresses    Identify allocated objects by their full callpath.\n"
+		  "    -no-translate-data-addresses Identify allocated objects by the tuple <library, symbol_offset>.\n"
 		  "    -emit-library-events Emit library information for unknown references if possible.\n"
-		  "    -sort-addresses      Sort file name, line events in information linked with source code.\n"
+		  "    -sort-addresses      Sort source code references by <line, filename>.\n"
 		  "    -task-view           Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
-          "    -without-addresses   Do not emit address information into PCF (valuable for test purposes).\n"
+		  "    -without-addresses   Do not emit address information into PCF (useful for testing purposes).\n"
 		  "    --                   Take the next trace files as a diferent parallel task.\n"
 		  "\n",
           ProgName, ProgName, ProgName);
@@ -770,6 +772,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		}
 		if (!strcmp (argv[CurArg], "-sort-addresses"))
 		{
+			set_option_merge_TranslateAddresses(TRUE);
 			set_option_merge_SortAddresses (TRUE);
 			continue;
 		}
@@ -955,6 +958,16 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		if (!strcmp (argv[CurArg], "-no-remove-files"))
 		{
 			set_option_merge_RemoveFiles (FALSE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-translate-data-addresses"))
+		{
+			set_option_merge_TranslateDataAddresses(TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-translate-data-addresses"))
+		{
+			set_option_merge_TranslateDataAddresses(FALSE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "--"))
