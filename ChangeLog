@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 11May2022 Fixes incorrect sequence of initialization of CUDA instrumentation components
  * 23Mar2022 Applies corrections in MPI_Comm_spawn support
  * 08Mar2022 Reworks synchronization methods to work with and among multiple apps
  + 08Mar2022 Adds option to disable rpath per dependency

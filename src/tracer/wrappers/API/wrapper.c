@@ -1699,10 +1699,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	if (!forked)
 		Extrae_Allocate_Task_Bitmap (world_size);
 
-#if defined(CUDA_SUPPORT)
-	Extrae_CUDA_init (me);
-#endif
-
 #if defined(OPENCL_SUPPORT)
 	Extrae_OpenCL_init (me);
 #endif
@@ -1774,6 +1770,12 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	}
 
 #endif /* OMP_SUPPORT */
+
+#if defined(CUDA_SUPPORT)
+	Extrae_CUDA_init (me);
+	/* Allocate thread info for CUDA execs */
+	Extrae_reallocate_CUDA_info (0, get_maximum_NumOfThreads());
+#endif
 
 #endif /* STANDALONE */
 
@@ -1854,11 +1856,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 
 	/* Allocate the buffers and trace files */
 	Allocate_buffers_and_files (world_size, get_maximum_NumOfThreads(), forked);
-
-#if defined(CUDA_SUPPORT)
-	/* Allocate thread info for CUDA execs */
-	Extrae_reallocate_CUDA_info (0, get_maximum_NumOfThreads());
-#endif
 
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))
 	{
