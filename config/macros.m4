@@ -781,7 +781,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
    fi
 
    UNAME_M=`uname -m`
-   IFS='-' read -a TARGET_CPU <<< ${target_cpu}
+   TARGET_CPU=${target_cpu%%-*}
 
    if test "${binutils_paths}" != "no" ; then
       AC_MSG_CHECKING([for binutils])

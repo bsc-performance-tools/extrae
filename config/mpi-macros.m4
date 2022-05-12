@@ -174,8 +174,9 @@ AC_DEFUN([AX_PROG_MPI],
       dnl If $MPICC is not set, check for mpicc under $MPI_HOME/bin. We don't want to mix multiple MPI installations.
       AC_MSG_CHECKING([for MPI C compiler])
       if test "${MPICC}" != "" ; then
-         IFS=' ' read -ra MPICC_parts <<< "${MPICC}"
-         if test -x ${MPICC_parts[0]} ; then
+         MPICC_parts=${MPICC%%\ *}
+
+         if test -x ${MPICC_parts} ; then
             MPICC_COMPILER=${MPICC}
             AC_MSG_RESULT([${MPICC_COMPILER}])
          else
