@@ -74,6 +74,9 @@ static char UNUSED rcsid[] = "$Id$";
 #  include "ompt-wrapper.h"
 # endif /* OMPT_SUPPORT */
 #endif
+#if defined(NEW_OMP_SUPPORT)
+# include "omp_common.h"
+#endif
 #include "UF_gcc_instrument.h"
 #include "UF_xl_instrument.h"
 #if defined(HAVE_ONLINE)
@@ -906,7 +909,7 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			XML_FREE(enabled);
 #endif
 		}
-		/* Shall we gather counters in the UF calls? */
+		/* Shall we gather counters in the OMP calls? */
 		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
@@ -928,6 +931,76 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	}
 }
 #endif
+
+#if defined(NEW_OMP_SUPPORT)
+/* Configure OpenMP related parameters */
+static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+	UNREFERENCED_PARAMETER(xmldoc);
+
+	/* Parse all TAGs, and annotate them to use them later */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
+		{
+		}
+		/* Shall we instrument openmp lock routines? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_OMP_LOCKS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)) 
+				xtr_OMP_config_enable(OMP_LOCKS_ENABLED);
+			XML_FREE(enabled);
+		}
+		/* Shall we instrument openmp task's dependencies? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_OMP_TASK))
+		{
+			xmlChar *task_deps = xmlGetProp_env (rank, tag, TRACE_OMP_TASK_DEPS);
+			if (task_deps != NULL && !xmlStrcasecmp (task_deps, xmlYES)) 
+				xtr_OMP_config_enable(OMP_TASK_DEPENDENCY_LINE_ENABLED);
+			XML_FREE(task_deps);
+		}
+		/* Shall we instrument openmp taskloop? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_OMP_TASKLOOP))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)) 
+				xtr_OMP_config_enable(OMP_TASKLOOP_ENABLED);
+
+			xmlChar *taskloop_deps = xmlGetProp_env (rank, tag, TRACE_OMP_TASK_DEPS);
+			if (taskloop_deps != NULL && !xmlStrcasecmp (taskloop_deps, xmlYES)) 
+				xtr_OMP_config_enable(OMP_TASKLOOP_DEPENDENCY_LINE_ENABLED);
+
+			XML_FREE(enabled);
+			XML_FREE(taskloop_deps);
+		}
+		/* Shall we gather counters in the OMP calls? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)) 
+				xtr_OMP_config_enable(OMP_COUNTERS_ENABLED);
+#if USE_HARDWARE_COUNTERS
+			mfprintf (stdout, PACKAGE_NAME": OpenMP routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT ");
+#else
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <OpenMP> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			tracejant_hwc_omp = FALSE;
+#endif
+			XML_FREE(enabled);
+		}
+		else
+		{
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <OpenMP> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
+
 
 #if defined(PTHREAD_SUPPORT)
 /* Configure OpenMP related parameters */
@@ -1678,6 +1751,24 @@ static void Parse_XML_CPU_Events (int rank, xmlDocPtr xmldoc, xmlNodePtr current
 					mfprintf(stdout, PACKAGE_NAME": CPU events will only be emitted if CPU has changed.\n");
 				}
 				XML_FREE(changeOnly);
+
+#if defined(NEW_OMP_SUPPORT)
+				xmlChar *poi = xmlGetProp_env (rank, tag, TRACE_CPU_EVENTS_POI);
+				if (poi != NULL)
+				{
+					int i = 0;
+					char **poi_array;
+					int num_pois = __Extrae_Utils_explode ((char *)poi, ",", &poi_array);
+					for (i = 0; i < num_pois; i++)
+					{
+						if (!strcmp(poi_array[i], TRACE_CPU_EVENTS_OPENMP))
+						{
+							xtr_OMP_config_enable(OMP_ANNOTATE_CPU);
+						}
+					}
+				}
+				XML_FREE(poi)
+#endif
 			}
 			XML_FREE(enabled);
 		}
@@ -2028,7 +2119,12 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
-#if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
+#if defined(NEW_OMP_SUPPORT)
+							tracejant_omp = TRUE;
+							xtr_OMP_config_enable(OMP_ENABLED);
+							Parse_XML_OMP (rank, xmldoc, current_tag);
+
+#elif defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 							tracejant_omp = TRUE;
 							Parse_XML_OMP (rank, xmldoc, current_tag);
 

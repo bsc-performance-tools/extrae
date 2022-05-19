@@ -81,7 +81,9 @@
 #define TRACE_PTHREAD                   ((xmlChar*) "pthread")
 #define TRACE_OMP_OMPT                  ((xmlChar*) "ompt")
 #define TRACE_OMP_LOCKS                 ((xmlChar*) "locks")
+#define TRACE_OMP_TASK                  ((xmlChar*) "task")
 #define TRACE_OMP_TASKLOOP              ((xmlChar*) "taskloop")
+#define TRACE_OMP_TASK_DEPS             ((xmlChar*) "dependencies")
 #define TRACE_OMP                       ((xmlChar*) "openmp")
 #define TRACE_STORAGE                   ((xmlChar*) "storage")
 #define TRACE_BUFFER                    ((xmlChar*) "buffer")
@@ -176,6 +178,8 @@
 #define TRACE_CPU_EVENTS_EMIT_ALWAYS    ((xmlChar*) "emit-always")
 
 #define TRACE_OPENACC                   ((xmlChar*) "openacc")
+#define TRACE_CPU_EVENTS_POI            ((xmlChar*) "poi")
+#define TRACE_CPU_EVENTS_OPENMP         ((xmlChar*) "openmp")
 
 short int Parse_XML_File (int rank, int world_size, const char *filename);
 

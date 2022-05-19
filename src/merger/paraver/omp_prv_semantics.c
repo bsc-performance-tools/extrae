@@ -345,7 +345,6 @@ static int TaskGroup_Event (
 	EvValue = Get_EvValue (current_event);
 
 	Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
-
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	if (EvType == TASKGROUP_START_EV)
@@ -489,13 +488,16 @@ static int TaskEvent_IfSetPredecessor (const void *dependency_event, void *userd
 	{
 		struct TaskFunction_Event_Info_SetPredecessor *tfeisp =
 		  (struct TaskFunction_Event_Info_SetPredecessor *)
-		    xmalloc (sizeof(struct TaskFunction_Event_Info_SetPredecessor));
-		tfeisp->ptask = tfei->ptask;
-		tfeisp->task = tfei->task;
-		tfeisp->cpu = tfei->cpu;
-		tfeisp->thread = tfei->thread;
-		tfeisp->time = tfei->time;
-		*predecessordata = tfeisp;
+		    malloc (sizeof(struct TaskFunction_Event_Info_SetPredecessor));
+		if (tfeisp != NULL)
+		{
+			tfeisp->ptask = tfei->ptask;
+			tfeisp->task = tfei->task;
+			tfeisp->cpu = tfei->cpu;
+			tfeisp->thread = tfei->thread;
+			tfeisp->time = tfei->time;
+			*predecessordata = tfeisp;
+		}
 
 		return TRUE;
 	}
@@ -643,7 +645,7 @@ static int Ordered_Event (
    FileSet_t *fset )
 {
         unsigned int EvType;
-		UINT64 EvValue;
+        UINT64 EvValue;
         UNREFERENCED_PARAMETER(fset);
 
         EvType  = Get_EvEvent (current_event);
@@ -657,7 +659,201 @@ static int Ordered_Event (
         return 0;
 }
 
+static int OMP_Call_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+  unsigned int EvType;
+	UINT64 EvValue, EvParam;
+
+  UNREFERENCED_PARAMETER(fset);
+
+  EvType  = Get_EvEvent (current_event);
+  EvValue = Get_EvValue (current_event);
+  EvParam = Get_EvParam (current_event);
+
+  switch (EvParam)
+  {
+    // Barrier
+    case GOMP_BARRIER_VAL:
+    case GOMP_LOOP_END_VAL:
+    case GOMP_SECTIONS_END_VAL:
+      Switch_State (STATE_BARRIER, (EvValue == EVT_BEGIN), ptask, task, thread);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
+      break;
+
+    // Syncing
+    case GOMP_ATOMIC_START_VAL:
+    case GOMP_ATOMIC_END_VAL:
+    case GOMP_CRITICAL_START_VAL:
+    case GOMP_CRITICAL_END_VAL:
+    case GOMP_CRITICAL_NAME_START_VAL:
+    case GOMP_CRITICAL_NAME_END_VAL:
+    case GOMP_ORDERED_START_VAL:
+    case GOMP_ORDERED_END_VAL:
+    case GOMP_TASKWAIT_VAL:
+    case GOMP_TASKGROUP_START_VAL:
+    case GOMP_TASKGROUP_END_VAL:
+    case GOMP_DOACROSS_POST_VAL:
+    case GOMP_DOACROSS_WAIT_VAL:
+    case GOMP_SET_LOCK_VAL:
+    case GOMP_UNSET_LOCK_VAL:
+      Switch_State (STATE_SYNC, (EvValue == EVT_BEGIN), ptask, task, thread);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
+      break;
+
+    // Scheduling (work dispatch)
+    case GOMP_LOOP_STATIC_START_VAL:
+    case GOMP_LOOP_DYNAMIC_START_VAL:
+    case GOMP_LOOP_GUIDED_START_VAL:
+    case GOMP_LOOP_RUNTIME_START_VAL:
+    case GOMP_LOOP_STATIC_NEXT_VAL:
+    case GOMP_LOOP_DYNAMIC_NEXT_VAL:
+    case GOMP_LOOP_GUIDED_NEXT_VAL:
+    case GOMP_LOOP_RUNTIME_NEXT_VAL:
+    case GOMP_LOOP_NONMONOTONIC_DYNAMIC_START_VAL:
+    case GOMP_LOOP_NONMONOTONIC_GUIDED_START_VAL:
+    case GOMP_LOOP_NONMONOTONIC_RUNTIME_START_VAL:
+    case GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_START_VAL:
+    case GOMP_LOOP_NONMONOTONIC_DYNAMIC_NEXT_VAL:
+    case GOMP_LOOP_NONMONOTONIC_GUIDED_NEXT_VAL:
+    case GOMP_LOOP_NONMONOTONIC_RUNTIME_NEXT_VAL:
+    case GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_NEXT_VAL:
+    case GOMP_LOOP_ORDERED_STATIC_START_VAL:
+    case GOMP_LOOP_ORDERED_DYNAMIC_START_VAL:
+    case GOMP_LOOP_ORDERED_GUIDED_START_VAL:
+    case GOMP_LOOP_ORDERED_RUNTIME_START_VAL:
+    case GOMP_LOOP_ORDERED_STATIC_NEXT_VAL:
+    case GOMP_LOOP_ORDERED_DYNAMIC_NEXT_VAL:
+    case GOMP_LOOP_ORDERED_GUIDED_NEXT_VAL:
+    case GOMP_LOOP_ORDERED_RUNTIME_NEXT_VAL:
+    case GOMP_SECTIONS_START_VAL:
+    case GOMP_SECTIONS_NEXT_VAL:
+    case GOMP_SINGLE_START_VAL:
+    case GOMP_LOOP_DOACROSS_STATIC_START_VAL:
+    case GOMP_LOOP_DOACROSS_DYNAMIC_START_VAL:
+    case GOMP_LOOP_DOACROSS_GUIDED_START_VAL:
+    case GOMP_LOOP_DOACROSS_RUNTIME_START_VAL:
+    case GOMP_TASK_VAL:
+    case GOMP_TASKLOOP_VAL:
+      Switch_State (STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
+      break;
+
+    // Fork/join
+    case GOMP_PARALLEL_LOOP_STATIC_START_VAL:
+    case GOMP_PARALLEL_LOOP_DYNAMIC_START_VAL:
+    case GOMP_PARALLEL_LOOP_GUIDED_START_VAL:
+    case GOMP_PARALLEL_START_VAL:
+    case GOMP_PARALLEL_END_VAL:
+    case GOMP_PARALLEL_SECTIONS_START_VAL:
+    case GOMP_PARALLEL_SECTIONS_VAL:
+    case GOMP_PARALLEL_LOOP_RUNTIME_START_VAL:
+    case GOMP_LOOP_END_NOWAIT_VAL:
+    case GOMP_SECTIONS_END_NOWAIT_VAL:
+    case GOMP_PARALLEL_VAL:
+    case GOMP_PARALLEL_LOOP_STATIC_VAL:
+    case GOMP_PARALLEL_LOOP_DYNAMIC_VAL:
+    case GOMP_PARALLEL_LOOP_GUIDED_VAL:
+    case GOMP_PARALLEL_LOOP_RUNTIME_VAL:
+    case GOMP_PARALLEL_LOOP_NONMONOTONIC_DYNAMIC_VAL:
+    case GOMP_PARALLEL_LOOP_NONMONOTONIC_GUIDED_VAL:
+    case GOMP_PARALLEL_LOOP_NONMONOTONIC_RUNTIME_VAL:
+    case GOMP_PARALLEL_LOOP_MAYBE_NONMONOTONIC_RUNTIME_VAL:
+    case GOMP_TEAMS_REG_VAL:
+      Switch_State (STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
+      break;
+
+    default:
+      break;
+  }
+
+  trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, (EvValue == EVT_BEGIN ? EvParam : 0));
+
+  return 0;
+}
+
+static int OMP_Punctual_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+  unsigned int EvType;
+	UINT64 EvValue;
+  UNREFERENCED_PARAMETER(fset);
+
+  EvType  = Get_EvEvent (current_event);
+  EvValue = Get_EvValue (current_event);
+
+  trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+  return 0;
+}
+
+static int OMP_Address_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+  unsigned int EvType;
+	UINT64 EvValue;
+  UNREFERENCED_PARAMETER(fset);
+
+  EvType  = Get_EvEvent (current_event);
+  EvValue = Get_EvValue (current_event);
+
+#if defined(HAVE_BFD)
+  /* Add the outlined/task address to the list of known addresses,
+   * and emit its reference for matching in final tracefile */
+
+  if (get_option_merge_SortAddresses())
+  {
+    AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);
+    AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_LINE);
+  }
+#endif
+
+  switch (EvType)
+  {
+    case NEW_OMP_OUTLINED_ADDRESS_EV:
+      Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_OUTLINED_NAME_EV, EvValue);
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_OUTLINED_LINE_EV, EvValue);
+      break;
+    case NEW_OMP_TASK_INST_ADDRESS_EV:
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_TASK_INST_NAME_EV, EvValue);
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_TASK_INST_LINE_EV, EvValue);
+      break;
+    case NEW_OMP_TASK_EXEC_ADDRESS_EV:
+      Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_TASK_EXEC_NAME_EV, EvValue);
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_TASK_EXEC_LINE_EV, EvValue);
+      break;
+    default:
+      break;
+  }
+  return 0;
+}
+
 SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
+
+	/* Old OMP support*/
 	{ WSH_EV, WorkSharing_Event },
 	{ PAR_EV, Parallel_Event },
 	{ OMPFUNC_EV, OpenMP_Function_Event },
@@ -666,8 +862,6 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ NAMEDCRIT_EV, Critical_Event },
 	{ WORK_EV, Work_Event},
 	{ JOIN_EV, Join_Event},
-	{ OMPSETNUMTHREADS_EV, SetGetNumThreads_Event },
-	{ OMPGETNUMTHREADS_EV, SetGetNumThreads_Event },
 	{ TASK_EV, Task_Event },
 	{ TASKWAIT_EV, Taskwait_Event },
 	{ TASKFUNC_EV, OpenMP_Function_Event },
@@ -688,6 +882,26 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ OMP_STATS_EV, OMP_Stats_Event },
 	{ TASKLOOP_EV, TaskLoop_Event },
 	{ ORDERED_EV, Ordered_Event },
+	{ OMPSETNUMTHREADS_EV, SetGetNumThreads_Event },
+	{ OMPGETNUMTHREADS_EV, SetGetNumThreads_Event },
+
+	/* New GOMP support*/
+	{ NEW_OMP_CALL_EV, OMP_Call_Event},
+	{ NEW_OMP_NESTED_EV, OMP_Punctual_Event},
+	{ NEW_OMP_PARALLEL_EV, OMP_Punctual_Event},
+	{ NEW_OMP_WSH_EV, OMP_Punctual_Event},
+	{ NEW_OMP_SYNC_EV, OMP_Punctual_Event},
+	{ NEW_OMP_LOCK_EV, OMP_Punctual_Event},
+	{ NEW_OMP_LOCK_NAME_EV, OMP_Punctual_Event},
+	{ NEW_OMP_ORDERED_EV, OMP_Punctual_Event},
+	{ NEW_OMP_TASKGROUP_EV, OMP_Punctual_Event},
+	{ NEW_OMP_TASKING_EV, OMP_Punctual_Event},
+	{ NEW_OMP_TASK_INST_ID_EV, OMP_Punctual_Event},
+	{ NEW_OMP_TASK_EXEC_ID_EV, OMP_Punctual_Event},
+	{ NEW_OMP_OUTLINED_ADDRESS_EV, OMP_Address_Event},
+	{ NEW_OMP_TASK_INST_ADDRESS_EV, OMP_Address_Event},
+	{ NEW_OMP_TASK_EXEC_ADDRESS_EV, OMP_Address_Event},
+
 	{ NULL_EV, NULL }
 };
 

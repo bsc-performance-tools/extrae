@@ -49,6 +49,10 @@
 # define FALSE (1==0)
 #endif
 
+#ifndef NULL
+# define NULL 0
+#endif
+
 #define ENABLE   TRUE
 #define ENABLED  TRUE
 

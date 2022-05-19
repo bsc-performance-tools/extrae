@@ -190,7 +190,8 @@ void Extrae_set_ApplicationIsMPI (int isMPI);
 void Extrae_set_ApplicationIsSHMEM (int isSHMEM);
 void Extrae_set_ApplicationIsGASPI (int isGASPI);
 
-void Extrae_AnnotateCPU (UINT64 timestamp);
+#define Extrae_AnnotateCPU() xtr_AnnotateCPU(THREADID, LAST_READ_TIME, TRUE)
+void xtr_AnnotateCPU (int thread_id, UINT64 timestamp, int force_emission_now);
 
 int Extrae_Allocate_Task_Bitmap (int size);
 

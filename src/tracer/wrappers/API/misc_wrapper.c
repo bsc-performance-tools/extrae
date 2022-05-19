@@ -70,6 +70,9 @@
 #include "threadinfo.h"
 #include "sampling-common.h"
 #include "xalloc.h"
+#if defined(NEW_OMP_SUPPORT)
+# include "omp_common.h"
+#endif
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -158,6 +161,10 @@ void Extrae_set_options_Wrapper (int options)
 	Extrae_set_pthread_hwc_tracing (options & EXTRAE_PTHREAD_HWC_OPTION);
 	tracejant_hwc_uf  = options & EXTRAE_UF_HWC_OPTION;
 	Extrae_setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
+#if defined(NEW_OMP_SUPPORT)
+	xtr_OMP_config_enable_conditional (OMP_ENABLED, (options & EXTRAE_OMP_OPTION))
+	xtr_OMP_config_enable_conditional (OMP_COUNTERS_ENABLED, (options & EXTRAE_OMP_HWC_OPTION))
+#endif
 }
 
 void Extrae_getrusage_set_to_0_Wrapper (UINT64 time)

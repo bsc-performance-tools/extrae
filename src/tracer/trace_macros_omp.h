@@ -24,6 +24,8 @@
 #ifndef TRACE_MACROS_OMP_H_INCLUDED
 #define TRACE_MACROS_OMP_H_INCLUDED
 
+#include "wrapper.h"
+
 #define TRACE_OMPEVENT(evttime,evttype,evtvalue,evtparam)     \
 {                                                             \
 	int thread_id = THREADID;                                   \

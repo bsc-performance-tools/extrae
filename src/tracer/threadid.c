@@ -58,7 +58,7 @@ void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void))
 
 /* Internal routines */
 
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) || defined(NEW_OMP_SUPPORT)
 extern int omp_get_thread_num(void);
 extern int omp_get_num_threads(void);
 #elif defined(SMPSS_SUPPORT)
@@ -77,12 +77,19 @@ extern int css_get_max_threads();
 
 unsigned Extrae_get_thread_number (void)
 {
-	if (get_thread_num)
+#if defined(NEW_OMP_SUPPORT)
+	return omp_get_thread_num();
+#elif defined(OMP_SUPPORT) 
+# if defined(OMPT_SUPPORT)
+	if (ompt_enabled)
 	{
 		return get_thread_num();
 	}
-#if defined(OMP_SUPPORT)
-	return omp_get_thread_num();
+	else
+# endif /* OMPT_SUPPORT */
+	{
+		return omp_get_thread_num();
+	}
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num();
 #elif defined(PTHREAD_SUPPORT)
@@ -96,12 +103,19 @@ unsigned Extrae_get_thread_number (void)
 
 void * Extrae_get_thread_number_function (void)
 {
-	if (get_thread_num)
+#if defined(NEW_OMP_SUPPORT)
+	return (void*) omp_get_thread_num;
+#elif defined(OMP_SUPPORT) 
+# if defined(OMPT_SUPPORT)
+	if (ompt_enabled)
 	{
 		return (void*) get_thread_num;
 	}
-#if defined(OMP_SUPPORT)
-	return (void*) omp_get_thread_num;
+	else
+# endif /* OMPT_SUPPORT */
+	{
+		return (void*) omp_get_thread_num;
+	}
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num;
 #elif defined(PTHREAD_SUPPORT)
@@ -115,12 +129,19 @@ void * Extrae_get_thread_number_function (void)
 
 unsigned Extrae_get_num_threads (void)
 {
-	if (get_num_threads)
+#if defined(NEW_OMP_SUPPORT)
+	return omp_get_num_threads();
+#elif defined(OMP_SUPPORT) 
+# if defined(OMPT_SUPPORT)
+	if (ompt_enabled)
 	{
 		return get_num_threads();
 	}
-#if defined(OMP_SUPPORT)
-	return omp_get_num_threads();
+	else 
+# endif /* OMPT_SUPPORT */
+	{
+		return omp_get_num_threads();
+	}
 #elif defined(SMPSS_SUPPORT)
 	return css_get_max_threads();
 #elif defined(PTHREAD_SUPPORT)

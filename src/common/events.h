@@ -25,6 +25,7 @@
 #define __EVENTS_H_INCLUDED__
 
 #include "openshmem_events.h"
+#include "new_openmp_events.h"
 
 #ifdef __cplusplus
 extern "C" {

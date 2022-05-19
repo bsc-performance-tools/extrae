@@ -13,7 +13,7 @@
  * dlsym. The initialization is deferred until any of the instrumented symbols
  * is used for the first time.
  */
-
+#if defined(PIC) /* Only available for .so libraries */
 #if !defined(DEBUG)
 # define XTR_FIND_SYMBOL(func)                                      \
   ({                                                                \
@@ -31,6 +31,15 @@
      ptr;                                                           \
   })
 #endif /* DEBUG */
+#else /* PIC */
+# define XTR_FIND_SYMBOL(func)                                      \
+  ({                                                                \
+     fprintf (stderr, PACKAGE_NAME": Warning! %s instrumenation "   \
+                      "requieres linking with shared library!\n",   \
+                      func );                                       \
+  })
+#endif /* PIC */
+
 
 #define XTR_FIND_SYMBOL_OR_DIE(func)                                \
 ({                                                                  \
@@ -43,4 +52,3 @@
   }                                                                 \
   ptr;                                                              \
 })
-

@@ -88,6 +88,9 @@
 
   <cuda enabled="no" />
 
+	<!-- Beware: High overhead! -->
+	<cpu-events enabled="no" frequency="0" emit-always="no" poi="openmp"/>
+
   <merge enabled="yes" 
     synchronization="default"
     binary="mpi_ping"

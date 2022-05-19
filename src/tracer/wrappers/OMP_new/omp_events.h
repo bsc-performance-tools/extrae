@@ -21,45 +21,31 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#pragma once
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-#include "debug.h"
+#include "events.h"
 
-#define FS_SYNC_MAX_ATTEMPTS 60
-#define FS_SYNC_RETRY_IN      1
-#define FS_SYNC_TIMEOUT      FS_SYNC_MAX_ATTEMPTS * FS_SYNC_RETRY_IN
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-int __Extrae_Utils_is_Whitespace (char c);
-int __Extrae_Utils_is_Alphabetic (char c);
-char *__Extrae_Utils_trim (char *sourceStr);
-int __Extrae_Utils_explode (char *sourceStr, const char *delimiter, char ***tokenArray);
-int __Extrae_Utils_append_from_to_file (const char *source, const char *destination);
-int __Extrae_Utils_rename_or_copy (char *origen, char *desti);
-unsigned long long __Extrae_Utils_getTimeFromStr (const char *time, const char *envvar, int rank);
-unsigned long long __Extrae_Utils_getFactorValue (const char *value, const char *ref, int rank);
-int __Extrae_Utils_mkdir_recursive (const char *path);
-int __Extrae_Utils_file_exists (const char *file);
-int __Extrae_Utils_directory_exists (const char *file);
-int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
-	unsigned __Extrae_Utils_buffersize, char *buffer, const char *string);
-void __Extrae_Utils_free_array(char **, int);
-int  __Extrae_Utils_sync_on_file(char *file);
-void __Extrae_Utils_chomp (char *buffer);
-int xtr_random(void);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#define STRINGIFY(s) #s
-
-
-#endif /* __UTILS_H__ */
+void Extrae_OpenMP_Counters (void);
+void Extrae_OpenMP_Call_Entry (unsigned omp_call);
+void Extrae_OpenMP_Call_Exit (unsigned omp_call);
+void Extrae_OpenMP_Parallel_Entry (unsigned par_construct);
+void Extrae_OpenMP_Parallel_Exit ();
+void Extrae_OpenMP_Forking_Entry (unsigned par_construct);
+void Extrae_OpenMP_Forking_Exit ();
+void Extrae_OpenMP_Chunk_Entry (void);
+void Extrae_OpenMP_Chunk_Exit (void);
+void Extrae_OpenMP_Worksharing_Entry (unsigned wsh_construct);
+void Extrae_OpenMP_Worksharing_Exit ();
+void Extrae_OpenMP_Sync_Entry (unsigned sync_construct);
+void Extrae_OpenMP_Sync_Exit (void);
+void Extrae_OpenMP_Lock_Status (const void *name, unsigned lock_state);
+void Extrae_OpenMP_Ordered (unsigned int ordered_state);
+void Extrae_OpenMP_Taskgroup (unsigned int taskgroup_state);
+void Extrae_OpenMP_Outlined_Entry (const void *outlined_fn);
+void Extrae_OpenMP_Outlined_Exit (void);
+void Extrae_OpenMP_Task_Inst_Entry (const void *task, long long task_id);
+void Extrae_OpenMP_Task_Inst_Exit (void);
+void Extrae_OpenMP_Task_Exec_Entry (int task_or_taskloop, const void *task, long long task_id);
+void Extrae_OpenMP_Task_Exec_Exit (void);
+void Extrae_OpenMP_Taskloop_Entry (const void *task, long long taskloop_id, int num_tasks);
+void Extrae_OpenMP_Taskloop_Exit (void);

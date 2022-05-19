@@ -708,6 +708,25 @@ given number of loads.  Please note that the 'period' setting is not available
 for Skylake and newer processors. 
 
 
+.. _sec:XMLCPUEvents:
+
+XML Section: Executing CPU identification
+-----------------------------------------
+
+.. highlight:: xml
+
+.. literalinclude:: xml/cpu-events.xml
+
+By default the core identifier where every thread is executing is emitted 
+at initialization points. This section enables extra measurements, 
+configurable by time ('frequency') and points of interest ('poi'). 
+When 'frequency' is set, new measurements are emitted at instrumentation points 
+if enough time has passed since the previous measurement. When 'poi' is 
+set to 'openmp', new measurements are emitted at the entry and exit points
+of OpenMP outlined functions, tasks, and work dispatches. This option may 
+introduce high variable overhead, please use with caution.
+
+
 .. _sec:XMLSectionMerge:
 
 XML Section: Merge

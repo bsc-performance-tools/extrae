@@ -315,6 +315,27 @@
 	} \
 }
 
+#define THREAD_TRACE_SAME_N_USER_COMMUNICATION_EVENT(thread,evttime,count,evttype,evtpartner,evtsize,evttag,id) \
+{ \
+	event_t evts[count]; \
+	unsigned i; \
+	if (tracejant) \
+	{ \
+		for (i=0; i<count; i++) \
+		{ \
+			evts[i].time = (evttime); \
+			evts[i].event = (evttype); \
+			evts[i].value = 0; \
+			evts[i].param.mpi_param.target = (long) (evtpartner); \
+			evts[i].param.mpi_param.size = (evtsize); \
+			evts[i].param.mpi_param.tag = (evttag); \
+			evts[i].param.mpi_param.aux = (id); \
+			HARDWARE_COUNTERS_READ(thread, evts[i], FALSE);  \
+		} \
+		BUFFER_INSERT_N(thread, TRACING_BUFFER(thread), evts, count); \
+	} \
+}
+
 #define THREAD_TRACE_USER_COMMUNICATION_EVENT(thread,evttime,evttype,evtpartner,evtsize,evttag,id) \
 { \
 	event_t evt; \

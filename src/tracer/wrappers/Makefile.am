@@ -5,7 +5,7 @@ SUBDIRS += pthread
 endif
 
 if WANT_OPENMP
-SUBDIRS += OMP
+SUBDIRS += OMP OMP_new
 endif
 
 if HAVE_MPI

@@ -544,6 +544,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/MPI/Makefile \
   src/tracer/wrappers/OMP/Makefile \
   src/tracer/wrappers/OMP/intel-kmpc-11-intermediate/Makefile \
+  src/tracer/wrappers/OMP_new/Makefile \
   src/tracer/wrappers/CUDA/Makefile \
   src/tracer/wrappers/OPENCL/Makefile \
   src/tracer/wrappers/pthread/Makefile \
@@ -688,6 +689,7 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[docs/source/xml/input-output.xml:docs/source/xml/input-output.xml] \
 		[docs/source/xml/dynamic-memory.xml:docs/source/xml/dynamic-memory.xml] \
 		[docs/source/xml/intel-pebs.xml:docs/source/xml/intel-pebs.xml] \
+		[docs/source/xml/cpu-events.xml:docs/source/xml/cpu-events.xml] \
 		[docs/source/xml/merge.xml:docs/source/xml/merge.xml] \
 		[docs/source/xml/merge-reduced.xml:docs/source/xml/merge-reduced.xml] \
 		[docs/source/xml/extrae.xml:docs/source/xml/extrae.xml] \

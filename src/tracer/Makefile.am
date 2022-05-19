@@ -59,7 +59,7 @@ if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += libmpitracecf.la
 endif
 if WANT_OPENMP
-  lib_LTLIBRARIES += libompitrace.la libompitracef.la
+  lib_LTLIBRARIES += libompitrace.la libompitracef.la libnewompitrace.la
 if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += libompitracecf.la
 endif
@@ -155,7 +155,7 @@ endif
 endif
 
 if WANT_OPENMP
-  lib_LTLIBRARIES += libomptrace.la
+  lib_LTLIBRARIES += libomptrace.la libnewomptrace.la
 endif
 if WANT_SMPSS
   lib_LTLIBRARIES += libsmpsstrace.la
@@ -318,6 +318,8 @@ endif
 libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
 libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
 libomptrace_la_SOURCES = $(core_SRCS)
+libnewomptrace_la_SOURCES = $(core_SRCS)
+libnewompitrace_la_SOURCES = $(core_SRCS)
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_SOURCES = $(libmpitracecf_la_SOURCES)
@@ -470,6 +472,7 @@ ADDITIONAL_GASPI_LIBS = $(WRAPPERS_LIB)/GASPI/libwrap_gaspi.la
 
 ADDITIONAL_PTHREAD_LIBS = $(WRAPPERS_LIB)/pthread/libwrap_pthread.la $(PTHREAD_LIBS)
 ADDITIONAL_OPENMP_LIBS = $(WRAPPERS_LIB)/OMP/libwrap_openmp.la
+NEW_ADDITIONAL_OPENMP_LIBS = $(WRAPPERS_LIB)/OMP_new/libwrap_openmp.la
 ADDITIONAL_OPENCL_LIBS = $(WRAPPERS_LIB)/OPENCL/libwrap_opencl.la
 ADDITIONAL_CUDA_LIBS = $(WRAPPERS_LIB)/CUDA/libwrap_cuda.la
 ADDITIONAL_OPENSHMEM_LIBS = $(WRAPPERS_LIB)/openshmem/libwrap_openshmem.la
@@ -544,6 +547,8 @@ endif
 libompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
 libompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
 libomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_OPENMP_LIBS) $(SEQUENTIAL_MERGE_LIB)
+libnewomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(NEW_ADDITIONAL_OPENMP_LIBS) $(SEQUENTIAL_MERGE_LIB)
+libnewompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(NEW_ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
@@ -600,6 +605,9 @@ core_INCLUDES = \
  -I$(WRAPPERS_INC)/GASPI \
  -I$(SAMPLING_DIR)/common \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)
+
+# XXX Folder OMP_new will be renamed to OMP (already included by core_INCLUDES above) when deprecated OpenMP support is removed
+NEW_OMP_INCLUDES = -I$(WRAPPERS_INC)/OMP_new 
 
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
@@ -724,6 +732,8 @@ endif
 libompitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 libompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 libomptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
+libnewomptrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
+libnewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
@@ -880,8 +890,10 @@ if SINGLE_MPI_LIBRARY
 endif
 
 libomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libnewomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -dynamic
 libompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
+libnewompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -dynamic
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS)

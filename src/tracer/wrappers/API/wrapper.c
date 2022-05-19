@@ -117,6 +117,9 @@
 #  include "ompt-wrapper.h"
 # endif
 #endif
+#if defined(NEW_OMP_SUPPORT)
+# include "omp_common.h"
+#endif
 #include "trace_buffers.h"
 #include "timesync.h"
 #if defined(HAVE_ONLINE)
@@ -161,6 +164,8 @@
 #include "syscall_probe.h"
 #include "syscall_wrapper.h"
 #include "taskid.h"
+
+// #define DEBUG
 
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
@@ -214,7 +219,7 @@ int tracejant_mpi = TRUE;
 int tracejant_hwc_mpi = TRUE;
 
 /***** Variable global per saber si OpenMP s'ha de tracejar **************/
-int tracejant_omp = TRUE;
+int tracejant_omp = TRUE; // XXX To be deleted when the deprecated OpenMP support is removed
 
 /***** Variable global per saber si OpenMP s'ha de tracejar amb hwc ******/
 int tracejant_hwc_omp = TRUE;
@@ -316,22 +321,6 @@ char final_dir[TMP_DIR_LEN];
 char tmp_dir[TMP_DIR_LEN];
 
 
-/*
- * Checks if there is a CPU event waiting to be emitted.
- * Returns 1 if the thread never emitted a CPU event or if the user specified
- * timer goes off.
-*/
-int
-PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
-{
-	if ((LastCPUEmissionTime[thread_id] == 0) || (((current_time - LastCPUEmissionTime[thread_id]) >  MinimumCPUEventTime) && MinimumCPUEventTime > 0)) {
-		LastCPUEmissionTime[thread_id] = current_time;
-		return 1;
-	}
-
-	return 0;
-}
-
 /* HSG
 
  MN GPFS optimal files per directories is 512.
@@ -432,7 +421,7 @@ int Extrae_getAppendingEventsToGivenPID (int *pid)
 
 static int extrae_initialized = FALSE;
 
-int EXTRAE_ON (void) { return mpitrace_on; }
+int EXTRAE_ON (void) { return mpitrace_on && extrae_initialized; }
 
 int EXTRAE_INITIALIZED(void)
 { return extrae_initialized; }
@@ -490,18 +479,47 @@ static void Extrae_BG_gettopology (int enter, UINT64 timestamp)
 }
 #endif
 
-void Extrae_AnnotateCPU (UINT64 timestamp)
+/**
+ * xtr_AnnotateCPU
+ *
+ * Emits a new measurement of GETCPU_EV in the following circumstances:
+ * 1) The first time this method is invoked
+ * 2) If 'force_emission_now' is set to TRUE
+ * 3) If cpu-events option is enabled in the xml and the time since the last emission is greater than 'MinimumCPUEventTime'
+ *
+ * To reduce overhead, the event is only emitted if the actual CPU ID has changed 
+ * since the last emission, or if 'AlwaysEmitCPUEvent' is set to true.
+ */
+void xtr_AnnotateCPU (int thread_id, UINT64 timestamp, int force_emission_now)
 {
 #if defined(HAVE_SCHED_GETCPU)
-    int cpu = sched_getcpu();
+	iotimer_t last_emission = LastCPUEmissionTime[thread_id];
 
-    if (cpu != LastCPUEvent[THREADID] || AlwaysEmitCPUEvent)
-    {
-        LastCPUEvent[THREADID] = cpu;
-        TRACE_EVENT (timestamp, GETCPU_EV, cpu);
-    }
+#if defined(DEBUG)
+	if (force_emission_now)
+  {
+			fprintf(stderr, "[DEBUG] xtr_AnnotateCPU force=TRUE timestamp=%lld last=%lld delta=%lld\n", timestamp, last_emission, timestamp-last_emission);
+	}
+#endif
+
+	if ( (last_emission == 0) || 
+	     ( (force_emission_now == TRUE) && (timestamp - last_emission > 0) ) || 
+       ( (MinimumCPUEventTime > 0) && 
+				 ((timestamp - last_emission) > MinimumCPUEventTime) ) ) 
+	{
+		int cpu = sched_getcpu();
+
+		if (cpu != LastCPUEvent[THREADID] || AlwaysEmitCPUEvent)
+		{
+			LastCPUEvent[THREADID] = cpu;
+      THREAD_TRACE_MISCEVENT(thread_id, timestamp, GETCPU_EV, cpu, EMPTY);
+		}
+		LastCPUEmissionTime[thread_id] = timestamp;
+	}
 #else
-    UNREFERENCED_PARAMETER(timestamp);
+	UNREFERENCED_PARAMETER(thread_id);
+	UNREFERENCED_PARAMETER(timestamp);
+	UNREFERENCED_PARAMETER(force_emission_now);
 #endif
 }
 
@@ -511,7 +529,7 @@ static void Extrae_AnnotateTopology (int enter, UINT64 timestamp)
 	Extrae_BG_gettopology (enter, timestamp);
 #else
 	UNREFERENCED_PARAMETER(enter);
-	Extrae_AnnotateCPU (timestamp);
+	xtr_AnnotateCPU (THREADID, timestamp, TRUE);
 #endif
 }
 
@@ -940,16 +958,24 @@ static int read_environment_variables (int me)
 	else
 		tracejant_hwc_uf = FALSE;
 
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) || defined(NEW_OMP_SUPPORT)
 	/* Check if the OpenMP tracing must be disabled */
 	str = getenv ("EXTRAE_DISABLE_OMP");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
 			fprintf (stdout, PACKAGE_NAME": OpenMP runtime calls are NOT traced.\n");
-  	tracejant_omp = FALSE;
+ 	 	tracejant_omp = FALSE;
+# if defined(NEW_OMP_SUPPORT)
+		xtr_OMP_config_disable(OMP_ENABLED);
+# endif
 	}
-
+# if defined(NEW_OMP_SUPPORT)
+	else
+	{
+		xtr_OMP_config_enable(OMP_ENABLED);
+	}
+# endif
 	/* HWC must be gathered at OpenMP? */
 	str = getenv ("EXTRAE_OMP_COUNTERS_ON");
 	if (str != NULL && (strcmp (str, "1") == 0))
@@ -957,13 +983,32 @@ static int read_environment_variables (int me)
 		if (me == 0)
 			fprintf (stdout, PACKAGE_NAME": HWC reported in the OpenMP calls.\n");
 		tracejant_hwc_omp = TRUE;
+# if defined(NEW_OMP_SUPPORT)
+		xtr_OMP_config_enable(OMP_COUNTERS_ENABLED);
+# endif
 	}
 	else
+	{
 		tracejant_hwc_omp = FALSE;
-
+# if defined(NEW_OMP_SUPPORT)
+		xtr_OMP_config_disable(OMP_COUNTERS_ENABLED);
+# endif
+	}
 	/* Will we trace openmp-locks ? */
 	str = getenv ("EXTRAE_OMP_LOCKS");
+# if defined(NEW_OMP_SUPPORT)
+	xtr_OMP_config_enable(OMP_LOCKS_ENABLED);
+# else
 	setTrace_OMPLocks ((str != NULL && (strcmp (str, "1"))));
+# endif
+
+	/* Will we trace openmp-taskloop ? */
+	str = getenv ("EXTRAE_OMP_TASKLOOP");
+# if defined(NEW_OMP_SUPPORT)
+	xtr_OMP_config_enable(OMP_TASKLOOP_ENABLED);
+# else
+	setTrace_OMPTaskloop ((str != NULL && (strcmp (str, "1"))));
+# endif
 #endif
 
 #if defined(PTHREAD_SUPPORT)
@@ -973,7 +1018,7 @@ static int read_environment_variables (int me)
 	{
 		if (me == 0)
 			fprintf (stdout, PACKAGE_NAME": pthread runtime calls are NOT traced.\n");
-		tracejant_omp = FALSE;
+		tracejant_pthread = FALSE;
 	}
 
 	/* HWC must be gathered at OpenMP? */
@@ -1472,7 +1517,7 @@ int Extrae_Allocate_Task_Bitmap (int size)
 	return 0;
 }
 
-#if defined(OMP_SUPPORT) 
+#if defined(OMP_SUPPORT) || defined(NEW_OMP_SUPPORT)
 static int getnumProcessors (void)
 {
 	int numProcessors;
@@ -1490,7 +1535,7 @@ static int getnumProcessors (void)
 
 	return numProcessors;
 }
-#endif /* OMP_SUPPORT */
+#endif /* OMP_SUPPORT || defined(NEW_OMP_SUPPORT) */
 
 #if defined(PTHREAD_SUPPORT)
 
@@ -1620,7 +1665,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	unsigned u;
 	int runningInDynInst = FALSE;
 	char trace_sym[TMP_DIR_LEN];
-#if defined(OMP_SUPPORT) 
+#if defined(OMP_SUPPORT) || defined(NEW_OMP_SUPPORT)
 	char *omp_value;
 	char *new_num_omp_threads_clause;
 	int numProcessors;
@@ -1693,9 +1738,9 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	Extrae_OACC_init(me);
 #endif
 
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) || defined(NEW_OMP_SUPPORT)
 
-# if defined(OMPT_SUPPORT)
+# if defined(OMPT_SUPPORT) && !defined(NEW_OMP_SUPPORT)
 	if (!ompt_enabled)
 # endif /* OMPT_SUPPORT */
 	{
@@ -1755,7 +1800,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 				PACKAGE_NAME": Warning! OMP_NUM_THREADS is set but OpenMP is not supported!\n");
 	}
 
-#endif /* OMP_SUPPORT */
+#endif /* OMP_SUPPORT || defined(NEW_OMP_SUPPORT) */
 
 #if defined(CUDA_SUPPORT)
 	Extrae_CUDA_init (me);
@@ -2174,14 +2219,11 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	/* Enable sampling capabilities */
 	Extrae_setSamplingEnabled (TRUE);
 
-	/* We leave... so, we're no longer in instrumentatin from this point */
+	/* We leave... so, we're no longer in instrumentation from this point */
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 		Backend_setInInstrumentation (u, FALSE);
 
 	EXTRAE_SET_INITIALIZED(TRUE);
-
-	/* Mark the finalization of init as if we're not in instrumentation */
-	Backend_setInInstrumentation (THREADID, FALSE);
 
 	return TRUE;
 }
@@ -2450,7 +2492,7 @@ void Backend_Finalize (void)
 		}
 
 #if !defined(IS_BG_MACHINE)
-		Extrae_AnnotateTopology (TRUE, TIME);
+			Extrae_AnnotateTopology (TRUE, TIME);
 #endif
 
 		/* Write files back to disk , 1st part will include flushing events*/
@@ -2695,10 +2737,7 @@ void Backend_Leave_Instrumentation (void)
 	if (!mpitrace_on)
 		return;
 
-	if (PENDING_TRACE_CPU_EVENT(thread, LAST_READ_TIME))
-	{
-		Extrae_AnnotateCPU(LAST_READ_TIME);
-	}
+	xtr_AnnotateCPU(thread, LAST_READ_TIME, FALSE);
 
 	/* Change trace mode? (issue from API) */
 	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)

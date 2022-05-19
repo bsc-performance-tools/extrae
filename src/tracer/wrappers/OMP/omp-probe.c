@@ -86,7 +86,7 @@ void Probe_OpenMP_UF_Entry (UINT64 uf)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPFUNC_EV, uf, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -95,7 +95,7 @@ void Probe_OpenMP_UF_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPFUNC_EV, EVT_END, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -105,7 +105,7 @@ void Probe_OpenMP_Work_Entry (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, WORK_EV, EVT_BEGIN, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -115,7 +115,7 @@ void Probe_OpenMP_Work_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, WORK_EV, EVT_END, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -125,7 +125,7 @@ void Probe_OpenMP_DO_Entry (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, WSH_EV, WSH_DO_VAL, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -135,7 +135,7 @@ void Probe_OpenMP_DO_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, WSH_EV, WSH_END_VAL, EMPTY); 
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -159,7 +159,7 @@ void Probe_OpenMP_ParRegion_Entry (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS (LAST_READ_TIME, PAR_EV, PAR_REG_VAL, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		Extrae_AnnotateCPU ();
 	}
 }
 
@@ -169,7 +169,7 @@ void Probe_OpenMP_ParRegion_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, PAR_EV, PAR_END_VAL, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		Extrae_AnnotateCPU ();
 	}
 }
 
@@ -179,7 +179,7 @@ void Probe_OpenMP_ParDO_Entry (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, PAR_EV, PAR_WSH_VAL, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		Extrae_AnnotateCPU ();
 	}
 }
 
@@ -189,7 +189,7 @@ void Probe_OpenMP_ParDO_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, PAR_EV, PAR_END_VAL, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		Extrae_AnnotateCPU ();
 	}
 }
 
@@ -375,7 +375,7 @@ void Probe_OpenMP_Task_Entry (UINT64 uf)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASK_EV, uf, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -385,7 +385,7 @@ void Probe_OpenMP_Task_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TASK_EV, EVT_END, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -395,7 +395,7 @@ void Probe_OpenMP_TaskUF_Entry (UINT64 uf)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKFUNC_EV, uf, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -405,7 +405,7 @@ void Probe_OpenMP_TaskUF_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKFUNC_EV, EVT_END, EMPTY);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -457,7 +457,7 @@ void Probe_OpenMP_TaskLoop_Entry (void)
 		if (mpitrace_on)
 		{
 					TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKLOOP_EV, EVT_BEGIN, EMPTY);
-					/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+					/*Extrae_AnnotateCPU ();*/
 		}
 }
 
@@ -467,7 +467,7 @@ void Probe_OpenMP_TaskLoop_Exit (void)
 		if (mpitrace_on)
 		{
 					TRACE_OMPEVENTANDCOUNTERS(TIME, TASKLOOP_EV, EVT_END, EMPTY);
-					/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+					/*Extrae_AnnotateCPU ();*/
 		}
 }
 
@@ -622,7 +622,7 @@ void Probe_OMPT_OpenMP_TaskUF_Entry (UINT64 uf, UINT64 taskid)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKFUNC_EV, uf, taskid);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
@@ -632,7 +632,7 @@ void Probe_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_TASKFUNC_EV, EVT_END, taskid);
-		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		/*Extrae_AnnotateCPU ();*/
 	}
 }
 
