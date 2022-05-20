@@ -2080,7 +2080,6 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(SAMPLING_SUPPORT)
-							xtr_sampling_enabled = TRUE;
 							Parse_XML_Sampling (rank, current_tag);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support sampling.\n", TRACE_SAMPLING);

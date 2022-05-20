@@ -258,16 +258,19 @@ int Buffer_ExecuteFlushCallback (Buffer_t *buffer)
 {
 	int rc = 0;
 
-#if defined(LOCK_AT_FLUSH)
-	Buffer_Lock (buffer);
-#endif
-	if (buffer->FlushCallback != NULL)
+	if (buffer != NULL)
 	{
-		rc = ((buffer->FlushCallback) (buffer));
-	}
 #if defined(LOCK_AT_FLUSH)
-	Buffer_Unlock (buffer);
+		Buffer_Lock (buffer);
 #endif
+		if (buffer->FlushCallback != NULL)
+		{
+			rc = ((buffer->FlushCallback) (buffer));
+		}
+#if defined(LOCK_AT_FLUSH)
+		Buffer_Unlock (buffer);
+#endif
+	}
 	return rc;
 }
 
@@ -339,7 +342,14 @@ int Buffer_GetFillCount (Buffer_t *buffer)
 
 int Buffer_RemainingEvents (Buffer_t *buffer)
 {
-    return (buffer->MaxEvents - buffer->FillCount);
+    if (buffer != NULL)
+    {
+	    return (buffer->MaxEvents - buffer->FillCount);
+    }
+    else
+    {
+	    return 0;
+    }
 }
 
 int Buffer_EnoughSpace (Buffer_t *buffer, int num_events)

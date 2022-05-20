@@ -252,11 +252,6 @@ int tracejant_rusage = FALSE;
 /** Store information about malloc?                                     **/
 int tracejant_memusage = FALSE;
 
-#if defined(SAMPLING_SUPPORT)
-/** Is time-based sampling enabled?                                     **/
-int xtr_sampling_enabled = FALSE;
-#endif
-
 
 /**** Variable global que controla quin subset de les tasks generen o ****/
 /**** no generen trasa ***************************************************/
@@ -1375,22 +1370,19 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	}
 
 #if defined(SAMPLING_SUPPORT)
-	if (TRACING_SAMPLING)
+	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name,
+	             hostname, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
+
+	if (forked)
+		Buffer_Free (SamplingBuffer[thread_id]);
+
+	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, FALSE);
+	if (SamplingBuffer[thread_id] == NULL)
 	{
-		FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name,
-		  hostname, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
-
-		if (forked)
-			Buffer_Free (SamplingBuffer[thread_id]);
-
-		SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, FALSE);
-		if (SamplingBuffer[thread_id] == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error allocating sampling buffer for thread %d\n", thread_id);
-			return 0;
-		}
-		Buffer_SetFlushCallback (SamplingBuffer[thread_id], NULL);
+		fprintf (stderr, PACKAGE_NAME": Error allocating sampling buffer for thread %d\n", thread_id);
+		return 0;
 	}
+	Buffer_SetFlushCallback (SamplingBuffer[thread_id], NULL);
 #endif
 
 	return 1;
@@ -1430,10 +1422,7 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 		LastCPUEmissionTime = xmalloc(num_threads * sizeof(iotimer_t));
 		LastCPUEvent = xmalloc(num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
-		if (TRACING_SAMPLING)
-		{
-			SamplingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
-		}
+		SamplingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
 #endif
 	}
 
@@ -1456,10 +1445,7 @@ static int Reallocate_buffers_and_files (int new_num_threads)
 	LastCPUEmissionTime = xrealloc(LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
 	LastCPUEvent = xrealloc(LastCPUEvent, new_num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
-	if (TRACING_SAMPLING)
-	{
-		SamplingBuffer = xrealloc(SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
-	}
+	SamplingBuffer = xrealloc(SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
 #endif
 
 	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)

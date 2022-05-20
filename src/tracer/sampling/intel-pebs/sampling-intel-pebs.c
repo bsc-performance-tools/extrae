@@ -1065,43 +1065,10 @@ void Extrae_IntelPEBS_stopSampling (void)
 
 	if (PEBS_enabled != 1) return;
 
-	pthread_mutex_lock (&pebs_init_lock);
 	for (i=0; i<pebs_init_threads; i++)
 	{
-		// Stop Loads and unmap associated pages
-		if (perf_pebs_fd[i][LOAD_INDEX] >= 0) {
-			ioctl (perf_pebs_fd[i][LOAD_INDEX], PERF_EVENT_IOC_REFRESH, 0);
-			close (perf_pebs_fd[i][LOAD_INDEX]);
-		}
-		if (extrae_intel_pebs_mmap[i][LOAD_INDEX] != NULL) {
-			munmap (extrae_intel_pebs_mmap[i][LOAD_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
-			extrae_intel_pebs_mmap[i][LOAD_INDEX] = NULL;
-		}
-		// Stop Stores and unmap associated pages
-		if (perf_pebs_fd[i][STORE_INDEX] >= 0) {
-			ioctl (perf_pebs_fd[i][STORE_INDEX], PERF_EVENT_IOC_REFRESH, 0);
-			close (perf_pebs_fd[i][STORE_INDEX]);
-		}
-		if (extrae_intel_pebs_mmap[i][STORE_INDEX] != NULL) {
-			munmap (extrae_intel_pebs_mmap[i][STORE_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
-			extrae_intel_pebs_mmap[i][STORE_INDEX] = NULL;
-		}
-		// Stop LoadL3M and unmap associated pages
-		if (perf_pebs_fd[i][LOAD_L3M_INDEX] >= 0) {
-			ioctl (perf_pebs_fd[i][LOAD_L3M_INDEX], PERF_EVENT_IOC_REFRESH, 0);
-			close (perf_pebs_fd[i][LOAD_L3M_INDEX]);
-		}
-		// Stop Offcore L3M stores and unmap associated pages
-		if (perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX] >= 0) {
-			ioctl (perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX], PERF_EVENT_IOC_ENABLE, 0);
-			close (perf_pebs_fd[i][OFFCORE_STORE_L3M_INDEX]);
-		}
-		if (extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] != NULL) {
-			munmap (extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
-			extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] = NULL;
-		}
+		Extrae_IntelPEBS_stopSamplingThread(i);
 	}
-	pthread_mutex_unlock (&pebs_init_lock);
 }
 
 /*  Extrae_IntelPEBS_startSampling
@@ -1141,10 +1108,12 @@ void Extrae_IntelPEBS_stopSamplingThread (int thid)
 {
 	if (PEBS_enabled != 1) return;
 
+	pthread_mutex_lock (&pebs_init_lock);
 	// Stop Loads and unmap associated pages
 	if (perf_pebs_fd[thid][LOAD_INDEX] >= 0) {
 		ioctl (perf_pebs_fd[thid][LOAD_INDEX], PERF_EVENT_IOC_REFRESH, 0);
 		close (perf_pebs_fd[thid][LOAD_INDEX]);
+		perf_pebs_fd[thid][LOAD_INDEX] = -1;
 	}
 	if (extrae_intel_pebs_mmap[thid][LOAD_INDEX] != NULL) {
 		munmap (extrae_intel_pebs_mmap[thid][LOAD_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
@@ -1154,6 +1123,7 @@ void Extrae_IntelPEBS_stopSamplingThread (int thid)
 	if (perf_pebs_fd[thid][STORE_INDEX] >= 0) {
 		ioctl (perf_pebs_fd[thid][STORE_INDEX], PERF_EVENT_IOC_REFRESH, 0);
 		close (perf_pebs_fd[thid][STORE_INDEX]);
+		perf_pebs_fd[thid][STORE_INDEX] = -1;
 	}
 	if (extrae_intel_pebs_mmap[thid][STORE_INDEX] != NULL) {
 		munmap (extrae_intel_pebs_mmap[thid][STORE_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
@@ -1163,6 +1133,7 @@ void Extrae_IntelPEBS_stopSamplingThread (int thid)
 	if (perf_pebs_fd[thid][LOAD_L3M_INDEX] >= 0) {
 		ioctl (perf_pebs_fd[thid][LOAD_L3M_INDEX], PERF_EVENT_IOC_REFRESH, 0);
 		close (perf_pebs_fd[thid][LOAD_L3M_INDEX]);
+		perf_pebs_fd[thid][LOAD_L3M_INDEX] = -1;
 	}
 	if (extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX] != NULL) {
 		munmap (extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
@@ -1172,5 +1143,8 @@ void Extrae_IntelPEBS_stopSamplingThread (int thid)
 	if (perf_pebs_fd[thid][OFFCORE_STORE_L3M_INDEX] >= 0) {
 		ioctl (perf_pebs_fd[thid][OFFCORE_STORE_L3M_INDEX], PERF_EVENT_IOC_DISABLE, 0);
 		close (perf_pebs_fd[thid][OFFCORE_STORE_L3M_INDEX]);
+		perf_pebs_fd[thid][OFFCORE_STORE_L3M_INDEX] = -1;
 	}
+	pthread_mutex_unlock (&pebs_init_lock);
 }
+
