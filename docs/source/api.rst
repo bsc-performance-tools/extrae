@@ -228,6 +228,18 @@ the same compiler as the program being instrumented, with the following command:
   
     Activates hardware counter gathering in the user functions.
 
+  * EXTRAE_PTHREAD_OPTION
+
+    Activates pthreads instrumentation
+
+  * EXTRAE_PTHREAD_HWC_OPTION
+
+    Activates hardware counters gathering in pthread routines
+
+  * EXTRAE_SAMPLING_OPTION
+
+    Activates instrumentation using time-based sampling
+
 .. _func:extrae_network_counters:
 
 * .. function:: void Extrae_network_counters (void)
