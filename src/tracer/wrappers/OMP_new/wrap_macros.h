@@ -29,7 +29,7 @@
 #include "common.h"
 #include "pdebug.h"
 #include "wrap_checkpoints.h"
-
+#include "change_mode.h"
 
 /*
  * Macros to enable macro specialisation based on an argument, based on:
@@ -489,4 +489,3 @@ rettype symbol prototype                                               \
   VARARGS_END(varargs);                                                \
   RETVAR_RETURN(rettype);                                              \
 }
-

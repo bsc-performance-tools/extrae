@@ -29,19 +29,18 @@
 #include <stdio.h>
 
 #include "burst_mode.h"
+#include "change_mode.h"
 #include "clock.h"
 #include "common.h"
 #include "events.h"
 #include "io_probe.h"
 #include "malloc_probe.h"
-#include "mode.h"
 #include "stats_module.h"
 #include "syscall_probe.h"
 #include "taskid.h"
 #include "threadid.h"
 #include "trace_hwc.h"
 #include "trace_macros.h"
-#include "trace_mode.h"
 #include "xalloc.h"
 
 
@@ -129,8 +128,7 @@ void trace_statistics(xtr_stats_t **begin_stats, xtr_stats_t **end_stats, xtr_st
  */
 void xtr_burst_init ( void )
 {
-  if ( CURRENT_TRACE_MODE(THREADID) != TRACE_MODE_BURST || burst_initialized )
-    return;
+  if ( burst_initialized ) return;
 
   burst_info = xmalloc_and_zero( Backend_getMaximumOfThreads() * sizeof(burst_mode_st));
 

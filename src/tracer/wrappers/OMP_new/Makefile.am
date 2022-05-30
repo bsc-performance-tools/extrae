@@ -36,7 +36,7 @@ libwrap_openmp_la_CFLAGS = \
  -I$(top_srcdir) \
  -I$(top_srcdir)/include \
  -I$(COMMON_INC) \
- -I$(STATS_INC) \
- -I$(STATS_INC)/OMP \
- -I$(BURST_INC)
+ -I$(STATS_DIR) \
+ -I$(STATS_DIR)/OMP \
+ -I$(BURST_MODE_DIR)
 libwrap_openmp_la_SOURCES = $(WRAPPERS_OPENMP)

@@ -29,9 +29,10 @@
 
 #include "wrapper.h"
 #include "hwc.h"
-#include "mode.h"
 #include "utils.h"
 #include "xalloc.h"
+#include "burst_mode.h"
+#include "change_mode.h"
 
 int *MPI_Deepness              = NULL;
 int *Current_Trace_Mode        = NULL;
@@ -185,6 +186,38 @@ void TMODE_setInitial (int mode)
 	{
 		fprintf(stderr, PACKAGE_NAME": TMODE_setInitial: Invalid mode '%d'.\n", mode);
 	}
+}
+
+/* Change between detail/burst mode */
+void TMODE_setCurrent (unsigned long long burst_threshold)
+{
+#if defined(HAVE_BURST)
+	int new_mode = TRACE_MODE_DETAIL;
+
+	if (burst_threshold > 0)
+	{
+		new_mode = TRACE_MODE_BURST;
+		TMODE_setBurstThreshold(burst_threshold);
+
+	}
+
+	if (new_mode == TRACE_MODE_BURST) xtr_burst_init();
+
+	/*
+	 * XXX Should this be Backend_getMaximumOfThreads()? If we decrease the
+	 * number of threads, switch tracing mode and then increase again the the
+	 * number of threads, only the "old" threads will use burst mode, while the
+	 * "new" ones will continue in detail.
+	 */
+	for (int i=0; i<Backend_getNumberOfThreads(); i++)
+	{
+		Future_Trace_Mode[i] = new_mode;
+		if (Current_Trace_Mode[i] != Future_Trace_Mode[i]) 
+		{
+			Pending_Trace_Mode_Change[i] = TRUE;
+		}
+	}
+#endif /* HAVE_BURST */
 }
 
 /* Burst mode specific */

@@ -24,8 +24,6 @@
 #ifndef BURST_MOD_DEFINED
 #define BURST_MOD_DEFINED
 
-#include "stats_module.h"
-
 typedef void (*func_ptr_t) (void);
 
 void xtr_burst_init ( void );

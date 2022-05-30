@@ -64,7 +64,7 @@
 #include "signals.h"
 #include "misc_wrapper.h"
 #include "mpi_interface.h"
-#include "mode.h"
+#include "change_mode.h"
 #include "threadinfo.h"
 #include "hash_table.h"
 

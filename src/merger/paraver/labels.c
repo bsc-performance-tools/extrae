@@ -435,7 +435,7 @@ static void Write_memusage_Labels (FILE * pcf_fd)
 static void Write_Trace_Mode_Labels (FILE * pcf_fd)
 {
 	fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-	fprintf (pcf_fd, "9    %d    %s\n", TRACING_MODE_EV, "Tracing mode:");
+	fprintf (pcf_fd, "9    %d    %s\n", TRACING_MODE_EV, "Tracing mode");
 	fprintf (pcf_fd, "%s\n", VALUES_LABEL);
 	fprintf (pcf_fd, "%d      %s\n", TRACE_MODE_DETAIL, "Detailed");
 	fprintf (pcf_fd, "%d      %s\n", TRACE_MODE_BURST, "CPU Bursts");

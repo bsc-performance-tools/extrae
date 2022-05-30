@@ -28,7 +28,7 @@
 #include "omp_stats.h"
 
 #include "common.h"
-#include "mode.h"
+#include "change_mode.h"
 #include "omp_utils.h"
 #include "threadid.h"
 #include "xalloc.h"

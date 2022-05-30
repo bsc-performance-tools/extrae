@@ -108,7 +108,7 @@
 #include "xml-parse.h"
 #include "UF_gcc_instrument.h"
 #include "UF_xl_instrument.h"
-#include "mode.h"
+#include "change_mode.h"
 #include "events.h"
 #if defined(OMP_SUPPORT)
 # include "omp-probe.h"

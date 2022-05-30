@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "mpi_stats.h"
-#include "mode.h"
+#include "change_mode.h"
 #include "taskid.h"
 #include "threadid.h"
 #include "stdio.h"

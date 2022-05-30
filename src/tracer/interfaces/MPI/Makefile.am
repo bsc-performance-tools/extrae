@@ -14,8 +14,8 @@ iface_MPI_INCLUDES =     \
    -I$(TRACER_INC)       \
    -I$(CLOCKS_INC)       \
    -I$(HWC_INC)          \
-   -I$(STATS_INC)    \
-   -I$(STATS_INC)/MPI    \
+   -I$(STATS_DIR)    \
+   -I$(STATS_DIR)/MPI    \
    -I$(WRAPPERS_INC)/API \
    -I$(WRAPPERS_INC)/MPI \
    -I$(INTERFACES_INC)/API \

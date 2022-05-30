@@ -38,7 +38,9 @@ extern int *Pending_Trace_Mode_Change;
 #define DECREASE_MPI_DEEPNESS(tid) (MPI_Deepness[tid]--)
 #define MPI_IS_NOT_STACKED(tid) (MPI_Deepness[tid] == 0)
 
+
 void TMODE_setInitial (int mode);
+void TMODE_setCurrent (unsigned long long burst_threshold);
 int Trace_Mode_Initialize (int num_threads);
 int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads);
 void Trace_Mode_Change (int tid, iotimer_t time);

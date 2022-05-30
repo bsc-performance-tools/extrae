@@ -207,6 +207,8 @@ void Extrae_get_version (unsigned *major, unsigned *minor, unsigned *revision);
 void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, const char* s1, const char *s2);
 void Extrae_register_function_address (void *ptr, const char *funcname, const char *modname, unsigned line);
 
+void Extrae_tracing_mode (unsigned long long burst_threshold);
+
 #ifdef __cplusplus
 }
 #endif

@@ -42,6 +42,7 @@
 #include "misc_interface.h"
 #include "misc_wrapper.h"
 #include "wrapper.h"
+#include "change_mode.h"
 
 #if !defined(HAVE_ALIAS_ATTRIBUTE)
 
@@ -142,6 +143,13 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENTANDCOUNTERS)
 		} \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_RESTART)
+
+#define apifTRACE_TRACING_MODE(x) \
+	void CtoF77(x##_tracing_mode) (unsigned long long *burst_threshold) \
+	{ \
+		TMODE_setCurrent(*burst_threshold); \
+	}
+EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_TRACING_MODE)
 
 #define apifTRACE_COUNTERS(x) \
 	void CtoF77(x##_counters) (void) \
@@ -372,6 +380,13 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SHUTDOWN)
 		} \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESTART);
+
+#define apiTRACE_TRACING_MODE(x) \
+	void x##_tracing_mode (unsigned long long burst_threshold) \
+	{ \
+		TMODE_setCurrent(burst_threshold); \
+	}
+EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_TRACING_MODE);
 
 #define apiTRACE_COUNTERS(x) \
 	void x##_counters(void) \
@@ -676,6 +691,12 @@ void Extrae_restart (void)
 	}
 }
 
+INTERFACE_ALIASES_C(_tracing_mode, Extrae_tracing_mode,(unsigned long long burst_threshold),void)
+void Extrae_tracing_mode (unsigned long long burst_threshold)
+{
+	TMODE_setCurrent(burst_threshold);
+}
+
 INTERFACE_ALIASES_C(_counters, Extrae_counters,(void),void)
 void Extrae_counters(void)
 {
@@ -938,6 +959,12 @@ void extrae_restart (void)
 		Extrae_restart_Wrapper ();
 		Backend_Leave_Instrumentation ();
 	}
+}
+
+INTERFACE_ALIASES_F(_tracing_mode,_TRACING_MODE,extrae_tracing_mode,(unsigned long long *burst_threshold),void)
+void extrae_tracing_mode(unsigned long long *burst_threshold)
+{
+	TMODE_setCurrent(burst_threshold);
 }
 
 INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (extrae_type_t *type, extrae_value_t *value),void)

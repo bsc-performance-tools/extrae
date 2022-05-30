@@ -27,7 +27,7 @@
 
 #include "burst_mode.h"
 #include "common.h"
-#include "mode.h"
+#include "change_mode.h"
 #include "omp_stats.h"
 #include "threadid.h"
 #include "xalloc.h"

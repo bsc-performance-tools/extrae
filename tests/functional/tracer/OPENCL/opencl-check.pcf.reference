@@ -143,7 +143,7 @@ GRADIENT_NAMES
 
 
 EVENT_TYPE
-9    40000018    Tracing mode:
+9    40000018    Tracing mode
 VALUES
 1      Detailed
 2      CPU Bursts

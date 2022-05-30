@@ -61,6 +61,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "xalloc.h"
 #include "hwc.h"
 #include "xml-parse.h"
+#include "change_mode.h"
 #include "wrapper.h"
 #include "signals.h"
 #if defined(MPI_SUPPORT)

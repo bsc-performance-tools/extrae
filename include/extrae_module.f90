@@ -133,6 +133,10 @@
          integer*4, intent(in) :: lvl
          end subroutine extrae_user_function_at_level
 
+         subroutine extrae_tracing_mode (burst_threshold)
+         integer*8, intent(in) :: burst_threshold
+         end subroutine extrae_tracing_mode
+
       end interface
 
       end module EXTRAE_MODULE

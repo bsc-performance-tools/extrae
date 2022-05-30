@@ -228,9 +228,9 @@ core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
  xml-parse.c xml-parse.h                     \
+ change_mode.c change_mode.h                 \
  UF_gcc_instrument.c UF_gcc_instrument.h     \
  UF_xl_instrument.c UF_xl_instrument.h       \
- mode.c mode.h                               \
  threadid.h threadid.c                       \
  taskid.h taskid.c                           \
  xalloc.c                                    \
@@ -244,11 +244,11 @@ core_SRCS = \
  $(WRAPPERS_CORE)
 
 burst_mode_SRCS = \
- $(STATS_INC)/stats_module.c \
- $(STATS_INC)/stats_module.h \
- $(STATS_INC)/stats_types.h \
- $(BURST_INC)/burst_mode.c \
- $(BURST_INC)/burst_mode.h 
+ $(STATS_DIR)/stats_module.c \
+ $(STATS_DIR)/stats_module.h \
+ $(STATS_DIR)/stats_types.h \
+ $(BURST_MODE_DIR)/burst_mode.c \
+ $(BURST_MODE_DIR)/burst_mode.h
 
 # OPENACC trace
 liboacctrace_la_SOURCES = $(core_SRCS)
@@ -597,10 +597,10 @@ lib_dyn_cudampitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL
 #
 core_INCLUDES = \
  -I$(TRACER_INC) -I$(HWC_INC) -I$(CLOCKS_INC) -I$(INTERFACES_INC)/API -I$(INTERFACES_INC)/MPI \
- -I$(BURST_INC) \
- -I$(STATS_INC) \
- -I$(STATS_INC)/MPI \
- -I$(STATS_INC)/OMP \
+ -I$(BURST_MODE_DIR) \
+ -I$(STATS_DIR) \
+ -I$(STATS_DIR)/MPI \
+ -I$(STATS_DIR)/OMP \
  -I$(WRAPPERS_INC)/API \
  -I$(WRAPPERS_INC)/MPI \
  -I$(WRAPPERS_INC)/OMP \
@@ -816,7 +816,7 @@ endif
 
 endif
 
-burst_CFLAGS  = -DHAVE_BURST -I$(STATS_INC) -I$(BURST_INC)
+burst_CFLAGS  = -DHAVE_BURST -I$(STATS_DIR) -I$(BURST_MODE_DIR)
 
 libnewomptrace_la_LIBADD     += $(STATS_LIB)/libstats_omp.la
 libnewomptrace_la_CFLAGS     += $(burst_CFLAGS) -DNEW_OMP_SUPPORT

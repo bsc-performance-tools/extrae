@@ -6,6 +6,7 @@ iface_API_INCLUDES = \
    -I$(CLOCKS_INC)   \
    -I$(TRACER_INC)   \
    -I$(HWC_INC)      \
+   -I$(BURST_MODE_DIR) \
    -I$(top_srcdir)/include \
    -I$(WRAPPERS_INC)/API @PAPI_CFLAGS@
 

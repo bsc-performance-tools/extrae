@@ -34,7 +34,7 @@
 #include "events.h"
 #include "clock.h"
 #include "calltrace.h" 
-#include "mode.h"
+//#include "change_mode.h"
 #include "trace_buffers.h"
 #include "trace_hwc.h"
 
