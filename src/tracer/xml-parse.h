@@ -50,6 +50,7 @@
 #define TRACE_COUNTERS                  ((xmlChar*) "counters")
 #define TRACE_CALLERS                   ((xmlChar*) "callers")
 #define TRACE_CPU                       ((xmlChar*) "cpu")
+#define TRACE_UNCORE                    ((xmlChar*) "uncore")
 #define TRACE_STARTSET                  ((xmlChar*) "starting-set-distribution")
 #define TRACE_HWCSET                    ((xmlChar*) "set")
 #define TRACE_HWCSET_CHANGEAT_GLOBALOPS ((xmlChar*) "changeat-globalops")

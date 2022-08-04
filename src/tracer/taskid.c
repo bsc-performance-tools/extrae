@@ -58,7 +58,14 @@ static unsigned xtr_get_taskid ()
 
 static unsigned xtr_set_taskid ()
 {
+#if defined(MPI_SUPPORT) || defined(OPENSHMEM_SUPPORT) || defined(GASPI_SUPPORT)
 	unsigned int NUM_RANK_ENVVARS = 9;
+	unsigned int NUM_WORLD_ENVVARS = 6;
+#else
+	unsigned int NUM_RANK_ENVVARS = 0;
+	unsigned int NUM_WORLD_ENVVARS = 0;
+#endif
+
 	char *rank_envvars[] =
 	{
 		"SLURM_PROCID",         // SLURM
@@ -72,7 +79,6 @@ static unsigned xtr_set_taskid ()
 		"MP_CHILD"              // POE
 	};
 
-	unsigned int NUM_WORLD_ENVVARS = 6;
 	char *world_envvars[] =
 	{
 		"SLURM_NPROCS",         // SLURM

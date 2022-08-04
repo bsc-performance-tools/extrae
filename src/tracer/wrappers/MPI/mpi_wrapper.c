@@ -147,6 +147,8 @@ static void Extrae_MPI_Barrier (void)
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
 
+int numNodes = 0;
+
 char *MpitsFileName    = NULL;    /* Name of the .mpits file (only significant at rank 0) */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 char *SpawnsFileName   = NULL;    /* Name of the .spawn file (all tasks have it defined)  */
@@ -174,6 +176,76 @@ static MPI_Group CommWorldRanks;     // Group attached to the MPI_COMM_WORLD
 #if defined(IS_BGL_MACHINE)       // BGL, s'intercepten algunes crides barrier dins d'altres cols */
 static int BGL_disable_barrier_inside = 0;
 #endif
+
+
+static int amIFirstOnNode() {
+    int rank, size;
+    PMPI_Comm_rank( MPI_COMM_WORLD, &rank );
+    PMPI_Comm_size( MPI_COMM_WORLD, &size );
+    char names[size][MPI_MAX_PROCESSOR_NAME];
+    int len;
+    PMPI_Get_processor_name( names[rank], &len );
+    PMPI_Allgather( MPI_IN_PLACE, 0, 0, names[0], MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD );
+    int lower = 0;
+    while ( strncmp( names[rank], names[lower], MPI_MAX_PROCESSOR_NAME ) != 0 ) {
+        lower++;
+    }
+    return lower == rank;
+}
+
+MPI_Comm uncore_intercomm = MPI_COMM_NULL;
+
+static void Stop_Uncore_Service()
+{
+	if (uncore_intercomm != MPI_COMM_NULL)
+	{
+		MPI_Request req;
+		MPI_Status status;
+		int rank;
+
+		PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if (rank == 0)
+		{
+			int stop_signal = 1;
+
+			//fprintf(stderr, "[DEBUG] Stop_Uncore_Service: Master rank sending stop signal\n");
+			PMPI_Bcast(&stop_signal, 1, MPI_INT, (rank == 0 ? MPI_ROOT : MPI_PROC_NULL), uncore_intercomm);
+		}
+	}
+}
+
+static void Start_Uncore_Service()
+{
+	int rank;
+	int activate_readers = 0;
+	int num_readers_per_node = 0;
+	char *env_extrae_uncore = NULL;
+	char *env_extrae_uncore_launch_cmd = NULL;
+
+	PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if (rank == 0)
+	{
+		env_extrae_uncore = getenv("EXTRAE_UNCORE");
+		env_extrae_uncore_launch_cmd = getenv("EXTRAE_UNCORE_LAUNCH_CMD");
+
+		if (env_extrae_uncore != NULL) 
+		{
+			num_readers_per_node = atoi(env_extrae_uncore);
+			activate_readers = (num_readers_per_node > 0);
+		}
+	}
+
+	PMPI_Bcast (&activate_readers, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	//fprintf(stderr, "[DEBUG] Start_Uncore_Service: rank=%d num_readers=%d noderep=%d numNodes=%d\n", rank, (getenv("EXTRAE_UNCORE") != NULL ? atoi(getenv("EXTRAE_UNCORE")) : 0), amIFirstOnNode(), numNodes);
+
+	if (activate_readers)
+	{
+		PMPI_Comm_spawn(env_extrae_uncore_launch_cmd, NULL, num_readers_per_node * numNodes, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &uncore_intercomm, MPI_ERRCODES_IGNORE);
+	}
+}
+
 
 /******************************************************************************
  *** CheckGlobalOpsTracingIntervals()
@@ -467,11 +539,12 @@ char **TasksNodes = NULL;
 
 static void Gather_Nodes_Info (void)
 {
-	unsigned u;
+	unsigned u, v;
 	int rc;
 	size_t s;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
 	char *buffer_names = NULL;
+	char **UniqueNodes = NULL;
 
 	/* Get processor name */
 	if (gethostname (hostname, sizeof(hostname)) == -1)
@@ -494,13 +567,36 @@ static void Gather_Nodes_Info (void)
 	TasksNodes = (char **)xmalloc (Extrae_get_num_tasks() * sizeof(char *));
 	for (u=0; u<Extrae_get_num_tasks(); u++)
 	{
+    int found = FALSE;
+
 		char *tmp = &buffer_names[u*MPI_MAX_PROCESSOR_NAME];
 		TasksNodes[u] = (char *)xmalloc((strlen(tmp)+1) * sizeof(char));
 		strcpy (TasksNodes[u], tmp);
+
+		for (v=0; v<numNodes && !found; v++)
+		{
+			if (!strcmp(TasksNodes[u], UniqueNodes[v]))
+			{
+        found = TRUE;
+			}
+		}
+
+		if (!found)
+		{
+			numNodes ++;
+			UniqueNodes = xrealloc(UniqueNodes, (numNodes * sizeof(char *)));
+			UniqueNodes[numNodes-1] = strdup(TasksNodes[u]);
+		}
 	}
 
 	/* Free the local array, not the global one */
 	xfree (buffer_names);
+
+	for (v=0; v<numNodes; v++)
+	{
+		xfree(UniqueNodes[v]);
+	}
+	xfree(UniqueNodes);
 }
 
 
@@ -889,7 +985,7 @@ static void Spawn_Children_Sync(iotimer_t init_time)
 
   PMPI_Comm_get_parent(&parent);
 
-  if (parent != MPI_COMM_NULL)
+  if ((parent != MPI_COMM_NULL) && (getenv("EXTRAE_UNCORE_SERVICE_WORKER") == NULL))
   {
     int  i                  = 0;
     int  RemoteSpawnGroup   = 0;
@@ -1068,6 +1164,8 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	Spawn_Children_Sync (MPI_Init_start_time);
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
@@ -1181,6 +1279,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	Spawn_Children_Sync (MPI_Init_start_time);
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
@@ -1220,6 +1320,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 	/* Generate the final file list */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
+	Stop_Uncore_Service();
 #endif
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1941,6 +2042,8 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	Spawn_Children_Sync( MPI_Init_start_time );
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
@@ -2052,6 +2155,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
         Spawn_Children_Sync (MPI_Init_start_time);
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
@@ -2091,6 +2196,7 @@ int MPI_Finalize_C_Wrapper (void)
 
 	/* Generate the final file list */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
+	Stop_Uncore_Service();
 #endif
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);

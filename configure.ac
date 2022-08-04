@@ -7,7 +7,7 @@
 
 m4_define([extrae_major], [4])
 m4_define([extrae_minor], [0])
-m4_define([extrae_micro], [1])
+m4_define([extrae_micro], [2rc1])
 
 m4_define([extrae_version], [extrae_major.extrae_minor.extrae_micro])
 
@@ -634,6 +634,10 @@ AC_CONFIG_FILES([
   src/launcher/static/Makefile \
   src/launcher/dyninst/Makefile \
   src/launcher/java/Makefile \
+  src/extrae-uncore/Makefile \
+  src/extrae-uncore/uncore-service/Makefile \
+  src/extrae-uncore/uncore-service/seq/Makefile \
+  src/extrae-uncore/uncore-service/mpi/Makefile \
   scripts/Makefile \
   src/common/Makefile \
   src/common/MPI/Makefile \
@@ -794,7 +798,9 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[docs/source/xml/merge-reduced.xml:docs/source/xml/merge-reduced.xml] \
 		[docs/source/xml/extrae.xml:docs/source/xml/extrae.xml] \
 		[docs/source/overheads/overheads.eps:docs/source/overheads/overheads.eps] \
-		[include/extrae_version.h.in:include/extrae_version.h.in]
+		[include/extrae_version.h.in:include/extrae_version.h.in] \
+		[src/extrae-uncore/extrae-uncore.py:src/extrae-uncore/extrae-uncore.py] \
+		[src/extrae-uncore/extrae_uncore_template.xml:src/extrae-uncore/extrae_uncore_template.xml]
 	)
 
 #########################################

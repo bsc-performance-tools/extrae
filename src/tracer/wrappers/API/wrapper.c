@@ -2728,8 +2728,46 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	{
 		unsigned j;
 
-		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
-			description);
+		/* For now assume a given HWC is an uncore if :cpu= attribute is present.
+		 * We could use a new category 'U' for uncores, and extend extrae.xml
+		 * to define uncore counter groups.
+		 *
+		int socket_id = 0;
+		char *cpu_attr = strstr(description, ":cpu=");
+		if (cpu_attr != NULL) cpu_attr += 5;
+
+		if ((code_type == 'H') && (cpu_attr != NULL))
+		{
+			// Also store the socket identifier to remap the object tree for uncore counters
+			int cpu_id = atoi(cpu_attr);
+
+			// Query the socket id for this cpu id
+			char *cpu_socket_info[64];
+			snprintf(cpu_socket_info, sizeof(cpu_socket_info), "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", cpu_id);
+
+			FILE *cpu_socket_info_file = fopen(cpu_socket_info, "r");
+			if (cpu_socket_info_file == NULL)
+			{
+				fprintf(stderr, PACKAGE_NAME": Can't retrieve socket id information from '%s'", cpu_socket_info);
+			}
+			else
+			{
+				char *socket_id_str = NULL;
+				size_t len = 0;
+
+				if (getline(&socket_id_str, &len, cpu_socket_info_file) != -1)	
+				{
+					socket_id = atoi(socket_id_str);
+
+					snprintf (line, sizeof(line), "%c %d \"%s\" [socket_id:%d]", code_type, type, description, socket_id);
+				}
+				fclose(cpu_socket_info_file);
+			}
+		}
+		else */
+		{
+			snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type, description);
+		}
 
 		/* Avoid cr in line */
 		for (j = 0; j < strlen(line); j++)

@@ -1291,6 +1291,10 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 			XML_FREE(hwc_startset);
 			XML_FREE(hwc_enabled);
 		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_UNCORE))
+		{
+			// This is only considered by the new launcher
+		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_NETWORK))
 		{
 #if defined(TEMPORARILY_DISABLED)
@@ -2138,7 +2142,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 #if defined(EMBED_MERGE_IN_TRACE)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						xmlChar *tracetype = xmlGetProp_env (rank, root_tag, TRACE_TYPE);
-						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES) && getenv("EXTRAE_DISABLE_MERGE") == NULL)
 						{
 							Parse_XML_Merge (rank, xmldoc, current_tag, tracetype);
 							MergeAfterTracing = TRUE;
