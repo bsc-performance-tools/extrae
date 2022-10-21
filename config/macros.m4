@@ -544,31 +544,10 @@ AC_DEFUN([AX_ENSURE_CXX_PRESENT],
 # Test if the architecture is little or big endian
 AC_DEFUN([AX_CHECK_ENDIANNESS],
 [
-   AC_CACHE_CHECK([for the architecture endianness], [ac_cv_endianness],
-   [
-      AC_LANG_SAVE()
-      AC_LANG([C])
-      AC_TRY_RUN(
-      [
-         int main()
-         {
-            short s = 1;
-            short * ptr = &s;
-            unsigned char c = *((char *)ptr);
-            return c;
-         }
-      ],
-      [ac_cv_endianness="big endian" ],
-      [ac_cv_endianness="little endian" ]
-      )
-      AC_LANG_RESTORE()
-   ])
-   if test "$ac_cv_endianness" = "big endian" ; then
-      AC_DEFINE(IS_BIG_ENDIAN, 1, [Define to 1 if architecture is big endian])
-   fi
-   if test "$ac_cv_endianness" = "little endian" ; then
-      AC_DEFINE(IS_LITTLE_ENDIAN, 1, [Define to 1 if architecture is little endian])
-   fi
+   AC_C_BIGENDIAN(
+      AC_DEFINE(IS_BIG_ENDIAN, 1, [Define to 1 if architecture is big endian]),
+      AC_DEFINE(IS_LITTLE_ENDIAN, 1, [Define to 1 if architecture is little endian]),
+      AC_MSG_FAILURE([Cannot detect endianiness]))
 ])
 
 
