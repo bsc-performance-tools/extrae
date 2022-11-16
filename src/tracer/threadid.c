@@ -81,7 +81,7 @@ unsigned Extrae_get_thread_number (void)
 	{
 		return get_thread_num();
 	}
-#if defined(OMP_SUPPORT) && !defined(OMPT_SUPPORT)
+#if defined(OMP_SUPPORT)
 	return omp_get_thread_num();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num();
@@ -100,7 +100,7 @@ void * Extrae_get_thread_number_function (void)
 	{
 		return (void*) get_thread_num;
 	}
-#if defined(OMP_SUPPORT) && !defined(OMPT_SUPPORT)
+#if defined(OMP_SUPPORT)
 	return (void*) omp_get_thread_num;
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num;
@@ -119,7 +119,7 @@ unsigned Extrae_get_num_threads (void)
 	{
 		return get_num_threads();
 	}
-#if defined(OMP_SUPPORT) && !defined(OMPT_SUPPORT)
+#if defined(OMP_SUPPORT)
 	return omp_get_num_threads();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_max_threads();
