@@ -112,9 +112,9 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 			bfdSymbols = (asymbol**) xmalloc (size);
 #if 0
 			/* HSG This is supposed to be space-efficient, but showed some errors .... :( */
-			symcount = bfd_read_minisymbols (bfdImage, FALSE, (PTR) bfdSymbols, &usize);
+			symcount = bfd_read_minisymbols (bfdImage, FALSE, (void *) bfdSymbols, &usize);
 			if (symcount == 0) 
-				symcount = bfd_read_minisymbols (bfdImage, TRUE, (PTR) bfdSymbols, &usize);
+				symcount = bfd_read_minisymbols (bfdImage, TRUE, (void *) bfdSymbols, &usize);
 #else
 			symcount = bfd_canonicalize_symtab (bfdImage, bfdSymbols);
 
@@ -225,7 +225,7 @@ asymbol **BFDmanager_getDefaultSymbols (void)
  *
  * @return No return value.
  */
-static void BFDmanager_findAddressInSection (bfd * abfd, asection * section, PTR data)
+static void BFDmanager_findAddressInSection (bfd * abfd, asection * section, void *data)
 {
 #if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	bfd_size_type size;
