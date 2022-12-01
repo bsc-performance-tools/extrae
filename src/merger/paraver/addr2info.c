@@ -813,18 +813,13 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 
 	if (obj)
 	{
+		/* When the address belongs to a shared address we need to substract the 
+		 * base address and add the offet (taken from /proc/self/maps). No 
+		 * offsets are applied when it belongs to the main binary.
+		 */
 		found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
-		  (void*) address, &translated_function, &translated_filename, &translated_line);
-
-		/* If we didn't find the address, then the function is possibly in a shared
-		   library. Substract base address and retry.
-		   If we found it, just ensure we don't get the module name for the main binary */
-		if (!found)
-		{
-			found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
-			  (void*) (address - obj->start_address), &translated_function,
-			  &translated_filename, &translated_line);
-		}
+		 (void *)(obj->main_binary ? address : address - obj->start_address + obj->offset), 
+		  &translated_function, &translated_filename, &translated_line);
 	}
 	else
 	{

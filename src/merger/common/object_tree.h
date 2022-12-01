@@ -121,6 +121,7 @@ typedef struct binary_object_st
 	unsigned long long end_address;
 	unsigned long long offset;
 	unsigned index;
+	unsigned main_binary;
 #if defined(HAVE_BFD)
 	bfd *bfdImage;
 	asymbol **bfdSymbols;

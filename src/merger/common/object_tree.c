@@ -163,7 +163,7 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 	char *binary)
 {
 	task_t *task_info = GET_TASK_INFO(ptask, task);
-	unsigned found = FALSE, u;
+	//unsigned found = FALSE, u;
 
 	if (!__Extrae_Utils_file_exists(binary))
 	{
@@ -171,34 +171,46 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 		return;
 	}
 
-	for (u = 0; u < task_info->num_binary_objects && !found; u++)
-		found = strcmp (task_info->binary_objects[u].module, binary) == 0;
+	/* Do not discard repeated entries for the same binary. It seems 
+	 * there can be repetitions in /proc/self/maps with different
+	 * address ranges.
+	 *
+	 * for (u = 0; u < task_info->num_binary_objects && !found; u++)
+	 *	found = strcmp (task_info->binary_objects[u].module, binary) == 0;
+	 *
+   * if (!found)
+	 */
+	
+	unsigned last_index = task_info->num_binary_objects;
+	task_info->binary_objects = (binary_object_t*) xrealloc (
+	  task_info->binary_objects,
+	  (last_index+1) * sizeof(binary_object_t));
+	task_info->binary_objects[last_index].module = strdup (binary);
+	task_info->binary_objects[last_index].start_address = start;
+	task_info->binary_objects[last_index].end_address = end;
+	task_info->binary_objects[last_index].offset = offset;
+	task_info->binary_objects[last_index].index = last_index+1;
 
-	if (!found)
+	/* Check if the current binary is the main binary and flag it */
+	if (last_index == 0) task_info->binary_objects[last_index].main_binary = 1;
+	else 
 	{
-		unsigned last_index = task_info->num_binary_objects;
-		task_info->binary_objects = (binary_object_t*) xrealloc (
-		  task_info->binary_objects,
-		  (last_index+1) * sizeof(binary_object_t));
-		task_info->binary_objects[last_index].module = strdup (binary);
-		task_info->binary_objects[last_index].start_address = start;
-		task_info->binary_objects[last_index].end_address = end;
-		task_info->binary_objects[last_index].offset = offset;
-		task_info->binary_objects[last_index].index = last_index+1;
+		task_info->binary_objects[last_index].main_binary =
+			(strcmp (task_info->binary_objects[last_index].module, task_info->binary_objects[0].module) == 0);
+	}
 
 #if defined(HAVE_BFD)
-		task_info->binary_objects[last_index].nDataSymbols = 0;
-		task_info->binary_objects[last_index].dataSymbols = NULL;
+	task_info->binary_objects[last_index].nDataSymbols = 0;
+	task_info->binary_objects[last_index].dataSymbols = NULL;
 
-		BFDmanager_loadBinary (binary,
-		  &(task_info->binary_objects[last_index].bfdImage),
-		  &(task_info->binary_objects[last_index].bfdSymbols),
-		  &(task_info->binary_objects[last_index].nDataSymbols),
-		  &(task_info->binary_objects[last_index].dataSymbols));
+	BFDmanager_loadBinary (binary,
+	  &(task_info->binary_objects[last_index].bfdImage),
+	  &(task_info->binary_objects[last_index].bfdSymbols),
+	  &(task_info->binary_objects[last_index].nDataSymbols),
+	  &(task_info->binary_objects[last_index].dataSymbols));
 #endif
 
-		task_info->num_binary_objects++;
-	}
+	task_info->num_binary_objects++;
 }
 
 void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
