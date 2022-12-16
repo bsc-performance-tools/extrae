@@ -543,6 +543,17 @@ elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
 	voidp_size=8
 	short_size=2
 	char_size=1
+elif test "${IS_POWERPC64LE_MACHINE}" = "yes" ; then
+	cross_compiling="yes"
+	long_long_size=8
+	long_size=8
+	int_size=4
+	pid_t_size=4
+	ssize_t_size=8
+	size_t_size=8
+	voidp_size=8
+	short_size=2
+	char_size=1
 else
 	cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
 	long_long_size=0

@@ -68,6 +68,20 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_os="linux"
 	fi
 
+	AC_ARG_ENABLE(powerpc64le,
+	   AC_HELP_STRING(
+		  [--enable-powerpc64le],
+		  [Enable compilation for powerpc64le architecture (disabled by default; needed when cross-compiling for powerpc64le)]
+	   ),
+	   [enable_powerpc64le="${enableval}"],
+	   [enable_powerpc64le="no"]
+	)
+	IS_POWERPC64LE_MACHINE=${enable_powerpc64le}
+	if test "${IS_POWERPC64LE_MACHINE}" = "yes" ; then
+		target_cpu="powerpc64le"
+		target_os="linux"
+	fi
+
 	# Check if this is an Altix machine and if it has an /dev/mmtimer device
 	# (which is a global clock!)
 	AC_ARG_ENABLE(check-altix,

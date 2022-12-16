@@ -454,6 +454,8 @@ AC_DEFUN([AX_CHECK_POINTER_SIZE],
       POINTER_SIZE=64
    elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
       POINTER_SIZE=64
+   elif test "${IS_POWERPC64LE_MACHINE}" = "yes" ; then
+      POINTER_SIZE=64    
    else
       AC_TRY_RUN(
          [
