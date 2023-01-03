@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import argparse
 import subprocess
@@ -12,12 +12,13 @@ import shlex
 import shutil
 import tempfile
 import xml.etree.ElementTree as ET
+import time
 
 CPUSockets = {}
 ExternalCounters = {}
 
 def i_am_master_process():
-    mpi_rank_vars = [ "PMI_RANK" ]
+    mpi_rank_vars = [ "OMPI_COMM_WORLD_RANK", "PMIX_RANK", "PMI_RANK", "SLURM_PROCID"]
 
     for v in mpi_rank_vars:
         if os.getenv(v):
@@ -82,20 +83,37 @@ def parse_uncore_counters(counters_list):
                     # Get the names of the devices that can read this counter
                     device = device_counter_noqual.split('::')[0]
                 
-                    # Find the group label for this device (e.g. skx_unc_imc0 -> imc)
-                    regex = r"_unc_(\w+)\d+"
-                    device_class = re.search(regex, device).group(1)
-
-                    # Use the device + counter_qual + cpu qualifier to program the EventSet
-                    for socket_id in CPUSockets:
-                        device_counter_qual = device + "::" + counter_qual + CPUSockets[socket_id]
+                    if "skx_unc" in device:
+                        # Find the group label for this device (e.g. skx_unc_imc0 -> imc)
+                        regex = r"_unc_([A-Za-z]+)\d+"
+                        device_class = re.search(regex, device).group(1)
+                        # Use the device + counter_qual + cpu qualifier to program the EventSet
+                        for socket_id in CPUSockets:
+                            device_counter_qual = device + "::" + counter_qual + CPUSockets[socket_id]
+                            if device_counter_qual not in ExternalCounters:
+                                ExternalCounters[device_counter_qual] = {}
+                                ExternalCounters[device_counter_qual]['type'] = 'uncore'
+                                ExternalCounters[device_counter_qual]['class'] = device_class
+                                ExternalCounters[device_counter_qual]['device'] = device
+                                ExternalCounters[device_counter_qual]['counter'] = counter_qual + CPUSockets[socket_id]
+                                ExternalCounters[device_counter_qual]['socket'] = socket_id
+                    elif "hisi_sccl" in device:
+                        # Find the group label for this device (e.g. hisi_sccl_ddrc0 -> ddrc)
+                        regex = r"hisi_sccl(\d+)_([A-Za-z]+)\d+"
+                        supercluster = int(re.search(regex, device).group(1))
+                        device_class = re.search(regex, device).group(2)
+                        # Use the device + counter_qual + cpu qualifier to program the EventSet
+                        device_counter_qual = device + "::" + counter_qual + ":cpu=0"
                         if device_counter_qual not in ExternalCounters:
                             ExternalCounters[device_counter_qual] = {}
                             ExternalCounters[device_counter_qual]['type'] = 'uncore'
                             ExternalCounters[device_counter_qual]['class'] = device_class
                             ExternalCounters[device_counter_qual]['device'] = device
-                            ExternalCounters[device_counter_qual]['counter'] = counter_qual + CPUSockets[socket_id]
-                            ExternalCounters[device_counter_qual]['socket'] = socket_id
+                            ExternalCounters[device_counter_qual]['counter'] = counter_qual
+                            ExternalCounters[device_counter_qual]['socket'] = str(int(supercluster / 4))
+                            ExternalCounters[device_counter_qual]['sccl'] = str(supercluster)
+                    else:
+                        print ("ERROR: Unsupported counter " + counter + ".")
         else:
             print ("ERROR: Invalid counter " + counter + ". Please check it is typed correctly and available with 'papi_native_avail'.")
 
@@ -140,7 +158,7 @@ def parse_network_counters(counters_list):
                         # Match anything like infiniband:::mlx5_0_1:port_xmit_data
                         regex = r"\s+(\w+):::(\w+):(\w+)\s+"
                         matches = re.search(regex, line)
-                        print(line)
+                        # print(line)
                         if len(matches.groups()) == 3:
                             network = matches.group(1)
                             device  = matches.group(2)
@@ -264,11 +282,11 @@ if i_am_master_process():
         parsing_set = False
         Sets = []
         for line in (result.stdout.decode("utf-8").split('\n')):
-            print(line)
+            # print(line)
             if line.startswith("<set"):
                 parsing_set = True
                 # Don't use 'line' as it contains changeat-time attribute from the papi_best_set tool
-                current_set += '<set enabled="yes" domain="all">'
+                current_set += '<set enabled="yes" domain="all" changeat-time="0">'
                 continue
     
             if parsing_set:
@@ -318,10 +336,14 @@ if i_am_master_process():
             with open(trace_uncore_sh, 'w') as uncore_launch_cmd:
                 uncore_launch_cmd.write('#!/bin/bash\n\n')
                 uncore_launch_cmd.write('export EXTRAE_HOME=' + Extrae_home + '\n')
+                #uncore_launch_cmd.write('export EXTRAE_SKIP_AUTO_LIBRARY_INITIALIZE=1\n')
                 uncore_launch_cmd.write('export EXTRAE_UNCORE_SERVICE_WORKER=1\n')
                 uncore_launch_cmd.write('export EXTRAE_CONFIG_FILE=./extrae_uncore.xml\n')
                 uncore_launch_cmd.write('export LD_PRELOAD=' + Preload_uncore + '\n\n')
                 uncore_launch_cmd.write('$EXTRAE_HOME/bin/uncore-service-mpi\n')
+                uncore_launch_cmd.write('unset LD_PRELOAD\n')
+                # We need this sleep to prevent the system from killing the master MPI process doing the merge
+                uncore_launch_cmd.write('while [[ ! -z `ps ux | grep extrae-uncore | grep -v grep` ]]; do sleep 1; done\n')
             os.chmod(trace_uncore_sh, stat.S_IRWXU)
 
             os.putenv('EXTRAE_UNCORE', str(num_readers))
@@ -361,7 +383,7 @@ if not Dryrun:
     app_pid = os.fork()
     if app_pid == 0:
         #if (Tracing_MPI):
-        #    os.putenv('EXTRAE_SKIP_AUTO_LIBRARY_INITIALIZE', '1') # FIXME: Current version of Extrae crashes without this, check it out!!!
+        #    os.putenv('EXTRAE_SKIP_AUTO_LIBRARY_INITIALIZE', '1')
         if (Enable_uncore_service):
             os.putenv('EXTRAE_DISABLE_MERGE', '1')
         os.putenv('EXTRAE_CONFIG_FILE', Extrae_config_file)
@@ -419,7 +441,7 @@ if not Dryrun:
             if tag_label not in tree:
                 # Each node corresponds to a given tag:label (e.g. class:imc, socket:skt0, device:skx_unc_imc0)
                 tree[tag_label] = {}
-                tree[tag_label]['id'] = len(tree.keys()) # Assign new id's as new pairs of tag:value are seen
+                tree[tag_label]['id'] = len(tree.keys()) # Assign new id's as new pairs of tag:label are seen
                 tree[tag_label]['child'] = {}
 
             id_list.append( " [" + tag_label + ":" + str(tree[tag_label]['id']) + "]" )
