@@ -94,11 +94,17 @@ static void (*__kmpc_set_lock_real)(void *, int, void **) = NULL;
 static void (*__kmpc_unset_lock_real)(void *, int, void **) = NULL;
 
 static void (*__kmpc_dispatch_init_4_real)(void*,int,int,int,int,int,int) = NULL;
+static void (*__kmpc_dispatch_init_4u_real)(void*,int,int,unsigned int,unsigned int,int,int) = NULL;
 static void (*__kmpc_dispatch_init_8_real)(void*,int,int,long long,long long,long long,long long) = NULL;
+static void (*__kmpc_dispatch_init_8u_real)(void*,int,int,unsigned long long,unsigned long long,long long,long long) = NULL;
 static int (*__kmpc_dispatch_next_4_real)(void*,int,int*,int*,int*,int*) = NULL;
+static int (*__kmpc_dispatch_next_4u_real)(void*,int,int*,unsigned int*,unsigned int*,int*) = NULL;
 static int (*__kmpc_dispatch_next_8_real)(void*,int,int*,long long *,long long *, long long *) = NULL;
+static int (*__kmpc_dispatch_next_8u_real)(void*,int,int*,unsigned long long *,unsigned long long *, long long *) = NULL;
 static void (*__kmpc_dispatch_fini_4_real)(void*,int) = NULL;
+static void (*__kmpc_dispatch_fini_4u_real)(void*,int) = NULL;
 static void (*__kmpc_dispatch_fini_8_real)(void*,int) = NULL; 
+static void (*__kmpc_dispatch_fini_8u_real)(void*,int) = NULL;
 
 void (*__kmpc_fork_call_real)(void*,int,void*,...) = NULL;
 
@@ -656,6 +662,47 @@ void __kmpc_dispatch_init_4 (void *loc, int gtid, int schedule, int lb, int ub, 
 #endif
 }
 
+void __kmpc_dispatch_init_4u(void *loc, int gtid, int schedule, unsigned int lb, unsigned int ub, int st, int chunk)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4u enter: @=%p args=(%p %d %d %u %u %d %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_init_4u_real, loc, gtid, schedule, lb, ub, st, chunk);
+#endif
+
+	RECHECK_INIT(__kmpc_dispatch_init_4u_real);
+
+	if (TRACE(__kmpc_dispatch_init_4u_real))
+	{
+		/*
+		 * Retrieve the outlined function.
+		 * This is executed inside a parallel by multiple threads, so the current worker thread
+		 * retrieves this data from the parent thread who store it at the start of the parallel.
+		 */
+		void *par_uf = par_func;
+#if defined(DEBUG)
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4u: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
+#endif
+
+		Extrae_OpenMP_DO_Entry ();
+
+		__kmpc_dispatch_init_4u_real (loc, gtid, schedule, lb, ub, st, chunk);
+
+		Extrae_OpenMP_UF_Entry (par_uf);
+	}
+	else if (__kmpc_dispatch_init_4u_real != NULL)
+	{
+		__kmpc_dispatch_init_4u_real (loc, gtid, schedule, lb, ub, st, chunk);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4u: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4u exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
 void __kmpc_dispatch_init_8 (void *loc, int gtid, int schedule, long long lb, long long ub, long long st, long long chunk)
 {
 #if defined(DEBUG)
@@ -697,6 +744,47 @@ void __kmpc_dispatch_init_8 (void *loc, int gtid, int schedule, long long lb, lo
 #endif
 }
 
+void __kmpc_dispatch_init_8u(void *loc, int gtid, int schedule, unsigned long long lb, unsigned long long ub, long long st, long long chunk)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8u enter: @=%p args=(%p %d %d %llu %llu %lld %lld)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_init_8u_real, loc, gtid, schedule, lb, ub, st, chunk);
+#endif
+
+	RECHECK_INIT(__kmpc_dispatch_init_8u_real);
+
+	if (TRACE(__kmpc_dispatch_init_8u_real))
+	{
+		/*
+		 * Retrieve the outlined function.
+		 * This is executed inside a parallel by multiple threads, so the current worker thread
+		 * retrieves this data from the parent thread who store it at the start of the parallel.
+		 */
+		void *par_uf = par_func;
+#if defined(DEBUG)
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8u: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
+#endif
+
+		Extrae_OpenMP_DO_Entry ();
+
+		__kmpc_dispatch_init_8u_real (loc, gtid, schedule, lb, ub, st, chunk);
+
+		Extrae_OpenMP_UF_Entry (par_uf);
+	}
+	else if (__kmpc_dispatch_init_8u_real != NULL)
+	{
+		__kmpc_dispatch_init_8u_real (loc, gtid, schedule, lb, ub, st, chunk);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8u: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8u exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
 int __kmpc_dispatch_next_4 (void *loc, int gtid, int *p_last, int *p_lb, int *p_ub, int *p_st)
 {
 	int res;
@@ -725,12 +813,51 @@ int __kmpc_dispatch_next_4 (void *loc, int gtid, int *p_last, int *p_lb, int *p_
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_8: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_4: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
 		exit (-1);
 	}
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_4 exit: res=%d\n ", THREAD_LEVEL_VAR, res);
+#endif
+
+	return res;
+}
+
+int __kmpc_dispatch_next_4u(void *loc, int gtid, int *p_last, unsigned int *p_lb, unsigned int *p_ub, int *p_st)
+{
+	int res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_4u enter: @=%p args=(%p %d %p %p %p %p)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_next_4u_real, loc, gtid, p_last, p_lb, p_ub, p_st);
+#endif
+
+	RECHECK_INIT(__kmpc_dispatch_next_4u_real);
+
+	if (TRACE(__kmpc_dispatch_next_4u_real))
+	{
+		Extrae_OpenMP_Work_Entry();
+		res = __kmpc_dispatch_next_4u_real (loc, gtid, p_last, p_lb, p_ub, p_st);
+		Extrae_OpenMP_Work_Exit();
+
+		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_4 which seems not to be called ? */
+		{
+			Extrae_OpenMP_UF_Exit ();
+			Extrae_OpenMP_DO_Exit ();
+		}
+	}
+	else if (__kmpc_dispatch_next_4u_real != NULL)
+	{
+		res = __kmpc_dispatch_next_4u_real (loc, gtid, p_last, p_lb, p_ub, p_st);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_4u: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_4u exit: res=%d\n ", THREAD_LEVEL_VAR, res);
 #endif
 
 	return res;
@@ -775,6 +902,45 @@ int __kmpc_dispatch_next_8 (void *loc, int gtid, int *p_last, long long *p_lb, l
 	return res;
 }
 
+int __kmpc_dispatch_next_8u(void *loc, int gtid, int *p_last, unsigned long long *p_lb, unsigned long long *p_ub, long long *p_st)
+{
+	int res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_8u enter: @=%p args=(%p %d %p %p %p %p)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_next_8u_real, loc, gtid, p_last, p_lb, p_ub, p_st);
+#endif
+
+	RECHECK_INIT(__kmpc_dispatch_next_8u_real);
+
+	if (TRACE(__kmpc_dispatch_next_8u_real))
+	{
+		Extrae_OpenMP_Work_Entry();
+		res = __kmpc_dispatch_next_8u_real (loc, gtid, p_last, p_lb, p_ub, p_st);
+		Extrae_OpenMP_Work_Exit();
+
+		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_8 which seems not to be called ? */
+		{
+			Extrae_OpenMP_UF_Exit ();
+			Extrae_OpenMP_DO_Exit ();
+		}
+	}
+	else if (__kmpc_dispatch_next_8u_real != NULL)
+	{
+		res = __kmpc_dispatch_next_8u_real (loc, gtid, p_last, p_lb, p_ub, p_st);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_8u: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_8u exit: res=%d\n ", THREAD_LEVEL_VAR, res);
+#endif
+
+	return res;
+}
+
 void __kmpc_dispatch_fini_4 (void *loc, int gtid)
 {
 #if defined(DEBUG)
@@ -804,6 +970,35 @@ void __kmpc_dispatch_fini_4 (void *loc, int gtid)
 #endif
 }
 
+void __kmpc_dispatch_fini_4u(void *loc, int gtid)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_4u enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_fini_4u_real, loc, gtid);
+#endif
+
+	RECHECK_INIT(__kmpc_dispatch_fini_4u_real);
+
+	if (TRACE(__kmpc_dispatch_fini_4u_real))
+	{
+		Extrae_OpenMP_DO_Exit ();
+		__kmpc_dispatch_fini_4u_real (loc, gtid);
+		Extrae_OpenMP_UF_Exit ();
+	}
+	else if (__kmpc_dispatch_fini_4u_real != NULL)
+	{
+		__kmpc_dispatch_fini_4u_real (loc, gtid);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_4u: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_4u exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
 void __kmpc_dispatch_fini_8 (void *loc, int gtid)
 {
 #if defined(DEBUG)
@@ -830,6 +1025,35 @@ void __kmpc_dispatch_fini_8 (void *loc, int gtid)
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8 exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
+void __kmpc_dispatch_fini_8u(void *loc, int gtid)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8u enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_fini_8u_real, loc, gtid);
+#endif
+
+	RECHECK_INIT(__kmpc_dispatch_fini_8u_real);
+
+	if (TRACE(__kmpc_dispatch_fini_8u_real))
+	{
+		Extrae_OpenMP_DO_Exit ();
+		__kmpc_dispatch_fini_8u_real (loc, gtid);
+		Extrae_OpenMP_UF_Exit ();
+	}
+	else if (__kmpc_dispatch_fini_8u_real != NULL)
+	{
+		__kmpc_dispatch_fini_8u_real (loc, gtid);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8u: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8u exit\n ", THREAD_LEVEL_VAR);
 #endif
 }
 
@@ -1503,10 +1727,20 @@ static int intel_kmpc_get_hook_points (int rank)
 		(void(*)(void*,int,int,int,int,int,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_4");
 	INC_IF_NOT_NULL(__kmpc_dispatch_init_4_real,count);
 
+	/* Obtain @ for __kmpc_dispatch_init_4u */
+	__kmpc_dispatch_init_4u_real =
+		(void(*)(void*,int,int,unsigned int,unsigned int,int,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_4u");
+	INC_IF_NOT_NULL(__kmpc_dispatch_init_4u_real,count);
+
 	/* Obtain @ for __kmpc_dispatch_init_8 */
 	__kmpc_dispatch_init_8_real =
 		(void(*)(void*,int,int,long long,long long,long long,long long)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_8");
 	INC_IF_NOT_NULL(__kmpc_dispatch_init_8_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_init_8u */
+	__kmpc_dispatch_init_8u_real =
+		(void(*)(void*,int,int,unsigned long long,unsigned long long,long long,long long)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_8u");
+	INC_IF_NOT_NULL(__kmpc_dispatch_init_8u_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_next_4 */
 	__kmpc_dispatch_next_4_real =
@@ -1514,21 +1748,43 @@ static int intel_kmpc_get_hook_points (int rank)
 		dlsym (RTLD_NEXT, "__kmpc_dispatch_next_4");
 	INC_IF_NOT_NULL(__kmpc_dispatch_next_4_real,count);
 
+	/* Obtain @ for __kmpc_dispatch_next_4u */
+	__kmpc_dispatch_next_4u_real =
+		(int(*)(void*,int,int*,unsigned int*,unsigned int*,int*))
+		dlsym (RTLD_NEXT, "__kmpc_dispatch_next_4u");
+	INC_IF_NOT_NULL(__kmpc_dispatch_next_4u_real,count);
+
 	/* Obtain @ for __kmpc_dispatch_next_8 */
 	__kmpc_dispatch_next_8_real =
 		(int(*)(void*,int,int*,long long *,long long *, long long *))
 		dlsym (RTLD_NEXT, "__kmpc_dispatch_next_8");
 	INC_IF_NOT_NULL(__kmpc_dispatch_next_8_real,count);
 
+	/* Obtain @ for __kmpc_dispatch_next_8u */
+	__kmpc_dispatch_next_8u_real =
+		(int(*)(void*,int,int*,unsigned long long *,unsigned long long *, long long *))
+		dlsym (RTLD_NEXT, "__kmpc_dispatch_next_8u");
+	INC_IF_NOT_NULL(__kmpc_dispatch_next_8u_real,count);
+
 	/* Obtain @ for __kmpc_dispatch_fini_4 */
 	__kmpc_dispatch_fini_4_real =
 		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_4");
 	INC_IF_NOT_NULL(__kmpc_dispatch_fini_4_real,count);
 
+	/* Obtain @ for __kmpc_dispatch_fini_4u */
+	__kmpc_dispatch_fini_4u_real =
+		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_4u");
+	INC_IF_NOT_NULL(__kmpc_dispatch_fini_4u_real,count);
+
 	/* Obtain @ for __kmpc_dispatch_fini_8 */
 	__kmpc_dispatch_fini_8_real =
 		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_8");
 	INC_IF_NOT_NULL(__kmpc_dispatch_fini_8_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_fini_8u */
+	__kmpc_dispatch_fini_8u_real =
+		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_8u");
+	INC_IF_NOT_NULL(__kmpc_dispatch_fini_8u_real,count);
 
 	/* Obtain @ for __kmpc_fork_call */
 	if (__kmpc_fork_call_real == NULL)
