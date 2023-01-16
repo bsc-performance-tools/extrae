@@ -963,7 +963,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stderr, "PER_REQ_IRECV_CMD DID NOT find a partner\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, irecved_found_in_thread, irecved_thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, irecved_found_in_thread, irecved_thread_info->virtual_thread, Get_EvTarget(receive), Get_EvTag(receive), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
