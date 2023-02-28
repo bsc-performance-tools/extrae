@@ -11,7 +11,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	   [enable_mic="no"]
 	)
 	IS_MIC_MACHINE=${enable_mic}
-	
+
 	AC_ARG_ENABLE(arm,
 	   AC_HELP_STRING(
 	      [--enable-arm],
@@ -25,7 +25,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="arm"
 		target_os="linux"
 	fi
-	
+
 	AC_ARG_ENABLE(arm64,
 	   AC_HELP_STRING(
 	      [--enable-arm64],
@@ -39,7 +39,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="aarch64"
 		target_os="linux"
 	fi
-	
+
 	AC_ARG_ENABLE(sparc64,
 	   AC_HELP_STRING(
 	      [--enable-sparc64],
@@ -53,7 +53,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="sparc64"
 		target_os="linux"
 	fi
-	
+
 	AC_ARG_ENABLE(riscv64,
 	   AC_HELP_STRING(
 	      [--enable-riscv64],
@@ -67,6 +67,20 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="riscv64"
 		target_os="linux"
 	fi
+
+    AC_ARG_ENABLE(powerpc64le,
+       AC_HELP_STRING(
+          [--enable-powerpc64le],
+          [Enable compilation for powerpc64le architecture (disabled by default; needed when cross-compiling for powerpc64le)]
+       ),
+       [enable_powerpc64le="${enableval}"],
+       [enable_powerpc64le="no"]
+    )
+    IS_POWERPC64LE_MACHINE=${enable_powerpc64le}
+    if test "${IS_POWERPC64LE_MACHINE}" = "yes" ; then
+        target_cpu="powerpc64le"
+        target_os="linux"
+    fi
 
 	# Check if this is an Altix machine and if it has an /dev/mmtimer device
 	# (which is a global clock!)
@@ -82,17 +96,23 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	   AX_IS_ALTIX_MACHINE
 	   AX_HAVE_MMTIMER_DEVICE
 	fi
-	
+
 	AX_IS_CRAY_XT
+	if test "${IS_CXT_MACHINE}" = "yes" ; then
+	  IS_CRAY_MACHINE="yes"
+	fi
+    AM_CONDITIONAL(IS_CRAY_MACHINE, test "${IS_CXT_MACHINE}" = "yes")
+
 	AX_IS_BGL_MACHINE
 	AX_IS_BGP_MACHINE
 	AX_IS_BGQ_MACHINE
 	if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
 	  AC_DEFINE([IS_BG_MACHINE], 1, [Defined if this machine is a BG machine])
 	  IS_BG_MACHINE="yes"
+      cross_compiling="no"
 	fi
 	AM_CONDITIONAL(IS_BG_MACHINE, test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes")
-	
+
 	# Write defines in the output header file for the architecture and operating system
 	case "${target_cpu}" in
 	  arm*|aarch64*) Architecture="arm"

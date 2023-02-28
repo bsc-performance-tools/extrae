@@ -24,7 +24,13 @@ AC_CONFIG_MACRO_DIR([config])
 echo Configuring package ${PACKAGE_STRING}
 
 # Loads some shell variables like host_cpu and host_os, to get the host information 
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
+
+cross_compiling="no"
+
+if test "${host}" != "${build}"; then
+    cross_compiling="yes"
+fi
 
 AX_SYSTEM_TYPE
 
@@ -477,85 +483,6 @@ AX_PROG_ONLINE
 
 # Check the existence of the following data types and its size
 
-if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
-   cross_compiling="yes" # Force AC_CHECK_SIZEOF use the following values
-   long_long_size=8
-   long_size=4
-   int_size=4
-   pid_t_size=4
-   ssize_t_size=4
-   size_t_size=4
-   voidp_size=4
-   short_size=2
-   char_size=1
-elif test "${IS_BGQ_MACHINE}" = "yes" ; then
-   cross_compiling="yes" # Force AC_CHECK_SIZEOF use the following values
-   long_long_size=8
-   long_size=8
-   int_size=4
-   pid_t_size=4
-   ssize_t_size=8
-   size_t_size=8
-   voidp_size=8
-   short_size=2
-   char_size=1
-elif test "${IS_MIC_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=8
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=8
-	size_t_size=8
-	voidp_size=8
-	short_size=2
-	char_size=1
-elif test "${IS_ARM_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=4
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=4
-	size_t_size=4
-	voidp_size=4
-	short_size=2
-	char_size=1
-elif test "${IS_ARM64_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=8
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=8
-	size_t_size=8
-	voidp_size=8
-	short_size=2
-	char_size=1
-elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=8
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=8
-	size_t_size=8
-	voidp_size=8
-	short_size=2
-	char_size=1
-else
-	cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
-	long_long_size=0
-	long_size=0
-	int_size=0
-	pid_t_size=0
-	ssize_t_size=0
-	size_t_size=0
-	voidp_size=0
-	short_size=0
-	char_size=0
-fi
-
 AC_CHECK_TYPES([int64_t, uint64_t, int32_t, uint32_t, int16_t, uint16_t, \
 int8_t, uint8_t, off_t, ssize_t, size_t, pid_t, long, long long, char, \
 int, short])
@@ -585,13 +512,6 @@ AC_CHECK_MEMBER(struct perf_event_mmap_page.data_size,
 	[AC_DEFINE([HAVE_PERF_EVENT_MMAP_PAGE_DATA_SIZE], [1], [Whether the system includes perf_event_mmap_page.data_size])],
 	[],
 	[#include <linux/perf_event.h>])
-
-
-if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
-   cross_compiling="no"
-fi
-
-cross_compiling="no"
 
 # Test if the architecture is little or big endian
 AX_CHECK_ENDIANNESS
