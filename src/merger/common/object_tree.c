@@ -294,27 +294,32 @@ void ObjectTable_dumpAddresses (FILE *fd, unsigned eventstart)
 	/* Emitting the rest of ptask/task requires some changes in mpimpi2prv */
 
 	for (_ptask = 1; _ptask <= 1 /* ApplicationTable.nptasks */; _ptask++)
+	{
 		for (_task = 1; _task <= 1 /* ApplicationTable.ptasks[_ptask].ntasks */; _task++)
 		{
 			task_t *task_info = GET_TASK_INFO(_ptask, _task);
 
-			fprintf (fd, "EVENT_TYPE\n");
-			fprintf (fd, "0 %u Object addresses for task %u.%u\n", eventstart++, _ptask, _task);
-			fprintf (fd, "VALUES\n");
-
-			/* For now, emit only data symbols for binary object 0 */
-			for (_address = 0; _address < task_info->binary_objects[0].nDataSymbols; _address++)
+			if (task_info->binary_objects[0].nDataSymbols > 0)
 			{
-				data_symbol_t *d = &task_info->binary_objects[0].dataSymbols[_address];
+				fprintf (fd, "EVENT_TYPE\n");
+				fprintf (fd, "0 %u Object addresses for task %u.%u\n", eventstart++, _ptask, _task);
+				fprintf (fd, "VALUES\n");
 
-				fprintf (fd, "%u %s [0x%08llx-0x%08llx]\n",
-				  _address+1,
-				  d->name,
-				  (unsigned long long) d->address, 
-				  ((unsigned long long) d->address)+d->size-1);
+				/* For now, emit only data symbols for binary object 0 */
+				for (_address = 0; _address < task_info->binary_objects[0].nDataSymbols; _address++)
+				{
+					data_symbol_t *d = &task_info->binary_objects[0].dataSymbols[_address];
+
+					fprintf (fd, "%u %s [0x%08llx-0x%08llx]\n",
+					  _address+1,
+					  d->name,
+					  (unsigned long long) d->address, 
+					  ((unsigned long long) d->address)+d->size-1);
+				}
+				fprintf (fd, "\n");
 			}
-			fprintf (fd, "\n");
 		}
+	}
 }
 #endif
 
