@@ -194,6 +194,7 @@ void Extrae_AnnotateCPU (UINT64 timestamp);
 
 int Extrae_Allocate_Task_Bitmap (int size);
 
+void Extrae_AddSyncEntryToLocalSYM(unsigned long long);
 void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *description,
 	char code_values, unsigned nvalues, unsigned long long *values,
 	char **description_values);

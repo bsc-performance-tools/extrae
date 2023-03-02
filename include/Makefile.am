@@ -15,6 +15,7 @@ install-data-hook:
 if HAVE_FC
 	cp $(top_srcdir)/include/Makefile.extrae_module $(DESTDIR)$(includedir)
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(includedir)/Makefile.extrae_module
+	$(top_srcdir)/substitute $(SED) "@sub_FC@" "`which ${FC}`" $(DESTDIR)$(DESTDIR)$(includedir)/Makefile.extrae_module
 endif
 	cp $(EXTRAE_VERSION_HEADER).in $(DESTDIR)$(includedir)/$(EXTRAE_VERSION_HEADER)
 	$(top_srcdir)/substitute $(SED) "@sub_EXTRAE_MAJOR@" "${EXTRAE_MAJOR}" $(DESTDIR)$(includedir)/$(EXTRAE_VERSION_HEADER)

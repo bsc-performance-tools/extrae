@@ -1,4 +1,5 @@
 EXTRAE_HOME=@sub_PREFIXDIR@
+FC=@sub_FC@
 
 all: extrae_module.mod
 
