@@ -25,6 +25,19 @@
 #ifndef CUDA_WRAPPER_CUPTI_H_
 #define CUDA_WRAPPER_CUPTI_H_
 
+#if CUPTI_API_VERSION > 12
+typedef struct cudaConfigureCall_v3020_params_st {
+	dim3 gridDim;
+	dim3 blockDim;
+	size_t sharedMem;
+	cudaStream_t stream;
+} cudaConfigureCall_v3020_params;
+
+typedef struct cudaStreamDestroy_v3020_params_st {
+    cudaStream_t stream;
+} cudaStreamDestroy_v3020_params;
+#endif /* CUPTI_API_VERSION > 12 */
+
 void Extrae_CUDA_init (int rank);
 
 #endif

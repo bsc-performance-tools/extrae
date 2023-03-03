@@ -38,6 +38,7 @@
 #include "wrapper.h"
 #include "trace_macros.h"
 #include "cuda_probe.h"
+#include "xalloc.h"
 
 #if defined(__APPLE__)
 # define HOST_NAME_MAX 512

@@ -161,7 +161,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 	int ret = 0;
 	switch (cbid)
 	{
-#if CUPTI_API_VERSION < 12
 		/* 8 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020:
 		{
@@ -197,7 +196,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			ret = 1;
 		}
 		break;
-#endif /* CUPTI_API_VERSION < 12 */
 
 		/* 20 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaMalloc_v3020:
@@ -435,7 +433,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		}
 		break;
 
-#if CUPTI_API_VERSION < 12
 		/* 130 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v3020:
 		{
@@ -450,7 +447,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			ret = 1;
 		}
 		break;
-#endif /* CUPTI_API_VERSION < 12 */
 
 		/* 131 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020:
