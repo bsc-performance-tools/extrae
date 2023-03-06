@@ -498,7 +498,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 				if ((fitem1->ptask == fitem2->ptask) &&
 				    (fitem1->task  == fitem2->task))
 				{
-					sibling_threads->files = xrealloc(sibling_threads->files, (sizeof(FileItem_t *) * sibling_threads->nfiles+1));
+					sibling_threads->files = xrealloc(sibling_threads->files, (sizeof(FileItem_t *) * (sibling_threads->nfiles+1)));
 					sibling_threads->files[sibling_threads->nfiles] = fitem2;
 					sibling_threads->nfiles++;
 
