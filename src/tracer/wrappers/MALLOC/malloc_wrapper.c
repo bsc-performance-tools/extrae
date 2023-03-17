@@ -532,7 +532,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
     {
       xtr_mem_tracked_allocs_add (*memptr, size);
     }
-    Probe_memkind_malloc_Exit (*memptr);
+    Probe_posix_memalign_Exit (*memptr);
     Backend_Leave_Instrumentation ();
   }
   else if (real_posix_memalign != NULL)
