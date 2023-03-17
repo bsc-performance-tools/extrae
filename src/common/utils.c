@@ -52,6 +52,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
 
 #include "utils.h"
 #include "xalloc.h"
@@ -566,3 +569,28 @@ void __Extrae_Utils_chomp (char* buffer)
 {
 	buffer[strcspn(buffer, "\r\n")] = 0;
 }
+
+/**
+ * xtr_random
+ *
+ * Generate a random number using random_r
+ */
+int xtr_random(void) {
+  // Initialize the random number generator with a seed based on the current time
+  static __thread struct random_data rand_data = {0};
+  static __thread char rand_state[64];
+  static __thread int rand_initialized = 0;
+  if (!rand_initialized)
+  {
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    initstate_r(t.tv_nsec, rand_state, sizeof(rand_state), &rand_data);
+    rand_initialized = 1;
+  }
+
+  int rand_num;
+  random_r(&rand_data, &rand_num);
+
+  return rand_num;
+}
+

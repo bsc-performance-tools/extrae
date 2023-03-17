@@ -109,8 +109,7 @@ static void PrepareNextAlarm (void)
 	/* Set next timer! */
 	if (Sampling_variability > 0)
 	{
-		long int r = random();
-		unsigned long long v = r%(Sampling_variability);
+		unsigned long long v = xtr_random() % (Sampling_variability);
 		unsigned long long s, us;
 
 		us = (v + SamplingPeriod_base.it_value.tv_usec) % 1000000;

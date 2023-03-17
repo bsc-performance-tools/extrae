@@ -53,6 +53,7 @@ int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char
 void __Extrae_Utils_free_array(char **, int);
 int  __Extrae_Utils_sync_on_file(char *file);
 void __Extrae_Utils_chomp (char *buffer);
+int xtr_random(void);
 
 #if defined(__cplusplus)
 }

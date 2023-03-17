@@ -237,7 +237,7 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
 			HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
-			HWC_current_set[thread_id] = random()%HWC_num_sets;
+			HWC_current_set[thread_id] = xtr_random() % HWC_num_sets;
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -258,7 +258,7 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
 			HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
-			HWC_current_set[thread_id] = random()%HWC_num_sets;
+			HWC_current_set[thread_id] = xtr_random() % HWC_num_sets;
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -473,12 +473,7 @@ HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			int i;
 			unsigned long long rset;
 
-			unsigned seed = ((unsigned) LAST_READ_TIME);
-			for (i = 0; i < task_id; i++) /* Add some randomness here */
-				seed = (seed >> 1) ^ ~(num_tasks | task_id);
-			srandom (seed);
-
-			rset = random()%HWC_num_sets;
+			rset = xtr_random() % HWC_num_sets;
 
 			HWC_current_changeto = CHANGE_RANDOM;
 
