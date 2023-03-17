@@ -48,6 +48,69 @@ AC_DEFUN([AX_CUPTI],
     fi
   fi
 
+# Checks for deprecated CUPTI calls to define their parameter structures if not
+# found. This is to allow compatibility with older CUDA versions even if Extrae
+# is compiled with a newer one.
+  AC_MSG_CHECKING([for cudaConfigureCall_v3020_params definition])
+  if test "${CUPTI_INSTALLED}" = "yes"; then
+    CFLAGS="$CFLAGS $CUDA_CFLAGS"
+    AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM(
+        [#include <cupti.h>],
+        [
+          cudaConfigureCall_v3020_params *p;
+        ])
+      ],
+      [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_CUDACONFIGURECALL_v3020], 1, [Define to 1 if cudaConfigureCall_v3020_params struct is available in the CUPTI installation.])
+      ],
+      [
+        AC_MSG_RESULT([no])
+      ]
+    )
+  fi
+
+  AC_MSG_CHECKING([for cudaLaunch_v3020_params definition])
+  if test "${CUPTI_INSTALLED}" = "yes"; then
+    CFLAGS="$CFLAGS $CUDA_CFLAGS"
+    AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM(
+        [#include <cupti.h>],
+        [
+          cudaLaunch_v3020_params *p;
+        ])
+      ],
+      [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_CUDALAUNCH_v3020], 1, [Define to 1 if cudaLaunch_v3020_params struct is available in the CUPTI installation.])
+      ],
+      [
+        AC_MSG_RESULT([no])
+      ]
+    )
+  fi
+
+  AC_MSG_CHECKING([for cudaStreamDestroy_v3020_params definition])
+  if test "${CUPTI_INSTALLED}" = "yes"; then
+    CFLAGS="$CFLAGS $CUDA_CFLAGS"
+    AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM(
+        [#include <cupti.h>],
+        [
+          cudaStreamDestroy_v3020_params *p;
+        ])
+      ],
+      [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_CUDASTREAMDESTROY_v3020], 1, [Define to 1 if cudaStreamDestroy_v3020_params struct is available in the CUPTI installation.])
+      ],
+      [
+        AC_MSG_RESULT([no])
+      ]
+    )
+  fi
+
   AM_CONDITIONAL(HAVE_CUPTI, test "${CUPTI_INSTALLED}" = "yes")
   AX_FLAGS_RESTORE()
 ])

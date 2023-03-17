@@ -47,6 +47,8 @@
 #define LOG_UNTRACKED_CALLBACKS 0
 #define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 0
 
+#include "cuda_wrapper_cupti.h"
+
 #if LOG_UNTRACKED_CALLBACKS
 static CUptiResult (*cuptiGetCallbackName_real)(CUpti_CallbackDomain, uint32_t, const char**) = NULL;
 #endif
