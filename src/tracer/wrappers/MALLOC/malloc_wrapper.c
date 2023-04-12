@@ -282,15 +282,22 @@ void *malloc (size_t s)
  */
 static unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
 
-int __in_free = FALSE;
+static __thread int __in_free = 0;
+static __thread void *__in_free_ptr = NULL;
 
 void free (void *p)
 {
+
 	if (p == extrae_dlsym_static_buffer) return;
+
+	__in_free ++;
+	if (__in_free_ptr == p) return;
+	__in_free_ptr = p;
 
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
 	                    mpitrace_on                          &&
-	                    Extrae_get_trace_malloc();
+	                    Extrae_get_trace_malloc()            &&
+			    (__in_free == 1);
 	int present = FALSE;
 
 	/*
@@ -303,20 +310,16 @@ void free (void *p)
 	 * If we don't have the pointer to the real free funtion and we are not
 	 * already inside a dlsym, call dlsym
 	*/
-	if (real_free == NULL && !__in_free)
+	if (real_free == NULL && __in_free == 1)
 	{
-		__in_free = TRUE;
 		real_free = XTR_FIND_SYMBOL (__func__);
-		__in_free = FALSE;
 	}
 
 #if defined(DEBUG)
-	if (canInstrument && !__in_free) // fprintf() seems to call free()!
+	if (canInstrument) // fprintf() seems to call free()!
 	{
-		__in_free = TRUE;
 		fprintf(stderr, PACKAGE_NAME": free is at %p\n", real_free);
 		fprintf(stderr, PACKAGE_NAME": free params %p\n", p);
-		__in_free = FALSE;
 	}
 #endif
 
@@ -350,6 +353,8 @@ void free (void *p)
 		 * happen once during the initialization.
 		*/
 	}
+	__in_free --;
+	if (__in_free == 0) __in_free_ptr = NULL;
 }
 
 /* Unfortunately, calloc seems to be invoked if dlsym fails and generates an
