@@ -26,6 +26,7 @@ common_INCLUDES = -I$(COMMON_INC)
 noinst_LTLIBRARIES = libcommon.la
 libcommon_la_SOURCES = $(common_SRCS)
 libcommon_la_CFLAGS  = $(common_INCLUDES)
+libcommon_la_LDFLAGS = -lrt 
 
 #
 #noinst_PROGRAMS = common
