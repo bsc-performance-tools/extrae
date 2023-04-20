@@ -245,7 +245,7 @@ binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, U
 
 	for (u = 0; u < task_info->num_binary_objects; u++)
 		if (address >= task_info->binary_objects[u].start_address &&
-		    address <= task_info->binary_objects[u].end_address)
+		    address < task_info->binary_objects[u].end_address)
 			return &(task_info->binary_objects[u]);
 
 	return NULL;
