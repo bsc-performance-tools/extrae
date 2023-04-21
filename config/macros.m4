@@ -108,7 +108,7 @@ dnl AX_FLAGS_SAVE()
         bin_path="${bins_dir}/bin_name"
 
         dnl Make variable named <PKG>_BIN_<binary> (e.g. MPI_BIN_mpirun)
-        m4_pushdef([__PKG_BINARY_PATH], __pkg_name_ucase[]_BIN_[]bin_name)
+        m4_pushdef([__PKG_BINARY_PATH], m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _))
         dnl Assign value to this variable (e.g. MPI_BIN_mpirun=<path-to-mpirun>)
         __PKG_BINARY_PATH=${bin_path}
         dnl Make it available in the Makefiles
@@ -129,7 +129,7 @@ dnl AX_FLAGS_SAVE()
         bin_path="${bins_dir}/bin_name"
 
         dnl Make variable named <PKG>_BIN_<binary> (e.g. MPI_BIN_mpirun)
-        m4_pushdef([__PKG_BINARY_PATH], __pkg_name_ucase[]_BIN_[]bin_name)
+        m4_pushdef([__PKG_BINARY_PATH], m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _))
         dnl Assign value to this variable (e.g. MPI_BIN_mpirun=<path-to-mpirun>)
         __PKG_BINARY_PATH=${bin_path}
         dnl Make it available in the Makefiles
@@ -362,16 +362,16 @@ dnl AX_FLAGS_SAVE()
 
   dnl Add defines and Makefile conditionals for the detected binaries and libraries
   m4_foreach_w([bin_name], [$3], [
-    if test "${__pkg_name_ucase[]_BIN_[]bin_name}" != ""; then
-      AC_DEFINE([HAVE_[]__pkg_name_ucase[]_BIN_[]bin_name], 1, "Define to 1 if __pkg_name_ucase binary bin_name is found")
+    if test "${m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)}" != ""; then
+      AC_DEFINE([HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)], 1, "Define to 1 if __pkg_name_ucase binary bin_name is found")
     fi
-#    AM_CONDITIONAL(HAVE_[]__pkg_name_ucase[]_BIN_[]bin_name, test "${__pkg_name_ucase[]_BIN_[]bin_name}" != "")
+#    AM_CONDITIONAL(HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _), test "${__pkg_name_ucase[]_BIN_[]bin_name}" != "")
   ])
   m4_foreach_w([bin_name], [$4], [
-    if test "${__pkg_name_ucase[]_BIN_[]bin_name}" != ""; then
-      AC_DEFINE([HAVE_[]__pkg_name_ucase[]_BIN_[]bin_name], 1, "Define to 1 if __pkg_name_ucase binary bin_name is found")
+    if test "${m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)}" != ""; then
+      AC_DEFINE([HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)], 1, "Define to 1 if __pkg_name_ucase binary bin_name is found")
     fi
-#    AM_CONDITIONAL(HAVE_[]__pkg_name_ucase[]_BIN_[]bin_name, test "${__pkg_name_ucase[]_BIN_[]bin_name}" != "")
+#    AM_CONDITIONAL(HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _), test "${__pkg_name_ucase[]_BIN_[]bin_name}" != "")
   ])
   m4_foreach_w([lib_name], [$7], [
     if test "${__pkg_name_ucase[]_LIB_[]lib_name}" != ""; then
@@ -408,7 +408,7 @@ dnl AX_FLAGS_SAVE()
     __PKG_INSTALLED="no"
   fi
 
-  if test "${required_includes_found}" = "no"; then
+  if test "${required_headers_found}" = "no"; then
     __PKG_INSTALLED="no"
   fi
 
@@ -605,41 +605,68 @@ AC_DEFUN([AX_CHECK_PGI],
 
 # AX_PROG_XML2
 # -----------
+# Check for libxml2 installation
 AC_DEFUN([AX_PROG_XML2],
 [
-   XML2_CONFIG_DIRNAME="`dirname ${XML2_CONFIG}`"
-   XML2_HOME="`dirname ${XML2_CONFIG_DIRNAME}`"
+   AX_FLAGS_SAVE()
 
-   XML2_INCLUDES1="${XML2_HOME}/include/libxml2"
-   XML2_INCLUDES2="${XML2_HOME}/include"
-   XML2_CFLAGS="-I${XML2_INCLUDES1} -I${XML2_INCLUDES2}"
-   XML2_CPPFLAGS=${XML2_CFLAGS}
-   XML2_CXXFLAGS=${XML2_CFLAGS}
+   AC_ARG_WITH(xml-prefix,
+      AC_HELP_STRING(
+         [--with-xml-prefix@<:@=DIR@:>@],
+         [specify where to find libxml2 libraries and includes (deprecated, use --with-xml)]
+      ),
+      [xml_paths="${withval}"],
+      [xml_paths="/usr/local /usr"] dnl List of possible default paths
+   )
 
-   XML2_LIBS="-lxml2"
-   if test -f ${XML2_HOME}/lib${BITS}/libxml2.so -o \
-           -f ${XML2_HOME}/lib${BITS}/libxml2.dylib -o \
-           -f ${XML2_HOME}/lib${BITS}/libxml2.a ; then
-		XML2_LIBSDIR="${XML2_HOME}/lib${BITS}"
-   elif test -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.so -o \
-             -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.dylib -o \
-             -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.a ; then
-		XML2_LIBSDIR="${XML2_HOME}/lib/${multiarch_triplet}"
-   else
-      XML2_LIBSDIR="${XML2_HOME}/lib"
+   AC_ARG_WITH(xml,
+      AC_HELP_STRING(
+         [--with-xml@<:@=DIR@:>@],
+         [specify where to find libxml2 libraries and includes]
+      ),
+      [xml_paths="${withval}"]
+      dnl [xml_paths="/usr/local /usr"] dnl List of possible default not given here, taken from --with-xml-prefix
+      dnl                               dnl Activate this again when --with-xml-prefix is removed
+   )
+
+   AX_FIND_INSTALLATION([XML2], [${xml_paths}], [xml2-config], [], [], [], [xml2], [], [], [])
+   if test "$XML2_INSTALLED" = "yes" ; then
+
+      min_xml_version=ifelse([$1], ,2.0.0, [$1])
+      AC_MSG_CHECKING(for libxml2 version >= $min_xml_version)
+      min_xml_major_version=`echo ${min_xml_version} | cut -d. -f1`
+      min_xml_minor_version=`echo ${min_xml_version} | cut -d. -f2`
+      min_xml_micro_version=`echo ${min_xml_version} | cut -d. -f3`
+
+      xml_config_major_version=`${XML2_BIN_xml2_config} --version | cut -d. -f1`
+      xml_config_minor_version=`${XML2_BIN_xml2_config} --version | cut -d. -f2`
+      xml_config_micro_version=`${XML2_BIN_xml2_config} --version | cut -d. -f3`
+
+      if ((xml_config_major_version > min_xml_major_version)) ||
+         ((xml_config_major_version == min_xml_major_version && xml_config_minor_version > min_xml_minor_version)) ||
+         ((xml_config_major_version == major && xml_config_minor_version == min_xml_minor_version && xml_config_micro_version >= min_xml_micro_version)); then
+         AC_MSG_RESULT([yes ($xml_config_major_version.$xml_config_minor_version.$xml_config_micro_version)])
+      else
+         AC_MSG_RESULT([no ($xml_config_major_version.$xml_config_minor_version.$xml_config_micro_version)])
+         XML2_INSTALLED="no"
+      fi
+
+      XML2_CFLAGS="${XML2_CFLAGS} -I${XML2_INCLUDES}/libxml2"
+      XML2_CPPFLAGS="${XML2_CPPFLAGS} -I${XML2_INCLUDES}/libxml2"
+      XML2_CXXFLAGS="${XML2_CXXFLAGS} -I${XML2_INCLUDES}/libxml2"
+      AC_SUBST(XML2_CFLAGS)
+      AC_SUBST(XML2_CPPFLAGS)
+      AC_SUBST(XML2_CXXFLAGS)
+
+      CFLAGS=${XML2_CFLAGS}
+      AC_CHECK_HEADERS([libxml/parser.h libxml/xmlmemory.h], [], [$XML2_INSTALLED="no"])
    fi
-   XML2_LDFLAGS="-L${XML2_LIBSDIR}"
-   XML2_RPATH="-L${XML2_LIBSDIR}"
+   AX_FLAGS_RESTORE()
 
-   AC_SUBST(XML2_HOME)
-   AC_SUBST(XML2_CFLAGS)
-   AC_SUBST(XML2_CPPFLAGS)
-   AC_SUBST(XML2_CXXFLAGS)
-   AC_SUBST(XML2_INCLUDES)
-   AC_SUBST(XML2_LIBSDIR)
-   AC_SUBST(XML2_LIBS)
-   AC_SUBST(XML2_LDFLAGS)
-   AC_SUBST(XML2_RPATH)
+   AM_CONDITIONAL(HAVE_XML2, test "${XML2_INSTALLED}" = "yes")
+   if test "$XML2_INSTALLED" = "yes" ; then
+      AC_DEFINE([HAVE_XML2], [1], [Defined if libxml2 is available])
+   fi
 ])
 
 #
@@ -2063,9 +2090,9 @@ AC_DEFUN([AX_PROG_ONLINE],
   fi
 
   if test "$ONLINE_enabled" = "yes" ; then
-   if test "${XML_enabled}" != "yes" ; then
+   if test "${XML2_INSTALLED}" != "yes" ; then
       AC_MSG_WARN([You enabled the on-line analysis mode, but a required dependency is missing!])
-      AC_MSG_ERROR([Please enable support for XML with --enable-xml])
+      AC_MSG_ERROR([Please enable support for XML with --with-xml])
    fi
   fi
 

@@ -363,31 +363,7 @@ if test "${enable_hetero}" = "yes" ; then
 	AC_DEFINE([HETEROGENEOUS_SUPPORT], [1], [Determine if the heterogeneous support is enabled])
 fi
 
-AC_ARG_ENABLE(xml,
-   AC_HELP_STRING(
-      [--enable-xml],
-      [Enable support for XML configuration (enabled by default - disabled on BG/*)]
-   ),
-   [enable_xml="${enableval}"],
-   [enable_xml="yes"]
-)
-if test "${enable_xml}" = "yes" ; then
-   # BG/L does not have XML2
-   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
-      XML_enabled="no"
-   else
-      XML_enabled="yes"
-      AM_PATH_XML2(
-         [2.5.0],
-         [AC_DEFINE([HAVE_XML2], [1], [Defined if libxml2 exists])],
-         [AC_MSG_ERROR(Cannot find xml2-config of libXML 2.5.0 (or above))]
-      )
-      AX_PROG_XML2
-   fi
-else
-   XML_enabled="no"
-fi
-AM_CONDITIONAL(HAVE_XML2, test "${XML_enabled}" = "yes" )
+AX_PROG_XML2([2.5.0])
 
 AC_ARG_ENABLE(doc,
    AC_HELP_STRING(

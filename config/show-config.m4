@@ -83,7 +83,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo zlib available: no
 	fi
 
-	if test "${XML_enabled}" = "yes" ; then
+	if test "${XML2_INSTALLED}" = "yes" ; then
 		echo libxml2 available: yes \(${XML2_HOME}\)
 	else
 		echo libxml2 available: no
