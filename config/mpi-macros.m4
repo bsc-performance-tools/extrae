@@ -404,19 +404,19 @@ AC_DEFUN([AX_CHECK_MPI_STATUS_SIZE],
    CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
 
    if test "${IS_MIC_MACHINE}" = "yes" ; then
-     SIZEOF_MPI_STATUS=5
+     MPI_STATUS_FIELD_INDEX=5
    elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
-     SIZEOF_MPI_STATUS=5
+     MPI_STATUS_FIELD_INDEX=5
    else
      AC_CHECK_SIZEOF([MPI_Status], [], [#include <mpi.h>])
      AC_CHECK_SIZEOF([int])
 
-     SIZEOF_MPI_STATUS=$((${ac_cv_sizeof_MPI_Status}/${ac_cv_sizeof_int}))
+     MPI_STATUS_FIELD_INDEX=$((${ac_cv_sizeof_MPI_Status}/${ac_cv_sizeof_int}))
    fi
 
    AC_MSG_CHECKING([for number of integer fields in MPI_Status struct])
-   AC_MSG_RESULT([${SIZEOF_MPI_STATUS}])
-   AC_DEFINE_UNQUOTED([SIZEOF_MPI_STATUS], ${SIZEOF_MPI_STATUS}, [Number of integer fields in MPI_Status structure])
+   AC_MSG_RESULT([${MPI_STATUS_FIELD_INDEX}])
+   AC_DEFINE_UNQUOTED([MPI_STATUS_FIELD_INDEX], ${MPI_STATUS_FIELD_INDEX}, [Number of integer fields in MPI_Status structure])
    AX_FLAGS_RESTORE()
 ])
 

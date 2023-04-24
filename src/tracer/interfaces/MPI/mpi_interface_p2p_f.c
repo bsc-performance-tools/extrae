@@ -675,16 +675,16 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
  ***  MPI_TestAll
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_testall__,mpi_testall_,MPI_TESTALL,mpi_testall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror))
+MPI_F_SYMS(mpi_testall__,mpi_testall_,MPI_TESTALL,mpi_testall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag, MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror))
 
 void NAME_ROUTINE_F(mpi_testall) (MPI_Fint * count,
 	MPI_Fint array_of_requests[], MPI_Fint *flag,
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
 	MPI_Fint array_of_requests[], MPI_Fint *flag,
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #endif
 {
@@ -744,15 +744,15 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[
  ***  MPI_TestSome
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_testsome__,mpi_testsome_,MPI_TESTSOME,mpi_testsome, (MPI_Fint *incount, MPI_Fint *array_of_requests, MPI_Fint *outcount, MPI_Fint *array_of_indices, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror))
+MPI_F_SYMS(mpi_testsome__,mpi_testsome_,MPI_TESTSOME,mpi_testsome, (MPI_Fint *incount, MPI_Fint *array_of_requests, MPI_Fint *outcount, MPI_Fint *array_of_indices, MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_testsome) (MPI_Fint *incount,
 	MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #endif
 {
 	DLB(DLB_MPI_Testsome_F_enter, incount, array_of_requests, outcount,
@@ -810,14 +810,14 @@ void NAME_ROUTINE_C2F(mpi_wait) (MPI_Fint *request, MPI_Fint *status,
  ***  MPI_WaitAll
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_waitall__,mpi_waitall_,MPI_WAITALL,mpi_waitall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror))
+MPI_F_SYMS(mpi_waitall__,mpi_waitall_,MPI_WAITALL,mpi_waitall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror))
 
 void NAME_ROUTINE_F(mpi_waitall) (MPI_Fint * count,
-	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_waitall) (MPI_Fint * count,
-	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #endif
 {
@@ -877,15 +877,15 @@ void NAME_ROUTINE_C2F(mpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[
  ***  MPI_WaitSome
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_waitsome__,mpi_waitsome_,MPI_WAITSOME,mpi_waitsome, (MPI_Fint *incount, MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror))
+MPI_F_SYMS(mpi_waitsome__,mpi_waitsome_,MPI_WAITSOME,mpi_waitsome, (MPI_Fint *incount, MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_waitsome) (MPI_Fint *incount,
 	MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_waitsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #endif
 {
 
