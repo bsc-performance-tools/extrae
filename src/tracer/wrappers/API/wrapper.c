@@ -2547,6 +2547,16 @@ void Backend_Finalize (void)
 			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
 #if defined(EMBED_MERGE_IN_TRACE)
+#if defined(MPI_SUPPORT)
+		/* The launcher extrae-uncore sets variable EXTRAE_DISABLE_MERGE when the uncore service is active, but only in the master rank.
+		 * This leads to MergeAfterTracing be set to False only for this rank. Perform a logical AND to disable embedded merging
+		 * in all ranks, otherwise they follow different paths and the execution stalls.
+		 */
+		int tmp_merge_after_tracing_and;
+		PMPI_Allreduce(&MergeAfterTracing, &tmp_merge_after_tracing_and, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+		MergeAfterTracing = tmp_merge_after_tracing_and;
+#endif
+
 		/* Launch the merger */
 		if (MergeAfterTracing)
 		{
