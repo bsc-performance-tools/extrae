@@ -414,9 +414,12 @@ if i_am_master_process():
                 uncore_launch_cmd.write(
                     '$EXTRAE_HOME/bin/uncore-service-mpi\n')
                 uncore_launch_cmd.write('unset LD_PRELOAD\n')
-                # We need this sleep to prevent the system from killing the master MPI process doing the merge
-                uncore_launch_cmd.write(
-                    'while [[ ! -z `ps ux | grep extrae-uncore | grep -v grep` ]]; do sleep 1; done\n')
+                # We had this sleep to prevent the system from killing the master MPI process doing the merge,
+                # but apparently this was correcting an inadvertent bug fixed in commit 470f1fe7, where the 
+                # MPI ranks diverged on whether to start the embedded merging. With that fixed, this wait 
+                # stucks the finalization, removed for now.
+                #uncore_launch_cmd.write(
+                #    'while [[ ! -z `ps ux | grep extrae-uncore | grep -v grep` ]]; do sleep 1; done\n')
             os.chmod(trace_uncore_sh, stat.S_IRWXU)
 
             os.putenv('EXTRAE_UNCORE', str(num_readers))
