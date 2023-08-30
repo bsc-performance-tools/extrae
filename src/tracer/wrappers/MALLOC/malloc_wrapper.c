@@ -290,8 +290,8 @@ void free (void *p)
 
 	if (p == extrae_dlsym_static_buffer) return;
 
-	__in_free ++;
 	if (__in_free_ptr == p) return;
+	__in_free ++;
 	__in_free_ptr = p;
 
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
