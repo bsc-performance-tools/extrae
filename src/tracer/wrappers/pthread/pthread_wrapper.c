@@ -237,7 +237,8 @@ static void * pthread_create_hook (void *p1)
 	{
 		Probe_pthread_Function_Exit ();
 		Backend_Leave_Instrumentation ();
-		Backend_Flush_pThread (pthread_self());
+		// This seems to produce race conditions while master thread finalizes and dumps thread's pending buffers
+		//Backend_Flush_pThread (pthread_self());
 	}
 
 	return res;
