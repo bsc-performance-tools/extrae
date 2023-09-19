@@ -1868,6 +1868,9 @@ AC_DEFUN([AX_PROG_DYNINST],
    dnl Check for stackwalk within DynInst (is Dyninst > 7.0.1?)
    AM_CONDITIONAL(DYNINST_HAVE_STACKWALK, test -f "${DYNINST_LIBSDIR}/libstackwalk.so")
 
+   dnl Check for DynInst flavour: Lite or Full?
+   AM_CONDITIONAL(DYNINST_IS_LITE, test -f "${DYNINST_LIBSDIR}/libsymLite.so")
+
    dnl Did the checks pass?
    AM_CONDITIONAL(HAVE_DYNINST, test "${DYNINST_INSTALLED}" = "yes")
 
