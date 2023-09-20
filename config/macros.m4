@@ -1856,6 +1856,41 @@ AC_DEFUN([AX_PROG_DYNINST],
       CPPFLAGS="${CPPFLAGS} -I${DYNINST_INCLUDES} -I${BOOST_HOME}/include"
       AC_CHECK_HEADERS([BPatch.h], [], [DYNINST_INSTALLED="no"])
 
+      AC_MSG_CHECKING([whether DynInst uses Instruction::Ptr])
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM(
+            [[#include <InstructionDecoder.h>]],
+            [[
+               Dyninst::InstructionAPI::InstructionDecoder dec((unsigned char*)nullptr,0,Dyninst::Arch_x86);
+               Dyninst::InstructionAPI::Instruction::Ptr insn = dec.decode();
+               insn->isValid();
+            ]]
+         )
+        ],
+        [dyninst_decode_returns_instr_ptr="yes"],
+        [AC_COMPILE_IFELSE(
+           [AC_LANG_PROGRAM(
+               [[#include <InstructionDecoder.h>]],
+               [[
+                    Dyninst::InstructionAPI::InstructionDecoder dec((unsigned char*)nullptr,0,Dyninst::Arch_x86);
+                    Dyninst::InstructionAPI::Instruction insn = dec.decode();
+                    insn.isValid();
+               ]]
+            )
+           ],
+           [dyninst_decode_returns_instr_ptr="no"],
+           [dyninst_decode_returns_instr_ptr="unknown"]
+         )
+        ]
+      )
+      AC_MSG_RESULT([$dyninst_decode_returns_instr_ptr])
+      AS_IF([test "$dyninst_decode_returns_instr_ptr" = "yes"],
+            [AC_DEFINE([DYNINST_DECODE_RETURNS_PTR], 1, [Define to 1 if DYNINST decoder's function decode() return value is of type Intruction::Ptr])],
+            [test "$dyninst_decode_returns_instr_ptr" = "unknown"],
+            [AC_MSG_ERROR([Unable to determine whether DynInst uses Instruction::Ptr or not])]
+      )
+
+
       AC_SUBST(DYNINST_CXXFLAGS)
       AC_SUBST(DYNINST_CPPFLAGS)
 
