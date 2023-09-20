@@ -15,7 +15,14 @@ DYNINST_EXTRA_LIBS += -lpatchAPI
 endif
 # Step #2, add pcontrol, stackwalk, dynDwarf/Elf and symLite
 if DYNINST_HAVE_STACKWALK
-DYNINST_EXTRA_LIBS += -lpcontrol -lstackwalk -lcommon -ldynDwarf -ldynElf -lsymLite 
+DYNINST_EXTRA_LIBS += -lpcontrol -lstackwalk -lcommon -ldynDwarf -ldynElf
+endif
+# Step #3, add symLite if DynInst was configured with LIGHTWEIGHT_SYMTAB=On, all
+# other required libraries otherwise.
+if DYNINST_IS_LITE
+DYNINST_EXTRA_LIBS += -lsymLite
+else
+DYNINST_EXTRA_LIBS += -lsymtabAPI
 endif
 
 extrae_SOURCES = extrae.C \
