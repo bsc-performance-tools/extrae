@@ -29,32 +29,9 @@
 #endif
 #include "debug.h"
 
-#define xmalloc(ptr,size)             \
-{                                     \
-   ptr = malloc(size);                \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xrealloc(ptr,src,size)        \
-{                                     \
-   ptr = realloc(src, size);          \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xfree(ptr)                    \
-{                                     \
-   if (ptr != NULL)                   \
-   {                                  \
-      free(ptr);                      \
-   }                                  \
-   ptr = NULL;                        \
-} 
+#define FS_SYNC_MAX_ATTEMPTS 60
+#define FS_SYNC_RETRY_IN      1
+#define FS_SYNC_TIMEOUT      FS_SYNC_MAX_ATTEMPTS * FS_SYNC_RETRY_IN
 
 #if defined(__cplusplus)
 extern "C" {
@@ -73,11 +50,20 @@ int __Extrae_Utils_file_exists (const char *file);
 int __Extrae_Utils_directory_exists (const char *file);
 int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
 	unsigned __Extrae_Utils_buffersize, char *buffer, const char *string);
+void __Extrae_Utils_free_array(char **, int);
+int  __Extrae_Utils_sync_on_file(char *file);
+void __Extrae_Utils_chomp (char *buffer);
+int xtr_random(void);
 
 #if defined(__cplusplus)
 }
 #endif
 
 #define STRINGIFY(s) #s
+#define TOSTRING(x) STRINGIFY(x)
+
+#if DEBUG
+# define DBG(x, ...) fprintf(stderr, "DEBUG: " x, ##__VA_ARGS__)
+#endif
 
 #endif /* __UTILS_H__ */

@@ -53,6 +53,8 @@
 #include "trace_macros.h"
 #include "threadid.h"
 #include "wrapper.h"
+#include "utils.h"
+#include "xalloc.h"
 
 #if !defined(OS_RTEMS)
 
@@ -109,8 +111,7 @@ static void PrepareNextAlarm (void)
 	/* Set next timer! */
 	if (Sampling_variability > 0)
 	{
-		long int r = random();
-		unsigned long long v = r%(Sampling_variability);
+		unsigned long long v = xtr_random() % (Sampling_variability);
 		unsigned long long s, us;
 
 		us = (v + SamplingPeriod_base.it_value.tv_usec) % 1000000;
@@ -139,7 +140,8 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	 */
 	STRUCT_UCONTEXT *uc = (STRUCT_UCONTEXT *) context;
 
-#if defined(OS_LINUX) || defined(OS_ANDROID)
+// Last check required until we can use sigcontext sc_regs struct
+#if (defined(OS_LINUX) || defined(OS_ANDROID)) && !defined(ARCH_RISCV64)
 	struct sigcontext *sc = (struct sigcontext *) &uc->uc_mcontext;
 #endif
 
@@ -166,6 +168,21 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
     //pc = (caddr_t)sc->mc_gregs->tpc;
     //pc = (caddr_t)sc->mc_gregs[MC_PC];
 	pc = 0;
+# elif defined(ARCH_RISCV64)
+	/*
+	 * Directly read the PC register using ucontext
+	 * [1] https://reviews.llvm.org/D66870
+	 * [2] https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/unix/sysv/linux/riscv/sys/ucontext.h
+	 */
+	pc = (caddr_t)uc->uc_mcontext.__gregs[REG_PC];
+	/*
+	 * In the future it may be possible to obtain the PC through sigcontext
+	 * sc_regs struct. Right now it is empty, check [3].
+	 * [1] https://linuxplumbersconf.org/event/7/contributions/811/attachments/613/1103/An_introduction_of_vector_support_in_RISC-V_Linux.pdf
+	 * [2] https://github.com/torvalds/linux/blob/master/arch/riscv/include/uapi/asm/sigcontext.h
+	 * [3] https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/unix/sysv/linux/riscv/sys/user.h
+	 */
+//	pc = (caddr_t)sc->sc_regs->pc;
 # else
 #  error "Don't know how to get the PC for this architecture in Linux!"
 # endif
@@ -200,7 +217,7 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	int signum;
 	int ret;
 
-	memset (&signalaction, 0, sizeof(signalaction));
+	xmemset (&signalaction, 0, sizeof(signalaction));
 
 	ret = sigemptyset(&signalaction.sa_mask);
 	if (ret != 0)
@@ -278,7 +295,7 @@ void setTimeSampling_postfork (void)
 
 	if (Extrae_isSamplingEnabled())
 	{
-		memset (&signalaction, 0, sizeof(signalaction));
+		xmemset (&signalaction, 0, sizeof(signalaction));
 
 		ret = sigemptyset(&signalaction.sa_mask);
 		if (ret != 0)

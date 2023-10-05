@@ -1,5 +1,7 @@
 <pebs-sampling enabled="yes">
   <loads  enabled="yes" frequency="100" minimum-latency="10" />
-  <stores enabled="no"  frequency="100" />
+  <stores enabled="no" frequency="50">
+    <offcore-l3-misses enabled="no" /> <!-- Read together with stores samples. -->
+  </stores>
   <load-l3-misses enabled="no" frequency="25" />
 </pebs-sampling>

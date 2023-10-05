@@ -31,6 +31,8 @@
 # include <stdlib.h>
 #endif
 
+#include "xalloc.h"
+
 struct ThreadDependency_st
 {
 	void *predecessor_data;
@@ -50,12 +52,7 @@ struct ThreadDependencies_st
 struct ThreadDependencies_st * ThreadDependency_create (void)
 {
 	struct ThreadDependencies_st * td = (struct ThreadDependencies_st*)
-	  malloc (sizeof(struct ThreadDependencies_st));
-	if (NULL == td)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory to allocate thread dependencies!\n");
-		exit (-1);
-	}
+	  xmalloc (sizeof(struct ThreadDependencies_st));
 	td->Dependencies = NULL;
 	td->nDependencies = td->aDependencies = 0;
 	return td;
@@ -67,14 +64,9 @@ void ThreadDependency_add (struct ThreadDependencies_st *td,
 	unsigned u;
 	if (td->nDependencies == td->aDependencies)
 	{
-		td->Dependencies = (struct ThreadDependency_st*) realloc (td->Dependencies,
+		td->Dependencies = (struct ThreadDependency_st*) xrealloc (td->Dependencies,
 		  (td->aDependencies+THREAD_DEPENDENCY_ALLOC_SIZE)
 		  *sizeof(struct ThreadDependency_st));
-		if (NULL == td->Dependencies)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory to allocate thread dependencies!\n");
-			exit (-1);
-		}
 
 		for (u = td->aDependencies;
 		     u < td->aDependencies+THREAD_DEPENDENCY_ALLOC_SIZE;
@@ -106,7 +98,7 @@ void ThreadDependency_processAll_ifMatchDelete (struct ThreadDependencies_st *td
 			{
 				td->Dependencies[u].in_use = FALSE;
 				if (td->Dependencies[u].predecessor_data)
-					free (td->Dependencies[u].predecessor_data);
+					xfree (td->Dependencies[u].predecessor_data);
 				td->Dependencies[u].predecessor_data = NULL;
 				td->nDependencies--;
 			}

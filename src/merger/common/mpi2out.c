@@ -55,6 +55,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "semantics.h"
 #include "dump.h"
 #include "file_set.h"
@@ -68,6 +69,7 @@
 #include "options.h"
 #include "addresses.h"
 #include "intercommunicators.h"
+#include "HardwareCounters.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -88,6 +90,8 @@ static WorkDistribution_t WorkDistribution= Block;
 static char **MPITS_Files = NULL;
 static unsigned Num_MPITS_Files = 0;
 
+#define NOT_USED 0
+
 /******************************************************************************
  ***  Help
  ******************************************************************************/
@@ -104,16 +108,18 @@ void Help (const char *ProgName)
 		  "    -o file              Output trace file name.\n"
 		  "    -e file              Uses the executable file to obtain some information.\n"
 		  "    -f file              MpitFILE File with the names of the \".mpit\" input files.\n"
-		  "    -syn                 Synchronize traces at the MPI task-level using the MPI_Init information.\n"
-		  "    -syn-node            Synchronize traces at the MPI node-level using the MPI_Init information.\n"
+		  "    -syn-by-task         Synchronize traces at the MPI task-level using the MPI_Init information.\n"
+		  "    -syn-by-node         Synchronize traces at the MPI node-level using the MPI_Init information (default).\n"
+		  "    -syn-apps            Align all applications at their synchronization points.\n"
 		  "    -no-syn              Do not synchronize traces at the end of MPI_Init.\n"
 		  "    -maxmem M            Uses up to M megabytes of memory at the last step of merging process.\n"
 		  "    -dimemas             Force the generation of a Dimemas trace.\n"
 		  "    -paraver             Force the generation of a Paraver trace.\n"
-		  "    -keep-mpits          Keeps MPIT files after trace generation (default)\n"
+		  "    -keep-mpits          Keeps MPIT files after trace generation (default).\n"
 		  "    -no-keep-mpits       Removes MPIT files after trace generation.\n"
 		  "    -trace-overwrite     Overwrites the tracefile.\n"
 		  "    -no-trace-overwrite  Do not overwrite the tracefile, renaming the new one.\n"
+		  "    -stop-at-percentage  Stops the merging process at the specified percentage.\n"
 #if defined(IS_BG_MACHINE)
 		  "    -xyzt                Generates additional output file with BG/L torus coordinates.\n"
 #endif
@@ -127,17 +133,19 @@ void Help (const char *ProgName)
 #endif
 		  "    -s file              Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
 		  "    -d/-dump             Sequentially dumps the contents of every *.mpit file.\n"
-		  "    -dump-without-time   Do not show event time in when dumping events (valuable for test purposes).\n"
+		  "    -dump-without-time   Do not show event time in when dumping events (useful for testing purposes).\n"
 		  "    -remove-files        Remove intermediate files after processing them.\n"
 		  "    -split-states        Do not merge consecutives states that are the same.\n"
 		  "    -skip-sendrecv       Do not emit communication for SendReceive operations.\n"
 		  "    -unique-caller-id    Choose whether use a unique value identifier for different callers.\n"
-		  "    -translate-addresses Translate code addresses into code references if available.\n"
-		  "    -no-translate-addresses Do not translate code addresses into code references if available.\n"
+		  "    -translate-addresses         Translate code addresses into code references if available.\n"
+		  "    -no-translate-addresses      Do not translate code addresses into code references if available.\n"
+		  "    -translate-data-addresses    Identify allocated objects by their full callpath.\n"
+		  "    -no-translate-data-addresses Identify allocated objects by the tuple <library, symbol_offset>.\n"
 		  "    -emit-library-events Emit library information for unknown references if possible.\n"
-		  "    -sort-addresses      Sort file name, line events in information linked with source code.\n"
+		  "    -sort-addresses      Sort source code references by <line, filename>.\n"
 		  "    -task-view           Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
-          "    -without-addresses   Do not emit address information into PCF (valuable for test purposes).\n"
+		  "    -without-addresses   Do not emit address information into PCF (useful for testing purposes).\n"
 		  "    --                   Take the next trace files as a diferent parallel task.\n"
 		  "\n",
           ProgName, ProgName, ProgName);
@@ -161,22 +169,10 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 	int has_node_separator;
 	int hostname_len;
 
-	xrealloc(InputTraces, InputTraces, sizeof(struct input_t) * (nTraces + 1));
-	if (InputTraces == NULL)
-	{
-		perror ("realloc");
-		fprintf (stderr, "mpi2prv: Cannot allocate InputTraces memory for MPIT %d. Dying...\n", nTraces + 1);
-		exit (1);
-	}
+	InputTraces = xrealloc(InputTraces, sizeof(struct input_t) * (nTraces + 1));
 
 	InputTraces[nTraces].InputForWorker = -1;
-	InputTraces[nTraces].name = (char *) malloc (strlen (file) + 1);
-	if (InputTraces[nTraces].name == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Error cannot obtain memory for namefile\n");
-		fflush (stderr);
-		exit (1);
-	}
+	InputTraces[nTraces].name = (char *) xmalloc (strlen (file) + 1);
 	strcpy (InputTraces[nTraces].name, file);
 
 	pos = strlen(file)-strlen(EXT_MPIT)-DIGITS_PID-DIGITS_TASK
@@ -188,14 +184,8 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 		has_node_separator = file[pos] == TEMPLATE_NODE_SEPARATOR_CHAR;
 		if (has_node_separator)
 		{
-			InputTraces[nTraces].node = (char*) malloc (
-			  (hostname_len+1)*sizeof(char));
-			if (InputTraces[nTraces].node == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot obtain memory for NODE information!\n");
-				fflush (stderr);
-				exit (1);
-			}
+			InputTraces[nTraces].node = (char*) xmalloc((hostname_len+1)*sizeof(char));
+
 			snprintf (InputTraces[nTraces].node, hostname_len, "%s", &file[pos+1]);
 			break;
 		}
@@ -278,13 +268,8 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 		int res;
 
 		/* 7+4 for THREAD + (ptask + three dots) THREAD 1.1.1 */
-		InputTraces[nTraces].threadname = malloc (sizeof(char)*(10+DIGITS_TASK+DIGITS_THREAD+1));
-		if (InputTraces[nTraces].threadname == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Error cannot obtain memory for THREAD NAME information!\n");
-			fflush (stderr);
-			exit (1);
-		}
+		InputTraces[nTraces].threadname = xmalloc (sizeof(char)*(10+DIGITS_TASK+DIGITS_THREAD+1));
+
 		res = sprintf (InputTraces[nTraces].threadname, "THREAD %d.%d.%d",
 		  InputTraces[nTraces].ptask, InputTraces[nTraces].task,
 		  InputTraces[nTraces].thread);
@@ -340,7 +325,6 @@ void Read_SPAWN_file (char *mpit_file, int current_ptask)
 #endif /* MPI_SUPPORTS_MPI_COMM_SPAWN */
 
 
-
 /******************************************************************************
  ***  Read_MPITS_file
  ***  Inserts into trace tables the contents of a ascii file!
@@ -354,6 +338,28 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 	char mybuffer[4096];
 	char thdname[2048];
 	char path[2048];
+
+	char *env_enforce_fs_sync = getenv("EXTRAE_ENFORCE_FS_SYNC");
+	int enforce_fs_sync = (env_enforce_fs_sync != NULL)                &&
+	                       ((atoi(env_enforce_fs_sync) == 1)           ||
+	                        (strcmp(env_enforce_fs_sync, "TRUE") == 0) ||
+	                        (strcmp(env_enforce_fs_sync, "true") == 0));
+
+	if (enforce_fs_sync)
+	{
+		int delay = __Extrae_Utils_sync_on_file(file);
+
+		if (delay == -1)
+		{
+			fprintf(stderr, "mpi2prv: Aborting due to task %d timeout waiting on file system synchronization (> %d second(s) elapsed): %s is not ready\n", taskid, FS_SYNC_TIMEOUT, file);
+			exit(-1);
+		}
+		else if (delay > 0)
+		{
+			fprintf(stderr, "mpi2prv: Task %d syncs on %s after %d seconds\n", taskid, file, delay);
+		}
+	}
+	
 	FILE *fd = fopen (file, "r");
 
 	if (fd == NULL)
@@ -362,12 +368,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 		return;
 	}
 
-	MPITS_Files = (char**) realloc (MPITS_Files, sizeof(char*)*(Num_MPITS_Files+1));
-	if (MPITS_Files == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Unable to allocate memory for MPITS file: %s\n", file);
-		exit (-1);
-	}
+	MPITS_Files = (char**) xrealloc (MPITS_Files, sizeof(char*)*(Num_MPITS_Files+1));
 	MPITS_Files[Num_MPITS_Files] = strdup (file);
 	Num_MPITS_Files++;
 
@@ -411,7 +412,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 							sprintf (dir_file, "%s%s", directory, stripped_basename);
 							Process_MPIT_File (dir_file, (info==2)?thdname:NULL, cptask, taskid);
 
-							free (duplicate);
+							xfree (duplicate);
 						}
 						else
 							Process_MPIT_File (&stripped_basename[1], (info==2)?thdname:NULL, cptask, taskid);
@@ -442,7 +443,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 						sprintf (dir_file, "%s%s", directory, stripped_basename);
 						Process_MPIT_File (dir_file, (info==2)?thdname:NULL, cptask, taskid);
 
-						free (duplicate);
+						xfree (duplicate);
 					}
 					else
 						Process_MPIT_File (&stripped_basename[1], (info==2)?thdname:NULL, cptask, taskid);
@@ -461,6 +462,41 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 #endif
 }
 
+
+/**
+ * loadGlobalSYMfile
+ *
+ * Loads the specified global SYM file if 'sym_file' is given. Otherwise,
+ * loads the global SYM file with the same name as the given 'mpits_file', 
+ * if present.
+ */
+static int loadGlobalSYMfile(int rank, char *sym_file, char *mpits_file, int ptask)
+{
+	if ((sym_file != NULL) && (__Extrae_Utils_file_exists(sym_file)))
+	{
+		Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, sym_file, TRUE, NULL, NULL);
+		return 1;
+	}
+	else if (mpits_file != NULL)
+	{
+		char global_SYM_file[1024];
+
+		strncpy(global_SYM_file, mpits_file, sizeof(global_SYM_file)-1);
+		if (strcmp(&global_SYM_file[strlen(global_SYM_file)-strlen(".mpits")], ".mpits") == 0)
+		{
+			strncpy (&global_SYM_file[strlen(global_SYM_file)-strlen(".mpits")], ".sym", strlen(".sym")+1);
+
+			if (__Extrae_Utils_file_exists(global_SYM_file)) 
+			{
+				Labels_loadSYMfile (rank, NOT_USED, ptask, NOT_USED, global_SYM_file, TRUE, NULL, NULL);
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+
 /******************************************************************************
  ***  ProcessArgs
  ******************************************************************************/
@@ -471,6 +507,9 @@ void ProcessArgs (int rank, int argc, char *argv[])
 	int CurArg;
 	unsigned int cur_ptask = 1;   /* Ptask counter. Each -- the ptask number is
 	                               * incremented. */
+	int found_MPITS_for_current_ptask = FALSE;
+	int found_SYM_for_current_ptask = FALSE;
+
 	if (argc == 1)                /* No params? */
 	{
 		Help (argv[0]);
@@ -505,7 +544,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		set_option_merge_ForceFormat (FALSE);
 		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
-	free (BinaryName);
+	xfree (BinaryName);
 
 	for (CurArg = 1; CurArg < argc; CurArg++)
 	{
@@ -560,6 +599,23 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			set_option_merge_AbsoluteCounters (TRUE);
 			continue;
 		}
+		if (!strcmp (argv[CurArg], "-stop-at-percentage"))
+		{
+			CurArg++;
+			if (CurArg < argc)
+			{
+				long stopatpct = strtol(argv[CurArg], NULL, 10);
+				if (stopatpct > 0 && stopatpct < 100)
+					set_option_merge_StopAtPercentage(stopatpct);
+			} else
+			{
+				if ( 0 == rank)
+					fprintf(stderr, PACKAGE_NAME": Option -stop-at-percentage: You must specify a percentage.\n");
+				Help(argv[0]);
+				exit(0);
+			}
+			continue;
+		}
 		if (!strcmp (argv[CurArg], "-o"))
 		{
 			CurArg++;
@@ -582,14 +638,12 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				set_merge_SymbolFileName (argv[CurArg]);
-			}
-			else 
-			{
-				if (0 == rank)
-					fprintf (stderr, PACKAGE_NAME": Option -s: You must specify the path of the symbol file.\n");
-				Help(argv[0]);
-				exit(0);
+				char *global_SYM_file = argv[CurArg];
+
+				if ((rank == 0) && (loadGlobalSYMfile(rank, global_SYM_file, NULL, cur_ptask)))
+				{
+					found_SYM_for_current_ptask = TRUE;
+				}
 			}
 			continue;
 		}
@@ -630,6 +684,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
+				found_MPITS_for_current_ptask = TRUE;
 				Read_MPITS_file (argv[CurArg], &cur_ptask, FileOpen_Default, rank);
 			}
 			else 
@@ -717,6 +772,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		}
 		if (!strcmp (argv[CurArg], "-sort-addresses"))
 		{
+			set_option_merge_TranslateAddresses(TRUE);
 			set_option_merge_SortAddresses (TRUE);
 			continue;
 		}
@@ -858,18 +914,23 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			set_option_merge_SkipSendRecvComms (FALSE);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-syn"))
+		if (!strcmp (argv[CurArg], "-syn-by-task"))
 		{
 			set_option_merge_SincronitzaTasks (TRUE);
 			set_option_merge_SincronitzaTasks_byNode (FALSE);
 			AutoSincronitzaTasks = FALSE;
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-syn-node"))
+		if (!strcmp (argv[CurArg], "-syn-by-node"))
 		{
 			set_option_merge_SincronitzaTasks (TRUE);
 			set_option_merge_SincronitzaTasks_byNode (TRUE);
 			AutoSincronitzaTasks = FALSE;
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-syn-apps"))
+		{
+			set_option_merge_SincronitzaApps(TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-no-syn"))
@@ -899,8 +960,24 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			set_option_merge_RemoveFiles (FALSE);
 			continue;
 		}
+		if (!strcmp (argv[CurArg], "-translate-data-addresses"))
+		{
+			set_option_merge_TranslateDataAddresses(TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-translate-data-addresses"))
+		{
+			set_option_merge_TranslateDataAddresses(FALSE);
+			continue;
+		}
 		if (!strcmp (argv[CurArg], "--"))
 		{
+			if (!found_SYM_for_current_ptask && found_MPITS_for_current_ptask && rank == 0)
+			{
+				loadGlobalSYMfile(rank, NULL, last_mpits_file, cur_ptask);
+			}
+			found_MPITS_for_current_ptask = FALSE;
+			found_SYM_for_current_ptask = FALSE;
 			cur_ptask++;
 			continue;
 		}
@@ -912,6 +989,11 @@ void ProcessArgs (int rank, int argc, char *argv[])
 	/* Specific things to be applied per format */
 	if (rank == 0)
 	{
+		if (!found_SYM_for_current_ptask && found_MPITS_for_current_ptask)
+		{
+			loadGlobalSYMfile(rank, NULL, last_mpits_file, cur_ptask);
+		}
+
 		if (!get_option_merge_ParaverFormat())
 		{
 			/* Dimemas traces doesn't know about synchronization */
@@ -935,6 +1017,12 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			fprintf (stdout, "merger: Output trace format is: Paraver\n");
 		}
 	}
+
+#if defined(PARALLEL_MERGE)
+# if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
+	Share_HWC_Before_Processing_MPITS (rank);
+# endif
+#endif
 }
 
 static void PrintNodeNames (int numtasks, int processor_id, char **nodenames)
@@ -1011,8 +1099,8 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 	fprintf(stderr, "[DEBUG] num_apps = %d\n", num_apps);
 #endif
 
-	xmalloc(num_tasks_per_app, num_apps * sizeof(unsigned));
-	xmalloc(task_sizes_per_app, num_apps * sizeof(unsigned *));
+	num_tasks_per_app = xmalloc(num_apps * sizeof(unsigned));
+	task_sizes_per_app = xmalloc(num_apps * sizeof(unsigned *));
 
 	for (i = 0; i < num_apps; i++)
 	{
@@ -1030,7 +1118,7 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 		fprintf(stderr, "[DEBUG] num_tasks_per_app[%d]=%d\n", i, num_tasks_per_app[i]);
 #endif
 
-		xmalloc(task_sizes_per_app[i], num_tasks_per_app[i] * sizeof(unsigned));
+		task_sizes_per_app[i] = xmalloc(num_tasks_per_app[i] * sizeof(unsigned));
 		for (j = 0; j < num_tasks_per_app[i]; j++)
 		{
 			task_sizes_per_app[i][j] = 0;
@@ -1050,7 +1138,7 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 		task_sizes_per_app[ InputTraces[i].ptask - 1 ][ InputTraces[i].task - 1 ] += InputTraces[i].filesize;
 	}
 
-	xmalloc(all_tasks_ids, all_tasks * sizeof(all_tasks_ids_t));
+	all_tasks_ids = xmalloc(all_tasks * sizeof(all_tasks_ids_t));
 	index = 0;
 	for (i = 0; i < num_apps; i ++)
 	{
@@ -1074,15 +1162,20 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 
 	if (WorkDistribution == Block)
 	{
-		unsigned tasks_per_merger = (all_tasks + num_processors - 1) / num_processors;
+		unsigned offset = 0;
+		unsigned avg_tasks_per_merger = all_tasks / num_processors;
+		unsigned mod_tasks_per_merger = all_tasks % num_processors;
+
 		for (i=0; i<num_processors; i++)
 		{
-			for (j=0; j<tasks_per_merger; j++)
+			unsigned tasks_this_merger = avg_tasks_per_merger + (i < mod_tasks_per_merger ? 1 : 0);
+			for (j=0; j<tasks_this_merger; j++)
 			{
-				unsigned task_to_assign = (i * tasks_per_merger) + j;
+				unsigned task_to_assign = offset + j;
 				if (task_to_assign < all_tasks)
 					AssignFilesToWorker( i, all_tasks_ids[task_to_assign] );
 			}
+			offset += tasks_this_merger;
 		}
 	}
 	else if (WorkDistribution == Cyclic)
@@ -1195,13 +1288,13 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 	{
 		for (i = 0; i < num_apps; i++)
 			if (task_sizes_per_app[i])
-				free (task_sizes_per_app[i]);
-		free (task_sizes_per_app);
+				xfree (task_sizes_per_app[i]);
+		xfree (task_sizes_per_app);
 	}
 	if (num_tasks_per_app)
-		free (num_tasks_per_app);
+		xfree (num_tasks_per_app);
 	if (all_tasks_ids)
-		free (all_tasks_ids);
+		xfree (all_tasks_ids);
 }
 
 
@@ -1238,13 +1331,7 @@ static void merger_post_share_file_sizes (int taskid)
 	unsigned i;
 	unsigned long long *sizes;
 
-	sizes = malloc (sizeof(unsigned long long)*nTraces);
-	if (sizes == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Cannot allocate memory to share trace file sizes\n");
-		perror ("malloc");
-		exit (1);
-	}
+	sizes = xmalloc (sizeof(unsigned long long)*nTraces);
 
 	if (taskid == 0)
 		for (i = 0; i < nTraces; i++)
@@ -1257,7 +1344,7 @@ static void merger_post_share_file_sizes (int taskid)
 		for (i = 0; i < nTraces; i++)
 			InputTraces[i].filesize = sizes[i]; 
 
-	free (sizes);
+	xfree (sizes);
 }
 #endif
 
@@ -1375,28 +1462,9 @@ int merger_post (int numtasks, int taskid)
 	}
 #endif
 
-	if (taskid == 0 &&
-		strlen(get_merge_SymbolFileName()) == 0 &&
-		last_mpits_file != NULL)
-	{
-		char tmp[1024];
-		strncpy (tmp, last_mpits_file, sizeof(tmp));
-
-		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
-		{
-			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
-			Labels_loadSYMfile (taskid, TRUE, 0, 0, tmp, TRUE);
-		}
-	}
-	else
-	{
-		if (taskid == 0)
-			Labels_loadSYMfile (taskid, FALSE, 0, 0, get_merge_SymbolFileName(), TRUE);
-	}
-
 	if (taskid == 0)
 	{
-		fprintf (stdout, "mpi2prv: Checking for target directory existance...");
+		fprintf (stdout, "mpi2prv: Checking for target directory existence...");
 		char *dirn = dirname(strdup(__Extrae_Utils_trim(get_merge_OutputTraceName())));
 		if (!__Extrae_Utils_directory_exists(dirn))
 		{
@@ -1432,7 +1500,7 @@ int merger_post (int numtasks, int taskid)
 			for (u = 0; u < Num_MPITS_Files; u++)
 			{
 				char tmp[1024];
-				strncpy (tmp, MPITS_Files[u], sizeof(tmp));
+				strncpy (tmp, MPITS_Files[u], sizeof(tmp)-1);
 
 				if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
 				{
@@ -1450,7 +1518,7 @@ int merger_post (int numtasks, int taskid)
 				/* Remove the local .sym file for that .mpit file */
 				{
 					char tmp[1024];
-					strncpy (tmp, InputTraces[u].name, sizeof(tmp));
+					strncpy (tmp, InputTraces[u].name, sizeof(tmp)-1);
 					strncpy (&tmp[strlen(tmp)-strlen(".mpit")], ".sym", strlen(".sym")+1);
 					unlink (tmp);
 				}
@@ -1469,4 +1537,48 @@ int merger_post (int numtasks, int taskid)
 #endif
 
 	return 0;
+}
+
+/**
+ * mergerLoadFilesInEmbeddedMode
+ *
+ * This is called from Backend_Finalize when XML merge option is enabled. Since the embedded
+ * merger can not pass parameters by command-line to mpi2prv binary, the function ProcessArgs
+ * is not called, and thus, the global sym file is not loaded. This function loads the 
+ * necessary files for the embedded merger to start the merging process, including the 
+ * global sym file.
+ */
+void mergerLoadFilesInEmbeddedMode(int taskid, int num_tasks, char *mpits_filename)
+{
+	int ptask = 1;
+
+	if (taskid == 0)
+		fprintf(stdout, "mpi2prv: Proceeding with the merge of the intermediate tracefiles.\n");
+
+#if defined(MPI_SUPPORT)
+	/* Synchronize all tasks at this point so none overtakes the master and
+	   gets and invalid/blank trace file list (.mpits file) */
+	if (taskid == 0)
+		fprintf(stdout, "mpi2prv: Waiting for all tasks to reach the checkpoint.\n");
+
+	PMPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+	merger_pre(num_tasks);
+	
+	if (taskid == 0)
+	{
+		loadGlobalSYMfile(taskid, NULL, mpits_filename, ptask);
+	}
+#if defined(PARALLEL_MERGE)
+# if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
+	Share_HWC_Before_Processing_MPITS(taskid);
+# endif
+#endif
+	Read_MPITS_file(mpits_filename, &ptask, FileOpen_Default, taskid);
+
+	if (taskid == 0)
+		fprintf(stdout, "mpi2prv: Executing the merge process (using %s).\n", mpits_filename);
+
+	merger_post(num_tasks, taskid);
 }

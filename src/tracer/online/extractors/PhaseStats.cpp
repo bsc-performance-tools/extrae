@@ -24,6 +24,7 @@
 #include "PhaseStats.h"
 #include "taskid.h"
 #include "utils.h"
+#include "xalloc.h"
 #if defined(BACKEND)
 # include "timesync.h"
 # include "online_buffers.h"
@@ -180,7 +181,9 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
       case MPI_COMM_CREATE_EV:
       case MPI_COMM_FREE_EV:
       case MPI_COMM_DUP_EV:
+      case MPI_COMM_DUP_WITH_INFO_EV:
       case MPI_COMM_SPLIT_EV:
+      case MPI_COMM_SPLIT_TYPE_EV:
       case MPI_COMM_SPAWN_EV:
       case MPI_REQUEST_FREE_EV:
       case MPI_RECV_INIT_EV:
@@ -194,12 +197,28 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
       case MPI_FILE_CLOSE_EV:
       case MPI_FILE_READ_EV:
       case MPI_FILE_READ_ALL_EV:
-      case MPI_FILE_WRITE_EV:
-      case MPI_FILE_WRITE_ALL_EV:
+      case MPI_FILE_READ_ALL_BEGIN_EV:
+      case MPI_FILE_READ_ALL_END_EV:
       case MPI_FILE_READ_AT_EV:
       case MPI_FILE_READ_AT_ALL_EV:
+      case MPI_FILE_READ_AT_ALL_BEGIN_EV:
+      case MPI_FILE_READ_AT_ALL_END_EV:
+      case MPI_FILE_READ_ORDERED_EV:
+      case MPI_FILE_READ_ORDERED_BEGIN_EV:
+      case MPI_FILE_READ_ORDERED_END_EV:
+      case MPI_FILE_READ_SHARED_EV:
+      case MPI_FILE_WRITE_EV:
+      case MPI_FILE_WRITE_ALL_EV:
+      case MPI_FILE_WRITE_ALL_BEGIN_EV:
+      case MPI_FILE_WRITE_ALL_END_EV:
       case MPI_FILE_WRITE_AT_EV:
       case MPI_FILE_WRITE_AT_ALL_EV:
+      case MPI_FILE_WRITE_AT_ALL_BEGIN_EV:
+      case MPI_FILE_WRITE_AT_ALL_END_EV:
+      case MPI_FILE_WRITE_ORDERED_EV:
+      case MPI_FILE_WRITE_ORDERED_BEGIN_EV:
+      case MPI_FILE_WRITE_ORDERED_END_EV:
+      case MPI_FILE_WRITE_SHARED_EV:
       case MPI_GET_EV:
       case MPI_PUT_EV:
       case MPI_FINALIZE_EV:

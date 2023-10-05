@@ -50,6 +50,7 @@
 #define TRACE_COUNTERS                  ((xmlChar*) "counters")
 #define TRACE_CALLERS                   ((xmlChar*) "callers")
 #define TRACE_CPU                       ((xmlChar*) "cpu")
+#define TRACE_UNCORE                    ((xmlChar*) "uncore")
 #define TRACE_STARTSET                  ((xmlChar*) "starting-set-distribution")
 #define TRACE_HWCSET                    ((xmlChar*) "set")
 #define TRACE_HWCSET_CHANGEAT_GLOBALOPS ((xmlChar*) "changeat-globalops")
@@ -71,6 +72,8 @@
 #define TRACE_CIRCULAR                  ((xmlChar*) "circular")
 #define TRACE_PREFIX                    ((xmlChar*) "trace-prefix")
 #define TRACE_MPI                       ((xmlChar*) "mpi")
+#define TRACE_MPI_COMM_CALLS            ((xmlChar*) "comm-calls")
+#define TRACE_GASPI                     ((xmlChar*) "gaspi")
 #define TRACE_SHMEM                     ((xmlChar*) "shmem")
 #define TRACE_OPENCL                    ((xmlChar*) "opencl")
 #define TRACE_CUDA                      ((xmlChar*) "cuda")
@@ -94,6 +97,7 @@
 #define TRACE_DYNAMIC_MEMORY_ALLOC_THRESHOLD   ((xmlChar*) "threshold")
 #define TRACE_DYNAMIC_MEMORY_FREE       ((xmlChar*) "free")
 #define TRACE_IO                        ((xmlChar*) "input-output")
+#define TRACE_IO_INTERNALS              ((xmlChar*) "internals")
 #define TRACE_SYSCALL                   ((xmlChar*) "syscall")
 #define TRACE_LIST                      ((xmlChar*) "list")
 #define TRACE_EXCLUDE_AUTOMATIC_FUNCTIONS ((xmlChar*) "exclude-automatic-functions")
@@ -155,17 +159,23 @@
 #define TRACE_MERGE_SYN_TASK            ((xmlChar*) "task")
 #define TRACE_MERGE_SYN_DEFAULT         ((xmlChar*) "default")
 #define TRACE_MERGE_SORTADDRESSES       ((xmlChar*) "sort-addresses")
+#define TRACE_MERGE_STOP_AT_PCT         ((xmlChar*) "stop-at-percentage")
+#define TRACE_MERGE_TRANSLATE_ADDRESSES ((xmlChar*) "translate-addresses")
+#define TRACE_MERGE_TRANSLATE_DATA_ADDRESSES ((xmlChar*) "translate-data-addresses")
 #define TRACE_MERGE_OVERWRITE           ((xmlChar*) "overwrite")
 
-#define TRACE_PEBS_SAMPLING             ((xmlChar*) "pebs-sampling")
-#define TRACE_PEBS_SAMPLING_LOADS       ((xmlChar*) "loads")
-#define TRACE_PEBS_SAMPLING_STORES      ((xmlChar*) "stores")
-#define TRACE_PEBS_SAMPLING_LOAD_L3Ms   ((xmlChar*) "load-l3-misses")
-#define TRACE_PEBS_MIN_MEM_LATENCY      ((xmlChar*) "minimum-latency")
+#define TRACE_PEBS_SAMPLING                     ((xmlChar*) "pebs-sampling")
+#define TRACE_PEBS_SAMPLING_LOADS               ((xmlChar*) "loads")
+#define TRACE_PEBS_SAMPLING_STORES              ((xmlChar*) "stores")
+#define TRACE_PEBS_SAMPLING_STORES_OFFCORE_L3Ms ((xmlChar*) "offcore-l3-misses")
+#define TRACE_PEBS_SAMPLING_LOAD_L3Ms           ((xmlChar*) "load-l3-misses")
+#define TRACE_PEBS_MIN_MEM_LATENCY              ((xmlChar*) "minimum-latency")
 
 #define TRACE_CPU_EVENTS		((xmlChar*) "cpu-events")
 #define TRACE_CPU_EVENTS_FREQUENCY	((xmlChar*) "frequency")
 #define TRACE_CPU_EVENTS_EMIT_ALWAYS    ((xmlChar*) "emit-always")
+
+#define TRACE_OPENACC                   ((xmlChar*) "openacc")
 
 short int Parse_XML_File (int rank, int world_size, const char *filename);
 

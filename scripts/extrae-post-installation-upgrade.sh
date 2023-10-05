@@ -107,8 +107,6 @@ function generate_extrae_Makefile_inc
 	new_XML2_LDFLAGS=${look_for_var_res}
 	look_for_var BFD_LIBS ${EXTRAE_HOME}/share/example/Makefile.inc
 	new_BFD_LIBS=${look_for_var_res}
-	look_for_var CUPTI_LIBS ${EXTRAE_HOME}/share/example/Makefile.inc
-	new_CUPTI_LIBS=${look_for_var_res}
 
 	echo "Generating a newer ${EXTRAE_HOME}/share/example/Makefile.inc"
 
@@ -133,7 +131,6 @@ function generate_extrae_Makefile_inc
 	echo "BFD_LIBS=${new_BFD_LIBS}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	echo "UNWIND_LIBS=-L\$(PAPI_HOME)/lib" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	echo "PAPI_LIBS=-L\$(PAPI_HOME)/lib" >> ${EXTRAE_HOME}/share/example/Makefile.inc
-	echo "CUPTI_LIBS=${new_CUPTI_LIBS}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	echo "POSIX_CLOCK_LIBS=${new_POSIX_CLOCK_LIBS}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	echo "LIBEXEC_INFO_LIBS=${new_LIBEXECINFO_LIBS}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 }

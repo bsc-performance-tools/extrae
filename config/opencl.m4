@@ -23,7 +23,7 @@ AC_DEFUN([AX_OPENCL],
 			if test -d "${opencl_path}" ; then
 				AC_MSG_RESULT([found])
 				AX_FLAGS_SAVE()
-				AX_FIND_INSTALLATION([OPENCL], [${opencl_path}], [opencl])
+				AX_FIND_INSTALLATION([OPENCL], [${opencl_path}], [], [], [], [], [], [], [], [])
 				AX_FLAGS_RESTORE()
 			else
 				AC_MSG_ERROR([The specified path for OpenCL does not exist])
@@ -35,6 +35,8 @@ AC_DEFUN([AX_OPENCL],
 				if test -r ${OPENCL_LIBSDIR}/libOpenCL.so ; then
 					AC_MSG_RESULT([found])
 					enable_opencl="yes"
+					OPENCL_LIBS="-lOpenCL"
+					AC_SUBST(OPENCL_LIBS)
 				else
 					AC_MSG_ERROR([Cannot find the necessary library files for OpenCL])
 				fi

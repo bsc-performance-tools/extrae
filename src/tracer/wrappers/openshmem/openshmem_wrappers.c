@@ -37,6 +37,7 @@
 #include "openshmem_probes.h"
 #include "openshmem_events.h"
 #include "utils.h"
+#include "xalloc.h"
 
 /****************************************\
  ***     POINTERS TO REAL SYMBOLS     ***
@@ -206,11 +207,6 @@ static void Extrae_OPENSHMEM_Barrier(void)
   shmem_barrier_all_real();
 }
 
-static void Extrae_OPENSHMEM_Finalize(void)
-{
-  return;
-}
-
 #include "auto_fini.h"
 void shmem_finalize()
 {
@@ -263,13 +259,7 @@ static char * OPENSHMEM_Distribute_XML_File (int rank, int world_size, char *ori
   if (rank == 0)
   {
                 /* Copy the filename */
-                result_file = (char*) malloc ((strlen(origen)+1)*sizeof(char));
-                if (result_file == NULL)
-                {
-                        fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML file!\n");
-                        exit (0);
-                }
-                memset (result_file, 0, (strlen(origen)+1)*sizeof(char));
+                result_file = (char*) xmalloc_and_zero ((strlen(origen)+1)*sizeof(char));
                 strncpy (result_file, origen, strlen(origen));
 
                 /* Open the file */
@@ -344,13 +334,13 @@ static char * OPENSHMEM_Distribute_XML_File (int rank, int world_size, char *ori
                                 __Extrae_Utils_mkdir_recursive (getenv("TMPDIR"));
 
                         /* 14 is the length from /XMLFileXXXXXX */
-                        result_file = (char*) malloc (len * sizeof(char));
+                        result_file = (char*) xmalloc (len * sizeof(char));
                         snprintf (result_file, len, "%s/XMLFileXXXXXX", getenv ("TMPDIR"));
                 }
                 else
                 {
                         /* 13 is the length from XMLFileXXXXXX */
-                        result_file = (char*) malloc ((13+1)*sizeof(char));
+                        result_file = (char*) xmalloc ((13+1)*sizeof(char));
                         sprintf (result_file, "XMLFileXXXXXX");
                 }
 
@@ -415,16 +405,11 @@ static void OPENSHMEM_Gather_Nodes_Info (void)
   shmem_fcollect32_real(all_hostnames, hostname, (hostname_length/4), 0, 0, num_tasks, psync);
 
   /* Store the information in a global array */
-  TasksNodes = (char **)malloc (num_tasks * sizeof(char *));
-  if (TasksNodes == NULL)
-  {
-    fprintf (stderr, ": Fatal error! Cannot allocate memory for nodes info\n");
-    exit (-1);
-  }
+  TasksNodes = (char **)xmalloc (num_tasks * sizeof(char *));
 
   for(i=0; i<num_tasks; i++)
   {
-    TasksNodes[i] = (char *)malloc(hostname_length * sizeof(char));
+    TasksNodes[i] = (char *)xmalloc(hostname_length * sizeof(char));
 
     if (TasksNodes[i] == NULL)
     {
@@ -455,7 +440,7 @@ void OPENSHMEM_remove_file_list (int all)
 char *MpitsFileName = NULL;
 #include "threadinfo.h"
 
-int OPENSHMEM_Generate_Task_File_list( char **node_list )
+int OPENSHMEM_Generate_Task_File_list()
 {
 	int i;
 	unsigned ret;
@@ -534,7 +519,7 @@ int OPENSHMEM_Generate_Task_File_list( char **node_list )
                                 /* If Im processing MASTER, I know my threads and their names */
                                 for (thid = 0; thid < NTHREADS; thid++)
                                 {
-                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, node_list[i], PID, TID, thid, EXT_MPIT);
+                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, TasksNodes[i], PID, TID, thid, EXT_MPIT);
                                         sprintf (tmpline, "%s named %s\n", tmpname, Extrae_get_thread_name(thid));
                                         ret = write (fd, tmpline, strlen (tmpline));
                                         if (ret != strlen (tmpline))
@@ -550,7 +535,7 @@ int OPENSHMEM_Generate_Task_File_list( char **node_list )
 				shmem_getmem_real(thread_names_target, thread_names_source, Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char), i);
                                 for (thid = 0; thid < NTHREADS; thid++)
                                 {
-                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, node_list[i], PID, TID, thid, EXT_MPIT);
+                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, TasksNodes[i], PID, TID, thid, EXT_MPIT);
                                         sprintf (tmpline, "%s named %s\n", tmpname, &thread_names_target[thid*THREAD_INFO_NAME_LEN]);
                                         ret = write (fd, tmpline, strlen (tmpline));
                                         if (ret != strlen (tmpline))
@@ -1525,7 +1510,6 @@ static void Initialize_Extrae_Stuff()
   Extrae_set_taskid_function( Extrae_OPENSHMEM_TaskID );
   Extrae_set_numtasks_function( Extrae_OPENSHMEM_NumTasks );
   Extrae_set_barrier_tasks_function ( Extrae_OPENSHMEM_Barrier );
-  Extrae_set_finalize_task_function ( Extrae_OPENSHMEM_Finalize );
 
   if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
   {
@@ -1553,7 +1537,7 @@ static void Initialize_Extrae_Stuff()
     /* Remove the local copy only if we're not the master */
     if (TASKID != 0)
       unlink (config_file);
-    free (config_file);
+    xfree (config_file);
   }
   else  
   {
@@ -1565,7 +1549,7 @@ static void Initialize_Extrae_Stuff()
   if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
     OPENSHMEM_remove_file_list (TRUE);
 
-  OPENSHMEM_Generate_Task_File_list (TasksNodes);
+  OPENSHMEM_Generate_Task_File_list();
 
   shmem_init_start_time = TIME;
 

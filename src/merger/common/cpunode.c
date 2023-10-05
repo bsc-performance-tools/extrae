@@ -39,6 +39,7 @@
 #include "options.h"
 
 #include "cpunode.h"
+#include "xalloc.h"
 
 #define FLOG(x) ((x)<10?1:(x)<100?2:(x)<1000?3:(x)<10000?4:(x)<100000?5:(x)<1000000?6:(x)<10000000?7:8)
 
@@ -176,32 +177,12 @@ struct Pair_NodeCPU *AssignCPUNode (unsigned nfiles, struct input_t *files)
 		/* If didn't appear, allocate it */
 		if (!found)
 		{
-			nodenames = (char**) realloc (nodenames, (numnodes+1)*sizeof(char*));
-			if (nodenames == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodenames information\n");
-				exit (0);
-			}
+			nodenames = (char**) xrealloc (nodenames, (numnodes+1)*sizeof(char*));
 			nodenames[numnodes] = files[i].node;
-			nodecount = (unsigned*) realloc (nodecount, (numnodes+1)*sizeof(char*));
-			if (nodecount == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodecount information\n");
-				exit (0);
-			}
+			nodecount = (unsigned*) xrealloc (nodecount, (numnodes+1)*sizeof(char*));
 			nodecount[numnodes] = 1;
-			nodefiles = (unsigned **) realloc (nodefiles, (numnodes+1)*sizeof(unsigned*));
-			if (nodefiles == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodefiles information\n");
-				exit (0);
-			}
-			nodefiles[numnodes] = (unsigned*) malloc (nodecount[numnodes]*sizeof(unsigned));
-			if (nodefiles[numnodes] == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodefiles[%d] information (1)\n", numnodes);
-				exit (0);
-			}
+			nodefiles = (unsigned **) xrealloc (nodefiles, (numnodes+1)*sizeof(unsigned*));
+			nodefiles[numnodes] = (unsigned*) xmalloc (nodecount[numnodes]*sizeof(unsigned));
 			nodefiles[numnodes][nodecount[numnodes]-1] = i;
 			numnodes++;
 
@@ -214,12 +195,7 @@ struct Pair_NodeCPU *AssignCPUNode (unsigned nfiles, struct input_t *files)
 			/* Found node, stored in position found_pos: increase the node count usage,
 			   and allocate the referred file */
 			nodecount[found_pos]++;
-			nodefiles[found_pos] = (unsigned*) realloc (nodefiles[found_pos], nodecount[found_pos]*sizeof(unsigned));
-			if (nodefiles[found_pos] == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodefiles[%d] information (2)\n", numnodes);
-				exit (0);
-			}
+			nodefiles[found_pos] = (unsigned*) xrealloc (nodefiles[found_pos], nodecount[found_pos]*sizeof(unsigned));
 			nodefiles[found_pos][nodecount[found_pos]-1] = i;
 
 #if defined(DEBUG)
@@ -230,12 +206,7 @@ struct Pair_NodeCPU *AssignCPUNode (unsigned nfiles, struct input_t *files)
 	}
 
 	/* Allocate output information */
-	result = (struct Pair_NodeCPU*) malloc ((numnodes+1) * sizeof(struct Pair_NodeCPU));
-	if (result == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold Node-CPU information\n");
-		exit (0);
-	}
+	result = (struct Pair_NodeCPU*) xmalloc ((numnodes+1) * sizeof(struct Pair_NodeCPU));
 
 	/* Prepare the resulting output and modify file->cpu and file->nodeid */
 	for (total_cpus = 0, i = 0; i < numnodes; i++)
@@ -244,12 +215,7 @@ struct Pair_NodeCPU *AssignCPUNode (unsigned nfiles, struct input_t *files)
 #if defined(DEBUG)
 		fprintf (stdout, "NodeInfo::result[%d].CPUs = %d\n", i, result[i].CPUs);
 #endif
-		result[i].files = (struct input_t **) malloc (result[i].CPUs*sizeof(struct input_t*));
-		if (result[i].files == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold cpu node information\n");
-			exit (0);
-		}
+		result[i].files = (struct input_t **) xmalloc (result[i].CPUs*sizeof(struct input_t*));
 		
 		for (j = 0; j < nodecount[i]; j++)
 		{
@@ -270,10 +236,10 @@ struct Pair_NodeCPU *AssignCPUNode (unsigned nfiles, struct input_t *files)
 	if (numnodes > 0)
 	{
 		for (i = 0; i < numnodes; i++)
-			free (nodefiles[i]);
-		free (nodefiles);
-		free (nodenames);
-		free (nodecount);
+			xfree (nodefiles[i]);
+		xfree (nodefiles);
+		xfree (nodenames);
+		xfree (nodecount);
 	}
 
 	return result;

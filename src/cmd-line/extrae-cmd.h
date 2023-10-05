@@ -28,6 +28,6 @@
 #define CMD_EMIT   "emit"
 #define CMD_FINI   "fini"
 
-#define EXTRAE_CMD_FILE_PREFIX "/tmp/extrae-cmd."
+#define EXTRAE_CMD_FILE_PREFIX "extrae-cmd."
 
 #endif  /* EXTRAE_CMD_H_INCLUDED */

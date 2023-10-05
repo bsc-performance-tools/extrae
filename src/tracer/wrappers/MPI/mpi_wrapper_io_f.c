@@ -139,6 +139,172 @@ void PMPI_File_read_all_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *coun
 	updateStats_OTHER(global_mpi_stats);
 }
 
+void
+PMPI_File_read_all_begin_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+{
+	int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_ALL_BEGIN_EV, EVT_BEGIN, EMPTY,
+	    *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77(pmpi_file_read_all_begin) (fh, buf, count, datatype, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_ALL_BEGIN_EV, EVT_END, EMPTY,
+	    *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_all_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_ALL_END_EV, EVT_BEGIN, EMPTY,
+	    EMPTY, EMPTY, EMPTY, EMPTY);
+	CtoF77(pmpi_file_read_all_end) (fh, buf, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_ALL_END_EV, EVT_END, EMPTY, EMPTY, EMPTY,
+	    EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void PMPI_File_read_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
+	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+{
+    int size, ret;
+
+    CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+
+    TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+    CtoF77 (pmpi_file_read_at) (fh, offset, buf, count, datatype, status, ierror);
+    TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_EV, EVT_END, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_at_all_Fortran_Wrapper(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+{
+    int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_AT_ALL_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_read_at_all)
+	    (fh, offset, buf, count, datatype, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_AT_ALL_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_at_all_begin_Fortran_Wrapper(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+{
+    int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_AT_ALL_BEGIN_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_read_at_all_begin)
+	    (fh, offset, buf, count, datatype, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_AT_ALL_BEGIN_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_at_all_end_Fortran_Wrapper(MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_AT_ALL_END_EV, EVT_BEGIN,
+	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_read_at_all_end)
+	    (fh, buf, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_AT_ALL_END_EV, EVT_END,
+	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_ordered_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+{
+	int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_ORDERED_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_read_ordered) (fh, buf, count, datatype, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_ORDERED_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_ordered_begin_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Fint *ierror)
+{
+	int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_ORDERED_BEGIN_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_read_ordered_begin) (fh, buf, count, datatype, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_ORDERED_BEGIN_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_ordered_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_ORDERED_END_EV, EVT_BEGIN,
+	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_read_ordered_end) (fh, buf, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_ORDERED_END_EV, EVT_END,
+	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_read_shared_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+{
+	int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_READ_SHARED_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_read_shared) (fh, buf, count, datatype, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_READ_SHARED_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
 void PMPI_File_write_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 {
@@ -169,32 +335,37 @@ void PMPI_File_write_all_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *cou
 	updateStats_OTHER(global_mpi_stats);
 }
 
-void PMPI_File_read_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+void
+PMPI_File_write_all_begin_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
 {
-    int size, ret;
+	int size, ret;
 
-    CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-    MPI_CHECK(ret, pmpi_type_size);
+	CtoF77(pmpi_type_size)(datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
 
-    TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
-    CtoF77 (pmpi_file_read_at) (fh, offset, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_EV, EVT_END, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_ALL_BEGIN_EV, EVT_BEGIN,
+	  EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	CtoF77(pmpi_file_write_all_begin)(fh, buf, count, datatype, ierror);
+
+	TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_ALL_BEGIN_EV, EVT_END,
+	  EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 }
 
-void PMPI_File_read_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+void
+PMPI_File_write_all_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
 {
-    int size, ret;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_ALL_END_EV, EVT_BEGIN,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-    CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-    MPI_CHECK(ret, pmpi_type_size);
+	CtoF77(pmpi_file_write_all_end)(fh, buf, status, ierror);
 
-    TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
-    CtoF77 (pmpi_file_read_at_all) (fh, offset, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_ALL_END_EV, EVT_END,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 }
@@ -214,17 +385,120 @@ void PMPI_File_write_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void*
 	updateStats_OTHER(global_mpi_stats);
 }
 
-void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+void
+PMPI_File_write_at_all_Fortran_Wrapper(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
 {
     int size, ret;
 
-    CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+    CtoF77(pmpi_type_size) (datatype, &size, &ret);
     MPI_CHECK(ret, pmpi_type_size);
 
-    TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
-    CtoF77 (pmpi_file_write_at_all) (fh, offset, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+    TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY,
+	    *count * size, EMPTY, EMPTY, EMPTY);
+    CtoF77(pmpi_file_write_at_all) (fh, offset, buf, count, datatype, status,
+	    ierror);
+    TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY,
+	    *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_write_at_all_begin_Fortran_Wrapper(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+{
+    int size, ret;
+
+    CtoF77(pmpi_type_size) (datatype, &size, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+
+    TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_BEGIN_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+    CtoF77(pmpi_file_write_at_all_begin) (fh, offset, buf, count, datatype, ierror);
+    TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_AT_ALL_BEGIN_EV, EVT_END, EMPTY,
+	    *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_write_at_all_end_Fortran_Wrapper(MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)
+{
+    TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_END_EV, EVT_BEGIN,
+	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    CtoF77(pmpi_file_write_at_all_end) (fh, buf, status, ierror);
+    TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_AT_ALL_END_EV, EVT_END, EMPTY,
+	    EMPTY, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_write_ordered_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+{
+	int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_ORDERED_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_write_ordered) (fh, buf, count, datatype, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_ORDERED_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_write_ordered_begin_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Fint *ierror)
+{
+	int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_ORDERED_BEGIN_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_write_ordered_begin) (fh, buf, count, datatype, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_ORDERED_BEGIN_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_write_ordered_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_ORDERED_END_EV, EVT_BEGIN,
+	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_write_ordered_end) (fh, buf, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_ORDERED_END_EV, EVT_END,
+	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void
+PMPI_File_write_shared_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
+{
+	int size, ret;
+
+	CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+	MPI_CHECK(ret, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_FILE_WRITE_SHARED_EV, EVT_BEGIN,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_file_write_shared) (fh, buf, count, datatype, status, ierror);
+	TRACE_MPIEVENT(TIME, MPI_FILE_WRITE_SHARED_EV, EVT_END,
+	    EMPTY, *count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 }

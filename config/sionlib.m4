@@ -13,7 +13,7 @@ AC_DEFUN([AX_PROG_SIONLIB],
 
 	if test "${sionlib_paths}" != "not_set" ; then
 		dnl Search for SIONlib installation
-		AX_FIND_INSTALLATION([SIONLIB], [$sionlib_paths], [sionlib])
+		AX_FIND_INSTALLATION([SIONLIB], [$sionlib_paths], [], [], [], [], [], [], [], [])
 
 		SIONLIB_ENABLED="yes"
 		SIONLIB_HOME=${sionlib_paths}

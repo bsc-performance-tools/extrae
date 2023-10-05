@@ -37,9 +37,13 @@ static int option_merge_SincronitzaTasks = FALSE;
 int get_option_merge_SincronitzaTasks (void) { return option_merge_SincronitzaTasks; }
 void set_option_merge_SincronitzaTasks (int b) { option_merge_SincronitzaTasks = b; }
 
-static int option_merge_SincronitzaTasks_byNode = FALSE;
+static int option_merge_SincronitzaTasks_byNode = TRUE;
 int get_option_merge_SincronitzaTasks_byNode (void) { return option_merge_SincronitzaTasks_byNode; }
 void set_option_merge_SincronitzaTasks_byNode (int b) { option_merge_SincronitzaTasks_byNode = b; }
+
+static int option_merge_SincronitzaApps = FALSE;
+int get_option_merge_SincronitzaApps (void) { return option_merge_SincronitzaApps; }
+void set_option_merge_SincronitzaApps (int b) { option_merge_SincronitzaApps = b; }
 
 static int option_merge_UseDiskForComms = FALSE;
 int get_option_merge_UseDiskForComms (void) { return option_merge_UseDiskForComms; }
@@ -68,10 +72,6 @@ void set_merge_GivenTraceName (int b) { option_merge_GivenTraceName = b; }
 static char callback_file[1024] = "";
 char * get_merge_CallbackFileName (void) { return callback_file; }
 void set_merge_CallbackFileName (const char* s) { strcpy (callback_file, s); }
-
-static char symbol_file[1024] = "";
-char * get_merge_SymbolFileName (void) { return symbol_file; }
-void set_merge_SymbolFileName (const char* s) { strcpy (symbol_file, s); }
 
 static char executable_file[1024] = ""; 
 char * get_merge_ExecutableFileName (void) { return executable_file; }
@@ -131,6 +131,10 @@ static int option_merge_AbsoluteCounters = FALSE;
 int get_option_merge_AbsoluteCounters (void) { return option_merge_AbsoluteCounters; }
 void set_option_merge_AbsoluteCounters (int b) { option_merge_AbsoluteCounters = b; }
 
+static long option_merge_StopAtPercentage = 0;
+long get_option_merge_StopAtPercentage(void) { return option_merge_StopAtPercentage; }
+void set_option_merge_StopAtPercentage(long b) { option_merge_StopAtPercentage = b; }
+
 static int option_merge_TraceOverwrite = TRUE;
 int get_option_merge_TraceOverwrite (void) { return option_merge_TraceOverwrite; }
 void set_option_merge_TraceOverwrite (int b) { option_merge_TraceOverwrite = b; }
@@ -143,3 +147,6 @@ static int option_merge_EmitLibraryEvents = FALSE;
 int get_option_merge_EmitLibraryEvents (void) { return option_merge_EmitLibraryEvents; }
 void set_option_merge_EmitLibraryEvents (int b) { option_merge_EmitLibraryEvents = b; }
 
+static int option_merge_TranslateDataAddresses = TRUE;
+int get_option_merge_TranslateDataAddresses(void) { return option_merge_TranslateDataAddresses; }
+void set_option_merge_TranslateDataAddresses(int b) { option_merge_TranslateDataAddresses = b; }

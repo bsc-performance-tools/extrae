@@ -51,11 +51,10 @@ int MPI_File_read_C_Wrapper (MPI_File fh, void *buf, int count,
 int MPI_File_read_all_C_Wrapper (MPI_File fh, void *buf, int count,
   MPI_Datatype datatype, MPI_Status *status);
 
-int MPI_File_write_C_Wrapper (MPI_File fh, void *buf, int count,
-	MPI_Datatype datatype, MPI_Status *status);
+int MPI_File_read_all_begin_C_Wrapper(MPI_File fh, void *buf, int count,
+    MPI_Datatype datatype);
 
-int MPI_File_write_all_C_Wrapper (MPI_File fh, void *buf, int count,
-  MPI_Datatype datatype, MPI_Status *status);
+int MPI_File_read_all_end_C_Wrapper(MPI_File fh, void *buf, MPI_Status *status);
 
 int MPI_File_read_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf, 
   int count, MPI_Datatype datatype, MPI_Status *status);
@@ -63,11 +62,57 @@ int MPI_File_read_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
 int MPI_File_read_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
   int count, MPI_Datatype datatype, MPI_Status *status);
 
+int MPI_File_read_at_all_begin_C_Wrapper (MPI_File fh, MPI_Offset offset,
+    void *buf, int count, MPI_Datatype datatype);
+
+int MPI_File_read_at_all_end_C_Wrapper (MPI_File fh, void *buf,
+    MPI_Status *status);
+
+int MPI_File_read_ordered_C_Wrapper(MPI_File fh, void *buf, int count,
+    MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_read_ordered_begin_C_Wrapper(MPI_File fh, void *buf, int count,
+    MPI_Datatype datatype);
+
+int MPI_File_read_ordered_end_C_Wrapper(MPI_File fh, void *buf, MPI_Status *status);
+
+int MPI_File_read_shared_C_Wrapper(MPI_File fh, void *buf, int count,
+    MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_write_C_Wrapper (MPI_File fh, void *buf, int count,
+	MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_write_all_C_Wrapper (MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_write_all_begin_C_Wrapper(MPI_File fh, const void *buf, int count,
+    MPI_Datatype datatype);
+
+int MPI_File_write_all_end_C_Wrapper(MPI_File fh, const void *buf,
+    MPI_Status *status);
+
 int MPI_File_write_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
   int count, MPI_Datatype datatype, MPI_Status *status);
 
 int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
   int count, MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_write_at_all_begin_C_Wrapper(MPI_File fh, MPI_Offset offset,
+    void *buf, int count, MPI_Datatype datatype);
+
+int MPI_File_write_at_all_end_C_Wrapper(MPI_File fh, void *buf,
+    MPI_Status *status);
+
+int MPI_File_write_ordered_C_Wrapper(MPI_File fh, void *buf, int count,
+    MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_write_ordered_begin_C_Wrapper(MPI_File fh, void *buf, int count,
+    MPI_Datatype datatype);
+
+int MPI_File_write_ordered_end_C_Wrapper(MPI_File fh, void *buf, MPI_Status *status);
+
+int MPI_File_write_shared_C_Wrapper(MPI_File fh, void *buf, int count,
+    MPI_Datatype datatype, MPI_Status *status);
 
 #endif /* MPI_SUPPORTS_MPI_IO */
 

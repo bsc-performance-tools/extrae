@@ -83,6 +83,8 @@ void Extrae_MPI_stats_Wrapper (iotimer_t timestamp);
 void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *global_source);
 void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *receiver, int send_or_recv);
 
+int MPI_Generate_Task_File_List();
+
 #define MPI_REQUEST_TO_HASH_KEY(r) ((uintptr_t)r)
 #define MPI_MESSAGE_TO_HASH_KEY(m) ((uintptr_t)m)
 
@@ -147,8 +149,14 @@ void PMPI_Comm_Free_Wrapper (MPI_Fint *comm, MPI_Fint *ierror);
 void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
 
+void PMPI_Comm_Dup_With_Info_Wrapper (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror);
+
 void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
+
+void PMPI_Comm_Split_Type_Wrapper (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key,
+	MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror);
 
 void PMPI_Comm_Spawn_Wrapper (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
 
@@ -179,6 +187,7 @@ void PMPI_Graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *
 
 void PMPI_Dist_graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
 
+void PMPI_Dist_graph_create_adjacent_Wrapper (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
 
 #endif /* defined(FORTRAN_SYMBOLS) */
 
@@ -212,7 +221,11 @@ int MPI_Comm_free_C_Wrapper (MPI_Comm *comm);
 
 int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm);
 
+int MPI_Comm_dup_with_info_C_Wrapper (MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm);
+
 int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newcomm);
+
+int MPI_Comm_split_type_C_Wrapper (MPI_Comm comm, int split_type, int key, MPI_Info info, MPI_Comm *newcomm);
 
 int MPI_Comm_spawn_C_Wrapper (char *command, char **argv, int maxprocs, MPI_Info info,
   int root, MPI_Comm comm, MPI_Comm *intercomm, int *array_of_errcodes);
@@ -241,6 +254,10 @@ int MPI_Request_free_C_Wrapper (MPI_Request * request);
 int MPI_Graph_create_C_Wrapper (MPI_Comm comm_old, int nnodes, int *index, int *edges, int reorder, MPI_Comm *comm_graph);
 
 int MPI_Dist_graph_create_C_Wrapper (MPI_Comm comm_old, int n, int *sources, int *degrees, int *destinations, int *weights, MPI_Info info, int reorder, MPI_Comm *comm_dist_graph);
+
+int MPI_Dist_graph_create_adjacent_C_Wrapper (MPI_Comm comm_old, int indegree, const int sources[],
+	const int sourceweights[], int outdegree, const int destinations[], const int destweights[],
+	MPI_Info info, int reorder, MPI_Comm *comm_dist_graph);
 
 #endif /* MPI_WRAPPER_DEFINED */
 

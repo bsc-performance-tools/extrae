@@ -1,6 +1,10 @@
 SUBDIRS = \
   OTHER
 
+if INSTRUMENT_IO
+SUBDIRS += IO
+endif
+
 if WANT_PTHREAD
 SUBDIRS += PTHREAD
 endif
@@ -9,7 +13,7 @@ if HAVE_MPI
 SUBDIRS += MPI
 endif
 
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 SUBDIRS += CUDA
 endif
 

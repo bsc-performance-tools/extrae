@@ -30,7 +30,6 @@
 void Extrae_init_Wrapper(void);
 void Extrae_init_tracing (int forked);
 void Extrae_fini_Wrapper(void);
-void Extrae_fini_last_chance_Wrapper(void);
 void Extrae_shutdown_Wrapper (void);
 void Extrae_restart_Wrapper (void);
 
@@ -71,5 +70,7 @@ void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
 void Extrae_change_number_of_threads_Wrapper (unsigned nthreads);
 
 void Extrae_flush_manual_Wrapper ();
+
+void Generate_Task_File_List (void);
 
 #endif

@@ -16,6 +16,8 @@
   <mpi enabled="yes">
     <!-- Gather counters in the MPI routines? -->
     <counters enabled="yes" />
+    <!-- Capture all MPI_Comm_* calls? -->	  
+    <comm-calls enabled="yes" />
   </mpi>
 
   <!-- Emit information of the callstack -->
@@ -23,13 +25,13 @@
     <!-- At MPI calls, select depth level -->
     <mpi enabled="yes">1-3</mpi>
     <!-- At sampling points, select depth level -->
-		<sampling enabled="yes">1-5</sampling>
-		<!-- At dynamic memory system calls -->
-		<dynamic-memory enabled="no">1-3</dynamic-memory>
-		<!-- At I/O system calls -->
-		<input-output enabled="no">1-3</input-output>
-		<!-- At other system calls -->
-	  <syscall enabled="no">1-3</syscall>
+    <sampling enabled="yes">1-5</sampling>
+    <!-- At dynamic memory system calls -->
+    <dynamic-memory enabled="no">1-3</dynamic-memory>
+    <!-- At I/O system calls -->
+    <input-output enabled="no">1-3</input-output>
+    <!-- At other system calls -->
+    <syscall enabled="no">1-3</syscall>
   </callers>
 
   <!-- Configuration of some OpenMP dependant values -->
@@ -37,17 +39,16 @@
     <!-- If the library instruments OpenMP, shall we gather info about locks?
          Obtaining such information can make the final trace quite large.
     -->
-		<locks enabled="no" />
-		<!-- Gather info about taskloops? -->
-		<taskloop enabled="no" />
+    <locks enabled="no" />
+    <!-- Gather info about taskloops? -->
+    <taskloop enabled="no" />
     <!-- Gather counters in the OpenMP routines? -->
     <counters enabled="yes" />
   </openmp>
 
   <!-- Configuration of some pthread dependant values -->
   <pthread enabled="no">
-    <!-- If the library instruments pthread, shall we gather info about locks,
-	       mutexs and conds?
+    <!-- If the library instruments pthread, shall we gather info about locks, mutexs and conds?
          Obtaining such information can make the final trace quite large.
     -->
     <locks enabled="no" />
@@ -143,13 +144,13 @@
   <trace-control enabled="no">
     <!-- We can start the application with a "latent tracing" and wake it up
          once a control file is created. Use the property 'frequency' to
-         choose at which frequency this check must be done. If not supplied,
-         it will be checked every 100 global operations on MPI_COMM_WORLD.
+         choose at which frequency this check must be done. 
     -->
     <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
-    <!-- 
+    <!-- Alternatively, you can specify a start[-end] range of collective operations
+         over MPI_COMM_WORLD to start/stop the tracing.
     -->
-    <global-ops enabled="no"></global-ops>
+    <global-ops enabled="no">50-100</global-ops>
   </trace-control>
 
   <others enabled="yes">
@@ -162,7 +163,7 @@
       SIGQUIT="yes" SIGTERM="yes" SIGXCPU="yes"
       SIGFPE="yes" SIGSEGV="yes" SIGABRT="yes"
     />
-	<!-- Use instrumentation poitns to flush sampling buffer -->
+    <!-- Use instrumentation poitns to flush sampling buffer -->
     <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
 
@@ -189,9 +190,9 @@
   <dynamic-memory enabled="no" />
 
   <!-- Enable I/O (read, write) instrumentation (experimental) -->
-  <input-output enabled="no" />
+  <input-output enabled="no" internals="no"/>
 
-	<!-- Enable system calls instrumentation (experimental) -->
+  <!-- Enable system calls instrumentation (experimental) -->
   <syscall enabled="no" />
 
   <!-- Do merge the intermediate tracefiles into the final tracefile?
@@ -208,7 +209,9 @@
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
+    translate-addresses="yes"
     sort-addresses="yes"
+    translate-data-addresses="yes"
     overwrite="yes"
   />
 

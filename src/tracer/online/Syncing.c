@@ -33,6 +33,7 @@
 # include <stdlib.h>
 #endif
 #include "Syncing.h"
+#include "xalloc.h"
 
 /**
  * Passes the information from the connections file (read only by the root task) to 
@@ -80,7 +81,7 @@ int SyncAttachments(
   PMPI_Scatter(sendcnts, 1, MPI_INTEGER, &recvcnt, 1, MPI_INTEGER, root, MPI_COMM_WORLD);
 
   /* Distribute the connections information lines (1 per task) */
-  ParentInfo = (char *)malloc(sizeof(char) * recvcnt);
+  ParentInfo = (char *)xmalloc(sizeof(char) * recvcnt);
   PMPI_Scatterv (sendbuf, sendcnts, displs, MPI_CHAR, ParentInfo, recvcnt, MPI_CHAR, root, MPI_COMM_WORLD);
 
   /* DEBUG 
@@ -111,9 +112,9 @@ int SyncAttachments(
   /* Free pending connections info arrays */
   if (rank == 0)
   {
-    free(sendcnts); free(displs); free(sendbuf);
+    xfree(sendcnts); xfree(displs); xfree(sendbuf);
   }
-  free(ParentInfo);
+  xfree(ParentInfo);
 
   /* Check whether all tasks went ok */
   return SyncOk(i_went_ok);

@@ -94,12 +94,16 @@
 #if defined(MPI_SUPPORT)
 # include "mpi_wrapper.h"
 #endif
+#if defined(OPENSHMEM_SUPPORT)
+#include "openshmem_wrappers.h"
+#endif
 #include "misc_wrapper.h"
 #include "fork_wrapper.h"
 #include "clock.h"
 #include "hwc.h"
 #include "signals.h"
 #include "utils.h"
+#include "xalloc.h"
 #include "calltrace.h"
 #include "xml-parse.h"
 #include "UF_gcc_instrument.h"
@@ -128,6 +132,10 @@
 #if defined(OPENCL_SUPPORT)
 # include "opencl_wrapper.h"
 #endif
+#if defined(OPENACC_SUPPORT)
+# include "openacc_wrapper.h"
+#endif
+
 #include "common_hwc.h"
 
 #if defined(EMBED_MERGE_IN_TRACE)
@@ -255,7 +263,7 @@ int *TracingBitmap = NULL;
 int mpitrace_on = FALSE;
 
 /* Where is the tracing facility located                                 */
-char trace_home[TMP_DIR];
+char trace_home[TMP_DIR_LEN];
 
 /* Time of the first event (APPL_EV) */
 unsigned long long ApplBegin_Time = 0;
@@ -304,8 +312,8 @@ static unsigned maximum_NumOfThreads = 1;
 #define TMP_NAME_LENGTH     512
 #define APPL_NAME_LENGTH    512
 char appl_name[APPL_NAME_LENGTH];
-char final_dir[TMP_DIR];
-char tmp_dir[TMP_DIR];
+char final_dir[TMP_DIR_LEN];
+char tmp_dir[TMP_DIR_LEN];
 
 
 /*
@@ -336,7 +344,7 @@ PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
 
 int Extrae_Get_FinalDir_BlockSize(void)
 { return 128; }
-static char _get_finaldir[TMP_DIR];
+static char _get_finaldir[TMP_DIR_LEN];
 char *Get_FinalDir (int task)
 {
 	sprintf (_get_finaldir, "%s/set-%d", final_dir,
@@ -352,7 +360,7 @@ char *Extrae_Get_FinalDirNoTask (void)
 
 int Extrae_Get_TemporalDir_BlockSize(void)
 { return 128; }
-static char _get_temporaldir[TMP_DIR];
+static char _get_temporaldir[TMP_DIR_LEN];
 char *Get_TemporalDir (int task)
 {
 	sprintf (_get_temporaldir, "%s/set-%d", tmp_dir,
@@ -367,7 +375,7 @@ char *Extrae_Get_TemporalDirNoTask (void)
 #endif
 
 /* Know if the run is controlled by a creation of a file  */
-static char ControlFileName[TMP_DIR];
+static char ControlFileName[TMP_DIR_LEN];
 static int CheckForControlFile = FALSE;
 static int CheckForGlobalOpsTracingIntervals = FALSE;
 
@@ -517,6 +525,7 @@ char * Get_ApplName (void)
  ******************************************************************************/
 static int Extrae_Application_isMPI = FALSE;
 static int Extrae_Application_isSHMEM = FALSE;
+static int Extrae_Application_isGASPI = FALSE;
 
 int Extrae_get_ApplicationIsMPI (void)
 {
@@ -536,6 +545,24 @@ int Extrae_get_ApplicationIsSHMEM (void)
 void Extrae_set_ApplicationIsSHMEM (int b)
 {
         Extrae_Application_isSHMEM = b;
+}
+
+int Extrae_get_ApplicationIsGASPI(void)
+{
+	return Extrae_Application_isGASPI;
+}
+
+void Extrae_set_ApplicationIsGASPI(int isGASPI)
+{
+	Extrae_Application_isGASPI = isGASPI;
+}
+
+/* extrae_cmd tmpdir */
+
+static char xtr_cmd_prefix[TMP_DIR_LEN];
+void Extrae_get_cmd_prefix(char *prefix)
+{
+	strncpy(prefix, xtr_cmd_prefix, TMP_DIR_LEN);
 }
 
 
@@ -567,7 +594,7 @@ void Backend_createExtraeDirectory (int taskid, int Temporal)
 	int attempts = 100;
 	char *dirname;
 
-	dirname = (Temporal)?Get_TemporalDir(taskid):Get_FinalDir(taskid);
+	dirname = (Temporal) ? Get_TemporalDir(taskid) : Get_FinalDir(taskid);
 
 	ret = __Extrae_Utils_mkdir_recursive (dirname);
 	while (!ret && attempts > 0)
@@ -582,6 +609,27 @@ void Backend_createExtraeDirectory (int taskid, int Temporal)
 		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", taskid, dirname);
 }
 
+
+void Backend_syncOnExtraeDirectory (int taskid, int Temporal)
+{
+	char *dirname;
+	int delay;
+
+	dirname = (Temporal) ? Get_TemporalDir(taskid) : Get_FinalDir(taskid);
+	
+	delay = __Extrae_Utils_sync_on_file (dirname);
+	if (delay == -1)
+	{
+		fprintf(stderr, PACKAGE_NAME ": Aborting due to task %d timeout waiting on file system synchronization (> %d second(s) elapsed): %s is not ready\n", taskid, FS_SYNC_TIMEOUT, dirname);
+		exit(-1);
+	}
+	else if (delay > 0)
+	{
+		fprintf(stderr, PACKAGE_NAME ": Task %d syncs on %s directory %s after %d seconds\n", taskid, (Temporal ? "temporal" : "final"), dirname, delay);
+	}
+}
+
+
 /******************************************************************************
  ***  read_environment_variables
  ***  Reads some environment variables. Returns 0 if the tracing was disabled,
@@ -595,7 +643,7 @@ static int read_environment_variables (int me)
 #endif
   char *dir, *str, *res_cwd;
 	char *file;
-	char cwd[TMP_DIR];
+	char cwd[TMP_DIR_LEN];
 
 	/* Check if the tracing is enabled. If not, just exit from here */
 	str = getenv ("EXTRAE_ON");
@@ -610,7 +658,7 @@ static int read_environment_variables (int me)
 	str = getenv ("EXTRAE_HOME");
 	if (str != NULL)
 	{
-		strncpy (trace_home, str, TMP_DIR);
+		strncpy (trace_home, str, TMP_DIR_LEN);
 	}
 	else
 	{
@@ -970,11 +1018,18 @@ static int read_environment_variables (int me)
 	str = getenv ("EXTRAE_MERGE_AFTER_TRACING");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": Merge after tracing active.\n");
-		MergeAfterTracing = TRUE;
+		MergeAfterTracing = (getenv("EXTRAE_DISABLE_MERGE") == NULL);
+    	if (me == 0)
+    		fprintf (stdout, PACKAGE_NAME": Merge after tracing is %s.\n", (MergeAfterTracing ? "enabled" : "disabled"));
 	}
 		
+	/* Set extrae-cmd folder prefix */
+	str = getenv("EXTRAE_CMD_PREFIX");
+	if (str != NULL)
+	{
+		snprintf(xtr_cmd_prefix, sizeof(xtr_cmd_prefix), "%s/", str);
+	}
+
 	/* Add sampling capabilities */
 #if defined(SAMPLING_SUPPORT)
 	str = getenv ("EXTRAE_SAMPLING_PERIOD");
@@ -1045,7 +1100,7 @@ void Parse_Callers (int me, char * mpi_callers, int type)
    char * callers, * caller, * error;
    int from, to, i, tmp;
 
-   callers = (char *)malloc(sizeof(char)*(strlen(mpi_callers)+1));
+   callers = (char *)xmalloc(sizeof(char)*(strlen(mpi_callers)+1));
    strcpy(callers, mpi_callers);
 
    while ((caller = strtok(callers, (const char *)",")) != NULL) {
@@ -1089,12 +1144,12 @@ void Parse_Callers (int me, char * mpi_callers, int type)
 
       /* Reservamos memoria suficiente para el vector */
       if (Trace_Caller[type] == NULL) {
-         Trace_Caller[type] = (int *)malloc(sizeof(int) * to);
+         Trace_Caller[type] = (int *)xmalloc(sizeof(int) * to);
          for (i = 0; i < to; i++) Trace_Caller [type][i] = 0;
          Caller_Deepness[type] = i;
       }
       else if (to > Caller_Deepness[type]) {
-         Trace_Caller[type] = (int *)realloc(Trace_Caller[type], sizeof(int) * to);
+         Trace_Caller[type] = (int *)xrealloc(Trace_Caller[type], sizeof(int) * to);
          for (i = Caller_Deepness[type]; i < to; i++) Trace_Caller [type][i] = 0;
          Caller_Deepness[type] = i;
       }
@@ -1155,7 +1210,7 @@ static void Add_GlOp_Interval (int glop_id, int trace_status)
 {
    int idx;
    idx = glops_intervals.n_glops ++;
-   glops_intervals.glop_list = (GlOp_t *)realloc(glops_intervals.glop_list, glops_intervals.n_glops * sizeof(GlOp_t));
+   glops_intervals.glop_list = (GlOp_t *)xrealloc(glops_intervals.glop_list, glops_intervals.n_glops * sizeof(GlOp_t));
    glops_intervals.glop_list[idx].glop_id = glop_id;
    glops_intervals.glop_list[idx].trace_status = trace_status;
 }
@@ -1329,7 +1384,7 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 
 #if defined(SAMPLING_SUPPORT)
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name,
-	  hostname, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
+	             hostname, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
 
 	if (forked)
 		Buffer_Free (SamplingBuffer[thread_id]);
@@ -1376,11 +1431,11 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 
 	if (!forked)
 	{
-		xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
-		xmalloc(LastCPUEmissionTime, num_threads * sizeof(iotimer_t));
-		xmalloc(LastCPUEvent, num_threads * sizeof(int));
+		TracingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
+		LastCPUEmissionTime = xmalloc(num_threads * sizeof(iotimer_t));
+		LastCPUEvent = xmalloc(num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
-		xmalloc(SamplingBuffer, num_threads * sizeof(Buffer_t *));
+		SamplingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
 #endif
 	}
 
@@ -1399,11 +1454,11 @@ static int Reallocate_buffers_and_files (int new_num_threads)
 {
 	int i;
 
-	xrealloc(TracingBuffer, TracingBuffer, new_num_threads * sizeof(Buffer_t *));
-	xrealloc(LastCPUEmissionTime, LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
-	xrealloc(LastCPUEvent, LastCPUEvent, new_num_threads * sizeof(int));
+	TracingBuffer = xrealloc(TracingBuffer, new_num_threads * sizeof(Buffer_t *));
+	LastCPUEmissionTime = xrealloc(LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
+	LastCPUEvent = xrealloc(LastCPUEvent, new_num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
-	xrealloc(SamplingBuffer, SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
+	SamplingBuffer = xrealloc(SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
 #endif
 
 	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)
@@ -1422,12 +1477,7 @@ int Extrae_Allocate_Task_Bitmap (int size)
 {
 	int i;
 
-	TracingBitmap = (int *) realloc (TracingBitmap, size*sizeof (int));
-	if (TracingBitmap == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot obtain memory for tasks bitmap\n");
-		exit (-1);
-	}
+	TracingBitmap = (int *) xrealloc (TracingBitmap, size*sizeof (int));
 
 	for (i = 0; i < size; i++)
 		TracingBitmap[i] = TRUE;
@@ -1469,7 +1519,7 @@ static pthread_mutex_t pThreadIdentifier_mtx;
 
 static void Extrae_reallocate_pthread_info (int new_num_threads)
 {
-	xrealloc(pThreads, pThreads, new_num_threads * sizeof(pthread_t));
+	pThreads = xrealloc(pThreads, new_num_threads * sizeof(pthread_t));
 	numpThreads = new_num_threads;
 }
 
@@ -1493,30 +1543,44 @@ void Backend_Flush_pThread (pthread_t t)
 	unsigned u;
 
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
+	{
 		if (pThreads[u] == t)
 		{
 			pThreads[u] = (pthread_t)0; // This slot won't be used in the future
 
+			// Protect race condition with the master thread flushing the buffers at
+			// the end of this pthread and the process
 			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 
-			if (TRACING_BUFFER(u) != NULL)
+			// TracingBuffer may have been already free'd by the master thread if the process finished
+			if (TracingBuffer != NULL)
 			{
-				Buffer_Flush(TRACING_BUFFER(u));
-				Backend_Finalize_close_mpits (getpid(), u, FALSE);
+				if (TRACING_BUFFER(u) != NULL)
+				{
+					Buffer_Flush(TRACING_BUFFER(u));
+					Backend_Finalize_close_mpits (getpid(), u, FALSE);
 
-				Buffer_Free (TRACING_BUFFER(u));
-				TRACING_BUFFER(u) = NULL;
+					Buffer_Free (TRACING_BUFFER(u));
+					TRACING_BUFFER(u) = NULL;
+				}
 			}
 #if defined(SAMPLING_SUPPORT)
-			if (SAMPLING_BUFFER(u) != NULL)
+			// SamplingBuffer may have been already free'd by the master thread if the process finished
+			if (SamplingBuffer != NULL)
 			{
-				Buffer_Free (SAMPLING_BUFFER(u));
-				SAMPLING_BUFFER(u) = NULL;
+				if (SAMPLING_BUFFER(u) != NULL)
+				{
+					Buffer_Free (SAMPLING_BUFFER(u));
+					SAMPLING_BUFFER(u) = NULL;
+				}
 			}
 #endif
+
 			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+
 			break;
 		}
+	}
 }
 
 void Backend_CreatepThreadIdentifier (void)
@@ -1568,7 +1632,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 {
 	unsigned u;
 	int runningInDynInst = FALSE;
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 #if defined(OMP_SUPPORT) 
 	char *omp_value;
 	char *new_num_omp_threads_clause;
@@ -1634,12 +1698,12 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	if (!forked)
 		Extrae_Allocate_Task_Bitmap (world_size);
 
-#if defined(CUDA_SUPPORT)
-	Extrae_CUDA_init (me);
-#endif
-
 #if defined(OPENCL_SUPPORT)
 	Extrae_OpenCL_init (me);
+#endif
+
+#if defined(OPENACC_SUPPORT)
+	Extrae_OACC_init(me);
 #endif
 
 #if defined(OMP_SUPPORT)
@@ -1655,12 +1719,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 		   allows instrumenting OpenMP */
 		numProcessors = getnumProcessors();
 
-		new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
-		if (NULL == new_num_omp_threads_clause)
-		{
-			fprintf (stderr, PACKAGE_NAME": Unable to allocate memory for tentative OMP_NUM_THREADS\n");
-			exit (-1);
-		}
+		new_num_omp_threads_clause = (char*) xmalloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
 		if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
 		{
 			fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
@@ -1710,6 +1769,12 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	}
 
 #endif /* OMP_SUPPORT */
+
+#if defined(CUDA_SUPPORT)
+	Extrae_CUDA_init (me);
+	/* Allocate thread info for CUDA execs */
+	Extrae_reallocate_CUDA_info (0, get_maximum_NumOfThreads());
+#endif
 
 #endif /* STANDALONE */
 
@@ -1791,15 +1856,11 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	/* Allocate the buffers and trace files */
 	Allocate_buffers_and_files (world_size, get_maximum_NumOfThreads(), forked);
 
-#if defined(CUDA_SUPPORT)
-	/* Allocate thread info for CUDA execs */
-	Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads());
-#endif
-
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))
 	{
 		ApplBegin_Time = TIME;
 		TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
+		Extrae_AddSyncEntryToLocalSYM(ApplBegin_Time);
 #if !defined(IS_BG_MACHINE)
 		Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
 #endif
@@ -1828,7 +1889,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 						hwc_defs[u].description, (char)0, 0, NULL, NULL);
 					u++;
 				}
-				free (hwc_defs);
+				xfree (hwc_defs);
 			}
 		}
 	
@@ -1868,8 +1929,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 		}	
 	}
 #endif
-
-	Extrae_getExecutableInfo ();
 
 	last_mpi_exit_time = ApplBegin_Time;
 
@@ -1938,7 +1997,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 	
 #if defined(CUDA_SUPPORT)
 			/* Allocate thread info for CUDA execs */
-			Extrae_reallocate_CUDA_info (new_num_threads);
+			Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads(), new_num_threads);
 #endif
 	
 #if defined(PTHREAD_SUPPORT)
@@ -1953,7 +2012,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 #endif
 
 		}
-		else
+		else if (new_num_threads > 0)
 			current_NumOfThreads = new_num_threads;
 	}
 	else
@@ -2007,10 +2066,8 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 
 	TimeSync_Initialize (1, &world_size);
 
-	xmalloc(StartingTimes, world_size * sizeof(UINT64));
-	memset (StartingTimes, 0, world_size * sizeof(UINT64));
-	xmalloc(SynchronizationTimes, world_size * sizeof(UINT64));
-	memset (SynchronizationTimes, 0, world_size * sizeof(UINT64));
+	StartingTimes = xmalloc_and_zero(world_size * sizeof(UINT64));
+	SynchronizationTimes = xmalloc_and_zero(world_size * sizeof(UINT64));
 
 #if defined(MPI_SUPPORT)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT &&
@@ -2048,7 +2105,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 		TimeSync_SetInitialTime (0, i, StartingTimes[i], SynchronizationTimes[i], node);
 	}
 
-	TimeSync_CalculateLatencies (TS_NODE);
+	TimeSync_CalculateLatencies (TS_NODE, 0);
 
 	xfree(StartingTimes);
 	xfree(SynchronizationTimes);
@@ -2073,6 +2130,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 		Extrae_getrusage_set_to_0_Wrapper (InitTime);
 
 		TRACE_MPIINITEV (EndTime, init_event, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
+		Extrae_AddSyncEntryToLocalSYM (EndTime);
 		Extrae_AnnotateTopology (FALSE, EndTime);
 	}
 
@@ -2099,7 +2157,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 
 		/* Just disable the tracing until the control file is created */
 		Extrae_shutdown_Wrapper();
-		mpitrace_on = 0;		/* Disable full tracing. It will allow us to know if files must be deleted or kept */
+		mpitrace_on = FALSE;		/* Disable full tracing. It will allow us to know if files must be deleted or kept */
 	}
 	else if (mpitrace_on &&
 	  !Extrae_getCheckControlFile() &&
@@ -2157,8 +2215,8 @@ void Backend_Finalize_close_files(void)
 static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 {
 	int r;
-	char trace[TMP_DIR];
-	char tmp_name[TMP_DIR];
+	char trace[TMP_DIR_LEN];
+	char tmp_name[TMP_DIR_LEN];
 	unsigned initialTASKID;
 	char hostname[1024];
 
@@ -2213,7 +2271,8 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 #if defined(SAMPLING_SUPPORT)
 	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
 	  pid, initialTASKID, thread, EXT_TMP_SAMPLE);
-	if (Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
+	if (SamplingBuffer != NULL && SAMPLING_BUFFER(thread) != NULL &&
+	  Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
 	{
 		Buffer_Flush(SAMPLING_BUFFER(thread));
 		Buffer_Close(SAMPLING_BUFFER(thread));
@@ -2322,7 +2381,39 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 
 void Backend_Finalize (void)
 {
+	// Moved here to prevent instrumentation of IO calls on our files
+	mpitrace_on = FALSE; /* Turn off tracing now */
+
+	/* Mark as already finalized, thus avoiding further deinits */
+	Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
+
+	/* If the application is MPI the MPI wrappers are responsible
+	   for gathering and generating the .MPITS file*/
+#if defined(MPI_SUPPORT)
+	if (Extrae_get_ApplicationIsMPI())
+	{
+		MPI_Generate_Task_File_List();
+	} else
+#endif
+#if defined(OPENSHMEM_SUPPORT)
+	if (Extrae_get_ApplicationIsSHMEM())
+	{
+		OPENSHMEM_Generate_Task_File_list();
+	} else
+#endif
+	{
+		/* If we are appending into the file (i.e. using the cmd-line) don't
+		   change the already existing .mpits file */
+		if (!Extrae_getAppendingEventsToGivenPID(NULL))
+		{
+			Generate_Task_File_List();
+		}
+	}
+
+	Extrae_getExecutableInfo ();
+
 	unsigned thread;
+	int online_mode = 0;
 
 #if defined(ENABLE_PEBS_SAMPLING)
 	Extrae_IntelPEBS_stopSampling();
@@ -2349,6 +2440,7 @@ void Backend_Finalize (void)
 		/* Stop the analysis threads and flush the online buffers */
 		if (Online_isEnabled())
 		{
+			online_mode = 1;
 			Online_Stop();
 		}
 #endif /* HAVE_ONLINE */
@@ -2377,6 +2469,15 @@ void Backend_Finalize (void)
 		/* Write files back to disk , 1st part will include flushing events*/
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
 		{
+			// Protects race condition with Backend_Flush_pThread
+			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+
+			// If buffer was working in circular mode, change it to flush mode to dump the final data into the trace
+			if ((circular_buffering) && (!online_mode))
+			{
+		                Buffer_SetFlushCallback (TracingBuffer[thread], Extrae_Flush_Wrapper);
+			}
+
 			/* Prevent writing performance counters from another thread */
 			if (thread != THREADID)
 				Extrae_Flush_Wrapper_setCounters (FALSE);
@@ -2385,6 +2486,8 @@ void Backend_Finalize (void)
 				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 
 			Extrae_Flush_Wrapper_setCounters (TRUE);
+
+			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 		}
 
 		/* Final write files to disk, include renaming of the filenames,
@@ -2392,6 +2495,7 @@ void Backend_Finalize (void)
 		Extrae_Flush_Wrapper_setCounters (FALSE);
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 		{
+			// Protects race condition with Backend_Flush_pThread
 			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 
 			if (TRACING_BUFFER(thread) != NULL)
@@ -2403,7 +2507,7 @@ void Backend_Finalize (void)
 
 			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 		}
-	
+
 		/* Free allocated memory */
 		{
 			if (TASKID == 0)
@@ -2414,6 +2518,7 @@ void Backend_Finalize (void)
 #if defined(PTHREAD_SUPPORT)
 				pThreads[thread] = (pthread_t)0;
 #endif
+				// Protects race condition with Backend_Flush_pThread
 				pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 				if (TRACING_BUFFER(thread) != NULL)
 				{
@@ -2421,7 +2526,8 @@ void Backend_Finalize (void)
 					TRACING_BUFFER(thread) = NULL;
 				}
 #if defined(SAMPLING_SUPPORT)
-				if (SAMPLING_BUFFER(thread) != NULL)
+				if (SamplingBuffer != NULL &&
+				  SAMPLING_BUFFER(thread) != NULL)
 				{
 					Buffer_Free (SAMPLING_BUFFER(thread));
 					SAMPLING_BUFFER(thread) = NULL;
@@ -2433,7 +2539,10 @@ void Backend_Finalize (void)
 			xfree(LastCPUEvent);
 			xfree(TracingBuffer);
 #if defined(SAMPLING_SUPPORT)
-			xfree(SamplingBuffer);
+			if (SamplingBuffer != NULL)
+			{
+				xfree(SamplingBuffer);
+			}
 #endif
 			xfree (TracingBitmap);
 			Extrae_allocate_thread_CleanUp();
@@ -2450,44 +2559,27 @@ void Backend_Finalize (void)
 		if (TASKID == 0 && Extrae_isProcessMaster())
 			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
-		mpitrace_on = FALSE; /* Turn off tracing now */
-
-		/* Mark as already finalized, thus avoiding further deinits */
-		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
-
 #if defined(EMBED_MERGE_IN_TRACE)
+#if defined(MPI_SUPPORT)
+		/* The launcher extrae-uncore sets variable EXTRAE_DISABLE_MERGE when the uncore service is active, but only in the master rank.
+		 * This leads to MergeAfterTracing be set to False only for this rank. Perform a logical AND to disable embedded merging
+		 * in all ranks, otherwise they follow different paths and the execution stalls.
+		 */
+		int tmp_merge_after_tracing_and;
+		PMPI_Allreduce(&MergeAfterTracing, &tmp_merge_after_tracing_and, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+		MergeAfterTracing = tmp_merge_after_tracing_and;
+#endif
+
 		/* Launch the merger */
 		if (MergeAfterTracing)
 		{
-			int ptask = 1;
 			char tmp[1024];
-
-			if (TASKID == 0)
-				fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");
-
-#if defined(MPI_SUPPORT)
-			/* Synchronize all tasks at this point so none overtakes the master and
-			   gets and invalid/blank trace file list (.mpits file) */
-			if (TASKID == 0)
-				fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
-
-			MPI_Barrier (MPI_COMM_WORLD);
-#endif
-
-			merger_pre (Extrae_get_num_tasks());
-
 #if defined(MPI_SUPPORT)
 			sprintf (tmp, "%s", Extrae_core_get_mpits_file_name());
 #else
 			sprintf (tmp, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 #endif
-
-			Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
-
-			if (TASKID == 0)
-				fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);
-
-			merger_post (Extrae_get_num_tasks(), TASKID);
+			mergerLoadFilesInEmbeddedMode(TASKID, Extrae_get_num_tasks(), tmp);
 		}
 #endif /* EMBED_MERGE_IN_TRACE */
 	}
@@ -2495,6 +2587,7 @@ void Backend_Finalize (void)
 	{
 		int pid;
 		Extrae_getAppendingEventsToGivenPID (&pid);
+		// Protects race condition with Backend_Flush_pThread
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 		if (TRACING_BUFFER(THREADID) != NULL)
 		{
@@ -2533,20 +2626,8 @@ void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
 
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 {
-	Extrae_inInstrumentation = (int*) realloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
-	if (Extrae_inInstrumentation == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME
-		  ": Failed to allocate memory for inInstrumentation structure\n");
-		exit (-1);
-	}
-	Extrae_inSampling = (int*) realloc (Extrae_inSampling, sizeof(int)*nthreads);
-	if (Extrae_inSampling == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME
-		  ": Failed to allocate memory for inSampling structure\n");
-		exit (-1);
-	}
+	Extrae_inInstrumentation = (int*) xrealloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
+	Extrae_inSampling = (int*) xrealloc (Extrae_inSampling, sizeof(int)*nthreads);
 }
 
 void Backend_Enter_Instrumentation ()
@@ -2562,7 +2643,8 @@ void Backend_Enter_Instrumentation ()
 	/* Check if we have to fill the sampling buffer */
 #if defined(SAMPLING_SUPPORT)
 	if (Extrae_get_DumpBuffersAtInstrumentation())
-		if (Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
+		if (SamplingBuffer != NULL && SAMPLING_BUFFER(THREADID) != NULL &&
+		  Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
 		{
 			event_t FlushEv_Begin, FlushEv_End;
 
@@ -2644,7 +2726,7 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 {
 	#define LINE_SIZE 2048
 	char line[LINE_SIZE];
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 	int fd;
 
 	ASSERT(strlen(description)<LINE_SIZE, "Description for type is too large");
@@ -2655,8 +2737,46 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	{
 		unsigned j;
 
-		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
-			description);
+		/* For now assume a given HWC is an uncore if :cpu= attribute is present.
+		 * We could use a new category 'U' for uncores, and extend extrae.xml
+		 * to define uncore counter groups.
+		 *
+		int socket_id = 0;
+		char *cpu_attr = strstr(description, ":cpu=");
+		if (cpu_attr != NULL) cpu_attr += 5;
+
+		if ((code_type == 'H') && (cpu_attr != NULL))
+		{
+			// Also store the socket identifier to remap the object tree for uncore counters
+			int cpu_id = atoi(cpu_attr);
+
+			// Query the socket id for this cpu id
+			char *cpu_socket_info[64];
+			snprintf(cpu_socket_info, sizeof(cpu_socket_info), "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", cpu_id);
+
+			FILE *cpu_socket_info_file = fopen(cpu_socket_info, "r");
+			if (cpu_socket_info_file == NULL)
+			{
+				fprintf(stderr, PACKAGE_NAME": Can't retrieve socket id information from '%s'", cpu_socket_info);
+			}
+			else
+			{
+				char *socket_id_str = NULL;
+				size_t len = 0;
+
+				if (getline(&socket_id_str, &len, cpu_socket_info_file) != -1)	
+				{
+					socket_id = atoi(socket_id_str);
+
+					snprintf (line, sizeof(line), "%c %d \"%s\" [socket_id:%d]", code_type, type, description, socket_id);
+				}
+				fclose(cpu_socket_info_file);
+			}
+		}
+		else */
+		{
+			snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type, description);
+		}
 
 		/* Avoid cr in line */
 		for (j = 0; j < strlen(line); j++)
@@ -2694,13 +2814,43 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	#undef LINE_SIZE
 }
 
+pthread_mutex_t write_local_sym_mtx = PTHREAD_MUTEX_INITIALIZER;
+
+void Extrae_AddSyncEntryToLocalSYM(unsigned long long sync_time)
+{
+	#define LINE_SIZE 2048
+	char line[LINE_SIZE];
+	char trace_sym[TMP_DIR_LEN];
+	int fd;
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
+
+	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname, getpid(), TASKID, 0 /* THREADID -- force write at TASK level */, EXT_SYM);
+
+	pthread_mutex_lock (&write_local_sym_mtx);
+	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
+	{
+		snprintf (line, sizeof(line), "%c %lld\n", 'S', sync_time);
+		if (write (fd, line, strlen(line)) < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error writing synchronization point local symbolic file");
+		}
+		close (fd);
+	}
+	pthread_mutex_unlock(&write_local_sym_mtx);
+	#undef LINE_SIZE
+}
+
+
 void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *description,
 	char code_values, unsigned nvalues, unsigned long long *values,
 	char **description_values)
 {
 	#define LINE_SIZE 2048
 	char line[LINE_SIZE];
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 	int fd;
 	char hostname[1024];
 
@@ -2712,6 +2862,7 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname,
 	  getpid(), TASKID, THREADID, EXT_SYM);
 
+	pthread_mutex_lock (&write_local_sym_mtx);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
@@ -2752,6 +2903,7 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 		}
 		close (fd);
 	}
+	pthread_mutex_unlock(&write_local_sym_mtx);
 	#undef LINE_SIZE
 }
 
@@ -2760,7 +2912,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 {
 	#define LINE_SIZE 2048
 	char line[LINE_SIZE];
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 	int fd;
 	char hostname[1024];
 
@@ -2772,6 +2924,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname,
 	  getpid(), TASKID, THREADID, EXT_SYM);
 
+	pthread_mutex_lock (&write_local_sym_mtx);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
@@ -2792,6 +2945,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 
 		close (fd);
 	}
+	pthread_mutex_unlock(&write_local_sym_mtx);
 	#undef LINE_SIZE
 }
 
@@ -2852,7 +3006,7 @@ static void Extrae_getExecutableInfo (void)
  */
 void Backend_updateTaskID (void)
 {
-	char file1[TMP_DIR], file2[TMP_DIR];
+	char file1[TMP_DIR_LEN], file2[TMP_DIR_LEN];
 	unsigned thread;
 	char hostname[1024];
 

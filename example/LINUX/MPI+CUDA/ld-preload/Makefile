@@ -1,7 +1,7 @@
 include ../Makefile.inc
 
 CFLAGS = -O2 -g --cudart shared $(MPI_CFLAGS)
-CLIBS  = -O2 -g --cudart shared $(MPI_LDFLAGS) $(MPI_LIBS)
+CLIBS  = $(MPI_LDFLAGS) $(MPI_LIBS)
 
 all: mpi_hello 
 

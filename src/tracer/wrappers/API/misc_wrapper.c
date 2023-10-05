@@ -69,6 +69,7 @@
 #include "common_hwc.h"
 #include "threadinfo.h"
 #include "sampling-common.h"
+#include "xalloc.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -277,7 +278,7 @@ void Extrae_function_from_address_Wrapper (extrae_type_t type, void *address)
 	}
 }
 
-static void Generate_Task_File_List (void)
+void Generate_Task_File_List (void)
 {
 	int filedes;
 	unsigned thid;
@@ -323,25 +324,28 @@ void Extrae_init_tracing (int forked)
 
 	Extrae_set_initial_TASKID (TASKID);
 
-	/* Initialize the backend */
+	// Initialize the backend
 	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, forked))
 		return;
 
-	/* Generate a tentative file list if we don't reuse a previous execution through
-	   Extrae cmd commands */
+#if !defined(MPI_SUPPORT) // In MPI libraries this is done later at MPI_Init wrapper
+	// Generate tentative file list if we don't reuse previous execution through extrae-cmd
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))
+	{
 		Generate_Task_File_List();
+	}
+#endif
 
-	/* Take the time */
+	// Take the time
 	temps_init = TIME;
 
-	/* Execute a barrier within tasks so they will be synchronized */
+	// Execute a barrier within tasks so they will be synchronized
 	Extrae_barrier_tasks();
 
-	/* Take the time (a newer one) */
+	// Take the time (a newer one)
 	temps_fini = TIME;
 
-	/* End initialization of the backend */
+	// End initialization of the backend
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), TRACE_INIT_EV, temps_init, temps_fini, NULL))
 		return;
 
@@ -380,62 +384,22 @@ void Extrae_init_Wrapper (void)
 
 void Extrae_fini_Wrapper (void)
 {
-	/* Finalize only if its initialized by Extrae_init call */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-	{
-		/* If the application is MPI the MPI wrappers are responsible
-		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
-			/* If we are appending into the file (i.e. using the cmd-line) don't
-			   change the already existing .mpits file */
-			if (!Extrae_getAppendingEventsToGivenPID(NULL))
-				Generate_Task_File_List();
-
-		/* Finalize tracing library */
-		Backend_Finalize ();
-
-		/* Call additional code to finalize the task including
-	     MPI_Finalize,... */
-		Extrae_finalize_task();
-	}
-}
-
-/* This will be called by the atexit() hook. If this happens and the app is MPI we
-   warn about a finalization that does not occur through MPI_Finalize */
-void Extrae_fini_last_chance_Wrapper (void)
-{
-	/* Finalize independently from who did the initialization ! */
+	/* Finalize only if it is initialized */
 	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
 	{
-
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-			fprintf (stderr, PACKAGE_NAME": Warning! MPI task %d application did not terminate using MPI_Finalize! Review your application code.\n", TASKID);
-
-		/* If the application is MPI the MPI wrappers are responsible
-		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
-			/* If we are appending into the file (i.e. using the cmd-line) don't
-			   change the already existing .mpits file */
-			if (!Extrae_getAppendingEventsToGivenPID(NULL))
-				Generate_Task_File_List();
-
 		/* Finalize tracing library */
 		Backend_Finalize ();
-
-		/* Call additional code to finalize the task including
-		MPI_Finalize, ... */
-		Extrae_finalize_task();
 	}
 }
 
 void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr)
 {
-	memset (ptr, 0, sizeof(struct extrae_UserCommunication));
+	xmemset (ptr, 0, sizeof(struct extrae_UserCommunication));
 }
 
 void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 {
-	memset (ptr, 0, sizeof(struct extrae_CombinedEvents));
+	xmemset (ptr, 0, sizeof(struct extrae_CombinedEvents));
 	ptr->UserFunction = EXTRAE_USER_FUNCTION_NONE;
 }
 

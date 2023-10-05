@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "xalloc.h"
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>
@@ -104,12 +105,7 @@ int main (int argc, char *argv[])
 
 	if ((env_var = getenv ("DYNINSTAPI_RT_LIB")) == NULL)
 	{
-		env_var = (char*) malloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
-		if (env_var == NULL)
-		{
-			cerr << PACKAGE_NAME << ": Cannot allocate memory to define DYNINSTAPI_RT_LIB!" << endl;
-			exit (-1);
-		}
+		env_var = (char*) xmalloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
 		sprintf (env_var, "DYNINSTAPI_RT_LIB=%s", DYNINST_RT_LIB);
 		putenv (env_var);
 	}

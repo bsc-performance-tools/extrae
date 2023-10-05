@@ -42,120 +42,149 @@
 #include "record.h"
 #include "events.h"
 
-static int CUDA_Call (event_t* event, unsigned long long current_time,
-	unsigned int cpu, unsigned int ptask, unsigned int task,
-	unsigned int thread, FileSet_t *fset )
+static int
+CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
+    unsigned int ptask, unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned state;
-	unsigned EvType, EvValue;
+	unsigned int state;
+	unsigned int EvMisc;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (event);
-	EvValue = Get_EvValue (event);
+	EvValue = Get_EvValue(event);
+	EvMisc  = Get_EvMiscParam(event);
 
-	switch (EvType)
+	switch (EvValue)
 	{
-		case CUDACONFIGCALL_EV:
-		case CUDASTREAMCREATE_EV:
-		case CUDASTREAMDESTROY_EV:
+		case CUDASTREAMCREATE_VAL:
+		case CUDASTREAMDESTROY_VAL:
 			state = STATE_OTHERS;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case CUDATHREADEXIT_EV:
-		case CUDADEVICERESET_EV:
-		case CUDALAUNCH_EV:
+		case CUDATHREADEXIT_VAL:
+		case CUDADEVICERESET_VAL:
 			state = STATE_OVHD;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case CUDASTREAMBARRIER_EV:
-		case CUDATHREADBARRIER_EV:
+		case CUDACONFIGCALL_VAL:
+		case CUDALAUNCH_VAL:
+			state = STATE_CONFACCEL;
+			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
+			break;
+		case CUDASTREAMBARRIER_VAL:
+		case CUDATHREADBARRIER_VAL:
 			state = STATE_BARRIER;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case CUDAMEMCPY_EV:
-		case CUDAMEMCPYASYNC_EV:
+		case CUDAMEMCPY_VAL:
+		case CUDAMEMCPYASYNC_VAL:
+		case CUDAMEMSET_VAL:
 			state = STATE_MEMORY_XFER;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
+			break;
+		case CUDAMALLOC_VAL:
+		case CUDAMALLOCPITCH_VAL:
+		case CUDAFREE_VAL:
+		case CUDAMALLOCARRAY_VAL:
+		case CUDAFREEARRAY_VAL:
+		case CUDAMALLOCHOST_VAL:
+		case CUDAFREEHOST_VAL:
+		case CUDAHOSTALLOC_VAL:
+			state = STATE_ALLOCMEM;
+			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
 	}
 
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	if (EvValue != EVT_END)
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDACALL_EV, EvType - CUDABASE_EV);
-	else
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDACALL_EV, EVT_END);
-
-	if (EvType == CUDAMEMCPY_EV || EvType == CUDAMEMCPYASYNC_EV)
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDAMEMCPY_SIZE_EV, Get_EvMiscParam(event));
-
-	if (EvType == CUDALAUNCH_EV)
-	{
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDAFUNC_EV, EvValue);
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDAFUNC_LINE_EV, EvValue);
-	}
-
-	if (EvType == CUDASTREAMBARRIER_EV)
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDASTREAMBARRIER_THID_EV, 1+Get_EvMiscParam(event));
+	trace_paraver_state(cpu, ptask, task, thread, current_time);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDACALL_EV,
+	    (EvMisc != EVT_END) ? EvValue : EVT_END);
 
 	return 0;
 }
 
-static int CUDA_GPU_Call (event_t *event, unsigned long long current_time,
-	unsigned int cpu, unsigned int ptask, unsigned int task,
-	unsigned int thread, FileSet_t *fset)
+static int
+CUDA_Func_Event(event_t *event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
 {
-	unsigned EvType, EvValue, state;
+	unsigned int state;
+	UINT64 EvValue;
+	UNREFERENCED_PARAMETER(state);
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (event);
-	EvValue = Get_EvValue (event);
+	EvValue = Get_EvValue(event);
 
-	switch (EvType)
+	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDAFUNC_EV, EvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
+
+	return 0;
+}
+
+static int
+CUDA_Punctual_Event(event_t *event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
+{
+	unsigned int state;
+	unsigned int EvType;
+	UINT64 EvValue;
+	UNREFERENCED_PARAMETER(state);
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent(event);
+	EvValue = Get_EvValue(event);
+
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+static int
+CUDA_GPU_Call (event_t *event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
+{
+	unsigned EvMisc, state;
+	UINT64 EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvValue = Get_EvValue (event);
+	EvMisc  = Get_EvMiscParam(event);
+
+	switch (EvValue)
 	{
-		case CUDAKERNEL_GPU_EV:
+		case CUDAKERNEL_GPU_VAL:
 			state = STATE_RUNNING;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case CUDATHREADBARRIER_GPU_EV:
+		case CUDASTREAMBARRIER_GPU_VAL:
+		case CUDATHREADBARRIER_GPU_VAL:
 			state = STATE_BARRIER;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case CUDAMEMCPYASYNC_GPU_EV:
-		case CUDAMEMCPY_GPU_EV:
+		case CUDAMEMCPYASYNC_GPU_VAL:
+		case CUDAMEMCPY_GPU_VAL:
 			state = STATE_MEMORY_XFER;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case CUDACONFIGKERNEL_GPU_EV:
-			state = STATE_OTHERS;
-			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+		case CUDACONFIGKERNEL_GPU_VAL:
+			state = STATE_CONFACCEL;
+			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
 	}
 
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_state(cpu, ptask, task, thread, current_time);
 
-	if (EvValue != EVT_END)
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDACALL_EV, EvType - CUDABASE_GPU_EV);
-	else
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDACALL_EV, EVT_END);
-
-	if (EvType == CUDAMEMCPY_GPU_EV || EvType == CUDAMEMCPYASYNC_EV)
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDAMEMCPY_SIZE_EV, Get_EvMiscParam(event));
-
-	if (EvType == CUDAKERNEL_GPU_EV)
+	/*
+	 * XXX
+	 * Devices don't call cuda_launch. They actually run the kernel, thus we
+	 * don't emit this event so the region is marked as Useful.
+	 * XXX
+	 */
+	if (EvValue != CUDAKERNEL_GPU_VAL)
 	{
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDAFUNC_EV, EvValue);
-		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDAFUNC_LINE_EV, EvValue);
+		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDACALL_EV,
+		  (EvMisc != EVT_END) ? EvValue : EVT_END);
 	}
 
 	return 0;
@@ -163,22 +192,13 @@ static int CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 
 SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	/* Host calls */
-	{ CUDACONFIGCALL_EV, CUDA_Call },
-	{ CUDALAUNCH_EV, CUDA_Call },
-	{ CUDAMEMCPY_EV, CUDA_Call },
-	{ CUDAMEMCPYASYNC_EV, CUDA_Call },
-	{ CUDATHREADBARRIER_EV, CUDA_Call },
-	{ CUDASTREAMBARRIER_EV, CUDA_Call },
-	{ CUDADEVICERESET_EV, CUDA_Call },
-	{ CUDATHREADEXIT_EV, CUDA_Call },
-	{ CUDASTREAMCREATE_EV, CUDA_Call },
-	{ CUDASTREAMDESTROY_EV, CUDA_Call },
+	{ CUDACALL_EV, CUDA_Call },
+	{ CUDAFUNC_EV, CUDA_Func_Event },
+	{ CUDA_DYNAMIC_MEM_PTR_EV, CUDA_Punctual_Event },
+	{ CUDA_DYNAMIC_MEM_SIZE_EV, CUDA_Punctual_Event },
+	{ CUDASTREAMBARRIER_THID_EV, CUDA_Punctual_Event },
+	{ CUDA_UNTRACKED_EV, CUDA_Punctual_Event },
 	/* Accelerator calls */
-	{ CUDAKERNEL_GPU_EV, CUDA_GPU_Call },
-	{ CUDACONFIGKERNEL_GPU_EV, CUDA_GPU_Call },
-	{ CUDAMEMCPY_GPU_EV, CUDA_GPU_Call },
-	{ CUDAMEMCPYASYNC_GPU_EV, CUDA_GPU_Call },
-	{ CUDATHREADBARRIER_GPU_EV, CUDA_GPU_Call },
+	{ CUDACALLGPU_EV, CUDA_GPU_Call },
 	{ NULL_EV, NULL }
 };
-

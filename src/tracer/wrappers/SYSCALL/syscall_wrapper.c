@@ -89,7 +89,7 @@ int sched_yield(void)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_sched_yield == NULL)
   {
-	real_sched_yield = EXTRAE_DL_INIT(__func__);
+	real_sched_yield = XTR_FIND_SYMBOL(__func__);
   }
 
 #if defined(DEBUG)

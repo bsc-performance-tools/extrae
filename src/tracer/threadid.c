@@ -34,20 +34,17 @@
 #endif
 
 /*
-   Default routines
+   Default return values
    1 thread in total, and thread id is always 0
 */
 
-static unsigned Extrae_threadid_default_function (void)
-{ return 0; }
-
-static unsigned Extrae_num_threads_default_function (void)
-{ return 1; }
+enum { Extrae_threadid_default = 0 };
+enum { Extrae_num_threads_default = 1};
 
 /* Callback definitions and API */
 
-static unsigned (*get_thread_num) (void) = Extrae_threadid_default_function;
-static unsigned (*get_num_threads) (void) = Extrae_num_threads_default_function;
+static unsigned (*get_thread_num) (void) = NULL;
+static unsigned (*get_num_threads) (void) = NULL;
 
 void Extrae_set_threadid_function (unsigned (*threadid_function)(void))
 {
@@ -80,49 +77,33 @@ extern int css_get_max_threads();
 
 unsigned Extrae_get_thread_number (void)
 {
-#if defined(OMP_SUPPORT) 
-# if defined(OMPT_SUPPORT)
-	if (ompt_enabled)
+	if (get_thread_num)
 	{
 		return get_thread_num();
 	}
-	else
-# endif /* OMPT_SUPPORT */
-	{
-		return omp_get_thread_num();
-	}
+#if defined(OMP_SUPPORT)
+	return omp_get_thread_num();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num();
-#elif defined(NANOS_SUPPORT)
-	/* return nanos_extrae_get_thread_num(); */
-	return get_thread_num();
 #elif defined(PTHREAD_SUPPORT)
 	return Backend_GetpThreadIdentifier();
 #elif defined(UPC_SUPPORT)
 	return GetUPCthreadID();
 #else
-	return get_thread_num();
+	return Extrae_threadid_default;
 #endif
 }
 
 void * Extrae_get_thread_number_function (void)
 {
-#if defined(OMP_SUPPORT) 
-# if defined(OMPT_SUPPORT)
-	if (ompt_enabled)
+	if (get_thread_num)
 	{
-		return get_thread_num;
+		return (void*) get_thread_num;
 	}
-	else
-# endif /* OMPT_SUPPORT */
-	{
-		return (void*) omp_get_thread_num;
-	} 
+#if defined(OMP_SUPPORT)
+	return (void*) omp_get_thread_num;
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num;
-#elif defined(NANOS_SUPPORT)
-	/* return nanos_extrae_get_thread_num; */
-	return (void*) get_thread_num;
 #elif defined(PTHREAD_SUPPORT)
 	return (void*) pthread_self;
 #elif defined(UPC_SUPPORT)
@@ -134,26 +115,19 @@ void * Extrae_get_thread_number_function (void)
 
 unsigned Extrae_get_num_threads (void)
 {
-#if defined(OMP_SUPPORT) 
-# if defined(OMPT_SUPPORT)
-	if (ompt_enabled)
+	if (get_num_threads)
 	{
 		return get_num_threads();
 	}
-	else 
-# endif /* OMPT_SUPPORT */
-	{
-		return omp_get_num_threads();
-	}
+#if defined(OMP_SUPPORT)
+	return omp_get_num_threads();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_max_threads();
-#elif defined(NANOS_SUPPORT)
-	return get_num_threads();
 #elif defined(PTHREAD_SUPPORT)
 	return Backend_getNumberOfThreads();
 #elif defined(UPC_SUPPORT)
 	return GetNumUPCthreads();
 #else
-	return get_num_threads();
+	return Extrae_num_threads_default;
 #endif
 }

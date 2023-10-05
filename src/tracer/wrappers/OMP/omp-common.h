@@ -24,10 +24,26 @@
 #ifndef OMP_COMMON_H_
 #define OMP_COMMON_H_
 
+#include "common.h"
+
+#ifdef HAVE_DLFCN_H
+# define __GNU_SOURCE
+# include <dlfcn.h>
+#endif
+
 #include <omp.h>
 
 #include "config.h"
 #include "ompt-wrapper.h"
+#include "utils.h"
+
+#if defined (OS_RTEMS)
+	#define GET_REAL_FUNCTION(f) __real_##f
+	#define LINK_WRAP(f) __wrap_##f
+#else
+	#define GET_REAL_FUNCTION(f) dlsym (RTLD_NEXT, TOSTRING(f));
+	#define LINK_WRAP(f) f
+#endif
 
 #define INSTRUMENT_OMP_WRAPPER(func) ((func != NULL) && (EXTRAE_INITIALIZED()) && (EXTRAE_ON()))
 

@@ -46,5 +46,13 @@
 #define MPI3_MPI_AINT_P_CAST
 #endif
 
+/*
+ * IntelMPI calls the C interface using MPI_* and not PMPI_* when used from
+ * Fortran. Checking if we are already in instrumentation does the trick for all
+ * calls but MPI_Init*, which use their own protection mechanism.
+ */
+#define INSTRUMENT_THIS_MPI ((mpitrace_on) && (!Backend_inInstrumentation(THREADID)))
+
+extern int capture_mpi_comm_calls;
 
 #endif /* __MPI_INTERFACE_H__ */

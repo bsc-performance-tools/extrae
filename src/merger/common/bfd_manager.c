@@ -39,6 +39,7 @@
 #include "debug.h"
 #include "bfd_manager.h"
 #include "object_tree.h"
+#include "xalloc.h"
 
 static loadedModule_t *loadedModules = NULL;
 static unsigned numLoadedModules = 0;
@@ -108,15 +109,12 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 			data_symbol_t *DataSyms = NULL;
 #endif
 
-			bfdSymbols = (asymbol**) malloc (size);
-			if (bfdSymbols == NULL)
-				FATAL_ERROR ("Cannot allocate memory to translate addresses into source code references\n");
-
+			bfdSymbols = (asymbol**) xmalloc (size);
 #if 0
 			/* HSG This is supposed to be space-efficient, but showed some errors .... :( */
-			symcount = bfd_read_minisymbols (bfdImage, FALSE, (PTR) bfdSymbols, &usize);
+			symcount = bfd_read_minisymbols (bfdImage, FALSE, (void *) bfdSymbols, &usize);
 			if (symcount == 0) 
-				symcount = bfd_read_minisymbols (bfdImage, TRUE, (PTR) bfdSymbols, &usize);
+				symcount = bfd_read_minisymbols (bfdImage, TRUE, (void *) bfdSymbols, &usize);
 #else
 			symcount = bfd_canonicalize_symtab (bfdImage, bfdSymbols);
 
@@ -137,9 +135,7 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 						if (bfd_get_flavour(bfdImage) == bfd_target_elf_flavour)
 							sz = ((elf_symbol_type*) bfdSymbols[s])->internal_elf_sym.st_size;
 
-						DataSyms = (data_symbol_t*) realloc (DataSyms, sizeof(data_symbol_t)*(nDataSyms+1));
-						if (DataSyms == NULL)
-							FATAL_ERROR ("Cannot allocate memory to allocate data symbols\n");
+						DataSyms = (data_symbol_t*) xrealloc (DataSyms, sizeof(data_symbol_t)*(nDataSyms+1));
 						DataSyms[nDataSyms].name = strdup (syminfo.name);
 						DataSyms[nDataSyms].address = (void*) syminfo.value;
 						DataSyms[nDataSyms].size = sz;
@@ -188,10 +184,8 @@ void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols,
 			return;
 		}
 
-	loadedModules = (loadedModule_t*) realloc (loadedModules,
+	loadedModules = (loadedModule_t*) xrealloc (loadedModules,
 	  (numLoadedModules+1)*sizeof(loadedModule_t));
-	if (loadedModules == NULL)
-		FATAL_ERROR("Cannot obtain memory to load a binary");
 
 	idx = numLoadedModules;
 	loadedModules[idx].module = strdup (file);
@@ -231,35 +225,49 @@ asymbol **BFDmanager_getDefaultSymbols (void)
  *
  * @return No return value.
  */
-static void BFDmanager_findAddressInSection (bfd * abfd, asection * section, PTR data)
+static void BFDmanager_findAddressInSection (bfd * abfd, asection * section, void *data)
 {
-#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
+#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	bfd_size_type size;
 #endif
+
 	bfd_vma vma;
 	BFDmanager_symbolInfo_t *symdata = (BFDmanager_symbolInfo_t*) data;
 
 	if (symdata->found)
 		return;
 
+#if HAVE_BFD_GET_SECTION_FLAGS
 	if ((bfd_get_section_flags (abfd, section) & SEC_ALLOC) == 0)
 		return;
+#elif HAVE_BFD_SECTION_FLAGS
+	if ((bfd_section_flags (section) & SEC_ALLOC) == 0)
+		return;
+#endif
 
-	vma = bfd_get_section_vma (abfd, section);;
+#ifdef HAVE_BFD_GET_SECTION_VMA
+	vma = bfd_get_section_vma (abfd, section);
+#elif HAVE_BFD_SECTION_VMA
+	vma = bfd_section_vma (section);
+#else
+	#error "Incompatible BFD section_vma. Binutils version not supported."
+#endif
 
 	if (symdata->pc < vma)
 		return;
 
+#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
+
 #if HAVE_BFD_GET_SECTION_SIZE
 	size = bfd_get_section_size (section);
-	if (symdata->pc >= vma + size)
-		return;
+#elif HAVE_BFD_SECTION_SIZE
+	size = bfd_section_size (section);
 #elif HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	size = bfd_get_section_size_before_reloc (section);
+#endif
+
 	if (symdata->pc >= vma + size)
 		return;
-#else
-	/* Do nothing? */
 #endif
 
 	symdata->found = bfd_find_nearest_line (abfd, section, symdata->symbols,

@@ -75,6 +75,8 @@ typedef struct
 }
 paraver_rec_t;
 
+typedef struct TaskFileItem_t TaskFileItem_t;
+
 typedef struct
 {
 	int fd;
@@ -90,12 +92,25 @@ typedef struct
 	event_t *first, *last, *first_glop;
 	event_t *last_recv;
 	event_t *tmp;
+
+	TaskFileItem_t *sibling_threads;
 }
 FileItem_t;
 
+/**
+ * TaskFileItem_t
+ * Contains a list of the files for all threads of one (ptask,task) 
+ */
+typedef struct TaskFileItem_t
+{
+   FileItem_t **files;
+   int nfiles;
+} TaskFileItem_t;
+
 typedef struct
 {
-	FileItem_t  *files;             /* Files in the set */
+	FileItem_t  *files;                /* All files in the set */
+
 	unsigned int nfiles;            /* Number of files in the set */
 	unsigned int traceformat;       /* Output trace format */
 	unsigned int active_file;       /* Dimemas uses this in order to know which file is being translated */
@@ -177,7 +192,9 @@ int SearchRecvEvent_FS (FileSet_t *fset, unsigned int ptask,
 int SearchSendEvent_FS (FileSet_t *fset, unsigned int ptask,
 	unsigned int sender, unsigned int receiver, unsigned int tag,
 	event_t ** send_begin, event_t ** send_end);
-event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * freceive);
+event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * freceive, int * found_in_thread);
+event_t *Search_MPI_IRECVED_sequential (event_t * current, long long request, FileItem_t * freceive);
+event_t *Search_MPI_IRECVED_threads (event_t * current, long long request, FileItem_t * freceive, int * found_in_thread);
 
 long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid);
 int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes);

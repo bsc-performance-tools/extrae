@@ -28,6 +28,10 @@
 #include "trace_macros.h"
 #include "malloc_probe.h"
 
+#ifdef HAVE_MALLOC_H
+#include "malloc.h"
+#endif
+
 static int trace_malloc = FALSE;
 static int trace_malloc_allocate = TRUE;
 static int trace_malloc_free     = FALSE;
@@ -70,6 +74,12 @@ void Probe_Malloc_Exit (void *p)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, MALLOC_EV, EVT_END, (UINT64) p);
+
+		int v = malloc_usable_size(p);
+		if (v > 0) 
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
@@ -78,8 +88,14 @@ void Probe_Free_Entry (void *p)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, FREE_EV, EVT_BEGIN, (UINT64) p);
+
+		int v = malloc_usable_size(p);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, SUB_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
-}
+} 
 
 void Probe_Free_Exit (void)
 {
@@ -102,11 +118,18 @@ void Probe_Calloc_Exit (void *p)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CALLOC_EV, EVT_END, (UINT64) p);
+
+		int v = malloc_usable_size(p);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
-void Probe_Realloc_Entry (void *p, size_t s)
+int Probe_Realloc_Entry (void *p, size_t s)
 {
+	int v = malloc_usable_size(p);
 	if (mpitrace_on && trace_malloc)
 	{
 		/* Split p & s in two events. There's no need to read counters for the
@@ -114,13 +137,23 @@ void Probe_Realloc_Entry (void *p, size_t s)
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, REALLOC_EV, EVT_BEGIN, (UINT64) p);
 		TRACE_MISCEVENT(LAST_READ_TIME, REALLOC_EV, EVT_BEGIN+1, s);
 	}
+
+	return v;
 }
 
-void Probe_Realloc_Exit (void *p)
+void Probe_Realloc_Exit (void *p, int usable_size)
 {
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, REALLOC_EV, EVT_END, (UINT64) p);
+
+		int v = malloc_usable_size(p);
+		int delta_size = v - usable_size;
+		if (delta_size > 0) {
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, delta_size, EMPTY);
+		} else if (delta_size < 0) {
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, SUB_RESERVED_MEM_EV, delta_size * -1, EMPTY);
+		}
 	}
 }
 
@@ -134,10 +167,16 @@ void Probe_posix_memalign_Entry(size_t size)
 
 void Probe_posix_memalign_Exit(void *ptr)
 {
-        if (mpitrace_on && trace_malloc)
-        {
-                TRACE_MISCEVENTANDCOUNTERS(TIME, POSIX_MEMALIGN_EV, EVT_END, ptr);
-        }
+    if (mpitrace_on && trace_malloc)
+    {
+        TRACE_MISCEVENTANDCOUNTERS(TIME, POSIX_MEMALIGN_EV, EVT_END, ptr);
+
+        int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
+    }
 }
 
 void Probe_memkind_malloc_Entry(int kind, size_t size)
@@ -155,6 +194,12 @@ void Probe_memkind_malloc_Exit(void *ptr)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_MALLOC_EV, EVT_END, (UINT64) ptr);
 		TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_PARTITION_EV, EMPTY, EMPTY);
+
+		int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
@@ -171,13 +216,20 @@ void Probe_memkind_calloc_Exit(void *ptr)
 {
 	if (mpitrace_on && trace_malloc)
 	{
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_CALLOC_EV, EVT_END, (UINT64) ptr);
+		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_CALLOC_EV, EVT_END, (UINT64) ptr);
 		TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_PARTITION_EV, EMPTY, EMPTY);
+
+		int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
-void Probe_memkind_realloc_Entry(int kind, void *ptr, size_t size)
+int Probe_memkind_realloc_Entry(int kind, void *ptr, size_t size)
 {
+	int v = malloc_usable_size(ptr);
 	if (mpitrace_on && trace_malloc)
 	{
 		/* Split ptr & size in two events. There's no need to read counters for the second event */
@@ -185,14 +237,23 @@ void Probe_memkind_realloc_Entry(int kind, void *ptr, size_t size)
 		TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_REALLOC_EV, EVT_BEGIN+1, size);
 		TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_PARTITION_EV, kind, EMPTY);
 	}
+	return v;
 }
 
-void Probe_memkind_realloc_Exit(void *ptr)
+void Probe_memkind_realloc_Exit(void *ptr, int usable_size)
 {
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_REALLOC_EV, EVT_END, (UINT64) ptr);
 		TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_PARTITION_EV, EMPTY, EMPTY);
+
+		int v = malloc_usable_size(ptr);
+		int delta_size = v - usable_size;
+		if (delta_size > 0) {
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, delta_size, EMPTY);
+		} else if (delta_size < 0) {
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, SUB_RESERVED_MEM_EV, delta_size * -1, EMPTY);
+		}
 	}
 }
 
@@ -211,6 +272,12 @@ void Probe_memkind_posix_memalign_Exit(void *ptr)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_POSIX_MEMALIGN_EV, EVT_END, ptr);
 		TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_PARTITION_EV, EMPTY, EMPTY);
+
+		int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
@@ -219,7 +286,13 @@ void Probe_memkind_free_Entry(int kind, void *ptr)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_FREE_EV, EVT_BEGIN, (UINT64) ptr);
-                TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_PARTITION_EV, kind, EMPTY);
+        TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_PARTITION_EV, kind, EMPTY);
+
+        int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, SUB_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
@@ -245,6 +318,12 @@ void Probe_kmpc_malloc_Exit(void *ptr)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_MALLOC_EV, EVT_END, (UINT64) ptr);
+
+		int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
@@ -264,6 +343,12 @@ void Probe_kmpc_aligned_malloc_Exit(void *ptr)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_ALIGNED_MALLOC_EV, EVT_END, (UINT64) ptr);
+
+		int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
@@ -280,23 +365,39 @@ void Probe_kmpc_calloc_Exit(void *ptr)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_CALLOC_EV, EVT_END, (UINT64) ptr);
+
+		int v = malloc_usable_size(ptr);
+		if (v > 0)
+		{
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, v, EMPTY);
+		}
 	}
 }
 
-void Probe_kmpc_realloc_Entry (void *ptr, size_t size)
+int Probe_kmpc_realloc_Entry (void *ptr, size_t size)
 {
+	int v = malloc_usable_size(ptr);
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_REALLOC_EV, EVT_BEGIN, (UINT64) ptr);
 		TRACE_MISCEVENT(LAST_READ_TIME, KMPC_REALLOC_EV, EVT_BEGIN+1, size);
 	}
+	return v;
 }
 
-void Probe_kmpc_realloc_Exit (void *ptr)
+void Probe_kmpc_realloc_Exit (void *ptr, int usable_size)
 {
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_REALLOC_EV, EVT_END, (UINT64) ptr);
+
+		int v = malloc_usable_size(ptr);
+		int delta_size = v - usable_size;
+		if (delta_size > 0) {
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ADD_RESERVED_MEM_EV, delta_size, EMPTY);
+		} else if (delta_size < 0) {
+			TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, SUB_RESERVED_MEM_EV, delta_size * -1, EMPTY);
+		}
 	}
 }
 
@@ -305,6 +406,9 @@ void Probe_kmpc_free_Entry (void *ptr)
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_FREE_EV, EVT_BEGIN, (UINT64) ptr);
+
+		int v = malloc_usable_size(ptr);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, SUB_RESERVED_MEM_EV, v, EMPTY);
 	}
 }
 

@@ -131,7 +131,7 @@ void NAME_ROUTINE_C2F(mpi_bsend) (void *buf, MPI_Fint *count,
 
 	DLB(DLB_MPI_Bsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -161,7 +161,7 @@ void NAME_ROUTINE_C2F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 	
 	DLB(DLB_MPI_Ssend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 	
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -194,7 +194,7 @@ void NAME_ROUTINE_C2F(mpi_rsend) (void *buf, MPI_Fint *count,
 
 	DLB(DLB_MPI_Rsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -226,7 +226,7 @@ void NAME_ROUTINE_C2F(mpi_send) (void *buf, MPI_Fint *count,
 
 	DLB(DLB_MPI_Send_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -260,7 +260,7 @@ void NAME_ROUTINE_C2F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
 
 	DLB(DLB_MPI_Ibsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -295,7 +295,7 @@ void NAME_ROUTINE_C2F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 
 	DLB(DLB_MPI_Isend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -330,7 +330,7 @@ void NAME_ROUTINE_C2F(mpi_issend) (void *buf, MPI_Fint *count,
 
 	DLB(DLB_MPI_Issend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -365,7 +365,7 @@ void NAME_ROUTINE_C2F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
 
 	DLB(DLB_MPI_Irsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -400,7 +400,7 @@ void NAME_ROUTINE_C2F(mpi_recv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	DLB(DLB_MPI_Recv_F_enter, buf, count, datatype, source, tag, comm, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -435,7 +435,7 @@ void NAME_ROUTINE_C2F(mpi_irecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 
 	DLB(DLB_MPI_Irecv_F_enter, buf, count, datatype, source, tag, comm, request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -469,7 +469,7 @@ void NAME_ROUTINE_C2F(mpi_mrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 {
         DLB(DLB_MPI_Mrecv_F_enter, buf, count, datatype, message, status, ierror);
 
-        if (mpitrace_on)
+        if (INSTRUMENT_THIS_MPI)
         {
                 DEBUG_INTERFACE(ENTER)
                 Backend_Enter_Instrumentation ();
@@ -498,7 +498,7 @@ void NAME_ROUTINE_C2F(mpi_imrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
 {
         DLB(DLB_MPI_Imrecv_F_enter, buf, count, datatype, message, request, ierror);
 
-        if (mpitrace_on)
+        if (INSTRUMENT_THIS_MPI)
         {
                 DEBUG_INTERFACE(ENTER)
                 Backend_Enter_Instrumentation ();
@@ -530,7 +530,7 @@ void NAME_ROUTINE_C2F(mpi_probe) (MPI_Fint *source, MPI_Fint *tag,
 
 	DLB(DLB_MPI_Probe_F_enter, source, tag, comm, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -561,7 +561,7 @@ void NAME_ROUTINE_C2F(mpi_iprobe) (MPI_Fint *source, MPI_Fint *tag,
 
 	DLB(DLB_MPI_Iprobe_F_enter, source, tag, comm, flag, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -593,7 +593,7 @@ void NAME_ROUTINE_C2F(mpi_mprobe) (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *co
 {
         DLB(DLB_MPI_Mprobe_F_enter, source, tag, comm, message, status, ierror);
 
-        if (mpitrace_on)
+        if (INSTRUMENT_THIS_MPI)
         {
                 DEBUG_INTERFACE(ENTER)
                 Backend_Enter_Instrumentation ();
@@ -623,7 +623,7 @@ void NAME_ROUTINE_C2F(mpi_improbe) (MPI_Fint *source, MPI_Fint *tag,
 {
         DLB(DLB_MPI_Improbe_F_enter, source, tag, comm, flag, message, status, ierror);
 
-        if (mpitrace_on)
+        if (INSTRUMENT_THIS_MPI)
         {
                 DEBUG_INTERFACE(ENTER)
                 Backend_Enter_Instrumentation (); 
@@ -656,7 +656,7 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
 	DLB(DLB_MPI_Test_F_enter, request, flag, status, ierror);
 
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -675,16 +675,16 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
  ***  MPI_TestAll
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_testall__,mpi_testall_,MPI_TESTALL,mpi_testall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror))
+MPI_F_SYMS(mpi_testall__,mpi_testall_,MPI_TESTALL,mpi_testall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag, MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror))
 
 void NAME_ROUTINE_F(mpi_testall) (MPI_Fint * count,
 	MPI_Fint array_of_requests[], MPI_Fint *flag,
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
 	MPI_Fint array_of_requests[], MPI_Fint *flag,
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #endif
 {
@@ -692,7 +692,7 @@ void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
 	DLB(DLB_MPI_Testall_F_enter, count, array_of_requests, flag, (MPI_Fint*) array_of_statuses, ierror);
 
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -725,7 +725,7 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[
 	DLB(DLB_MPI_Testany_F_enter, count, array_of_requests, index, flag, status, ierror);
 
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -744,21 +744,21 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[
  ***  MPI_TestSome
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_testsome__,mpi_testsome_,MPI_TESTSOME,mpi_testsome, (MPI_Fint *incount, MPI_Fint *array_of_requests, MPI_Fint *outcount, MPI_Fint *array_of_indices, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror))
+MPI_F_SYMS(mpi_testsome__,mpi_testsome_,MPI_TESTSOME,mpi_testsome, (MPI_Fint *incount, MPI_Fint *array_of_requests, MPI_Fint *outcount, MPI_Fint *array_of_indices, MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_testsome) (MPI_Fint *incount,
 	MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #endif
 {
 	DLB(DLB_MPI_Testsome_F_enter, incount, array_of_requests, outcount,
 		array_of_indices, (MPI_Fint*) array_of_statuses, ierror);
 		
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -791,7 +791,7 @@ void NAME_ROUTINE_C2F(mpi_wait) (MPI_Fint *request, MPI_Fint *status,
 
 	DLB(DLB_MPI_Wait_F_enter, request, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -810,21 +810,21 @@ void NAME_ROUTINE_C2F(mpi_wait) (MPI_Fint *request, MPI_Fint *status,
  ***  MPI_WaitAll
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_waitall__,mpi_waitall_,MPI_WAITALL,mpi_waitall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror))
+MPI_F_SYMS(mpi_waitall__,mpi_waitall_,MPI_WAITALL,mpi_waitall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror))
 
 void NAME_ROUTINE_F(mpi_waitall) (MPI_Fint * count,
-	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_waitall) (MPI_Fint * count,
-	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint array_of_requests[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX],
 	MPI_Fint * ierror)
 #endif
 {
 
 	DLB(DLB_MPI_Waitall_F_enter, count, array_of_requests, (MPI_Fint*) array_of_statuses, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -857,7 +857,7 @@ void NAME_ROUTINE_C2F(mpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[
 
 	DLB(DLB_MPI_Waitany_F_enter, count, array_of_requests, index, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -877,22 +877,22 @@ void NAME_ROUTINE_C2F(mpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[
  ***  MPI_WaitSome
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_waitsome__,mpi_waitsome_,MPI_WAITSOME,mpi_waitsome, (MPI_Fint *incount, MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror))
+MPI_F_SYMS(mpi_waitsome__,mpi_waitsome_,MPI_WAITSOME,mpi_waitsome, (MPI_Fint *incount, MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[], MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_waitsome) (MPI_Fint *incount,
 	MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_waitsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 #endif
 {
 
 	DLB(DLB_MPI_Waitsome_F_enter, incount, array_of_requests, outcount,
 		array_of_indices, (MPI_Fint*) array_of_statuses, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -928,7 +928,7 @@ void NAME_ROUTINE_C2F(mpi_recv_init) (void *buf, MPI_Fint *count,
 	DLB(DLB_MPI_Recv_init_F_enter, buf, count, datatype, source, tag, comm,
 	  request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -964,7 +964,7 @@ void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
 	DLB(DLB_MPI_Send_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1000,7 +1000,7 @@ void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
 	DLB(DLB_MPI_Bsend_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1036,7 +1036,7 @@ void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
 	DLB(DLB_MPI_Rsend_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1072,7 +1072,7 @@ void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *dat
 	DLB(DLB_MPI_Ssend_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1110,7 +1110,7 @@ void NAME_ROUTINE_C2F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
 	DLB(DLB_MPI_Sendrecv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 		recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1149,7 +1149,7 @@ void NAME_ROUTINE_C2F(mpi_sendrecv_replace) (void *buf, MPI_Fint *count,
 		recvtag, comm, status, ierr);
 
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();

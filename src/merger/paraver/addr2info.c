@@ -64,6 +64,7 @@ int *__errno_location(void)
 #include "misc_prv_semantics.h"
 #include "addr2info_hashcache.h"
 #include "options.h"
+#include "xalloc.h"
 
 static void AddressTable_Initialize (void);
 static int  AddressTable_Insert (UINT64 address, int event_type,
@@ -240,21 +241,11 @@ static void AddressTable_Initialize (void)
 
 	for (type=0; type < COUNT_ADDRESS_TYPES; type++)
 	{
-		AddressTable[type] = (struct address_table *)malloc(sizeof(struct address_table));
-		if (AddressTable[type] == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for AddressTable[type=%d]\n", type);
-			exit (-1);
-		}
+		AddressTable[type] = (struct address_table *)xmalloc(sizeof(struct address_table));
 		AddressTable[type]->address = NULL;
 		AddressTable[type]->num_addresses = 0;
 
-		FunctionTable[type] = (struct function_table *)malloc(sizeof(struct function_table));
-		if (FunctionTable[type] == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for FunctionTable[type=%d]\n", type);
-			exit (-1);
-		}
+		FunctionTable[type] = (struct function_table *)xmalloc(sizeof(struct function_table));
 		FunctionTable[type]->function = NULL;
 		FunctionTable[type]->address_id = NULL;
 		FunctionTable[type]->num_functions = 0;
@@ -324,42 +315,83 @@ UINT64 Address2Info_Translate_MemReference (unsigned ptask, unsigned task, UINT6
 		char tmp[1024];
 		int i;
 
-		snprintf (buffer, sizeof(buffer), "");
+		if (get_option_merge_TranslateDataAddresses())
+		{
+			snprintf (buffer, sizeof(buffer), "");
 
-		/* Trim head and tail for callers that can't be translated */
-		for (i = 0; i < MAX_CALLERS; i++)
-			if (calleraddresses[i] != 0)
-			{
-				Translate_Address (calleraddresses[i], ptask, task, &module,
-				  &sname, &filename, &line);
-				if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
-					calleraddresses[i] = 0;
-				else
-					break;
-			}
+			/* Trim head and tail for callers that can't be translated */
+			for (i = 0; i < MAX_CALLERS; i++)
+				if (calleraddresses[i] != 0)
+				{
+					Translate_Address (calleraddresses[i], ptask, task, &module,
+					  &sname, &filename, &line);
+					if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
+						calleraddresses[i] = 0;
+					else
+						break;
+				}
 
-		for (i = MAX_CALLERS-1; i >= 0; i--)
-			if (calleraddresses[i] != 0)
-			{
-				Translate_Address (calleraddresses[i], ptask, task, &module,
-				  &sname, &filename, &line);
-				if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
-					calleraddresses[i] = 0;
-				else
-					break;
-			}
+			for (i = MAX_CALLERS-1; i >= 0; i--)
+				if (calleraddresses[i] != 0)
+				{
+					Translate_Address (calleraddresses[i], ptask, task, &module,
+					  &sname, &filename, &line);
+					if (!strcmp (filename, ADDR_UNRESOLVED) || !strcmp (filename, ADDR_NOT_FOUND))
+						calleraddresses[i] = 0;
+					else
+						break;
+				}
 
-		for (i = 0; i < MAX_CALLERS; i++)
-			if (calleraddresses[i] != 0)
+			for (i = 0; i < MAX_CALLERS; i++)
+				if (calleraddresses[i] != 0)
+				{
+					Translate_Address (calleraddresses[i], ptask, task, &module,
+					  &sname, &filename, &line);
+					if (strlen(buffer) > 0)
+						snprintf (tmp, sizeof(tmp), " > %s:%d", filename, line);
+					else
+						snprintf (tmp, sizeof(tmp), "%s:%d", filename, line);
+					strncat (buffer, tmp, sizeof(buffer));
+				}
+		}
+		else
+		{
+			// Export the id for a dynamically allocated object in memory through its callstack
+			// as pointers (not translated references). The pointers refer to the address in the
+			// respective library where it belongs as providing the absolute address won't help
+			// (even if ASLR is disabled) because LD_PRELOADing alters the addresses from the libs
+			// Main binary addresses are given with absolute references
+			const char * mainbinary = ObjectTable_GetBinaryObjectName (ptask, task);
+			UINT64 base_address;
+			buffer[0] = (char)0;
+			for (i = 0; i < MAX_CALLERS; i++)
 			{
-				Translate_Address (calleraddresses[i], ptask, task, &module,
-				  &sname, &filename, &line);
-				if (strlen(buffer) > 0)
-					snprintf (tmp, sizeof(tmp), " > %s:%d", filename, line);
-				else
-					snprintf (tmp, sizeof(tmp), "%s:%d", filename, line);
-				strncat (buffer, tmp, sizeof(buffer));
+				if (calleraddresses[i] != 0)
+				{
+					binary_object_t * obj = ObjectTable_GetBinaryObjectAt (ptask, task, calleraddresses[i]);
+					const char * module;
+
+					if (obj != NULL)
+					{
+						module = obj->module;
+						base_address = (strcmp (mainbinary, module) != 0) ? obj->start_address : 0;
+					}
+					else
+					{
+						if (getenv("EXTRAE_DEBUG"))
+							fprintf (stderr, "DEBUG: cannot translate address %08lx \n", calleraddresses[i]);
+						module = "Unknown";
+						base_address = 0;
+					}
+
+					if (strlen(buffer) > 0)
+						snprintf (tmp, sizeof(tmp), " > %s!%08lx", module, calleraddresses[i] - base_address);
+					else
+						snprintf (tmp, sizeof(tmp), "%s!%08lx", module, calleraddresses[i] - base_address);
+					strncat (buffer, tmp, sizeof(buffer));
+				}
 			}
+		}
 
 		return 1+AddressTable_Insert_MemReference (query, module, "",
 		  strdup(buffer), 0);
@@ -467,7 +499,7 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 		case ADDR2CUDA_FUNCTION:
 		case ADDR2CUDA_LINE:
 			Address2Info_Labels[A2I_CUDA] = TRUE;
-			caller_address = address-1;
+			caller_address = address;
 			addr_type = uniqueID?UNIQUE_TYPE:CUDAKERNEL_TYPE;
 			break;
 		case ADDR2UF_FUNCTION:
@@ -649,14 +681,9 @@ static int AddressTable_Insert_MemReference (int addr_type,
 	}
 
 	/* If we're here, we haven't find it! */
-	AddressObjectInfo.objects = (struct address_object_info_st*) realloc (
+	AddressObjectInfo.objects = (struct address_object_info_st*) xrealloc (
 	  AddressObjectInfo.objects,
 	  (AddressObjectInfo.num_objects+1)*sizeof(struct address_object_info_st));
-	if (NULL == AddressObjectInfo.objects)
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for memory object identifiers\n");
-		exit (-1);
-	}
 
 	i = AddressObjectInfo.num_objects;
 	AddressObjectInfo.objects[i].is_static = addr_type == MEM_REFERENCE_STATIC;
@@ -703,15 +730,10 @@ static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
 	FuncTab = FunctionTable[addr_type];
 
 	new_address_id = AddrTab->num_addresses ++;
-	AddrTab->address = (struct address_info *) realloc (
+	AddrTab->address = (struct address_info *) xrealloc (
 		AddrTab->address,
 		AddrTab->num_addresses * sizeof(struct address_info)
 	);
-	if (NULL == AddrTab->address)
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for AddressTable\n");
-		exit (-1);
-	}
 	
 	AddrTab->address[new_address_id].address = address;
 	AddrTab->address[new_address_id].file_name = filename;
@@ -731,24 +753,14 @@ static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
 	if (!found) 
 	{
 		function_id = FuncTab->num_functions ++;
-		FuncTab->function = (char **) realloc (
+		FuncTab->function = (char **) xrealloc (
 			FuncTab->function, 
 			FuncTab->num_functions * sizeof(char*)
 		);
-		if (NULL == FuncTab->function)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for function-identifiers table in FuncTab\n");
-			exit (-1);
-		}
-		FuncTab->address_id = (UINT64*) realloc (
+		FuncTab->address_id = (UINT64*) xrealloc (
 			FuncTab->address_id,
 			FuncTab->num_functions * sizeof (UINT64)
 		);
-		if (NULL == FuncTab->address_id)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for address-identifiers table in FuncTab\n");
-			exit (-1);
-		}
 		FuncTab->function[function_id] = funcname;
 		FuncTab->address_id[function_id] = new_address_id;
 	}
@@ -801,18 +813,13 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 
 	if (obj)
 	{
+		/* When the address belongs to a shared address we need to substract the 
+		 * base address and add the offet (taken from /proc/self/maps). No 
+		 * offsets are applied when it belongs to the main binary.
+		 */
 		found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
-		  (void*) address, &translated_function, &translated_filename, &translated_line);
-
-		/* If we didn't find the address, then the function is possibly in a shared
-		   library. Substract base address and retry.
-		   If we found it, just ensure we don't get the module name for the main binary */
-		if (!found)
-		{
-			found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
-			  (void*) (address - obj->start_address), &translated_function,
-			  &translated_filename, &translated_line);
-		}
+		 (void *)(obj->main_binary ? address : address - obj->start_address + obj->offset), 
+		  &translated_function, &translated_filename, &translated_line);
 	}
 	else
 	{
@@ -1445,12 +1452,7 @@ void Share_Callers_Usage (void)
 
 	if (MPI_Caller_Labels_Used == NULL)
 	{
-		MPI_Caller_Labels_Used = malloc(sizeof(int)*MAX_CALLERS);
-		if (MPI_Caller_Labels_Used == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for used MPI Caller labels\n");
-			exit (-1);
-		}
+		MPI_Caller_Labels_Used = xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++)
 			MPI_Caller_Labels_Used[i] = FALSE;
 	}
@@ -1461,12 +1463,7 @@ void Share_Callers_Usage (void)
 
 	if (Sample_Caller_Labels_Used == NULL)
 	{
-		Sample_Caller_Labels_Used = malloc(sizeof(int)*MAX_CALLERS);
-		if (Sample_Caller_Labels_Used == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for used sample Caller labels\n");
-			exit (-1);
-		}
+		Sample_Caller_Labels_Used = xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++)
 			Sample_Caller_Labels_Used[i] = FALSE;
 	}

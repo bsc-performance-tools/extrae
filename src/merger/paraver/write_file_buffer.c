@@ -40,6 +40,7 @@
 #endif
 
 #include "write_file_buffer.h"
+#include "xalloc.h"
 
 static unsigned nSeenBuffers = 0;
 static WriteFileBuffer_t **SeenBuffers = NULL;
@@ -53,12 +54,7 @@ WriteFileBuffer_t * WriteFileBuffer_new (int FD, char *filename, int maxElements
 	fprintf (stderr, "WriteFileBuffer_new (%s, %d, %d)\n", filename, maxElements, sizeElement);
 #endif
 
-	res = (WriteFileBuffer_t*) malloc (sizeof(WriteFileBuffer_t));
-	if (NULL == res)
-	{
-		fprintf (stderr, "mpi2prv: Cannot allocate WriteFileBuffer structure\n");
-		exit (-1);
-	}
+	res = (WriteFileBuffer_t*) xmalloc (sizeof(WriteFileBuffer_t));
 
 	res->maxElements = maxElements;
 	res->sizeElement = sizeElement;
@@ -71,26 +67,13 @@ WriteFileBuffer_t * WriteFileBuffer_new (int FD, char *filename, int maxElements
 	}
 	res->numElements = 0;
 	res->lastWrittenLocation = 0;
-	res->Buffer = (void*) malloc (res->maxElements*sizeElement);
-	if (NULL == res->Buffer)
-	{
-		fprintf (stderr, "mpi2prv: Cannot allocate memory for %d elements in WriteFileBuffer\n", maxElements);
-		exit (-1);
-	}
+	res->Buffer = (void*) xmalloc (res->maxElements*sizeElement);
 
 	/* Annotate this buffer as a seen buffer for later WriteFileBuffer_deleteall */
-	SeenBuffers = (WriteFileBuffer_t **) realloc (SeenBuffers, sizeof(WriteFileBuffer_t*)*(nSeenBuffers+1));
-	if (SeenBuffers != NULL)
-	{
-		SeenBuffers[nSeenBuffers] = res;
-		nSeenBuffers++;
-	}
-	else
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot reallocate SeenBuffers\n");
-		exit (-1);
-	}
-
+	SeenBuffers = (WriteFileBuffer_t **) xrealloc (SeenBuffers, sizeof(WriteFileBuffer_t*)*(nSeenBuffers+1));
+	SeenBuffers[nSeenBuffers] = res;
+	nSeenBuffers++;
+	
 	return res;
 }
 
@@ -102,9 +85,9 @@ void WriteFileBuffer_delete (WriteFileBuffer_t *wfb)
 
 	WriteFileBuffer_flush (wfb);
 	close (wfb->FD);
-	free (wfb->Buffer);
+	xfree (wfb->Buffer);
 	unlink (wfb->filename);
-	free (wfb);
+	xfree (wfb);
 }
 
 void WriteFileBuffer_deleteall (void)

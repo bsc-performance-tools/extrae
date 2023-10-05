@@ -66,4 +66,6 @@ int merger_post (int numtasks, int idtask);
 
 void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid);
 
+void mergerLoadFilesInEmbeddedMode(int taskid, int num_tasks, char *mpits_filename);
+
 #endif

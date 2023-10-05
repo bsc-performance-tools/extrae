@@ -42,88 +42,188 @@ int Extrae_get_trace_CUDA (void)
 # define DEBUG
 #endif
 
-void Probe_Cuda_Launch_Entry (UINT64 p1)
-{
-	DEBUG
-	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDALAUNCH_EV, p1, EMPTY);
-}
-
-void Probe_Cuda_Launch_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDALAUNCH_EV, EVT_END, EMPTY);
-}
-
 void Probe_Cuda_ConfigureCall_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACONFIGCALL_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDACONFIGCALL_VAL, EVT_BEGIN);
 }
 
 void Probe_Cuda_ConfigureCall_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACONFIGCALL_EV, EVT_END, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDACONFIGCALL_VAL, EVT_END);
+}
+
+void Probe_Cuda_Launch_Entry (UINT64 p1)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDALAUNCH_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDAFUNC_EV, p1);
+	}
+}
+
+void Probe_Cuda_Launch_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDALAUNCH_VAL, EVT_END);
+		TRACE_EVENT(LAST_READ_TIME, CUDAFUNC_EV, EVT_END);
+	}
+}
+
+void Probe_Cuda_Malloc_Entry(unsigned int event, UINT64 ptr, size_t size)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, event, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_PTR_EV, ptr);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, size);
+	}
+}
+
+void Probe_Cuda_Malloc_Exit(unsigned int event)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, event, EVT_END);
+	}
+}
+
+void Probe_Cuda_Free_Entry(unsigned int event, UINT64 devPtr)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, event, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_PTR_EV, devPtr);
+	}
+}
+
+void Probe_Cuda_Free_Exit(unsigned int event)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, event, EVT_END);
+	}
+}
+
+void Probe_Cuda_HostAlloc_Entry(UINT64 ptr, size_t size)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAHOSTALLOC_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_PTR_EV, ptr);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, size);
+	}
+}
+
+void Probe_Cuda_HostAlloc_Exit()
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAHOSTALLOC_VAL, EVT_END);
+	}
 }
 
 void Probe_Cuda_Memcpy_Entry (size_t size)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPY_EV, EVT_BEGIN, size);
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAMEMCPY_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, size);
+	}
 }
 
 void Probe_Cuda_Memcpy_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDAMEMCPY_EV, EVT_END, EMPTY); 
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAMEMCPY_VAL, EVT_END); 
+	}
 }
 
 void Probe_Cuda_MemcpyAsync_Entry (size_t size)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPYASYNC_EV, EVT_BEGIN, size);
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAMEMCPYASYNC_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, size);
+	}
 }
 
 void Probe_Cuda_MemcpyAsync_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDAMEMCPYASYNC_EV, EVT_END, EMPTY); 
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAMEMCPYASYNC_VAL, EVT_END); 
+	}
 }
 
-void Probe_Cuda_ThreadBarrier_Entry (void)
+void Probe_Cuda_Memset_Entry(UINT64 devPtr, size_t count)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDATHREADBARRIER_EV, EVT_BEGIN, EMPTY);
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAMEMSET_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_PTR_EV, devPtr);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, count);
+	}
 }
 
-void Probe_Cuda_ThreadBarrier_Exit (void)
+void Probe_Cuda_Memset_Exit()
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDATHREADBARRIER_EV, EVT_END, EMPTY); 
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAMEMSET_VAL, EVT_END);
+	}
+}
+
+void Probe_Cuda_ThreadBarrier_Entry(void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDATHREADBARRIER_VAL, EVT_BEGIN);
+}
+
+void Probe_Cuda_ThreadBarrier_Exit(void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDATHREADBARRIER_VAL, EVT_END); 
 }
 
 void Probe_Cuda_StreamBarrier_Entry (unsigned threadid)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDASTREAMBARRIER_EV, EVT_BEGIN, threadid);
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDASTREAMBARRIER_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDASTREAMBARRIER_THID_EV, threadid+1);
+	}
 }
 
 void Probe_Cuda_StreamBarrier_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMBARRIER_EV, EVT_END, EMPTY); 
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDASTREAMBARRIER_VAL, EVT_END); 
+	}
 }
 
 
@@ -131,54 +231,54 @@ void Probe_Cuda_DeviceReset_Enter (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDADEVICERESET_EV, EVT_BEGIN, EMPTY); 
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDADEVICERESET_VAL, EVT_BEGIN); 
 }
 
 void Probe_Cuda_DeviceReset_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDADEVICERESET_EV, EVT_END, EMPTY); 
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDADEVICERESET_VAL, EVT_END); 
 }
 
 void Probe_Cuda_ThreadExit_Enter (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDATHREADEXIT_EV, EVT_BEGIN, EMPTY); 
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDATHREADEXIT_VAL, EVT_BEGIN); 
 }
 
 void Probe_Cuda_ThreadExit_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDATHREADEXIT_EV, EVT_END, EMPTY); 
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDATHREADEXIT_VAL, EVT_END); 
 }
 
 void Probe_Cuda_StreamDestroy_Entry (void)
 {
 	DEBUG
-	  if (mpitrace_on && Extrae_get_trace_CUDA())
-		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMDESTROY_EV, EVT_BEGIN, EMPTY);
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDASTREAMDESTROY_VAL, EVT_BEGIN);
 }
 
 void Probe_Cuda_StreamDestroy_Exit (void)
 {
 	DEBUG
-	  if (mpitrace_on && Extrae_get_trace_CUDA())
-		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMDESTROY_EV, EVT_END, EMPTY);
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDASTREAMDESTROY_VAL, EVT_END);
 }
 
 void Probe_Cuda_StreamCreate_Entry (void)
 {
 	DEBUG
-	  if (mpitrace_on && Extrae_get_trace_CUDA())
-		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMCREATE_EV, EVT_BEGIN, EMPTY);
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDASTREAMCREATE_VAL, EVT_BEGIN);
 }
 
 void Probe_Cuda_StreamCreate_Exit (void)
 {
 	DEBUG
-	  if (mpitrace_on && Extrae_get_trace_CUDA())
-		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMCREATE_EV, EVT_END, EMPTY);
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDASTREAMCREATE_VAL, EVT_END);
 }

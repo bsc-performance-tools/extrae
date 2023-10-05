@@ -55,6 +55,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "utils_mpi.h"
 #include "mpi_wrapper.h"
 #include "wrapper.h"
@@ -142,14 +143,11 @@ static void Extrae_MPI_Barrier (void)
 	PMPI_Barrier (MPI_COMM_WORLD);
 }
 
-static void Extrae_MPI_Finalize (void)
-{
-	PMPI_Finalize ();
-}
-
 /******************************************************************************
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
+
+int numNodes = 0;
 
 char *MpitsFileName    = NULL;    /* Name of the .mpits file (only significant at rank 0) */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
@@ -158,6 +156,9 @@ int   SpawnGroup       = 0;
 int  *ParentWorldRanks = NULL;    /* World ranks of the parent processes 
   (index is local rank for the parent process, value is the parent world rank) */
 unsigned long long SpawnOffset = 0;
+
+// MPI_Comm attribute to mark intercommunicators created through MPI_Comm_spawn* calls
+int XTR_SPAWNED_INTERCOMM;
 #endif
 
 char *Extrae_core_get_mpits_file_name (void)
@@ -170,12 +171,81 @@ xtr_hash_t *hash_messages = NULL; // MPI_Message stored in a hash in order to se
 
 PR_Queue_t PR_queue;              // Persistent requests queue
 static int *ranks_global;         // Global ranks vector (from 1 to NProcs)
-static MPI_Group grup_global;     // Group attached to the MPI_COMM_WORLD
-static MPI_Fint grup_global_F;    // Group attached to the MPI_COMM_WORLD (Fortran)
+static MPI_Group CommWorldRanks;     // Group attached to the MPI_COMM_WORLD
 
 #if defined(IS_BGL_MACHINE)       // BGL, s'intercepten algunes crides barrier dins d'altres cols */
 static int BGL_disable_barrier_inside = 0;
 #endif
+
+
+static int amIFirstOnNode() {
+    int rank, size;
+    PMPI_Comm_rank( MPI_COMM_WORLD, &rank );
+    PMPI_Comm_size( MPI_COMM_WORLD, &size );
+    char names[size][MPI_MAX_PROCESSOR_NAME];
+    int len;
+    PMPI_Get_processor_name( names[rank], &len );
+    PMPI_Allgather( MPI_IN_PLACE, 0, 0, names[0], MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD );
+    int lower = 0;
+    while ( strncmp( names[rank], names[lower], MPI_MAX_PROCESSOR_NAME ) != 0 ) {
+        lower++;
+    }
+    return lower == rank;
+}
+
+MPI_Comm uncore_intercomm = MPI_COMM_NULL;
+
+static void Stop_Uncore_Service()
+{
+	if (uncore_intercomm != MPI_COMM_NULL)
+	{
+		MPI_Request req;
+		MPI_Status status;
+		int rank;
+
+		PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if (rank == 0)
+		{
+			int stop_signal = 1;
+
+			//fprintf(stderr, "[DEBUG] Stop_Uncore_Service: Master rank sending stop signal\n");
+			PMPI_Bcast(&stop_signal, 1, MPI_INT, (rank == 0 ? MPI_ROOT : MPI_PROC_NULL), uncore_intercomm);
+		}
+	}
+}
+
+static void Start_Uncore_Service()
+{
+	int rank;
+	int activate_readers = 0;
+	int num_readers_per_node = 0;
+	char *env_extrae_uncore = NULL;
+	char *env_extrae_uncore_launch_cmd = NULL;
+
+	PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if (rank == 0)
+	{
+		env_extrae_uncore = getenv("EXTRAE_UNCORE");
+		env_extrae_uncore_launch_cmd = getenv("EXTRAE_UNCORE_LAUNCH_CMD");
+
+		if (env_extrae_uncore != NULL) 
+		{
+			num_readers_per_node = atoi(env_extrae_uncore);
+			activate_readers = (num_readers_per_node > 0);
+		}
+	}
+
+	PMPI_Bcast (&activate_readers, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	//fprintf(stderr, "[DEBUG] Start_Uncore_Service: rank=%d num_readers=%d noderep=%d numNodes=%d\n", rank, (getenv("EXTRAE_UNCORE") != NULL ? atoi(getenv("EXTRAE_UNCORE")) : 0), amIFirstOnNode(), numNodes);
+
+	if (activate_readers)
+	{
+		PMPI_Comm_spawn(env_extrae_uncore_launch_cmd, NULL, num_readers_per_node * numNodes, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &uncore_intercomm, MPI_ERRCODES_IGNORE);
+	}
+}
+
 
 /******************************************************************************
  *** CheckGlobalOpsTracingIntervals()
@@ -214,62 +284,70 @@ int getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype)
  ***  translateLocalToGlobalRank
  ******************************************************************************/
 
-void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *receiver, int send_or_recv)
+void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_local, int *partner_world, int send_or_recv)
 {
 	int inter = 0;
 
-	/* If rank in MPI_COMM_WORLD or if dest is PROC_NULL or any source,
+	/* If rank in MPI_COMM_WORLD or if partner_local is PROC_NULL or any source,
 	   return value directly */
-	if (comm == MPI_COMM_WORLD || comm == MPI_COMM_NULL || dest == MPI_PROC_NULL || dest == MPI_ANY_SOURCE)
+	if (comm == MPI_COMM_WORLD || comm == MPI_COMM_NULL || partner_local == MPI_PROC_NULL || partner_local == MPI_ANY_SOURCE)
 	{
-		*receiver = dest;
+		*partner_world = partner_local;
 	}
 	else
 	{
-		PMPI_Comm_test_inter (comm, &inter);	
+		PMPI_Comm_test_inter (comm, &inter);
 
 		if (inter)
 		{
-                        MPI_Comm parent;
-                        PMPI_Comm_get_parent(&parent);
+			// The communicator is an intercommunicator
 
-                        /* The communicator is an intercommunicator */
-                        if (send_or_recv == OP_TYPE_SEND)
-                        {
-                                if (comm == parent)
-                                {
-                                        /* Send to parent -- Translate the local rank for the parent into its MPI_COMM_WORLD rank */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-                                        if (ParentWorldRanks != NULL)
-                                                *receiver = ParentWorldRanks[dest];
-                                        else
+			// The intercommunicator was created through MPI_Comm_spawn => each process has its own MPI_COMM_WORLD
+
+			int was_spawned, flag_spawned = FALSE;
+			PMPI_Comm_get_attr(comm, XTR_SPAWNED_INTERCOMM, &was_spawned, &flag_spawned);
+
+			MPI_Comm parent;
+			PMPI_Comm_get_parent(&parent);
+
+			if (flag_spawned && was_spawned)
+			{
+				// Parent process sends/recvs to/from children -- When interacting with an specific child, there's no need to translate ranks
+				*partner_world = partner_local;
+			}
+			else if ((comm == parent) && (parent != MPI_COMM_NULL))
+			{
+				// Child process sends/recvs to/from parent -- Translate the local parent rank into its MPI_COMM_WORLD rank
+				if (ParentWorldRanks != NULL)
+					*partner_world = ParentWorldRanks[partner_local];
+				else
+					*partner_world = partner_local; // Should never happen
+			}
+			else
 #endif
-                                                *receiver = dest; /* Should never happen */
-                                }
-                                else
-                                {
-                                        /* Send to children -- When sending to specific childen X, there's no need to translate ranks */
-                                        *receiver = dest;
-                                }
-                        }
-                        else
-                        {
-                                if (comm == parent)
-                                {
-                                        /* Recv from parent -- Translate the local rank for the parent into its MPI_COMM_WORLD rank */
-#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-                                        if (ParentWorldRanks != NULL)
-                                                *receiver = ParentWorldRanks[dest];
-                                        else
-#endif
-                                                *receiver = dest; /* Should never happen */
-                                }
-                                else
-                                {
-                                        /* Recv from children -- When receiving from specific childen X, there's no need to translate ranks */
-                                        *receiver = dest;
-                                }
-                        }
+			{
+				// The intercommunicator was created through MPI_Intercomm_create => there's only 1 MPI_COMM_WORLD 
+
+				MPI_Group remote_group;
+				int remote_group_size;
+				int *local_ranks, *world_ranks;
+				int i = 0;
+
+				PMPI_Comm_remote_group(comm, &remote_group);
+				PMPI_Group_size(remote_group, &remote_group_size);
+				local_ranks = (int *)xmalloc(sizeof(int) * remote_group_size);
+				world_ranks = (int *)xmalloc(sizeof(int) * remote_group_size);
+
+				for (i = 0; i < remote_group_size; i++) local_ranks[i] = i;
+
+				PMPI_Group_translate_ranks (remote_group, remote_group_size, local_ranks, CommWorldRanks, world_ranks); 
+
+				*partner_world = world_ranks[partner_local];
+
+				xfree(local_ranks);
+				xfree(world_ranks);
+			}
 		}
 		else
 		{
@@ -284,13 +362,13 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *
 			if ((group != MPI_GROUP_NULL) && (group != MPI_GROUP_EMPTY))
 			{
 				// Translate the rank 
-				PMPI_Group_translate_ranks (group, 1, &dest, grup_global, receiver); 
-				if (*receiver == MPI_UNDEFINED) *receiver = dest;
+				PMPI_Group_translate_ranks (group, 1, &partner_local, CommWorldRanks, partner_world); 
+				if (*partner_world == MPI_UNDEFINED) *partner_world = partner_local;
 				PMPI_Group_free (&group);
 			}
 			else
 			{
-				*receiver = dest;
+				*partner_world = partner_local;
 			}
 		}
 	}
@@ -427,21 +505,15 @@ static void InitMPICommunicators (void)
 	unsigned i;
 
 	/** Inicialitzacio de les variables per la creacio de comunicadors **/
-	ranks_global = malloc (sizeof(int)*Extrae_get_num_tasks());
-	if (ranks_global == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_global'");
-		exit (0);
-	}
+	ranks_global = xmalloc (sizeof(int)*Extrae_get_num_tasks());
 
 	for (i = 0; i < Extrae_get_num_tasks(); i++)
 		ranks_global[i] = i;
 
-	PMPI_Comm_group (MPI_COMM_WORLD, &grup_global);
-	grup_global_F = MPI_Group_c2f(grup_global);
+	PMPI_Comm_group (MPI_COMM_WORLD, &CommWorldRanks);
 
 	int s = 0;
-	PMPI_Group_size( grup_global, &s );
+	PMPI_Group_size( CommWorldRanks, &s );
 }
 
 
@@ -467,11 +539,12 @@ char **TasksNodes = NULL;
 
 static void Gather_Nodes_Info (void)
 {
-	unsigned u;
+	unsigned u, v;
 	int rc;
 	size_t s;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
 	char *buffer_names = NULL;
+	char **UniqueNodes = NULL;
 
 	/* Get processor name */
 	if (gethostname (hostname, sizeof(hostname)) == -1)
@@ -486,60 +559,65 @@ static void Gather_Nodes_Info (void)
 			hostname[s] = '_';
 
 	/* Share information among all tasks */
-	buffer_names = (char*) malloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);
-	if (buffer_names == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for nodes name\n");
-		exit (-1);
-	}
+	buffer_names = (char*) xmalloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);
 	rc = PMPI_Allgather (hostname, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, buffer_names, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD);
 	MPI_CHECK(rc, PMPI_Allgather);
 
 	/* Store the information in a global array */
-	TasksNodes = (char **)malloc (Extrae_get_num_tasks() * sizeof(char *));
-	if (TasksNodes == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for nodes info\n");
-		exit (-1);
-	}
+	TasksNodes = (char **)xmalloc (Extrae_get_num_tasks() * sizeof(char *));
 	for (u=0; u<Extrae_get_num_tasks(); u++)
 	{
+    int found = FALSE;
+
 		char *tmp = &buffer_names[u*MPI_MAX_PROCESSOR_NAME];
-		TasksNodes[u] = (char *)malloc((strlen(tmp)+1) * sizeof(char));
-		if (TasksNodes[u] == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for node info %u\n", u);
-			exit (-1);
-		}
+		TasksNodes[u] = (char *)xmalloc((strlen(tmp)+1) * sizeof(char));
 		strcpy (TasksNodes[u], tmp);
+
+		for (v=0; v<numNodes && !found; v++)
+		{
+			if (!strcmp(TasksNodes[u], UniqueNodes[v]))
+			{
+        found = TRUE;
+			}
+		}
+
+		if (!found)
+		{
+			numNodes ++;
+			UniqueNodes = xrealloc(UniqueNodes, (numNodes * sizeof(char *)));
+			UniqueNodes[numNodes-1] = strdup(TasksNodes[u]);
+		}
 	}
 
 	/* Free the local array, not the global one */
-	free (buffer_names);
+	xfree (buffer_names);
+
+	for (v=0; v<numNodes; v++)
+	{
+		xfree(UniqueNodes[v]);
+	}
+	xfree(UniqueNodes);
 }
 
 
 /******************************************************************************
  ***  MPI_Generate_Task_File_List
  ******************************************************************************/
-static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
+int MPI_Generate_Task_File_List ()
 {
 	int filedes, ierror;
 	unsigned u, ret, thid;
 	char tmpname[1024];
 	unsigned *buffer = NULL;
 	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
+	MPI_Comm cparent = MPI_COMM_NULL;
+	int isSpawned = 0;
 
 	if (TASKID == 0)
 	{
-		buffer = (unsigned *) malloc (sizeof(unsigned) * Extrae_get_num_tasks() * 3);
+		buffer = (unsigned *) xmalloc (sizeof(unsigned) * Extrae_get_num_tasks() * 3);
 		/* we store pid, nthreads and taskid on each position */
 
-		if (buffer == NULL)
-		{
-			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer MPITS info\n");
-			exit (-1);
-		}
 	}
 
 	tmp[0] = TASKID; 
@@ -549,6 +627,11 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 	/* Share PID and number of threads of each MPI task */
 	ierror = PMPI_Gather (&tmp, 3, MPI_UNSIGNED, buffer, 3, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 	MPI_CHECK(ierror, PMPI_Gather);
+
+#if MPI_SUPPORTS_MPI_COMM_SPAWN
+	PMPI_Comm_get_parent (&cparent);
+#endif
+	isSpawned = (cparent != MPI_COMM_NULL);
 
 	/* If I haven't been MPI_Comm_Spawned, let's clean all the *-%d.mpits we
 	   have created in earlier execes */
@@ -637,7 +720,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
 					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
-					  node_list[u], PID, TID, thid, EXT_MPIT);
+					  TasksNodes[u], PID, TID, thid, EXT_MPIT);
 					sprintf (tmpline, "%s named %s\n", tmpname,
 					  Extrae_get_thread_name(thid));
 					ret = write (filedes, tmpline, strlen (tmpline));
@@ -654,12 +737,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 
 				int foo;
 				MPI_Status s;
-				char *tmp = (char*)malloc (NTHREADS*THREAD_INFO_NAME_LEN*sizeof(char));
-				if (tmp == NULL)
-				{
-					fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
-					exit (-1);
-				}
+				char *tmp = (char*)xmalloc (NTHREADS*THREAD_INFO_NAME_LEN*sizeof(char));
 
 				/* Ask to slave */
 				PMPI_Send (&foo, 1, MPI_INT, TID, 123456, MPI_COMM_WORLD);
@@ -671,7 +749,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
 					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
-					  node_list[u], PID, TID, thid, EXT_MPIT);
+					  TasksNodes[u], PID, TID, thid, EXT_MPIT);
 					sprintf (tmpline, "%s named %s\n", tmpname,
 					  &tmp[thid*THREAD_INFO_NAME_LEN]);
 					ret = write (filedes, tmpline, strlen (tmpline));
@@ -681,7 +759,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 						return -1;
 					}
 				}
-				free (tmp);
+				xfree (tmp);
 			}
 		}
 		close (filedes);
@@ -691,12 +769,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 		MPI_Status s;
 		int foo;
 
-		char *tmp = (char*)malloc (Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char));
-		if (tmp == NULL)
-		{
-			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
-			exit (-1);
-		}
+		char *tmp = (char*)xmalloc (Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char));
 		for (u = 0; u < Backend_getMaximumOfThreads(); u++)
 			memcpy (&tmp[u*THREAD_INFO_NAME_LEN], Extrae_get_thread_name(u), THREAD_INFO_NAME_LEN);
 
@@ -707,12 +780,12 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 		PMPI_Send (tmp, Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN,
 		  MPI_CHAR, 0, 123457, MPI_COMM_WORLD);
 
-		free (tmp);
+		xfree (tmp);
 	}
 
 	if (TASKID == 0)
 	{
-		free (buffer);
+		xfree (buffer);
 	}
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
@@ -759,7 +832,7 @@ static void MPI_Generate_Spawns_List (void)
 
   if (TASKID != 0)
   {
-    SpawnsFileName = (char *)malloc((namelen+1) * sizeof(char));
+    SpawnsFileName = (char *)xmalloc((namelen+1) * sizeof(char));
   }
   
   PMPI_Bcast (SpawnsFileName, namelen+1, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -797,9 +870,10 @@ static void MPI_Generate_Spawns_List (void)
  * writes this information in the SpawnsFileName file, which will be later processed by
  * the merger, and synchronizes with the spawned processes' MPI_Init.
  */
-static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm intercomm, MPI_Comm spawn_comm)
+static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm *intercomm_ptr, MPI_Comm spawn_comm)
 {
   int i = 0;
+  MPI_Comm intercomm = *intercomm_ptr;
 
   if ((intercomm != MPI_COMM_NULL) && (spawn_comm != MPI_COMM_NULL))
   {
@@ -811,26 +885,47 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm inter
     int        world_rank = TASKID;
     unsigned long long ChildSpawnOffset = 0;
 
-	UNREFERENCED_PARAMETER(SpawnStartTime);
-    
+    UNREFERENCED_PARAMETER(SpawnStartTime);
+
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] STARTING Spawn_Parent_Sync\n", TASKID);
+#endif
+ 
+    /* Set the attribute XTR_SPAWNED_INTERCOMM in intercomm to mark that this intercommunicator belongs
+     * to the parent process of an MPI_Comm_spawn operation. We need this at translateLocalToGlobalRank
+     * to know how to translate the local into world ranks.
+     */
+    int was_spawned = 1;
+
+    PMPI_Comm_set_attr(*intercomm_ptr, XTR_SPAWNED_INTERCOMM, &was_spawned);
+
     PMPI_Comm_rank(spawn_comm, &my_rank);
 
     /* Register the intercommunicator */
     Trace_MPI_Communicator (intercomm, LAST_READ_TIME, FALSE);
 
     /* Gather the parent comm id's from the participating tasks */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] GATHERING all_parents_comms\n", TASKID);
+#endif
     PMPI_Comm_size(spawn_comm, &num_parents);
-    all_parents_comms = (int *)malloc( num_parents * sizeof(int) );
-    all_parents_ranks = (int *)malloc( num_parents * sizeof(int) );
+    all_parents_comms = (int *)xmalloc( num_parents * sizeof(int) );
+    all_parents_ranks = (int *)xmalloc( num_parents * sizeof(int) );
 
     PMPI_Gather(&intercomm, 1, MPI_INT, all_parents_comms, 1, MPI_INT, 0, spawn_comm);
     PMPI_Gather(&world_rank, 1, MPI_INT, all_parents_ranks, 1, MPI_INT, 0, spawn_comm);
 
     /* Exchange the spawn group id's */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] EXCHANGING SpawnGroup and RemoteSpawnGroup\n", TASKID);
+#endif
     PMPI_Bcast( &SpawnGroup, 1, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
     PMPI_Bcast( &RemoteSpawnGroup, 1, MPI_INT, 0, intercomm );
 
     /* Send the parent's world ranks to the children */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] BROADCASTING all_parents_ranks\n", TASKID);
+#endif
     PMPI_Bcast( &num_parents, 1, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
     PMPI_Bcast( all_parents_ranks, num_parents, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
 
@@ -890,7 +985,7 @@ static void Spawn_Children_Sync(iotimer_t init_time)
 
   PMPI_Comm_get_parent(&parent);
 
-  if (parent != MPI_COMM_NULL)
+  if ((parent != MPI_COMM_NULL) && (getenv("EXTRAE_UNCORE_SERVICE_WORKER") == NULL))
   {
     int  i                  = 0;
     int  RemoteSpawnGroup   = 0;
@@ -908,7 +1003,7 @@ static void Spawn_Children_Sync(iotimer_t init_time)
     
     /* Gather the children communicators to the parent */
     PMPI_Comm_size(MPI_COMM_WORLD, &num_children);
-    all_children_comms = (int *)malloc(sizeof(int) * num_children);
+    all_children_comms = (int *)xmalloc(sizeof(int) * num_children);
     PMPI_Gather(&parent, 1, MPI_INT, all_children_comms, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     /* Exchange the spawn group id's */
@@ -917,7 +1012,7 @@ static void Spawn_Children_Sync(iotimer_t init_time)
 
     /* Receive the parent's world ranks */
     PMPI_Bcast (&num_parents, 1, MPI_INT, 0, parent);
-    all_parents_ranks = (int *)malloc(sizeof(num_parents) * sizeof(int));
+    all_parents_ranks = (int *)xmalloc(sizeof(num_parents) * sizeof(int));
     PMPI_Bcast (all_parents_ranks, num_parents, MPI_INT, 0, parent);
     ParentWorldRanks = all_parents_ranks;
   
@@ -971,7 +1066,6 @@ static void Spawn_Children_Sync(iotimer_t init_time)
 void PMPI_Init_Wrapper (MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
 	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_NONE);
@@ -998,7 +1092,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -1032,7 +1125,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{
@@ -1042,15 +1135,10 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
-
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
@@ -1076,6 +1164,8 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	Spawn_Children_Sync (MPI_Init_start_time);
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
@@ -1091,7 +1181,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
         hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK);
@@ -1118,7 +1207,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -1152,7 +1240,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{
@@ -1162,15 +1250,10 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
-
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
@@ -1196,6 +1279,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	Spawn_Children_Sync (MPI_Init_start_time);
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
@@ -1215,8 +1300,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
  ******************************************************************************/
 void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
-
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 1;
 #endif
@@ -1237,16 +1320,16 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 	/* Generate the final file list */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
+	Stop_Uncore_Service();
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	/* Finalize only if its initialized by MPI_init call */
+	/* Finalize now only if its initialized by MPI_init call, wait for the
+	 * program to end otherwise */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
-		Backend_Finalize ();
+		Extrae_fini_Wrapper();
 
 #ifdef WITH_PMPI_HOOK
 		int (*real_mpi_finalize)(MPI_Fint *ierror) = NULL;
@@ -1258,8 +1341,6 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 		{
 			CtoF77 (pmpi_finalize) (ierror);
 		}
-
-		mpitrace_on = FALSE;
 	}
 	else
 		*ierror = MPI_SUCCESS;
@@ -1473,6 +1554,34 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 }
 
 
+/******************************************************************************
+ ***  PMPI_Comm_Dup_With_Info_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Dup_With_Info_Wrapper (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror)
+{
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	CtoF77 (pmpi_comm_dup_with_info) (comm, info, newcomm, ierror);
+
+	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
+	{
+		MPI_Comm comm_id = PMPI_Comm_f2c (*newcomm);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+		EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
 
 /******************************************************************************
  ***  PMPI_Comm_Split_Wrapper
@@ -1502,6 +1611,36 @@ void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	updateStats_OTHER(global_mpi_stats);
 }
 
+#if defined(MPI3)
+/******************************************************************************
+ ***  PMPI_Comm_Split_Type_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Split_Type_Wrapper (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key,
+	MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror)
+{
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	CtoF77 (pmpi_comm_split_type) (comm, split_type, key, info, newcomm, ierror);
+
+	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
+	{
+                MPI_Comm comm_id = PMPI_Comm_f2c (*newcomm);
+                Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+#endif /* MPI3 */
+
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
@@ -1522,7 +1661,8 @@ void PMPI_Comm_Spawn_Wrapper (char *command, char *argv, MPI_Fint *maxprocs, MPI
 
     MPI_Comm comm_c;
     comm_c = PMPI_Comm_f2c(*comm);
-    Spawn_Parent_Sync (SpawnStartTime, intercomm_c, comm_c);
+    Spawn_Parent_Sync (SpawnStartTime, &intercomm_c, comm_c);
+    *intercomm = PMPI_Comm_c2f(comm_c); // Spawn_Parent_Sync sets the XTR_SPAWNED_INTERCOMM attribute in comm_c, copy this attribute to resulting intercomm
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1549,7 +1689,8 @@ void PMPI_Comm_Spawn_Multiple_Wrapper (MPI_Fint *count, char *array_of_commands,
     MPI_Comm comm_c;
     comm_c = PMPI_Comm_f2c(*comm);
 
-    Spawn_Parent_Sync (SpawnStartTime, intercomm_c, comm_c);
+    Spawn_Parent_Sync (SpawnStartTime, &intercomm_c, comm_c);
+    *intercomm = PMPI_Comm_c2f(comm_c); // Spawn_Parent_Sync sets the XTR_SPAWNED_INTERCOMM attribute in comm_c, copy this attribute to resulting intercomm
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1803,7 +1944,6 @@ void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
 
 int MPI_Init_C_Wrapper (int *argc, char ***argv)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
@@ -1830,7 +1970,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -1864,7 +2003,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{
@@ -1874,19 +2013,14 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
-
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
-#endif 
+#endif
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -1907,11 +2041,13 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-        Spawn_Children_Sync( MPI_Init_start_time );
+	Spawn_Children_Sync( MPI_Init_start_time );
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
-        global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
+	global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
 	updateStats_OTHER(global_mpi_stats);
 
 	return val;
@@ -1921,7 +2057,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 #if defined(MPI_HAS_INIT_THREAD_C)
 int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
@@ -1948,7 +2083,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -1982,7 +2116,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		/* Remove the local copy only if we're not the master */
 		if (TASKID != 0)
 			unlink (config_file);
-		free (config_file);
+		xfree (config_file);
 	}
 	else
 	{
@@ -1992,15 +2126,10 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list, remove first if the list was generated
-	   by Extrae_init */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-		MPI_remove_file_list (TRUE);
-
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+	MPI_Generate_Task_File_List();
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
@@ -2026,6 +2155,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
         Spawn_Children_Sync (MPI_Init_start_time);
+
+	Start_Uncore_Service();
 #endif
 
 	/* Stats Init */
@@ -2043,7 +2174,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 int MPI_Finalize_C_Wrapper (void)
 {
-	MPI_Comm cparent = MPI_COMM_NULL;
 	int ierror = 0;
 
 #if defined(IS_BGL_MACHINE)
@@ -2066,16 +2196,16 @@ int MPI_Finalize_C_Wrapper (void)
 
 	/* Generate the final file list */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	PMPI_Comm_get_parent (&cparent);
+	Stop_Uncore_Service();
 #endif
-	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	/* Finalize only if its initialized by MPI_init call */
+	/* Finalize now only if its initialized by MPI_init call, wait for the
+	 * program to end otherwise */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
-		Backend_Finalize ();
+		Extrae_fini_Wrapper();
 
 #ifdef WITH_PMPI_HOOK
 		int (*real_mpi_finalize)() = NULL;
@@ -2087,8 +2217,6 @@ int MPI_Finalize_C_Wrapper (void)
 		{
 			ierror = PMPI_Finalize();
 		}
-
-		mpitrace_on = FALSE;
 	}
 	else
 		ierror = MPI_SUCCESS;
@@ -2294,24 +2422,52 @@ int MPI_Comm_free_C_Wrapper (MPI_Comm *comm)
 
 int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm)
 {
-  int ierror;
+	int ierror;
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-  ierror = PMPI_Comm_dup (comm, newcomm);
-  if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+	ierror = PMPI_Comm_dup (comm, newcomm);
+	if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+	{
+		Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+	}
 
 	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 		EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
-  return ierror;
+	return ierror;
 }
 
 
+/******************************************************************************
+ ***  MPI_Comm_dup_with_info_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_dup_with_info_C_Wrapper (MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm)
+{
+	int ierror;
+
+        TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY);
+
+	ierror = PMPI_Comm_dup_with_info (comm, info, newcomm);
+	if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+	{
+		Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+                EMPTY);
+
+        updateStats_OTHER(global_mpi_stats);
+
+	return ierror;
+}
+
+    
 /******************************************************************************
  ***  MPI_Comm_split_C_Wrapper
  ******************************************************************************/
@@ -2336,6 +2492,33 @@ int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newco
 }
 
 
+#if defined(MPI3)
+/******************************************************************************
+ ***  MPI_Comm_split_type_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_split_type_C_Wrapper (MPI_Comm comm, int split_type, int key, MPI_Info info, MPI_Comm *newcomm)
+{
+  int ierror;
+
+        TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY);
+
+  ierror = PMPI_Comm_split_type (comm, split_type, key, info, newcomm);
+  if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+    Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+
+        TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+                EMPTY);
+
+        updateStats_OTHER(global_mpi_stats);
+
+  return ierror;
+}
+#endif /* MPI3 */
+
+
+
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
  ***  MPI_Comm_spawn_C_Wrapper
@@ -2352,7 +2535,7 @@ int MPI_Comm_spawn_C_Wrapper (char *command, char **argv, int maxprocs, MPI_Info
 
   if (ierror == MPI_SUCCESS)
   {
-    Spawn_Parent_Sync (SpawnStartTime, *intercomm, comm);
+    Spawn_Parent_Sync (SpawnStartTime, intercomm, comm);
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -2379,7 +2562,7 @@ int MPI_Comm_spawn_multiple_C_Wrapper (int count, char *array_of_commands[], cha
 
   if (ierror == MPI_SUCCESS)
   {
-    Spawn_Parent_Sync (SpawnStartTime, *intercomm, comm);
+    Spawn_Parent_Sync (SpawnStartTime, intercomm, comm);
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_MULTIPLE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -2738,7 +2921,7 @@ void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 			int ranks_aux[num_tasks];
 	
 			/* Obtain task id of each element */
-			ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
+			ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, CommWorldRanks, ranks_aux);
 			MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 	
 			FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, trace);
@@ -2787,11 +2970,11 @@ void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
 	MPI_CHECK(ierror, PMPI_Comm_group);
 
 	ierror = PMPI_Group_translate_ranks (l_group, 1, &local_leader,
-	 grup_global, &t_local_leader);
+	 CommWorldRanks, &t_local_leader);
 	MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 
 	ierror = PMPI_Group_translate_ranks (r_group, 1, &remote_leader,
-	  grup_global, &t_remote_leader);
+	  CommWorldRanks, &t_remote_leader);
 	MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 
 	ierror = PMPI_Group_free (&l_group);
@@ -2812,65 +2995,90 @@ void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
 
 void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 {
+	int i = 0;
+
 	/* Before proceeding, check if it's ok to call MPI. We might support
 	   MPI but maybe it's not initialized at this moment (nanos+mpi e.g.) */
 	int mpi_initialized;
 	PMPI_Initialized (&mpi_initialized);
 
+	/* If we are working on a global FS and EXTRAE_ENFORCE_FS_SYNC is set, after process 0 
+ 	 * creates the set-* directories, all other processes are forced to wait until they see
+ 	 * the folders created in the FS. This is useful in  environments where file synchronization
+ 	 * is not guaranteed (i.e. NFS takes a while to update and see a folder created from another node)
+ 	 */
+	char *env_enforce_fs_sync = getenv("EXTRAE_ENFORCE_FS_SYNC");
+	int enforce_fs_sync = (env_enforce_fs_sync != NULL)                && 
+	                       ((atoi(env_enforce_fs_sync) == 1)           || 
+	                        (strcmp(env_enforce_fs_sync, "TRUE") == 0) ||
+	                        (strcmp(env_enforce_fs_sync, "true") == 0));
+
 	if (mpi_initialized && world_size > 1)
 	{
 		/* If the directory is shared, then let task 0 create all temporal
-	  	 directories. This proves a significant speedup in GPFS */
+	  	 * directories. This proves a significant speedup in GPFS 
+	  	 */
 		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_TemporalDirNoTask()))
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n",
-				  Extrae_Get_TemporalDirNoTask());
-			if (me == 0)
 			{
-				int i;
+				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n", Extrae_Get_TemporalDirNoTask());
+
 				for (i = 0; i < world_size; i+=Extrae_Get_TemporalDir_BlockSize())
+				{
 					Backend_createExtraeDirectory (i, TRUE);
+				}
+			}
+			else if (enforce_fs_sync)
+			{
+				Backend_syncOnExtraeDirectory (me, TRUE);
 			}
 		}
 		else
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n",
-				  Extrae_Get_TemporalDirNoTask());
+			{
+				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n", Extrae_Get_TemporalDirNoTask());
+			}
+
 			Backend_createExtraeDirectory (me, TRUE);
 		}
 	
-		/* Now, wait for every process to reach this point, so directories are
-		   created */
+		/* Wait for every process to reach this point, so directories are created */
+		
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
 	
 		/* If the directory is shared, then let task 0 create all final
-		   directories. This proves a significant speedup in GPFS */
+		 * directories. This proves a significant speedup in GPFS 
+		 */ 
 		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_FinalDirNoTask()))
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n",
-				  Extrae_Get_FinalDirNoTask());
-			if (me == 0)
 			{
-				int i;
+				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n", Extrae_Get_FinalDirNoTask());
+
 				for (i = 0; i < world_size; i+=Extrae_Get_FinalDir_BlockSize())
+				{
 					Backend_createExtraeDirectory (i, FALSE);
+				}
+			}
+			else if (enforce_fs_sync)
+			{
+				Backend_syncOnExtraeDirectory (me, FALSE);
 			}
 		}
 		else
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n",
-				  Extrae_Get_FinalDirNoTask());
+			{
+				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n", Extrae_Get_FinalDirNoTask());
+			}
 			Backend_createExtraeDirectory (me, FALSE);
 		}
 	
-		/* Now, wait for every process to reach this point, so directories are
-		   created */
+		/* Wait for every process to reach this point, so directories are created */
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
@@ -2934,6 +3142,8 @@ void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm 
 
 void SaveRequest(MPI_Request request, MPI_Comm comm)
 {
+	static int once = 0;
+
 	if (request != MPI_REQUEST_NULL) 
 	{
 		xtr_hash_data_request_t request_data;
@@ -2941,7 +3151,11 @@ void SaveRequest(MPI_Request request, MPI_Comm comm)
 		request_data.commid = comm;
 		getCommunicatorGroup(comm, &request_data.group);
 
-		xtr_hash_add (hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data);
+		if (!xtr_hash_add (hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data) && !once)
+		{
+			fprintf(stderr, PACKAGE_NAME": WARNING: SaveRequest: Hash table for MPI_Request's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Test*/Wait* routines.\n");
+			once = 1;
+		}
 	}
 }
 
@@ -3006,6 +3220,8 @@ void CancelRequest(MPI_Request request)
 
 void SaveMessage(MPI_Message message, MPI_Comm comm)
 {
+	static int once = 0;
+
 	if (message != MPI_MESSAGE_NULL)
 	{
 		xtr_hash_data_message_t message_data;
@@ -3013,13 +3229,19 @@ void SaveMessage(MPI_Message message, MPI_Comm comm)
 		message_data.commid = comm;
 		getCommunicatorGroup(comm, &message_data.group);
 
-		xtr_hash_add (hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data);
+		if (!xtr_hash_add (hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data) && !once)
+		{
+			fprintf(stderr, PACKAGE_NAME": WARNING: SaveMessage: Hash table for MPI_Message's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Mrecv/Imrecv routines.\n");
+			once = 1;
+		}
 	}
 }
 
 
 MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 {
+	static int once = 0;
+
 	if (message != MPI_MESSAGE_NULL)
 	{	
 		xtr_hash_data_message_t message_data;
@@ -3036,7 +3258,11 @@ MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 				request_data.group  = message_data.group;
 
 				// Save the request in the hash with the message's comm data
-				xtr_hash_add(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), &request_data);
+				if (!xtr_hash_add(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), &request_data) && !once)
+				{
+					fprintf(stderr, PACKAGE_NAME": WARNING: ProcessMessage: Hash table for MPI_Request's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Test*/Wait* routines.\n");
+					once = 1;
+				}
 			}
 
 			return message_data.commid;

@@ -48,6 +48,14 @@ Please, make sure to install the development versions of all packages (-dev,
 Installation instructions
 -------------------------
 
+If installing from Git, you will need to generate a configure file by running:
+
+```sh
+$ ./boostrap
+```
+
+then continue with installation as if from a release.
+
 Refer to the [INSTALL](./INSTALL) file for general installation instructions.  
-Refer to the [INSTALL-examples](./INSTALL-examples) fill for examples of
+Refer to the [INSTALL-examples](./INSTALL-examples) file for examples of
 specific installation instructions.

@@ -28,6 +28,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "semantics.h"
 #include "events.h"
 
@@ -39,6 +40,8 @@
 #include "opencl_prv_semantics.h"
 #include "openshmem_prv_semantics.h"
 #include "java_prv_semantics.h"
+#include "openacc_prv_semantics.h"
+#include "gaspi_prv_semantics.h"
 
 #include "mpi_trf_semantics.h"
 #include "misc_trf_semantics.h"
@@ -84,6 +87,8 @@ void Semantics_Initialize (int output_format)
 			Register_Range_Handlers (PRV_OpenCL_Event_Handlers);
 			Register_Event_Handlers (PRV_OPENSHMEM_Event_Handlers);
 			Register_Event_Handlers (PRV_Java_Event_Handlers);
+			Register_Event_Handlers (PRV_OPENACC_Event_Handlers);
+			Register_Event_Handlers (PRV_GASPI_Event_Handlers);
 			break;
 	}
 }
@@ -92,7 +97,7 @@ static void Register_Handler (int range_min, int range_max, Ev_Handler_t *handle
 {
 	num_Registered_Handlers ++;
 
-	xrealloc(Event_Handlers, Event_Handlers, num_Registered_Handlers * sizeof(RangeEv_Handler_t));
+	Event_Handlers = xrealloc(Event_Handlers, num_Registered_Handlers * sizeof(RangeEv_Handler_t));
 	Event_Handlers[num_Registered_Handlers - 1].range_min = range_min;
 	Event_Handlers[num_Registered_Handlers - 1].range_max = range_max;
 	Event_Handlers[num_Registered_Handlers - 1].handler = handler;

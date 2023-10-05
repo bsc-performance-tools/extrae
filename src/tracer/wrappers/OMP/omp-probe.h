@@ -75,7 +75,7 @@ void Probe_OpenMP_GetNumThreads_Exit (void);
 void Probe_OpenMP_SetNumThreads_Entry (int);
 void Probe_OpenMP_SetNumThreads_Exit (void);
 
-void Probe_OpenMP_TaskID (long long id);
+void Probe_OpenMP_TaskID (long long id, int inst_or_exec);
 void Probe_OpenMP_TaskLoopID (long long id);
 void Probe_OpenMP_Task_Entry (UINT64 uf);
 void Probe_OpenMP_Task_Exit (void);

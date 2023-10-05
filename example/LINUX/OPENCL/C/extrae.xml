@@ -61,7 +61,7 @@
 
   <dynamic-memory enabled="no" />
 
-	<input-output enabled="no" />
+  <input-output enabled="no" internals="no"/>
 
   <syscall enabled="no" />
 
@@ -71,7 +71,9 @@
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
+    translate-addresses="yes"
     sort-addresses="yes"
+    translate-data-addresses="yes"
     overwrite="yes"
   />
 

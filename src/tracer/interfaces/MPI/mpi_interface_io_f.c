@@ -132,7 +132,7 @@ void NAME_ROUTINE_C2F(mpi_file_open) (MPI_Fint *comm, char *filename,
 	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len)
 #endif
 {
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -158,7 +158,7 @@ void NAME_ROUTINE_C2F(mpi_file_close) (MPI_File *fh, MPI_Fint *ierror)
 {
 	DLB(DLB_MPI_File_close_F_enter, fh, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -188,7 +188,7 @@ void NAME_ROUTINE_C2F(mpi_file_read) (MPI_File *fh, void *buf, MPI_Fint *count,
 { 
 	DLB(DLB_MPI_File_read_F_enter, fh, buf, count, datatype, status, ierror);
 	
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -219,7 +219,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_all) (MPI_File *fh, void *buf,
 	
 	DLB(DLB_MPI_File_read_all_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -231,7 +231,336 @@ void NAME_ROUTINE_C2F(mpi_file_read_all) (MPI_File *fh, void *buf,
 		CtoF77 (pmpi_file_read_all) (fh, buf, count, datatype, status, ierror);
 		
 	DLB(DLB_MPI_File_read_all_F_leave);
+}
 
+/******************************************************************************
+ ***  MPI_File_read_all_begin
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_all_begin__, mpi_file_read_all_begin_,
+    MPI_FILE_READ_ALL_BEGIN, mpi_file_read_all_begin,
+    (MPI_File *fh, void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_all_begin)(MPI_File *fh, void *buf,
+	MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_all_begin)(MPI_File *fh, void *buf,
+	MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_all_begin_F_enter, fh, buf, count, datatype, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_all_begin_Fortran_Wrapper(fh, buf, count, datatype, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77(pmpi_file_read_all_begin)(fh, buf, count, datatype, ierror);
+
+	DLB(DLB_MPI_File_read_all_begin_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_all_end
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_all_end__, mpi_file_read_all_end_,
+    MPI_FILE_READ_ALL_END,mpi_file_read_all_end,
+    (MPI_File *fh, void *buf, MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_all_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_all_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_all_end_F_enter, fh, buf, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_all_end_Fortran_Wrapper(fh, buf, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77(pmpi_file_read_all_end)(fh, buf, status, ierror);
+
+	DLB(DLB_MPI_File_read_all_end_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_at
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_at__,mpi_file_read_at_,MPI_FILE_READ_AT,mpi_file_read_at, (MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset,
+	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset,
+	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	MPI_Fint *ierror)
+#endif
+{
+
+	DLB(DLB_MPI_File_read_at_F_enter, fh, offset, buf, count, datatype,
+	  status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		PMPI_File_read_at_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_at) (fh, offset, buf, count, datatype, status, ierror);
+
+	DLB(DLB_MPI_File_read_at_F_leave);
+
+}
+
+/******************************************************************************
+ ***  MPI_File_read_at_all
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_at_all__, mpi_file_read_at_all_, MPI_FILE_READ_AT_ALL,
+    mpi_file_read_at_all,
+    (MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count,
+        MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_at_all_F_enter, fh, offset, buf, count, datatype,
+	    status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		PMPI_File_read_at_all_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_at_all) (fh, offset, buf, count, datatype, status, ierror);
+
+	DLB(DLB_MPI_File_read_at_all_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_at_all_begin
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_at_all_begin__, mpi_file_read_at_all_begin_, 
+    MPI_FILE_READ_AT_ALL_BEGIN, mpi_file_read_at_all_begin,
+    (MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count,
+        MPI_Fint *datatype, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_at_all_begin) (MPI_File *fh,
+    MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+    MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_at_all_begin) (MPI_File *fh,
+    MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+    MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_at_all_begin_F_enter, fh, offset, buf, count,
+	    datatype, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_at_all_begin_Fortran_Wrapper
+		    (fh, offset, buf, count, datatype, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_at_all_begin)
+		    (fh, offset, buf, count, datatype, ierror);
+
+	DLB(DLB_MPI_File_read_at_all_begin_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_at_all_end
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_at_all_end__, mpi_file_read_at_all_end_, 
+    MPI_FILE_READ_AT_ALL_END, mpi_file_read_at_all_end,
+    (MPI_File *fh, void* buf, MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_at_all_end_F_enter, fh, buf, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_at_all_end_Fortran_Wrapper(fh, buf, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_at_all_end) (fh, buf, status, ierror);
+
+	DLB(DLB_MPI_File_read_at_all_end_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_ordered
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_ordered__, mpi_file_read_ordered_, 
+    MPI_FILE_READ_ORDERED, mpi_file_read_ordered,
+    (MPI_File *fh, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_ordered) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_ordered) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_ordered_F_enter, fh, buf, count, datatype, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_ordered_Fortran_Wrapper(fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_ordered) (fh, buf, count, datatype, status, ierror);
+
+	DLB(DLB_MPI_File_read_ordered_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_ordered_begin
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_ordered_begin__, mpi_file_read_ordered_begin_, 
+    MPI_FILE_READ_ORDERED_BEGIN, mpi_file_read_ordered_begin,
+    (MPI_File *fh, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_ordered_begin_F_enter, fh, buf, count, datatype, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_ordered_begin_Fortran_Wrapper(fh, buf, count, datatype, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_ordered_begin) (fh, buf, count, datatype, ierror);
+
+	DLB(DLB_MPI_File_read_ordered_begin_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_ordered_end
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_ordered_end__, mpi_file_read_ordered_end_, 
+    MPI_FILE_READ_ORDERED_END, mpi_file_read_ordered_end,
+    (MPI_File *fh, void* buf, MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_ordered_end_F_enter, fh, buf, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_ordered_end_Fortran_Wrapper(fh, buf, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_ordered_end) (fh, buf, status, ierror);
+
+	DLB(DLB_MPI_File_read_ordered_end_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_read_shared
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_read_shared__, mpi_file_read_shared_, 
+    MPI_FILE_READ_SHARED, mpi_file_read_shared,
+    (MPI_File *fh, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_read_shared) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_read_shared) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_read_shared_F_enter, fh, buf, count, datatype, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_read_shared_Fortran_Wrapper(fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_read_shared) (fh, buf, count, datatype, status, ierror);
+
+	DLB(DLB_MPI_File_read_shared_F_leave);
 }
 
 /******************************************************************************
@@ -250,7 +579,7 @@ void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 
 	DLB(DLB_MPI_File_write_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -281,7 +610,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, void *buf,
 
 	DLB(DLB_MPI_File_write_all_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -297,70 +626,69 @@ void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, void *buf,
 }
 
 /******************************************************************************
- ***  MPI_File_read_at
+ ***  MPI_File_write_all_begin
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_read_at__,mpi_file_read_at_,MPI_FILE_READ_AT,mpi_file_read_at, (MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_all_begin__, mpi_file_write_all_begin_,
+    MPI_FILE_WRITE_ALL_BEGIN, mpi_file_write_all_begin,
+    (MPI_File *fh, void *buf, MPI_Fint *count, MPI_Fint *datatype,
+    MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)
+void NAME_ROUTINE_F(mpi_file_write_all_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)
+void NAME_ROUTINE_C2F(mpi_file_write_all_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
 #endif
 {
+	DLB(DLB_MPI_File_write_all_begin_F_enter, fh, buf, count, datatype, ierror);
 
-	DLB(DLB_MPI_File_read_at_F_enter, fh, offset, buf, count, datatype,
-	  status, ierror);
-
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
-		PMPI_File_read_at_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
-		Backend_Leave_Instrumentation ();
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_all_begin_Fortran_Wrapper
+		    (fh, MPI3_VOID_P_CAST buf, count, datatype, ierror);
+		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_file_read_at) (fh, offset, buf, count, datatype, status, ierror);
+		CtoF77(pmpi_file_write_all_begin)(fh, buf, count, datatype, ierror);
 
-	DLB(DLB_MPI_File_read_at_F_leave);
+	DLB(DLB_MPI_File_write_all_begin_F_leave);
 
 }
 
 /******************************************************************************
- ***  MPI_File_read_at_all
+ ***  MPI_File_write_all_end
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_read_at_all__,mpi_file_read_at_all_,MPI_FILE_READ_AT_ALL,mpi_file_read_at_all, (MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_all_end__, mpi_file_write_all_end_,
+    MPI_FILE_WRITE_ALL_END, mpi_file_write_all_end,
+    (MPI_File *fh, void *buf, MPI_Status *status, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)
+void NAME_ROUTINE_F(mpi_file_write_all_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)
+void NAME_ROUTINE_C2F(mpi_file_write_all_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
 #endif
 {
+	DLB(DLB_MPI_File_write_all_end_F_enter, fh, buf, status, ierror);
 
-	DLB(DLB_MPI_File_read_at_all_F_enter, fh, offset, buf, count, datatype,
-	  status, ierror);
-
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
-		PMPI_File_read_at_all_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
-		Backend_Leave_Instrumentation ();
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_all_end_Fortran_Wrapper
+		    (fh, MPI3_VOID_P_CAST buf, status, ierror);
+		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_file_read_at_all) (fh, offset, buf, count, datatype, status, ierror);
+		CtoF77(pmpi_file_write_all_end)(fh, buf, status, ierror);
 
-	DLB(DLB_MPI_File_read_at_all_F_leave);
+	DLB(DLB_MPI_File_write_all_end_F_leave);
 
 }
 
@@ -383,7 +711,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
 	DLB(DLB_MPI_File_write_at_F_enter, fh, offset, buf, count, datatype,
 	  status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -405,19 +733,18 @@ void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
 MPI_F_SYMS(mpi_file_write_at_all__,mpi_file_write_at_all_,MPI_FILE_WRITE_AT_ALL,mpi_file_write_at_all,(MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
 #endif
 {
-
 	DLB(DLB_MPI_File_write_at_all_F_enter, fh, offset, buf, count, datatype,
-	  status, ierror);
+	    status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -429,7 +756,200 @@ void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
 		CtoF77 (pmpi_file_write_at_all) (fh, offset, buf, count, datatype, status, ierror);
 
 	DLB(DLB_MPI_File_write_at_all_F_leave);
+}
 
+/******************************************************************************
+ ***  MPI_File_write_at_all_begin
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_write_at_all_begin__,mpi_file_write_at_all_begin_,MPI_FILE_WRITE_AT_ALL_BEGIN,mpi_file_write_at_all_begin,(MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_write_at_all_begin) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_write_at_all_begin) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_write_at_all_begin_F_enter, fh, offset, buf, count,
+	    datatype, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_at_all_begin_Fortran_Wrapper
+		    (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_write_at_all_begin)
+		    (fh, offset, buf, count, datatype, ierror);
+
+	DLB(DLB_MPI_File_write_at_all_begin_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_write_at_all_end
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_write_at_all_end__,mpi_file_write_at_all_end_,MPI_FILE_WRITE_AT_ALL_END,mpi_file_write_at_all_end,(MPI_File *fh, void* buf, MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_write_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_write_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_write_at_all_end_F_enter, fh, buf, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_at_all_end_Fortran_Wrapper
+		    (fh, MPI3_VOID_P_CAST buf, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_write_at_all_end)
+		    (fh, buf, status, ierror);
+
+	DLB(DLB_MPI_File_write_at_all_end_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_write_ordered
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_write_ordered__, mpi_file_write_ordered_, 
+    MPI_FILE_WRITE_ORDERED, mpi_file_write_ordered,
+    (MPI_File *fh, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_write_ordered) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_write_ordered) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_write_ordered_F_enter, fh, buf, count, datatype, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_ordered_Fortran_Wrapper(fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_write_ordered) (fh, buf, count, datatype, status, ierror);
+
+	DLB(DLB_MPI_File_write_ordered_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_write_ordered_begin
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_write_ordered_begin__, mpi_file_write_ordered_begin_, 
+    MPI_FILE_WRITE_ORDERED_BEGIN, mpi_file_write_ordered_begin,
+    (MPI_File *fh, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_write_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_write_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_write_ordered_begin_F_enter, fh, buf, count, datatype, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_ordered_begin_Fortran_Wrapper(fh, buf, count, datatype, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_write_ordered_begin) (fh, buf, count, datatype, ierror);
+
+	DLB(DLB_MPI_File_write_ordered_begin_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_write_ordered_end
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_write_ordered_end__, mpi_file_write_ordered_end_, 
+    MPI_FILE_WRITE_ORDERED_END, mpi_file_write_ordered_end,
+    (MPI_File *fh, void* buf, MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_write_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_write_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_write_ordered_end_F_enter, fh, buf, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_ordered_end_Fortran_Wrapper(fh, buf, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_write_ordered_end) (fh, buf, status, ierror);
+
+	DLB(DLB_MPI_File_write_ordered_end_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_File_write_shared
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_file_write_shared__, mpi_file_write_shared_, 
+    MPI_FILE_WRITE_SHARED, mpi_file_write_shared,
+    (MPI_File *fh, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Status *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_file_write_shared) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_file_write_shared) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)
+#endif
+{
+	DLB(DLB_MPI_File_write_shared_F_enter, fh, buf, count, datatype, status, ierror);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation();
+		PMPI_File_write_shared_Fortran_Wrapper(fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_file_write_shared) (fh, buf, count, datatype, status, ierror);
+
+	DLB(DLB_MPI_File_write_shared_F_leave);
 }
 
 #endif /* MPI_SUPPORTS_MPI_IO */

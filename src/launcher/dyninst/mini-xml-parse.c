@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "xalloc.h"
 
 #if !defined(HAVE_XML2)
 
@@ -138,7 +139,7 @@ static xmlChar * deal_xmlChar_env (xmlChar *str)
 		if (sublen > 1 && tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
 		{
 			char tmp2[sublen];
-			memset (tmp2, 0, sublen);
+			xmemset (tmp2, 0, sublen);
 			strncpy (tmp2, &tmp[1], sublen-2);
 
 			if (getenv (tmp2) == NULL)
@@ -405,7 +406,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 			}
 			else
 			{
-				temporal_d = malloc ((strlen(res)+1)*sizeof(char));
+				temporal_d = xmalloc ((strlen(res)+1)*sizeof(char));
 				strcpy (temporal_d, res);
 			}
 		}

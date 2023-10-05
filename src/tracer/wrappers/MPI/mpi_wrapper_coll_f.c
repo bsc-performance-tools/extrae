@@ -2092,9 +2092,11 @@ int xtr_mpi_comm_neighbors_count(MPI_Fint *comm, int *indegree, int *outdegree)
     }
     case MPI_DIST_GRAPH:
     {
-      int weighted; 
-      CtoF77(pmpi_dist_graph_neighbors_count) (comm, indegree, outdegree, &weighted, &ret);
+      int local_indegree, local_outdegree, weighted; 
+      CtoF77(pmpi_dist_graph_neighbors_count) (comm, &local_indegree, &local_outdegree, &weighted, &ret);
       MPI_CHECK(ret, pmpi_dist_graph_neighbors_count)
+		if (indegree  != NULL) *indegree  = local_indegree;
+		if (outdegree != NULL) *outdegree = local_outdegree;
       break;
     }
     case MPI_UNDEFINED:
@@ -2139,23 +2141,48 @@ void PMPI_Graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *
 
 void PMPI_Dist_graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
 {
-        MPI_Fint cnull;
+	MPI_Fint cnull;
 
-        cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_DIST_GRAPH_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	CtoF77 (pmpi_dist_graph_create) (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph, ierr);
 
-        if (*comm_dist_graph != cnull && *ierr == MPI_SUCCESS)
-        {
-                MPI_Comm comm_id = PMPI_Comm_f2c(*comm_dist_graph);
-                Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
-        }
+	if (*comm_dist_graph != cnull && *ierr == MPI_SUCCESS)
+	{
+		MPI_Comm comm_id = PMPI_Comm_f2c(*comm_dist_graph);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
 
 	TRACE_MPIEVENT (TIME, MPI_DIST_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-        updateStats_OTHER(global_mpi_stats);
+	updateStats_OTHER(global_mpi_stats);
+}
+
+/******************************************************************************
+ ***  PMPI_Dist_graph_create_adjacent_Wrapper
+ ******************************************************************************/
+
+void PMPI_Dist_graph_create_adjacent_Wrapper (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
+{
+	MPI_Fint cnull;
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	CtoF77 (pmpi_dist_graph_create_adjacent) (comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph, ierr);
+
+	if (*comm_dist_graph != cnull && *ierr == MPI_SUCCESS)
+	{
+		MPI_Comm comm_id = PMPI_Comm_f2c(*comm_dist_graph);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
+
+	TRACE_MPIEVENT (TIME, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
 }
 
 /******************************************************************************
@@ -2205,7 +2232,7 @@ void PMPI_Neighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fi
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * indegree, *sendcount * sendsize);
 }
 
 /******************************************************************************
@@ -2255,7 +2282,7 @@ void PMPI_Ineighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_F
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * indegree, *sendcount * sendsize);
 }
 
 /******************************************************************************
@@ -2423,7 +2450,7 @@ void PMPI_Neighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fin
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * indegree, *sendcount * sendsize);
 }
 
 
@@ -2474,7 +2501,7 @@ void PMPI_Ineighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fi
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * indegree, *sendcount * sendsize);
 }
 
 

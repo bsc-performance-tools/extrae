@@ -50,28 +50,19 @@
 #include "wrapper.h"
 #include <omp.h>
 
+#include "xalloc.h"
+
 //#define DEBUG
 #define GOMP_API_3_1 "3.1"
 #define GOMP_API_4_0 "4.0"
 #define GOMP_API_4_5 "4.5"
 
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
-#if defined (OS_RTEMS)
-	#define GET_REAL_FUNCTION(f) __real_##f
-	#define WRAP(f) __wrap_##f
-#else
-	#define GET_REAL_FUNCTION(f) dlsym (RTLD_NEXT, TOSTRING(f));
-	#define WRAP(f) f
-#endif
-
 char *__GOMP_version = NULL;
 
-/*                                                                              
- * In case the constructor initialization didn't trigger                        
- * or the symbols couldn't be found, retry hooking.                        
- */                                                                             
+/*
+ * In case the constructor initialization didn't trigger
+ * or the symbols couldn't be found, retry hooking.
+ */
 #define RECHECK_INIT(real_fn_ptr)                                      \
 {                                                                      \
   if (real_fn_ptr == NULL)                                             \
@@ -244,6 +235,7 @@ static void (*GOMP_taskgroup_end_real)(void) = NULL;
 // Appeared in OpenMP 3.1 but increased the #parameters in 4.0 and later in 4.5
 static void (*GOMP_task_real)(void*,void*,void*,long,long,int,unsigned,...) = NULL;
 static void (*GOMP_taskloop_real)(void*,void*,void*,long,long,unsigned,unsigned long,int,long,long,long) = NULL;
+static void (*GOMP_taskloop_ull_real)(void*,void*,void*,long,long,unsigned,unsigned long,int,unsigned long long,unsigned long long,unsigned long long) = NULL;
 
 static int (*GOMP_loop_doacross_static_start_real)(unsigned, long *, long, long *, long *) = NULL;
 static int (*GOMP_loop_doacross_dynamic_start_real)(unsigned, long *, long, long *, long *) = NULL;
@@ -286,12 +278,7 @@ static void preallocate_GOMP_helpers()
 
 	if (__GOMP_helpers == NULL)                                                      
 	{                                                                             
-		__GOMP_helpers = (struct helpers_queue_t *)malloc(sizeof(struct helpers_queue_t));
-		if (__GOMP_helpers == NULL)                                                 
-		{                                                                           
-			fprintf (stderr, PACKAGE_NAME": ERROR! Invalid initialization of '__GOMP_helpers'\n");
-			exit(-1);                                                                 
-		}                                                                           
+		__GOMP_helpers = (struct helpers_queue_t *)xmalloc(sizeof(struct helpers_queue_t));                                                                        
 
 		/*
 		 * If the environment variable ENV_VAR_EXTRAE_OPENMP_HELPERS is defined, this
@@ -313,12 +300,7 @@ static void preallocate_GOMP_helpers()
 
 		__GOMP_helpers->current_helper = 0;                                           
 		__GOMP_helpers->max_helpers = num_helpers;                                    
-		__GOMP_helpers->queue = (struct parallel_helper_t *)malloc(sizeof(struct parallel_helper_t) * num_helpers);
-		if (__GOMP_helpers->queue == NULL)                                          
-		{                                                                           
-			fprintf (stderr, PACKAGE_NAME": ERROR! Invalid initialization of '__GOMP_helpers->queue' (%d helpers)\n", num_helpers);
-			exit(-1);                                                                 
-		}                                                                           
+		__GOMP_helpers->queue = (struct parallel_helper_t *)xmalloc(sizeof(struct parallel_helper_t) * num_helpers);                                                                          
 	}                                                                             
 
 	pthread_mutex_unlock(&__GOMP_helpers_mtx);
@@ -422,22 +404,6 @@ static volatile long long __GOMP_taskloop_ctr = 1;
 #if !defined(HAVE__SYNC_FETCH_AND_ADD)
 static pthread_mutex_t __GOMP_taskloop_ctr_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
-
-typedef struct tracked_taskloop_helper_t tracked_taskloop_helper_t;
-
-struct tracked_taskloop_helper_t
-{
-  void *taskloop_helper_ptr;
-  tracked_taskloop_helper_t *next;
-
-};
-
-tracked_taskloop_helper_t *tracked_taskloop_helpers = NULL;
-pthread_mutex_t mtx_taskloop_helpers = PTHREAD_MUTEX_INITIALIZER;
-
-void *taskloop_global_fn = NULL;
-void *taskloop_global_data = NULL;
-
 
 /*
  * Instrumentation of doacross is split in several routines. In the *_start 
@@ -576,179 +542,42 @@ static void callme_task (void *task_helper_ptr)
 	if (task_helper != NULL)
 	{
 		Extrae_OpenMP_TaskUF_Entry (task_helper->fn);
-		Extrae_OpenMP_TaskID (task_helper->counter);
+		Extrae_OpenMP_TaskID (task_helper->counter, XTR_TASK_EXECUTION);
 
 		task_helper->fn (task_helper->data);
 		if (task_helper->buf != NULL)
-			free(task_helper->buf);
-		free(task_helper);
+			xfree(task_helper->buf);
+		xfree(task_helper);
 
 		Extrae_OpenMP_Notify_NewExecutedTask();
 		Extrae_OpenMP_TaskUF_Exit ();
 	}
 }
 
-static void callme_taskloop (void (*fn)(void *), void *data)
-{
-#if defined(DEBUG)
-	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop enter: fn=%p data=%p data[0]=%ld data[1]=%ld\n", THREAD_LEVEL_VAR, fn, data, *((long *)data), *((long *)(data+sizeof(long))));
-#endif
 
-#if defined(HAVE__SYNC_FETCH_AND_ADD)
-	long long taskloop_ctr = __sync_fetch_and_add(&__GOMP_taskloop_ctr, 1);
-#else
-	pthread_mutex_lock (&__GOMP_taskloop_ctr_mtx);
-	long long taskloop_ctr = __GOMP_taskloop_ctr++;
-	pthread_mutex_unlock (&__GOMP_taskloop_ctr_mtx);
-#endif
+static void callme_taskloop(void *data_trailer)
+{
+	struct taskloop_helper_t *taskloop_helper = NULL;
+
+	// Search for the magic number 0xdeadbeef to locate the helper
+	int i = sizeof(void *), arg_size = 0;
+	while (*(void **)(data_trailer + i) != 0xdeadbeef)
+	{
+		i ++;
+	}
+	arg_size = i;
+	taskloop_helper = data_trailer + arg_size;
+
+	void (*fn)(void *) = taskloop_helper->fn;
 
 	Extrae_OpenMP_TaskUF_Entry (fn);
-	Extrae_OpenMP_TaskLoopID (taskloop_ctr);
+	Extrae_OpenMP_TaskLoopID (taskloop_helper->id);
 
-	fn(data);
+	fn (data_trailer);
 
-	Extrae_OpenMP_Notify_NewExecutedTask();
-  Extrae_OpenMP_TaskUF_Exit ();
+        Extrae_OpenMP_Notify_NewExecutedTask();
+	Extrae_OpenMP_TaskUF_Exit ();
 }
-
-/*
- * This callback is invoked when taskloop doesn't use copy function. Then the 
- * data helper is prefixed to the argument data in the GOMP_taskloop wrapper.
- *
- * taskloop_helper \             data \
- *                  --------------------------------------------
- *                  | cpyfn? |   *fn   | long start | long end |
- *                  --------------------------------------------
- */
-static void callme_taskloop_prefix_helper (void *data)
-{
-  /* Look for the data argument in our tracked list, if we don't find it, that means
-   * that the runtime did an internal copy of data and our prefixed pointers 
-   * are gone, so we use a fallback mechanism using a global pointer that stores the 
-   * original function and data (this only allows 1 simultaneous taskloop)
-   */
-	pthread_mutex_lock (&mtx_taskloop_helpers);
-	tracked_taskloop_helper_t *current_tracked_taskloop_helper = tracked_taskloop_helpers;
-	int found = 0;
-	while ((current_tracked_taskloop_helper != NULL) && (!found))
-	{
-		if (current_tracked_taskloop_helper->taskloop_helper_ptr == data)
-		{
-			found = 1;
-		}
-		current_tracked_taskloop_helper = current_tracked_taskloop_helper->next;
-	}
-	pthread_mutex_unlock (&mtx_taskloop_helpers);
-
-	if (!found)
-	{
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_prefix_helper: Using fallback global pointers taskloop_global_fn=%p taskloop_global_data=%p\n", THREAD_LEVEL_VAR, taskloop_global_fn, taskloop_global_data);
-#endif
-		callme_taskloop(taskloop_global_fn, taskloop_global_data);
-	}
-	else
-	{
-		/* Retrieve the data helper */
-		void *taskloop_helper = data - sizeof(void *);                                
-		void (*fn)(void *) = *(void **)(taskloop_helper); 
-
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_prefix_helper: Using injected pointers fn=%p data=%p\n", THREAD_LEVEL_VAR, fn, data);
-#endif
-		callme_taskloop(fn, data);
-	}
-}
-
-/*
- * This callback is invoked when taskloop uses copy function. Then the data 
- * helper is suffixed to the argument data in the callme_taskloop_cpyfn callback.
- *
- *            data \       taskloop_helper \
- *                  ---------------------------------
- *                  | long start | long end | *fn ...
- *                  ---------------------------------
- */
-static void callme_taskloop_suffix_helper (void *data)                                        
-{
-  /* Look for the data argument in our tracked list, if we don't find it, that means
-   * that the runtime did an internal copy of data and our suffixed pointers 
-   * are gone, so we use a fallback mechanism using a global pointer that stores the 
-   * original function and data (this only allows 1 simultaneous taskloop)
-   */
-	pthread_mutex_lock (&mtx_taskloop_helpers);
-	tracked_taskloop_helper_t *current_tracked_taskloop_helper = tracked_taskloop_helpers;
-	int found = 0;
-	while ((current_tracked_taskloop_helper != NULL) && (!found))
-	{
-		if (current_tracked_taskloop_helper->taskloop_helper_ptr == data)
-		{
-			found = 1;
-		}
-		current_tracked_taskloop_helper = current_tracked_taskloop_helper->next;
-	}
-	pthread_mutex_unlock (&mtx_taskloop_helpers);
-
-	if (!found)
-	{
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_suffix_helper: Using fallback global pointers taskloop_global_fn=%p taskloop_global_data=%p\n", THREAD_LEVEL_VAR, taskloop_global_fn, taskloop_global_data);
-#endif
-		callme_taskloop(taskloop_global_fn, taskloop_global_data);
-	}
-	else
-	{
-		/* Retrieve the data helper */
-		void *taskloop_helper = data + (2 * sizeof(long));
-		void (*fn)(void *) = *(void **)(taskloop_helper);
-
-#if defined(DEBUG)
-		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_suffix_helper: Using injected pointers fn=%p data=%p\n", THREAD_LEVEL_VAR, fn, data);
-#endif
-		callme_taskloop(fn, data);
-	}
-}
-
-/*
- * This callback is invoked when taskloop uses copy function. The data helper
- * is prefixed to the argument data in the GOMP_taskloop wrapper. The helper is 
- * copied from data to arg by suffixing it (see GOMP_taskloop wrapper), after
- * the real copy takes place.
- *
- * taskloop_helper ↴         data ↴
- *                 ----------------------------------------
- *                 | *cpyfn | *fn | long start | long end |
- *                 ----------------------------------------
- *
- *             arg ↴  arg+(2*sizeof(long)) ↴  arg+arg_size ↴        
- *                 ---------------------------------------------------------------------------
- *                 | long start | long end |   *fn   | ... | long start | long end | *fn | ...
- *                 ---------------------------------------------------------------------------
- */
-void callme_taskloop_cpyfn(void *arg, void *data)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_cpyfn enter: arg=%p data=%p\n", THREAD_LEVEL_VAR, arg, data);
-#endif
-
-  /* Retrieve the data helper */
-	void *taskloop_helper = data - sizeof(void *) - sizeof(void *);
-  void (*cpyfn)(void *, void*) = *((void **)(taskloop_helper));
-	void (*fn)(void *) = *((void **)(taskloop_helper+sizeof(void *)));
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_taskloop_cpyfn: taskloop_helper=%p cpyfn=%p fn=%p\n", THREAD_LEVEL_VAR, taskloop_helper, cpyfn, fn);
-#endif
-
-	/* Real copy function */
-  cpyfn(arg, data);
-
-	/* Save the pointer to the real fn in arg, after the 2 longs that mark the
-	 * start/end iterations 
-	 */
-  *(void **)(arg+(2 * sizeof(long))) = fn;
-}
-
 
 /******************************************************************************\
  *                                                                            *
@@ -760,7 +589,7 @@ void callme_taskloop_cpyfn(void *arg, void *data)
 /***** Added (or changed) in OpenMP 3.1 or prior versions *****/
 /**************************************************************/
 
-void WRAP(GOMP_atomic_start) (void)
+void LINK_WRAP(GOMP_atomic_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_atomic_start_real);
@@ -789,7 +618,7 @@ void WRAP(GOMP_atomic_start) (void)
 #endif
 }
 
-void WRAP(GOMP_atomic_end) (void)
+void LINK_WRAP(GOMP_atomic_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_atomic_end_real);
@@ -818,7 +647,7 @@ void WRAP(GOMP_atomic_end) (void)
 #endif
 }
 
-void WRAP(GOMP_barrier) (void)
+void LINK_WRAP(GOMP_barrier) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_barrier enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_barrier_real);
@@ -847,7 +676,7 @@ void WRAP(GOMP_barrier) (void)
 #endif
 }
 
-void WRAP(GOMP_critical_start) (void)
+void LINK_WRAP(GOMP_critical_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_critical_start_real);
@@ -876,7 +705,7 @@ void WRAP(GOMP_critical_start) (void)
 #endif
 }
 
-void WRAP(GOMP_critical_end) (void)
+void LINK_WRAP(GOMP_critical_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_critical_end_real);
@@ -905,7 +734,7 @@ void WRAP(GOMP_critical_end) (void)
 #endif
 }
 
-void WRAP(GOMP_critical_name_start) (void **pptr)
+void LINK_WRAP(GOMP_critical_name_start) (void **pptr)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_start enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_critical_name_start_real, pptr);
@@ -934,7 +763,7 @@ void WRAP(GOMP_critical_name_start) (void **pptr)
 #endif
 }
 
-void WRAP(GOMP_critical_name_end) (void **pptr)
+void LINK_WRAP(GOMP_critical_name_end) (void **pptr)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_end enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_critical_name_end_real, pptr);
@@ -963,7 +792,7 @@ void WRAP(GOMP_critical_name_end) (void **pptr)
 #endif
 }
 
-int WRAP(GOMP_loop_static_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_static_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 
@@ -997,7 +826,7 @@ int WRAP(GOMP_loop_static_start) (long start, long end, long incr, long chunk_si
 	return res;
 }
 
-int WRAP(GOMP_loop_dynamic_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_dynamic_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1030,7 +859,7 @@ int WRAP(GOMP_loop_dynamic_start) (long start, long end, long incr, long chunk_s
 	return res;
 }
 
-int WRAP(GOMP_loop_guided_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_guided_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1063,7 +892,7 @@ int WRAP(GOMP_loop_guided_start) (long start, long end, long incr, long chunk_si
 	return res;
 }
 
-int WRAP(GOMP_loop_runtime_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_runtime_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1096,7 +925,7 @@ int WRAP(GOMP_loop_runtime_start) (long start, long end, long incr, long chunk_s
 	return res;
 }
 
-int WRAP(GOMP_loop_static_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_static_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1128,7 +957,7 @@ int WRAP(GOMP_loop_static_next) (long *istart, long *iend)
 	return res;
 }
 
-int WRAP(GOMP_loop_dynamic_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_dynamic_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1160,7 +989,7 @@ int WRAP(GOMP_loop_dynamic_next) (long *istart, long *iend)
 	return res;
 }
 
-int WRAP(GOMP_loop_guided_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_guided_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1192,7 +1021,7 @@ int WRAP(GOMP_loop_guided_next) (long *istart, long *iend)
 	return res;
 }
 
-int WRAP(GOMP_loop_runtime_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_runtime_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1224,7 +1053,7 @@ int WRAP(GOMP_loop_runtime_next) (long *istart, long *iend)
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_static_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_static_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1256,7 +1085,7 @@ int WRAP(GOMP_loop_ordered_static_start) (long start, long end, long incr, long 
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_dynamic_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_dynamic_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1288,7 +1117,7 @@ int WRAP(GOMP_loop_ordered_dynamic_start) (long start, long end, long incr, long
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_guided_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_guided_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1320,7 +1149,7 @@ int WRAP(GOMP_loop_ordered_guided_start) (long start, long end, long incr, long 
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_runtime_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_runtime_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1352,7 +1181,7 @@ int WRAP(GOMP_loop_ordered_runtime_start) (long start, long end, long incr, long
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_static_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_static_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1384,7 +1213,7 @@ int WRAP(GOMP_loop_ordered_static_next) (long *istart, long *iend)
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_dynamic_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_dynamic_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1416,7 +1245,7 @@ int WRAP(GOMP_loop_ordered_dynamic_next) (long *istart, long *iend)
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_guided_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_guided_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1448,7 +1277,7 @@ int WRAP(GOMP_loop_ordered_guided_next) (long *istart, long *iend)
 	return res;
 }
 
-int WRAP(GOMP_loop_ordered_runtime_next) (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_runtime_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1481,7 +1310,7 @@ int WRAP(GOMP_loop_ordered_runtime_next) (long *istart, long *iend)
 }
 
 void
-WRAP(GOMP_parallel_loop_static_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+LINK_WRAP(GOMP_parallel_loop_static_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1540,7 +1369,7 @@ WRAP(GOMP_parallel_loop_static_start) (void (*fn)(void *), void *data, unsigned 
 }
 
 void
-WRAP(GOMP_parallel_loop_dynamic_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+LINK_WRAP(GOMP_parallel_loop_dynamic_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1599,7 +1428,7 @@ WRAP(GOMP_parallel_loop_dynamic_start) (void (*fn)(void *), void *data, unsigned
 }
 
 void
-WRAP(GOMP_parallel_loop_guided_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+LINK_WRAP(GOMP_parallel_loop_guided_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1658,7 +1487,7 @@ WRAP(GOMP_parallel_loop_guided_start) (void (*fn)(void *), void *data, unsigned 
 }
 
 void
-WRAP(GOMP_parallel_loop_runtime_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr)
+LINK_WRAP(GOMP_parallel_loop_runtime_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1716,7 +1545,7 @@ WRAP(GOMP_parallel_loop_runtime_start) (void (*fn)(void *), void *data, unsigned
 #endif
 }
 
-void WRAP(GOMP_loop_end) (void)
+void LINK_WRAP(GOMP_loop_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_loop_end_real);
@@ -1746,7 +1575,7 @@ void WRAP(GOMP_loop_end) (void)
 #endif
 }
 
-void WRAP(GOMP_loop_end_nowait) (void)
+void LINK_WRAP(GOMP_loop_end_nowait) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end_nowait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_loop_end_nowait_real);
@@ -1776,7 +1605,7 @@ void WRAP(GOMP_loop_end_nowait) (void)
 #endif
 }
 
-void WRAP(GOMP_ordered_start) (void)
+void LINK_WRAP(GOMP_ordered_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_ordered_start_real);
@@ -1805,7 +1634,7 @@ void WRAP(GOMP_ordered_start) (void)
 #endif
 }
 
-void WRAP(GOMP_ordered_end) (void)
+void LINK_WRAP(GOMP_ordered_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_ordered_end_real);
@@ -1835,7 +1664,7 @@ void WRAP(GOMP_ordered_end) (void)
 }
 
 void
-WRAP(GOMP_parallel_start) (void (*fn)(void *), void *data, unsigned num_threads)
+LINK_WRAP(GOMP_parallel_start) (void (*fn)(void *), void *data, unsigned num_threads)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1885,7 +1714,7 @@ WRAP(GOMP_parallel_start) (void (*fn)(void *), void *data, unsigned num_threads)
 }
 
 void
-WRAP(GOMP_parallel_end)(void)
+LINK_WRAP(GOMP_parallel_end)(void)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1928,7 +1757,7 @@ WRAP(GOMP_parallel_end)(void)
 }
 
 void
-WRAP(GOMP_parallel_sections_start)(void (*fn)(void *), void *data, unsigned num_threads, unsigned count)
+LINK_WRAP(GOMP_parallel_sections_start)(void (*fn)(void *), void *data, unsigned num_threads, unsigned count)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1975,7 +1804,7 @@ WRAP(GOMP_parallel_sections_start)(void (*fn)(void *), void *data, unsigned num_
 #endif
 }
 
-unsigned WRAP(GOMP_sections_start) (unsigned count)
+unsigned LINK_WRAP(GOMP_sections_start) (unsigned count)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
@@ -2007,7 +1836,7 @@ unsigned WRAP(GOMP_sections_start) (unsigned count)
 	return res;
 }
 
-unsigned WRAP(GOMP_sections_next) (void)
+unsigned LINK_WRAP(GOMP_sections_next) (void)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
@@ -2039,7 +1868,7 @@ unsigned WRAP(GOMP_sections_next) (void)
 	return res;
 }
 
-void WRAP(GOMP_sections_end) (void)
+void LINK_WRAP(GOMP_sections_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_sections_end_real);
@@ -2068,7 +1897,7 @@ void WRAP(GOMP_sections_end) (void)
 #endif
 }
 
-void WRAP(GOMP_sections_end_nowait) (void)
+void LINK_WRAP(GOMP_sections_end_nowait) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end_nowait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_sections_end_nowait_real);
@@ -2097,7 +1926,7 @@ void WRAP(GOMP_sections_end_nowait) (void)
 #endif
 }
 
-unsigned WRAP(GOMP_single_start) (void)
+unsigned LINK_WRAP(GOMP_single_start) (void)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
@@ -2129,7 +1958,7 @@ unsigned WRAP(GOMP_single_start) (void)
 	return res;
 }
 
-void WRAP(GOMP_taskwait) (void)
+void LINK_WRAP(GOMP_taskwait) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskwait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskwait_real);
@@ -2165,7 +1994,7 @@ void WRAP(GOMP_taskwait) (void)
 /********************************************/
 
 void
-WRAP(GOMP_parallel) (void (*fn)(void *), void *data, unsigned num_threads, unsigned int flags)
+LINK_WRAP(GOMP_parallel) (void (*fn)(void *), void *data, unsigned num_threads, unsigned int flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2230,7 +2059,7 @@ WRAP(GOMP_parallel) (void (*fn)(void *), void *data, unsigned num_threads, unsig
 }
 
 void
-WRAP(GOMP_parallel_loop_static) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_static) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2281,7 +2110,7 @@ WRAP(GOMP_parallel_loop_static) (void (*fn)(void *), void *data, unsigned num_th
 }
 
 void
-WRAP(GOMP_parallel_loop_dynamic) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_dynamic) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2331,7 +2160,7 @@ WRAP(GOMP_parallel_loop_dynamic) (void (*fn)(void *), void *data, unsigned num_t
 }
 
 void
-WRAP(GOMP_parallel_loop_guided) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_guided) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2382,7 +2211,7 @@ WRAP(GOMP_parallel_loop_guided) (void (*fn)(void *), void *data, unsigned num_th
 }
 
 void
-WRAP(GOMP_parallel_loop_runtime) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_runtime) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2433,7 +2262,7 @@ WRAP(GOMP_parallel_loop_runtime) (void (*fn)(void *), void *data, unsigned num_t
 }
 
 void
-WRAP(GOMP_parallel_sections) (void (*fn) (void *), void *data, unsigned num_threads, unsigned count, unsigned flags)
+LINK_WRAP(GOMP_parallel_sections) (void (*fn) (void *), void *data, unsigned num_threads, unsigned count, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2490,7 +2319,7 @@ WRAP(GOMP_parallel_sections) (void (*fn) (void *), void *data, unsigned num_thre
 }
 
 
-void WRAP(GOMP_taskgroup_start) (void)
+void LINK_WRAP(GOMP_taskgroup_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskgroup_start_real);
@@ -2520,7 +2349,7 @@ void WRAP(GOMP_taskgroup_start) (void)
 #endif
 }
 
-void WRAP(GOMP_taskgroup_end) (void)
+void LINK_WRAP(GOMP_taskgroup_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskgroup_end_real);
@@ -2560,7 +2389,7 @@ void WRAP(GOMP_taskgroup_end) (void)
  * varargs, and we check the runtime version to decide with how many parameters
  * we will make the call to the real function.
  */
-void WRAP(GOMP_task) (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), long arg_size, long arg_align, int if_clause, unsigned flags, ...)
+void LINK_WRAP(GOMP_task) (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), long arg_size, long arg_align, int if_clause, unsigned flags, ...)
 {
 	void **depend = NULL;
 	int priority = 0;
@@ -2583,13 +2412,13 @@ void WRAP(GOMP_task) (void (*fn)(void *), void *data, void (*cpyfn)(void *, void
 		 * Helpers for GOMP_task don't use the array of active helpers, as we know 
 		 * that we can free them right away after the task is executed.
 		 */
-		struct task_helper_t *task_helper = (struct task_helper_t *) malloc(sizeof(struct task_helper_t));
+		struct task_helper_t *task_helper = (struct task_helper_t *) xmalloc(sizeof(struct task_helper_t));
 		task_helper->fn = fn;
 		task_helper->data = data;
 
 		if (cpyfn != NULL)
 		{
-			char *buf = malloc(sizeof(char) * (arg_size + arg_align - 1));
+			char *buf = xmalloc(sizeof(char) * (arg_size + arg_align - 1));
 			char *arg = (char *) (((uintptr_t) buf + arg_align - 1)
 			            & ~(uintptr_t) (arg_align - 1));
 			cpyfn (arg, data);
@@ -2599,7 +2428,7 @@ void WRAP(GOMP_task) (void (*fn)(void *), void *data, void (*cpyfn)(void *, void
 		}
 		else
 		{
-			char *buf = malloc(sizeof(char) * (arg_size + arg_align - 1));
+			char *buf = xmalloc(sizeof(char) * (arg_size + arg_align - 1));
 			memcpy (buf, data, arg_size);
 			task_helper->data = buf;
 			// Saved for deallocation purposes, arg is not valid since includes offset
@@ -2614,7 +2443,7 @@ void WRAP(GOMP_task) (void (*fn)(void *), void *data, void (*cpyfn)(void *, void
 		pthread_mutex_unlock (&__GOMP_task_ctr_mtx);
 #endif
 
-		Extrae_OpenMP_TaskID (task_helper->counter);
+		Extrae_OpenMP_TaskID (task_helper->counter, XTR_TASK_INSTANTIATION);
 
 		if (strcmp(__GOMP_version, GOMP_API_3_1) == 0) {
 			GOMP_task_real (callme_task, &task_helper, NULL, sizeof(task_helper), arg_align, if_clause, flags);
@@ -2656,14 +2485,7 @@ void WRAP(GOMP_task) (void (*fn)(void *), void *data, void (*cpyfn)(void *, void
 }
 
 
-/*
- * taskloop_helper ↴         data ↴
- *                 ----------------------------------------
- *                 | *cpyfn | *fn | long start | long end |
- *                 ----------------------------------------
- */
-
-void WRAP(GOMP_taskloop) (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, long start, long end, long step)
+void LINK_WRAP(GOMP_taskloop) (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, long start, long end, long step)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_taskloop_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
@@ -2674,71 +2496,28 @@ void WRAP(GOMP_taskloop) (void *fn, void *data, void *cpyfn, long arg_size, long
 
 	if (TRACE(GOMP_taskloop_real) && (getTrace_OMPTaskloop()))
 	{
-		/* Store global pointers to fn and data. This is a fallback mechanism in case the runtime changes data, 
-		 * breaking our injected pointers. Using the global pointers only allows 1 simultaneous taskloop.
-		 */
-		taskloop_global_fn = fn;
-		taskloop_global_data = data;
+		struct taskloop_helper_t taskloop_helper;
+		long helper_size = sizeof(struct taskloop_helper_t);
+
+		taskloop_helper.magicno = 0xdeadbeef; // Magic number to locate the helper in callme_taskloop
+		taskloop_helper.fn = fn;
+
+		// Assign a unique id to this taskloop to track when it is scheduled and when executed 
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+		taskloop_helper.id = __sync_fetch_and_add(&__GOMP_taskloop_ctr, 1);
+#else
+		pthread_mutex_lock (&__GOMP_taskloop_ctr_mtx);
+		taskloop_helper.id = __GOMP_taskloop_ctr++;
+		pthread_mutex_unlock (&__GOMP_taskloop_ctr_mtx);
+#endif
+
+    	        // Append the helper to the end of data
+		void *data_trailer = xmalloc(arg_size + helper_size);
+		memcpy (data_trailer, data, arg_size);
+		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
 
 		Extrae_OpenMP_TaskLoop_Entry ();
-
-		/* Modify the input 'data' to prefix the pointers to cpyfn and fn */
-		long payload = sizeof(void *) + sizeof(void *);
-		void *taskloop_helper = (void *)malloc(payload + arg_size);
-#if defined(DEBUG)
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop taskloop_helper=%p\n", THREAD_LEVEL_VAR, taskloop_helper);
-#endif
-		*((void **)(taskloop_helper)) = cpyfn;
-		*((void **)(taskloop_helper+sizeof(void *))) = fn;
-		memcpy(taskloop_helper+payload, data, arg_size);
-
-		/* Store our modified data in a list */
-		pthread_mutex_lock (&mtx_taskloop_helpers);
-		tracked_taskloop_helper_t *new_tracked_taskloop_helper = malloc(sizeof(tracked_taskloop_helper_t));
-		new_tracked_taskloop_helper->taskloop_helper_ptr = taskloop_helper+payload;
-		new_tracked_taskloop_helper->next = tracked_taskloop_helpers;
-		tracked_taskloop_helpers = new_tracked_taskloop_helper;
-		pthread_mutex_unlock (&mtx_taskloop_helpers);
-
-		if (cpyfn != NULL)
-		{
-			GOMP_taskloop_real (callme_taskloop_suffix_helper, taskloop_helper+payload, callme_taskloop_cpyfn, arg_size+payload, arg_align, flags, num_tasks, priority, start, end, step);
-		}
-		else 
-		{
-			GOMP_taskloop_real (callme_taskloop_prefix_helper, taskloop_helper+payload, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
-		}
-
-		/* At this point the runtime has invoked all loop tasks so the helper can be freed */
-		if (taskloop_helper != NULL)
-		{
-		  free(taskloop_helper);
-		}
-
-		/* Remove our modified data from the list */
-		pthread_mutex_lock (&mtx_taskloop_helpers);
-		tracked_taskloop_helper_t *current_tracked_taskloop_helper = tracked_taskloop_helpers, *prev = NULL;
-		while (current_tracked_taskloop_helper != NULL)
-		{
-			if (current_tracked_taskloop_helper->taskloop_helper_ptr == taskloop_helper+payload)
-			{
-				if (prev != NULL)
-				{
-					prev->next = current_tracked_taskloop_helper->next;
-				}
-				else
-				{
-					tracked_taskloop_helpers = current_tracked_taskloop_helper->next;
-				}
-				free (current_tracked_taskloop_helper);
-
-				break;
-			}
-			prev = current_tracked_taskloop_helper;
-			current_tracked_taskloop_helper = current_tracked_taskloop_helper->next;
-		}
-		pthread_mutex_unlock (&mtx_taskloop_helpers);
-
+		GOMP_taskloop_real(callme_taskloop, data_trailer, cpyfn, arg_size + helper_size, arg_align, flags, num_tasks, priority, start, end, step);
 		Extrae_OpenMP_TaskLoop_Exit ();
 	}
 	else if (GOMP_taskloop_real != NULL)
@@ -2750,13 +2529,57 @@ void WRAP(GOMP_taskloop) (void *fn, void *data, void *cpyfn, long arg_size, long
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
 		exit (-1);
 	}
+}
+
+void LINK_WRAP(GOMP_taskloop_ull) (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, unsigned long long start, unsigned long long end, unsigned long long step)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %llu %llu %llu)\n", THREAD_LEVEL_VAR, GOMP_taskloop_ull_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
+#endif
+
+	RECHECK_INIT(GOMP_taskloop_ull_real);
+	if (TRACE(GOMP_taskloop_ull_real) && (getTrace_OMPTaskloop()))
+	{
+		struct taskloop_helper_t taskloop_helper;
+		long helper_size = sizeof(struct taskloop_helper_t);
+
+		taskloop_helper.magicno = 0xdeadbeef; // Magic number to locate the helper in callme_taskloop
+		taskloop_helper.fn = fn;
+
+		// Assign a unique id to this taskloop to track when it is scheduled and when executed 
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+		taskloop_helper.id = __sync_fetch_and_add(&__GOMP_taskloop_ctr, 1);
+#else
+		pthread_mutex_lock (&__GOMP_taskloop_ctr_mtx);
+		taskloop_helper.id = __GOMP_taskloop_ctr++;
+		pthread_mutex_unlock (&__GOMP_taskloop_ctr_mtx);
+#endif
+    	        // Append the helper to the end of data
+		void *data_trailer = xmalloc(arg_size + helper_size);
+		memcpy (data_trailer, data, arg_size);
+		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
+
+		Extrae_OpenMP_TaskLoop_Entry ();
+		GOMP_taskloop_ull_real(callme_taskloop, data_trailer, cpyfn, arg_size + helper_size, arg_align, flags, num_tasks, priority, start, end, step);
+		Extrae_OpenMP_TaskLoop_Exit ();
+	}
+	else if (GOMP_taskloop_ull_real != NULL)
+	{
+		GOMP_taskloop_ull_real(fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop exit\n", THREAD_LEVEL_VAR);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-int WRAP(GOMP_loop_doacross_static_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend) 
+int LINK_WRAP(GOMP_loop_doacross_static_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend) 
 {
 	int res;
 #if defined(DEBUG)
@@ -2790,7 +2613,7 @@ int WRAP(GOMP_loop_doacross_static_start) (unsigned ncounts, long *counts, long 
 	return res;
 }
 
-int WRAP(GOMP_loop_doacross_dynamic_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_doacross_dynamic_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
 #if defined(DEBUG)
@@ -2824,7 +2647,7 @@ int WRAP(GOMP_loop_doacross_dynamic_start) (unsigned ncounts, long *counts, long
 	return res;
 }
 
-int WRAP(GOMP_loop_doacross_guided_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_doacross_guided_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
 #if defined(DEBUG)
@@ -2858,7 +2681,7 @@ int WRAP(GOMP_loop_doacross_guided_start) (unsigned ncounts, long *counts, long 
 	return res;
 }
 
-int WRAP(GOMP_loop_doacross_runtime_start) (unsigned ncounts, long *counts, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_doacross_runtime_start) (unsigned ncounts, long *counts, long *istart, long *iend)
 {
 	int res;
 #if defined(DEBUG)
@@ -2892,7 +2715,7 @@ int WRAP(GOMP_loop_doacross_runtime_start) (unsigned ncounts, long *counts, long
 	return res;
 }
 
-void WRAP(GOMP_doacross_post) (long *counts)
+void LINK_WRAP(GOMP_doacross_post) (long *counts)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_doacross_post enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_doacross_post_real, counts);
@@ -2927,7 +2750,7 @@ void WRAP(GOMP_doacross_post) (long *counts)
  * 'genstubs-libgomp.sh' up to a maximum of DOACROSS_MAX_NESTING, defined in 
  * that script.
  */
-void WRAP(GOMP_doacross_wait) (long first, ...)
+void LINK_WRAP(GOMP_doacross_wait) (long first, ...)
 {
 	unsigned i = 0;
 	long args[MAX_DOACROSS_ARGS];
@@ -3310,26 +3133,31 @@ if ((__GOMP_version = getenv("EXTRAE___GOMP_version")) != NULL) {
 		(void(*)(void*,void*,void*,long,long,unsigned,unsigned long,int,long,long,long)) GET_REAL_FUNCTION(GOMP_taskloop);
 	INC_IF_NOT_NULL(GOMP_taskloop_real,count);
 
+	/* Obtain @ for GOMP_taskloop_ull */
+	GOMP_taskloop_ull_real =
+		(void(*)(void*,void*,void*,long,long,unsigned,unsigned long,int,unsigned long long,unsigned long long,unsigned long long)) dlsym (RTLD_NEXT, "GOMP_taskloop_ull");
+	INC_IF_NOT_NULL(GOMP_taskloop_ull_real,count);
+
 	/* Obtain @ for GOMP_loop_doacross_static_start */
 	GOMP_loop_doacross_static_start_real = (int(*)(unsigned, long *, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_static_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_static_start_real,count);
-	
+
 	/* Obtain @ for GOMP_loop_doacross_dynamic_start */
 	GOMP_loop_doacross_dynamic_start_real = (int(*)(unsigned, long *, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_dynamic_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_dynamic_start_real,count);
-	
+
 	/* Obtain @ for GOMP_loop_doacross_guided_start */
 	GOMP_loop_doacross_guided_start_real = (int(*)(unsigned, long *, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_guided_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_guided_start_real,count);
-	
+
 	/* Obtain @ for GOMP_loop_doacross_runtime_start */
 	GOMP_loop_doacross_runtime_start_real = (int(*)(unsigned, long *, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_runtime_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_runtime_start_real,count);
-	
+
 	/* Obtain @ for GOMP_doacross_post */
 	GOMP_doacross_post_real = (void(*)(long *)) GET_REAL_FUNCTION(GOMP_doacross_post);
 	INC_IF_NOT_NULL(GOMP_doacross_post_real,count);
-	
+
 	/* Obtain @ for GOMP_doacross_wait */
 	GOMP_doacross_wait_real = (void(*)(long, ...)) GET_REAL_FUNCTION(GOMP_doacross_wait);
 	INC_IF_NOT_NULL(GOMP_doacross_wait_real,count);

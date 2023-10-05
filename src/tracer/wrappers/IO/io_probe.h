@@ -70,4 +70,10 @@ void Probe_IO_pwritev_Exit  (void);
 void Probe_IO_ioctl_Entry (int fd, unsigned long request);
 void Probe_IO_ioctl_Exit  (void);
 
+void Probe_IO_close_Entry(int);
+void Probe_IO_close_Exit();
+
+void Probe_IO_fclose_Entry(FILE *);
+void Probe_IO_fclose_Exit();
+
 #endif /* __IO_PROBE_H__ */

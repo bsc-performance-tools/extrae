@@ -25,16 +25,6 @@
 #include "omp-probe.h"
 
 // #define DEBUG
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
-#if defined (OS_RTEMS)
-	#define GET_REAL_FUNCTION(f) __real_##f
-	#define WRAP(f) __wrap_##f
-#else
-	#define GET_REAL_FUNCTION(f) dlsym (RTLD_NEXT, TOSTRING(f));
-	#define WRAP(f) f
-#endif
 
 /*
  * In case the constructor initialization didn't trigger
@@ -95,7 +85,7 @@ void omp_common_get_hook_points_c (int rank)
 \******************************************************************************/
 
 #if defined(PIC) || defined (OS_RTEMS)
-int WRAP(omp_get_thread_num) (void)
+int LINK_WRAP(omp_get_thread_num) (void)
 {
 	static int shown = FALSE;
 	int res = 0;
@@ -132,7 +122,7 @@ int WRAP(omp_get_thread_num) (void)
 }
 
 void
-WRAP(omp_set_num_threads) (int num_threads)
+LINK_WRAP(omp_set_num_threads) (int num_threads)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME
@@ -175,7 +165,7 @@ WRAP(omp_set_num_threads) (int num_threads)
 #endif
 }
 
-void WRAP(omp_set_lock) (omp_lock_t *lock)
+void LINK_WRAP(omp_set_lock) (omp_lock_t *lock)
 {
 	void *lock_ptr = (void *)lock;
 
@@ -211,7 +201,7 @@ void WRAP(omp_set_lock) (omp_lock_t *lock)
 #endif
 }
 
-void WRAP(omp_unset_lock) (omp_lock_t *lock)
+void LINK_WRAP(omp_unset_lock) (omp_lock_t *lock)
 {
 	void *lock_ptr = (void *)lock;
 

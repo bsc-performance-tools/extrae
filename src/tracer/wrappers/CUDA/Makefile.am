@@ -5,14 +5,14 @@ WRAPPERS_CUDA = \
  cuda_probe.c cuda_probe.h \
  cuda_common.c cuda_common.h
 
-if WANT_CUDA
-WRAPPERS_CUDA += cuda_wrapper.c cuda_wrapper.h
+if HAVE_CUDA 
 WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@
-endif
-if WANT_CUPTI
+if HAVE_CUPTI
 WRAPPERS_CUDA += cuda_wrapper_cupti.c cuda_wrapper_cupti.h
-WRAPPERS_CUDA_CFLAGS = @CUPTI_CFLAGS@ @CUDA_CFLAGS@
-WRAPPERS_CUDA_LDFLAGS = @CUPTI_LDFLAGS@ -lcupti
+WRAPPERS_CUDA_CFLAGS += @CUPTI_CFLAGS@ 
+else 
+WRAPPERS_CUDA += cuda_wrapper.c cuda_wrapper.h
+endif
 endif
 
 noinst_LTLIBRARIES  = libwrap_cuda.la
@@ -29,8 +29,6 @@ libwrap_cuda_la_CFLAGS = \
  -I$(COMMON_INC) \
  $(UNWIND_CFLAGS) \
  $(WRAPPERS_CUDA_CFLAGS)
-
-libwrap_cuda_la_LDFLAGS = $(WRAPPERS_CUDA_LDFLAGS)
 
 libwrap_cuda_la_SOURCES = $(WRAPPERS_CUDA)
 

@@ -40,6 +40,8 @@ OMPSS_EXAMPLE_FILES=null
 MPIOMPSS_EXAMPLE_FILES=null
 JAVA_EXAMPLE_FILES=null
 FORK_EXAMPLE_FILES=null
+GASPI_EXAMPLE_FILES=null
+GASPIOMP_EXAMPLE_FILES=null
 UNICORE_EXAMPLE_FILES= $(top_srcdir)/example/UNICORE/*
 
 if IS_BG_MACHINE
@@ -108,7 +110,7 @@ MPI_EXAMPLE_FILES+=\
  $(top_srcdir)/example/FREEBSD/MPI/ld-preload/mpi2prv.sh \
  $(top_srcdir)/example/FREEBSD/MPI/ld-preload/Makefile \
  $(top_srcdir)/example/FREEBSD/MPI/ld-preload/trace.sh \
- $(top_srcdir)/example/FREEBSD/MPI/ld-preload/slurm_trace.sh 
+ $(top_srcdir)/example/FREEBSD/MPI/ld-preload/slurm_trace.sh
 
 OMP_EXAMPLE_FILES+=\
  $(top_srcdir)/example/FREEBSD/OMP/pi.c \
@@ -144,7 +146,7 @@ JAVA_EXAMPLE_FILES+=\
 
 if WANT_JAVA_WITH_ASPECTJ
 JAVA_EXAMPLE_FILES+=\
- $(top_srcdir)/example/FREEBSD/JAVA/automatic 
+ $(top_srcdir)/example/FREEBSD/JAVA/automatic
 endif
 endif
 
@@ -168,7 +170,7 @@ MPI_EXAMPLE_FILES+=\
  $(top_srcdir)/example/FREEBSD/MPI/ld-preload/mpi2prv.sh \
  $(top_srcdir)/example/FREEBSD/MPI/ld-preload/Makefile \
  $(top_srcdir)/example/FREEBSD/MPI/ld-preload/trace.sh \
- $(top_srcdir)/example/FREEBSD/MPI/ld-preload/slurm_trace.sh 
+ $(top_srcdir)/example/FREEBSD/MPI/ld-preload/slurm_trace.sh
 
 OMP_EXAMPLE_FILES+=\
  $(top_srcdir)/example/FREEBSD/OMP/pi.c \
@@ -202,7 +204,7 @@ JAVA_EXAMPLE_FILES+=\
 
 if WANT_JAVA_WITH_ASPECTJ
 JAVA_EXAMPLE_FILES+=\
- $(top_srcdir)/example/FREEBSD/JAVA/automatic 
+ $(top_srcdir)/example/FREEBSD/JAVA/automatic
 endif
 
 OPENCL_EXAMPLE_FILES+=\
@@ -279,7 +281,7 @@ PYTHON_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/PYTHON/test.py \
  $(top_srcdir)/example/LINUX/PYTHON/extrae.xml \
  $(top_srcdir)/example/LINUX/PYTHON/function-list \
- $(top_srcdir)/example/LINUX/PYTHON/run.sh 
+ $(top_srcdir)/example/LINUX/PYTHON/run.sh
 
 PTHREAD_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/PTHREAD/Makefile \
@@ -346,8 +348,19 @@ FORK_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/FORK/pi_forked.c \
  $(top_srcdir)/example/LINUX/FORK/README \
  $(top_srcdir)/example/LINUX/FORK/run_dyninst.sh
-endif
-endif
+
+GASPI_EXAMPLE_FILES+=\
+ $(top_srcdir)/example/LINUX/GASPI/README \
+ $(top_srcdir)/example/LINUX/GASPI/extrae.xml \
+ $(top_srcdir)/example/LINUX/GASPI/ld-preload
+
+GASPIOMP_EXAMPLE_FILES+=\
+ $(top_srcdir)/example/LINUX/GASPI+OMP/README \
+ $(top_srcdir)/example/LINUX/GASPI+OMP/extrae.xml \
+ $(top_srcdir)/example/LINUX/GASPI+OMP/ld-preload
+
+endif #!IS_BG_MACHINE
+endif #OS_LINUX
 
 
 install-data-hook:
@@ -365,24 +378,30 @@ install-data-hook:
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_LDFLAGS@" "${MPI_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_LIBS@" "${MPI_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_PAPI_LDFLAGS@" "${PAPI_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_PAPI_RPATH@" "${PAPI_RPATH}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_UNWIND_HOME@" "${UNWIND_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_UNWIND_LDFLAGS@" "${UNWIND_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_UNWIND_RPATH@" "${UNWIND_RPATH}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_UNWIND_LIBS@" "${UNWIND_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_XML2_HOME@" "${XML2_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_XML2_RPATH@" "${XML2_RPATH}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_BFD_HOME@" "${BFD_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_BFD_LDFLAGS@" "${BFD_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_BFD_RPATH@" "${BFD_RPATH}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_BFD_LIBS@" "${BFD_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_LIBERTY_HOME@" "${LIBERTY_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
-	$(top_srcdir)/substitute $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
-	$(top_srcdir)/substitute $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_LIBERTY_LDFLAGS@" "${LIBERTY_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_LIBERTY_RPATH@" "${LIBERTY_RPATH}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_ZLIB_HOME@" "${LIBZ_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_ZLIB_LDFLAGS@" "${LIBZ_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_ZLIB_RPATH@" "${LIBZ_RPATH}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_ZLIB_LIBS@" "${LIBZ_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_DL_LIBS@" "${DL_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
-if WANT_CUPTI
-	$(top_srcdir)/substitute $(SED) "@sub_CUPTI_LIBS@" "-L${CUPTI_HOME}/lib -lcupti" $(DESTDIR)$(datadir)/example/Makefile.inc
-else
-	$(top_srcdir)/substitute $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
-endif
 if WANT_OPENCL
 	$(top_srcdir)/substitute $(SED) "@sub_OPENCL_HOME@" "${OPENCL_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_OPENCL_LDFLAGS@" "${OPENCL_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
@@ -403,11 +422,25 @@ else
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF77@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF90@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
-if WANT_CUDAorCUPTI
-	$(top_srcdir)/substitute $(SED) "@sub_NVCC@" "`which ${NVCC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+
+if HAVE_CUDA
+	$(top_srcdir)/substitute $(SED) "@sub_NVCC@" "${CUDA_BIN_nvcc}" $(DESTDIR)$(datadir)/example/Makefile.inc
 else
 	$(top_srcdir)/substitute $(SED) "@sub_NVCC@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
+
+if HAVE_GASPI
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_CFLAGS@" "@GASPI_CFLAGS@" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_LDFLAGS@" "@GASPI_LDFLAGS@" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_RPATH@" "@GASPI_RPATH@" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_LIBS@" "@GASPI_LIBS@" $(DESTDIR)$(datadir)/example/Makefile.inc
+else
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_CFLAGS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_LDFLAGS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_RPATH@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_GASPI_LIBS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+endif
+
 if WANT_JAVA
 	$(top_srcdir)/substitute $(SED) "@sub_JAVAC@" "`which ${JAVAC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_JAR@" "`which ${JAR}`" $(DESTDIR)$(datadir)/example/Makefile.inc
@@ -436,7 +469,7 @@ if HAVE_MPI
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI
 	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
 	cd $(DESTDIR)$(datadir)/example/MPI ; cp ../Makefile.inc .
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+CUDA
 	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
 	cd $(DESTDIR)$(datadir)/example/MPI+CUDA ; cp ../Makefile.inc .
@@ -472,7 +505,7 @@ if WANT_PTHREAD
 	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
 	cd $(DESTDIR)$(datadir)/example/PTHREAD ; cp ../Makefile.inc .
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/CUDA
 	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
 	cd $(DESTDIR)$(datadir)/example/CUDA ; cp ../Makefile.inc .
@@ -492,6 +525,15 @@ if WANT_JAVA
 	cp -fr $(JAVA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/JAVA
 	cd $(DESTDIR)$(datadir)/example/JAVA ; cp ../Makefile.inc .
 endif
+if HAVE_GASPI
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/GASPI
+	cp -fr $(GASPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/GASPI
+	cd $(DESTDIR)$(datadir)/example/GASPI ; cp ../Makefile.inc .
+
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/GASPI+OMP
+	cp -fr $(GASPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/GASPI+OMP
+	cd $(DESTDIR)$(datadir)/example/GASPI+OMP ; cp ../Makefile.inc .
+endif
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
 #
@@ -509,7 +551,7 @@ uninstall-local:
 	      $(DESTDIR)$(datadir)/example/PYTHON
 if HAVE_MPI
 	rm -r $(DESTDIR)$(datadir)/example/MPI
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	rm -r $(DESTDIR)$(datadir)/example/MPI+CUDA
 endif
 if WANT_OPENCL
@@ -531,7 +573,7 @@ endif
 if WANT_PTHREAD
 	rm -r $(DESTDIR)$(datadir)/example/PTHREAD
 endif
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 	rm -r $(DESTDIR)$(datadir)/example/CUDA
 endif
 if WANT_OPENCL
@@ -542,6 +584,10 @@ if WANT_NANOS
 endif
 if WANT_JAVA
 	rm -r $(DESTDIR)$(datadir)/example/JAVA
+endif
+if HAVE_GASPI
+	rm -r $(DESTDIR)$(datadir)/example/GASPI
+	rm -r $(DESTDIR)$(datadir)/example/GASPI+OMP
 endif
 	rm -r $(DESTDIR)$(datadir)/example/UNICORE
 	rm    $(DESTDIR)$(datadir)/example/Makefile.inc

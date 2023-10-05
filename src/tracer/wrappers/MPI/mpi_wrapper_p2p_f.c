@@ -429,7 +429,7 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	int          c_tag        = *tag;
 	int          source_tag   = MPI_ANY_TAG;
 	MPI_Comm     c_comm       = PMPI_Comm_f2c(*comm);
-	MPI_Fint     f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint    *f_status_ptr = NULL;
 	MPI_Status   c_status;
 
@@ -522,7 +522,7 @@ void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	int          source_tag    = MPI_ANY_TAG;
 	MPI_Comm     c_comm        = MPI_COMM_NULL;
 	MPI_Message  c_save_message     = PMPI_Message_f2c(*message); // Save input value as it changes inside the PMPI
-	MPI_Fint     f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint    *f_status_ptr  = NULL;
 	MPI_Status   c_status;
 
@@ -945,7 +945,7 @@ void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
                         MPI_Fint *ierror)
 {
-	MPI_Fint  f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint  f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint *f_status_ptr = NULL;
 
 	f_status_ptr = (MPI_F_STATUS_IGNORE == status) ? f_status : status;
@@ -982,13 +982,13 @@ void copyRequests_F (int count, MPI_Fint *array_of_requests, MPI_Request *copy, 
  ******************************************************************************/
 
 void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[], MPI_Fint *flag,
-                           MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror)
+                           MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror)
 {
 	static int       mpi_testall_software_counter = 0;
 	static iotimer_t mpi_testall_elapsed_time     = 0;
 	iotimer_t        mpi_testall_begin_time       = 0;
 	iotimer_t        mpi_testall_end_time         = 0;
-	MPI_Fint         f_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS];
+	MPI_Fint         f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
 	MPI_Fint        *f_statuses_ptr               = (MPI_Fint *)(MPI_F_STATUSES_IGNORE == (MPI_Fint *)array_of_statuses) ? f_statuses : array_of_statuses;
 	MPI_Request      c_save_requests[MAX_WAIT_REQUESTS];
 
@@ -1019,7 +1019,7 @@ void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[], MPI_Fi
 		for (i = 0; i < *count; i ++)
 		{
 			MPI_Status c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i * SIZEOF_MPI_STATUS], &c_status);
+			PMPI_Status_f2c (&f_statuses_ptr[i * MPI_STATUS_FIELD_INDEX], &c_status);
 			ProcessRequest (mpi_testall_end_time, c_save_requests[i], &c_status);
 		}
 
@@ -1054,7 +1054,7 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	static iotimer_t mpi_testany_elapsed_time     = 0;
 	iotimer_t        mpi_testany_begin_time       = 0;
 	iotimer_t        mpi_testany_end_time         = 0;
-	MPI_Fint         f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint         f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint        *f_status_ptr                 = NULL;
 	MPI_Request      c_save_requests[MAX_WAIT_REQUESTS];
 
@@ -1111,13 +1111,13 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 
 void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
                             MPI_Fint *outcount, MPI_Fint array_of_indices[],
-                            MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+                            MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 {
 	static int       mpi_testsome_software_counter = 0;
 	static iotimer_t mpi_testsome_elapsed_time     = 0;
 	iotimer_t        mpi_testsome_begin_time       = 0;
 	iotimer_t        mpi_testsome_end_time         = 0;
-	MPI_Fint         f_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS];
+	MPI_Fint         f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
 	MPI_Fint        *f_statuses_ptr                = (MPI_F_STATUSES_IGNORE == (MPI_Fint *) array_of_statuses) ? f_statuses : array_of_statuses;
 	MPI_Request      c_save_requests[MAX_WAIT_REQUESTS];
 
@@ -1149,7 +1149,7 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 		{
 			MPI_Request c_request = c_save_requests[array_of_indices[i]];
 			MPI_Status  c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i*SIZEOF_MPI_STATUS], &c_status);
+			PMPI_Status_f2c (&f_statuses_ptr[i*MPI_STATUS_FIELD_INDEX], &c_status);
 
 			ProcessRequest (mpi_testsome_end_time, c_request, &c_status);
 		}
@@ -1180,7 +1180,7 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 {
 	MPI_Request c_request;
-	MPI_Fint    f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint    f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint   *f_status_ptr      = NULL;
 	iotimer_t   mpi_wait_end_time = 0;
 
@@ -1221,10 +1221,10 @@ void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
  ******************************************************************************/
 
 void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror)
 {
 	MPI_Request c_save_requests[MAX_WAIT_REQUESTS];
-	MPI_Fint    f_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS];
+	MPI_Fint    f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
 	MPI_Fint   *f_statuses_ptr       = (MPI_F_STATUSES_IGNORE == (MPI_Fint *)array_of_statuses) ? f_statuses : array_of_statuses;
 	iotimer_t   mpi_waitall_end_time = 0;
 
@@ -1249,7 +1249,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 		for (i = 0; i < *count; i ++)
 		{
 			MPI_Status c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i * SIZEOF_MPI_STATUS], &c_status);
+			PMPI_Status_f2c (&f_statuses_ptr[i * MPI_STATUS_FIELD_INDEX], &c_status);
 			ProcessRequest (mpi_waitall_end_time, c_save_requests[i], &c_status);
 		}
 	}
@@ -1272,7 +1272,7 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierror)
 {
 	MPI_Request c_save_requests[MAX_WAIT_REQUESTS];
-	MPI_Fint    f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint    f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint   *f_status_ptr         = NULL;
 	iotimer_t   mpi_waitany_end_time = 0;
 
@@ -1316,10 +1316,10 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 
 void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
 {
 	MPI_Request c_save_requests[MAX_WAIT_REQUESTS];
-	MPI_Fint    f_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS];
+	MPI_Fint    f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
 	MPI_Fint   *f_statuses_ptr        = (MPI_F_STATUSES_IGNORE == (MPI_Fint *)array_of_statuses) ? f_statuses : array_of_statuses;
 	iotimer_t   mpi_waitsome_end_time = 0;
 
@@ -1345,7 +1345,7 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 		{
 			MPI_Request c_request = c_save_requests[array_of_indices[i]];
 			MPI_Status  c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i * SIZEOF_MPI_STATUS], &c_status);
+			PMPI_Status_f2c (&f_statuses_ptr[i * MPI_STATUS_FIELD_INDEX], &c_status);
 			ProcessRequest (mpi_waitsome_end_time, c_request, &c_status);
 		}
 	}
@@ -1563,7 +1563,7 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Datatype c_sendtype   = PMPI_Type_f2c (*sendtype);
 	MPI_Datatype c_recvtype   = PMPI_Type_f2c (*recvtype);
 	MPI_Comm     c_comm       = PMPI_Comm_f2c (*comm);
-	MPI_Fint     f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint    *f_status_ptr = NULL;
 	MPI_Status   c_status;
 	int SentSize = 0, ReceivedSize = 0;
@@ -1608,7 +1608,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 {
 	MPI_Datatype c_type       = PMPI_Type_f2c (*type);
 	MPI_Comm     c_comm       = PMPI_Comm_f2c (*comm);
-	MPI_Fint     f_status[SIZEOF_MPI_STATUS];
+	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
 	MPI_Fint    *f_status_ptr = NULL;
 	MPI_Status   c_status;
 	int SentSize = 0, ReceivedSize = 0;

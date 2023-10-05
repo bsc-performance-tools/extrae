@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="@sub_PREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+>
+  <dynamic-memory enabled="no">
+    <alloc enabled="yes" threshold="32768" />
+    <free  enabled="yes" />
+  </dynamic-memory>
+
+  <input-output enabled="yes" internals="no"/>
+
+  <syscall enabled="no" />
+
+  <merge enabled="yes" 
+    synchronization="default"
+    tree-fan-out="16"
+    max-memory="512"
+    joint-states="yes"
+    keep-mpits="yes"
+    sort-addresses="yes"
+    overwrite="yes"
+  />
+
+</trace>

@@ -93,7 +93,9 @@ The MPI configuration part is nested in the config file (see section
 
 MPI calls can gather performance information at the begin and end of MPI calls.
 To activate this behavior, just set to ``yes`` the attribute of the nested
-``<counters>`` node.
+``<counters>`` node. When ``<comm-calls>`` is set to ``no``, the calls to
+certain MPI_Comm_* calls (_rank, _size) are excluded from instrumentation to
+reduce tracing overhead.
 
 .. seealso::
 
@@ -232,20 +234,36 @@ list varies depending of the instrumentation mechanism used:
 
 * GCC and ICC (through :option:`-finstrument-functions`) GNU and Intel compilers
   provide a compile and link flag named :option:`-finstrument-functions` that
-  instruments the routines of a source code file that |TRACE| can use. To take
-  advantage of this functionality the list of routines must point to a list with
-  the format: ``<HEX_addr>#<F_NAME>``, where *<HEX_addr>* refers to the
-  hexadecimal address of the function in the binary file (obtained through
-  :command:`nm <binary>` and *<F_NAME>* is the name of the function to be
-  instrumented. For instance to instrument the routine ``pi_kernel`` from the
-  ``pi`` binary we execute :command:`nm` as follows:
+  instruments the routines of a source code file that |TRACE| can use. To use
+  this functionality a file containing the names of the functions
+  to be instrumented has to be provided.
+  Compile the executable using the flag :option:`-rdynamic` (or link it using
+  :option:`-export-dynamic`) in order to make the functions visible. For instance,
+  to instrument the functions ``foo``, ``bar`` and ``baz`` the user would
+  create a file with:
 
   .. code-block:: sh
-  
+
+    foo
+    bar
+    baz
+
+  In specific cases (e.g., functions declared inside a Fortran CONTAINS construct)
+  the user may also need to provide the function address as given by the command :command:`nm`.
+  For instance, to instrument the routine ``pi_kernel`` from the ``pi`` executable the user
+  would run :command:`nm` as follows:
+
+  .. code-block:: sh
+
     $ nm -a pi | grep pi_kernel
+
     00000000004005ed T pi_kernel
-  
-  and add ``00000000004005ed#pi_kernel`` into the function list.
+
+  and then add ``<FUNCTION_NAME> # <HEX_ADDRESS>`` into the function list:
+
+  .. code-block:: sh
+
+    pi_kernel # 00000000004005ed
 
 The :option:`exclude-automatic-functions` attribute is used only by the DynInst
 instrumenter. By setting this attribute to ``yes`` the instrumenter will avoid
@@ -643,7 +661,8 @@ XML Section: Input/Output
 
 This section indicates whether I/O calls (``read`` and ``write``) are meant to
 be instrumented. If ``enabled`` is set to yes, the aforementioned calls will be
-instrumented, otherwise they will not be instrumented.
+instrumented, otherwise they will not be instrumented. If ``internals`` is set
+to yes, I/O calls that occur inside other traced calls will also be captured.
 
 
 .. _sec:XMLSectionDynamicMemory:
@@ -722,11 +741,20 @@ given as attribute of the ``<merge>`` node and they are:
   (*default is ``yes``*).
 * :option:`keep-mpits`: whether to keep the intermediate tracefiles after performing
   the merge.
+* :option:`translate-addresses` : whether to identify the calling site of
+  instrumented calls and samples by the specified levels of the callstack
+  (enabled by default); or just by their instruction addresses.
 * :option:`sort-addresses`: whether to sort all addresses that refer to the source
   code (enabled by default).
+* :option:`translate-data-addresses`: whether to identify allocated objects by
+  their full callpath (enabled by default); or just by the tuple
+  <library_base_address, symbol_offset_within_library>.
 * :option:`overwrite`: set to ``yes`` if the new tracefile can overwrite an existing
   tracefile with the same name. If set to ``no``, then the tracefile will be
   given a new name using a consecutive id.
+* :option:`stop-at-percentage`: stops the generation of the tracefile at a given
+  percentage. Accepts integer values from ``1`` to ``99``. All other values
+  disable this option.
 
 In Linux systems, the tracing package can take advantage of certain
 functionalities from the system and can guess the binary name, and from it the

@@ -39,6 +39,7 @@
 #endif /* USE_HARDWARE_COUNTERS */
 #endif /* BACKEND */
 #include "utils.h"
+#include "xalloc.h"
 
 Bursts::Bursts()
 {
@@ -56,8 +57,8 @@ Bursts::~Bursts()
 {
   if (NumberOfBursts > 0)
   {
-    free(Timestamps);
-    free(Durations);
+    xfree(Timestamps);
+    xfree(Durations);
     for (int i=0; i<NumberOfBursts; i++)
     {
       delete BurstStats[i];
@@ -71,8 +72,8 @@ void Bursts::Insert(unsigned long long timestamp, unsigned long long duration, P
   if (NumberOfBursts == MaxBursts)
   {
     MaxBursts += BURSTS_CHUNK;
-    Timestamps = (unsigned long long *)realloc(Timestamps, MaxBursts * sizeof(unsigned long long));
-    Durations  = (unsigned long long *)realloc(Durations, MaxBursts * sizeof(unsigned long long));
+    Timestamps = (unsigned long long *)xrealloc(Timestamps, MaxBursts * sizeof(unsigned long long));
+    Durations  = (unsigned long long *)xrealloc(Durations, MaxBursts * sizeof(unsigned long long));
   }
   Timestamps[ NumberOfBursts ] = timestamp;
   Durations [ NumberOfBursts ] = duration;

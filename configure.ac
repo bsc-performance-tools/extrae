@@ -5,9 +5,9 @@
 #    Initializations    #
 #########################
 
-m4_define([extrae_major], [3])
-m4_define([extrae_minor], [7])
-m4_define([extrae_micro], [1])
+m4_define([extrae_major], [4])
+m4_define([extrae_minor], [0])
+m4_define([extrae_micro], [6])
 
 m4_define([extrae_version], [extrae_major.extrae_minor.extrae_micro])
 
@@ -24,7 +24,13 @@ AC_CONFIG_MACRO_DIR([config])
 echo Configuring package ${PACKAGE_STRING}
 
 # Loads some shell variables like host_cpu and host_os, to get the host information 
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
+
+cross_compiling="no"
+
+if test "${host}" != "${build}"; then
+    cross_compiling="yes"
+fi
 
 AX_SYSTEM_TYPE
 
@@ -48,6 +54,15 @@ AC_PROG_MKDIR_P
 
 # Specify the output configuration header file
 AC_CONFIG_HEADER(config.h)
+
+AC_ARG_ENABLE(rpath,
+   AC_HELP_STRING(
+      [--enable-rpath],
+      [Hardcodes the run-time search path of required libraries in the objects built (enabled by default)]
+   ),
+   [enable_rpath="${enableval}"],
+   [enable_rpath="yes"]
+)
 
 #############################
 #    Checks for programs    #
@@ -178,8 +193,14 @@ AX_PROG_MPI
 ## Check if we have OpenSHMEM
 AX_PROG_OPENSHMEM
 
+## Check if we have OpenACC
+AX_PROG_OPENACC
+
 ## Check how we hook PMPI
 AX_PMPI_HOOK
+
+## Check whether we have GASPI
+AX_PROG_GASPI
 
 # Search for libtool support
 AC_LIBTOOL_DLOPEN
@@ -246,8 +267,6 @@ AX_CHECK_PERUSE
 if test "${MPI_INSTALLED}" = "yes" ; then
    AX_CHECK_PMPI_NAME_MANGLING
    AX_CHECK_MPI_STATUS_SIZE
-   AX_CHECK_MPI_SOURCE_OFFSET
-   AX_CHECK_MPI_TAG_OFFSET
    AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD
    AX_CHECK_MPI_C_HAS_FORTRAN_MPI_INIT
    AX_CHECK_MPI_SUPPORTS_MPI_IO
@@ -275,7 +294,7 @@ AM_CONDITIONAL(WANT_PARALLEL_MERGE, test "${enable_parallel_merge}" = "yes" )
 AC_ARG_ENABLE(merge-in-trace,
    AC_HELP_STRING(
       [--enable-merge-in-trace],
-      [Embed the merging functionality (mpi2prv) into the tracing library itself (disabled by default)]
+      [Embed the merging functionality (mpi2prv) into the tracing library itself (enabled by default)]
    ),
    [enable_merge_in_trace="${enableval}"],
    [enable_merge_in_trace="${enable_parallel_merge}"] # the auto value for merge in trace depends whether if parallel merge was enabled
@@ -344,31 +363,7 @@ if test "${enable_hetero}" = "yes" ; then
 	AC_DEFINE([HETEROGENEOUS_SUPPORT], [1], [Determine if the heterogeneous support is enabled])
 fi
 
-AC_ARG_ENABLE(xml,
-   AC_HELP_STRING(
-      [--enable-xml],
-      [Enable support for XML configuration (enabled by default - disabled on BG/*)]
-   ),
-   [enable_xml="${enableval}"],
-   [enable_xml="yes"]
-)
-if test "${enable_xml}" = "yes" ; then
-   # BG/L does not have XML2
-   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
-      XML_enabled="no"
-   else
-      XML_enabled="yes"
-      AM_PATH_XML2(
-          [2.5.0],
-          [AC_DEFINE([HAVE_XML2], [1], [Defined if libxml2 exists])],
-          [AC_MSG_ERROR(Cannot find xml2-config of libXML 2.5.0 (or above))]
-      )
-      AX_PROG_XML2
-   fi
-else
-   XML_enabled="no"
-fi
-AM_CONDITIONAL(HAVE_XML2, test "${XML_enabled}" = "yes" )
+AX_PROG_XML2([2.5.0])
 
 AC_ARG_ENABLE(doc,
    AC_HELP_STRING(
@@ -462,96 +457,6 @@ AX_PROG_ONLINE
 
 # Check the existence of the following data types and its size
 
-if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
-   cross_compiling="yes" # Force AC_CHECK_SIZEOF use the following values
-   long_long_size=8
-   long_size=4
-   int_size=4
-   pid_t_size=4
-   ssize_t_size=4
-   size_t_size=4
-   voidp_size=4
-   short_size=2
-   char_size=1
-elif test "${IS_BGQ_MACHINE}" = "yes" ; then
-   cross_compiling="yes" # Force AC_CHECK_SIZEOF use the following values
-   long_long_size=8
-   long_size=8
-   int_size=4
-   pid_t_size=4
-   ssize_t_size=8
-   size_t_size=8
-   voidp_size=8
-   short_size=2
-   char_size=1
-elif test "${IS_MIC_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=8
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=8
-	size_t_size=8
-	voidp_size=8
-	short_size=2
-	char_size=1
-elif test "${IS_ARM_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=4
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=4
-	size_t_size=4
-	voidp_size=4
-	short_size=2
-	char_size=1
-elif test "${IS_ARM64_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=8
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=8
-	size_t_size=8
-	voidp_size=8
-	short_size=2
-	char_size=1
-elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
-	cross_compiling="yes"
-	long_long_size=8
-	long_size=8
-	int_size=4
-	pid_t_size=4
-	ssize_t_size=8
-	size_t_size=8
-	voidp_size=8
-	short_size=2
-	char_size=1
-elif test "${IS_GR740_MACHINE}" = "yes" ; then
-  cross_compiling="yes"
-  long_long_size=8
-  long_size=8
-  int_size=4
-  pid_t_size=4
-  ssize_t_size=8
-  size_t_size=8
-  voidp_size=8
-  short_size=2
-  char_size=1
-else
-	cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
-	long_long_size=0
-	long_size=0
-	int_size=0
-	pid_t_size=0
-	ssize_t_size=0
-	size_t_size=0
-	voidp_size=0
-	short_size=0
-	char_size=0
-fi
-
 AC_CHECK_TYPES([int64_t, uint64_t, int32_t, uint32_t, int16_t, uint16_t, \
 int8_t, uint8_t, off_t, ssize_t, size_t, pid_t, long, long long, char, \
 int, short])
@@ -583,13 +488,6 @@ AC_CHECK_MEMBER(struct perf_event_mmap_page.data_size,
 	[AC_DEFINE([HAVE_PERF_EVENT_MMAP_PAGE_DATA_SIZE], [1], [Whether the system includes perf_event_mmap_page.data_size])],
 	[],
 	[#include <linux/perf_event.h>])
-
-
-if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
-   cross_compiling="no"
-fi
-
-cross_compiling="no"
 
 # Test if the architecture is little or big endian
 AX_CHECK_ENDIANNESS
@@ -632,6 +530,10 @@ AC_CONFIG_FILES([
   src/launcher/static/Makefile \
   src/launcher/dyninst/Makefile \
   src/launcher/java/Makefile \
+  src/extrae-uncore/Makefile \
+  src/extrae-uncore/uncore-service/Makefile \
+  src/extrae-uncore/uncore-service/seq/Makefile \
+  src/extrae-uncore/uncore-service/mpi/Makefile \
   scripts/Makefile \
   src/common/Makefile \
   src/common/MPI/Makefile \
@@ -653,6 +555,8 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/SYSCALL/Makefile \
   src/tracer/wrappers/fork/Makefile \
   src/tracer/wrappers/JAVA/Makefile \
+  src/tracer/wrappers/OPENACC/Makefile \
+  src/tracer/wrappers/GASPI/Makefile \
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \
@@ -683,6 +587,7 @@ AC_CONFIG_FILES([\
   tests/functional/tracer/JAVA/Makefile \
   tests/functional/tracer/OPENCL/Makefile \
   tests/functional/tracer/CUDA/Makefile \
+  tests/functional/tracer/IO/Makefile \
   tests/functional/merger/Makefile \
   tests/functional/merger/dump-events/Makefile \
   tests/functional/merger/shared-libraries/Makefile \
@@ -719,6 +624,8 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[tests/functional/tracer/JAVA/JavaThreads.java:tests/functional/tracer/JAVA/JavaThreads.java] \
 		[tests/functional/tracer/JAVA/extrae_JavaThreads.sh:tests/functional/tracer/JAVA/extrae_JavaThreads.sh] \
 		[tests/functional/tracer/JAVA/extrae.xml:tests/functional/tracer/JAVA/extrae.xml] \
+		[tests/functional/tracer/IO/trace.sh:tests/functional/tracer/IO/trace.sh] \
+		[tests/functional/tracer/IO/extrae.xml:tests/functional/tracer/IO/extrae.xml] \
 		[tests/functional/merger/dump-events/dump-events.reference:tests/functional/merger/dump-events/dump-events.reference] \
 		[tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml:tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml] \
 		[tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml:tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml] \
@@ -787,7 +694,9 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[docs/source/xml/merge-reduced.xml:docs/source/xml/merge-reduced.xml] \
 		[docs/source/xml/extrae.xml:docs/source/xml/extrae.xml] \
 		[docs/source/overheads/overheads.eps:docs/source/overheads/overheads.eps] \
-		[include/extrae_version.h.in:include/extrae_version.h.in]
+		[include/extrae_version.h.in:include/extrae_version.h.in] \
+		[src/extrae-uncore/extrae-uncore.py:src/extrae-uncore/extrae-uncore.py] \
+		[src/extrae-uncore/extrae_uncore_template.xml:src/extrae-uncore/extrae_uncore_template.xml]
 	)
 
 #########################################

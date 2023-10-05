@@ -30,6 +30,8 @@
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+#include <errno.h>
+
 #include "clock.h"
 #include "threadid.h"
 #include "record.h"
@@ -38,6 +40,7 @@
 #include "common.h"
 #include "buffers.h"
 #include "calltrace.h" 
+#include "symptr.h"
 
 #include "extrae_types.h"
 
@@ -105,12 +108,12 @@ void EXTRAE_SET_INITIALIZED (int);
 
 /****** Variable global per coneixer el nom del l'aplicacio *******/
 // Serveix per poder donar als fitxers generats el nom del programa
-#define TMP_DIR 1024
+#define TMP_DIR_LEN 1024
 extern char PROGRAM_NAME[256];
-extern char tmp_dir[TMP_DIR];
-extern char final_dir[TMP_DIR];
+extern char tmp_dir[TMP_DIR_LEN];
+extern char final_dir[TMP_DIR_LEN];
 extern char appl_name[512];
-extern char trace_home[TMP_DIR];
+extern char trace_home[TMP_DIR_LEN];
 
 #ifdef __cplusplus
 extern "C" {
@@ -182,13 +185,16 @@ void Extrae_set_is_initialized (extrae_init_type_t type);
 
 int Extrae_get_ApplicationIsMPI (void);
 int Extrae_get_ApplicationIsSHMEM (void);
+int Extrae_get_ApplicationIsGASPI (void);
 void Extrae_set_ApplicationIsMPI (int isMPI);
 void Extrae_set_ApplicationIsSHMEM (int isSHMEM);
+void Extrae_set_ApplicationIsGASPI (int isGASPI);
 
 void Extrae_AnnotateCPU (UINT64 timestamp);
 
 int Extrae_Allocate_Task_Bitmap (int size);
 
+void Extrae_AddSyncEntryToLocalSYM(unsigned long long);
 void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *description,
 	char code_values, unsigned nvalues, unsigned long long *values,
 	char **description_values);
@@ -210,6 +216,8 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads);
 void Backend_setNumTentativeThreads (int numofthreads);
 
 #if defined(PTHREAD_SUPPORT)
+extern pthread_mutex_t pthreadFreeBuffer_mtx;
+
 void Backend_SetpThreadIdentifier (int ID);
 int Backend_ispThreadFinished (int threadid);
 pthread_t Backend_GetpThreadID (int threadid);
@@ -220,6 +228,9 @@ void Backend_CreatepThreadIdentifier (void);
 void Backend_Flush_pThread (pthread_t t);
 #endif
 
+/* Folder prefix for extrae-cmd */
+void Extrae_get_cmd_prefix(char *prefix);
+
 iotimer_t Backend_Get_Last_Enter_Time (void);
 iotimer_t Backend_Get_Last_Leave_Time (void);
 void Backend_Enter_Instrumentation ();
@@ -229,6 +240,7 @@ void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);
 void Backend_setInSampling (unsigned thread, int insampling);
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads);
 void Backend_createExtraeDirectory (int taskid, int Temporal);
+void Backend_syncOnExtraeDirectory (int taskid, int Temporal);
 int Extrae_Get_FinalDir_BlockSize(void);
 int Extrae_Get_TemporalDir_BlockSize(void);
 char *Extrae_Get_FinalDirNoTask (void);
@@ -280,34 +292,5 @@ void Extrae_core_set_current_threads(int current_threads);
 void Extrae_core_set_maximum_threads(int maximum_threads);
 
 #endif /* STANDALONE */
-
-/**
- * EXTRAE_DL_INIT
- *
- * Initialization routine for the dynamic libraries tracing module. Performs a
- * discovery of the address of the real implementation of the calls through
- * dlsym. The initialization is deferred until any of the instrumented symbols
- * is used for the first time.
- */
-
-#if defined(PIC) /* Only available for .so libraries */
-# if !defined(DEBUG)
-#  define EXTRAE_DL_INIT(func)                                                \
-   ({                                                                         \
-	dlsym (RTLD_NEXT, func);                                              \
-   })
-# else /* DEBUG */
-#  define EXTRAE_DL_INIT(func)                                                \
-   ({                                                                         \
-	fprintf (stderr, PACKAGE_NAME": [DEBUG] hooking %s\n", func);         \
-	dlsym (RTLD_NEXT, func);                                              \
-   })
-# endif /* DEBUG */
-#else /* PIC */
-# define EXTRAE_DL_INIT(func)                                                 \
-  ({                                                                          \
-	fprintf (stderr, PACKAGE_NAME": Warning! %s instrumentation requires linking with shared library!\n", func); \
-  })
-#endif /* PIC */
 
 #endif /* __WRAPPER_H__ */

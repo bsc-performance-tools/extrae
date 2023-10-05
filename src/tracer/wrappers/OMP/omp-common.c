@@ -45,6 +45,7 @@
 #include "omp-common_c.h"
 #include "omp-common_f.h"
 #include "omp-events.h"
+#include "xalloc.h"
 
 #include "ibm-xlsmp-1.6.h"
 #include "gnu-libgomp.h"
@@ -168,12 +169,7 @@ void Extrae_OpenMP_init(int me)
 	 */
 	numProcessors = getnumProcessors();
 	
-	new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
-	if (NULL == new_num_omp_threads_clause)
-	{
-		fprintf (stderr, PACKAGE_NAME": Unable to allocate memory for tentative OMP_NUM_THREADS\n");
-		exit (-1);
-	}
+	new_num_omp_threads_clause = (char*) xmalloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
 	if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
 	{
 		fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");

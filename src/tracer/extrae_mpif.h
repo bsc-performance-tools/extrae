@@ -138,26 +138,26 @@ void CtoF77 (mpi_test) (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	MPI_Fint *ierror);
 
 void CtoF77 (mpi_testall) (MPI_Fint * count, MPI_Fint array_of_requests[],
-  MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror);
+  MPI_Fint *flag, MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror);
 
 void CtoF77 (mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[],
 	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
    
 void CtoF77 (mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror);
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror);
 
 void CtoF77 (mpi_wait) (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror);
 
 void CtoF77 (mpi_waitall) (MPI_Fint * count, MPI_Fint array_of_requests[],
-  MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror);
+  MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror);
 
 void CtoF77 (mpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[],
 	MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierror);
    
 void CtoF77 (mpi_waitsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror);
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror);
 
 void CtoF77 (mpi_bcast) (void *buffer, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror);
@@ -241,8 +241,14 @@ void CtoF77 (mpi_comm_free) (MPI_Fint *comm, MPI_Fint *ierror);
 void CtoF77 (mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
 
+void CtoF77 (mpi_comm_dup_with_info) (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror);
+
 void CtoF77 (mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
+
+void CtoF77 (mpi_comm_split_type) (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key,
+	MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror);
 
 void CtoF77 (mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
 
@@ -348,7 +354,9 @@ void CtoF77 (mpi_dist_graph_neighbors_count) (MPI_Fint *comm, MPI_Fint *indegree
 
 void CtoF77 (mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
 
-void CtoF77 (mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
+void CtoF77 (mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
+
+void CtoF77 (mpi_dist_graph_create_adjacent) (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
 
 void CtoF77 (mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
 
@@ -383,23 +391,71 @@ void CtoF77 (mpi_file_read) (MPI_File *fh, void *buf, MPI_Fint *count,
 void CtoF77 (mpi_file_read_all) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
+void CtoF77 (mpi_file_read_all_begin)(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_all_end)(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset, void* buf,
+	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_at_all_begin) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_ordered) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_read_shared) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
 void CtoF77 (mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
 void CtoF77 (mpi_file_write_all) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
-void CtoF77 (mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+void CtoF77 (mpi_file_write_all_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
 
-void CtoF77 (mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+void CtoF77 (mpi_file_write_all_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
 
 void CtoF77 (mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset, void* buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
 void CtoF77 (mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_write_at_all_begin) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_write_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_write_ordered) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_write_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_write_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (mpi_file_write_shared) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 #endif /* defined(MPI_SUPPORTS_MPI_IO) */
 
 #if MPI_SUPPORTS_MPI_1SIDED
@@ -567,26 +623,26 @@ void CtoF77 (pmpi_test) (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	MPI_Fint *ierror);
 
 void CtoF77 (pmpi_testall) (MPI_Fint * count, MPI_Fint array_of_requests[],
-  MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror);
+  MPI_Fint *flag, MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror);
 
 void CtoF77 (pmpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[],
 	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
    
 void CtoF77 (pmpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror);
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror);
 
 void CtoF77 (pmpi_wait) (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_waitall) (MPI_Fint * count, MPI_Fint array_of_requests[],
-  MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror);
+  MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror);
 
 void CtoF77 (pmpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[],
 	MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierror);
    
 void CtoF77 (pmpi_waitsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror);
+	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror);
 
 void CtoF77 (pmpi_bcast) (void *buffer, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror);
@@ -670,8 +726,14 @@ void CtoF77 (pmpi_comm_free) (MPI_Fint *comm, MPI_Fint *ierror);
 void CtoF77 (pmpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
 
+void CtoF77 (pmpi_comm_dup_with_info) (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror);
+
 void CtoF77 (pmpi_comm_split) (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_comm_split_type) (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key,
+	MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs,
 	MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm,
@@ -782,7 +844,9 @@ void CtoF77 (pmpi_dist_graph_neighbors_count) (MPI_Fint *comm, MPI_Fint *indegre
 
 void CtoF77 (pmpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
 
-void CtoF77 (pmpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
+void CtoF77 (pmpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_dist_graph_create_adjacent) (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
 
 void CtoF77 (pmpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
 
@@ -817,23 +881,71 @@ void CtoF77 (pmpi_file_read) (MPI_File *fh, void *buf, MPI_Fint *count,
 void CtoF77 (pmpi_file_read_all) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
+void CtoF77 (pmpi_file_read_all_begin)(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_all_end)(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_at) (MPI_File *fh, MPI_Offset *offset, void* buf,
+	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_at_all_begin) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_ordered) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_read_shared) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
 void CtoF77 (pmpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_file_write_all) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
-void CtoF77 (pmpi_file_read_at) (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+void CtoF77 (pmpi_file_write_all_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
 
-void CtoF77 (pmpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+void CtoF77 (pmpi_file_write_all_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_file_write_at) (MPI_File *fh, MPI_Offset *offset, void* buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_write_at_all_begin) (MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_write_at_all_end) (MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_write_ordered) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_write_ordered_begin) (MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_write_ordered_end) (MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_file_write_shared) (MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 #endif /* defined(MPI_SUPPORTS_MPI_IO) */
 
 #if MPI_SUPPORTS_MPI_1SIDED

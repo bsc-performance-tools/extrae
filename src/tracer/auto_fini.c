@@ -35,6 +35,6 @@
 __attribute__((destructor))
 void Extrae_auto_library_fini (void)
 {
-	Extrae_fini_last_chance_Wrapper ();
+	Extrae_fini_Wrapper ();
 }
 

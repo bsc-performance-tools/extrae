@@ -36,6 +36,9 @@ void set_option_merge_SincronitzaTasks (int b);
 int get_option_merge_SincronitzaTasks_byNode (void);
 void set_option_merge_SincronitzaTasks_byNode (int b);
 
+int get_option_merge_SincronitzaApps (void);
+void set_option_merge_SincronitzaApps (int b);
+
 int get_option_merge_UseDiskForComms (void);
 void set_option_merge_UseDiskForComms (int b);
 
@@ -56,9 +59,6 @@ void set_merge_GivenTraceName (int b);
 
 char * get_merge_CallbackFileName (void);
 void set_merge_CallbackFileName (const char* s);
-
-char * get_merge_SymbolFileName (void);
-void set_merge_SymbolFileName (const char* s);
 
 char * get_merge_ExecutableFileName (void);
 void set_merge_ExecutableFileName (const char* s);
@@ -104,6 +104,9 @@ void set_option_merge_BG_XYZT (int b);
 int get_option_merge_AbsoluteCounters (void);
 void set_option_merge_AbsoluteCounters (int b);
 
+long get_option_merge_StopAtPercentage(void);
+void set_option_merge_StopAtPercentage(long);
+
 int get_option_merge_TraceOverwrite (void);
 void set_option_merge_TraceOverwrite (int b);
 
@@ -112,5 +115,8 @@ void set_option_merge_TranslateAddresses (int b);
 
 int get_option_merge_EmitLibraryEvents (void);
 void set_option_merge_EmitLibraryEvents (int b);
+
+int get_option_merge_TranslateDataAddresses(void);
+void set_option_merge_TranslateDataAddresses(int b);
 
 #endif

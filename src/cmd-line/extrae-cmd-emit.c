@@ -76,9 +76,12 @@ static void Extrae_CMD_Emit_get_info (void)
 		char TMPFILE[2048];
 		int fd;
 
-		sprintf (TMPFILE, EXTRAE_CMD_FILE_PREFIX"%s", HOST);
+		char CMDPREFIX[TMP_DIR_LEN];
+		Extrae_get_cmd_prefix(CMDPREFIX);
+
+		sprintf(TMPFILE, "%s"EXTRAE_CMD_FILE_PREFIX"%s", CMDPREFIX, HOST);
 		fd = open (TMPFILE, O_RDONLY);
-		if (fd >= 0)
+		if (fd != -1)
 		{
 			char buffer[1024];
 			if (read (fd, buffer, sizeof(buffer)) > 0)
@@ -89,9 +92,11 @@ static void Extrae_CMD_Emit_get_info (void)
 			else
 				fprintf (stderr, CMD_EMIT " Error! Failed to read from temporary file (%s)\n", TMPFILE);
 			close (fd);
+		} else
+		{
+			int err = errno;
+			fprintf(stderr, PACKAGE_NAME"("CMD_EMIT"): %s (%s)\n", strerror(err), TMPFILE);
 		}
-		else
-			fprintf (stderr, CMD_INIT " Error! Failed to open temporary file (%s)\n", TMPFILE);
 	}
 }
 

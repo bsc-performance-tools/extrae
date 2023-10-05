@@ -80,6 +80,7 @@
 #include "paraver_generator.h"
 #include "paraver_state.h"
 #include "options.h"
+#include "xalloc.h"
 
 #include "mpi_prv_events.h"
 #include "addr2info.h"
@@ -636,11 +637,15 @@ static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == CUDAFUNC_EV)
+	{
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_FUNCTION, get_option_merge_UniqueCallerID());
+	}
 	else if (eventtype == CUDAFUNC_LINE_EV)
+	{
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
+	}
 	else
 	{
 		if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -681,7 +686,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 
 	// Here we store the caller addresses for a reference to a dynamic mem object
 	// Set to 0 initially
-	memset (CallerAddresses, 0, sizeof(CallerAddresses));
+	xmemset (CallerAddresses, 0, sizeof(CallerAddresses));
 
 	cur = *current;
 
@@ -751,7 +756,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					  CallerAddresses);
 
 					// Set to 0 again after emitting the information
-					memset (CallerAddresses, 0, sizeof(CallerAddresses));
+					xmemset (CallerAddresses, 0, sizeof(CallerAddresses));
 				}
 				else if (cur->event == SAMPLING_ADDRESS_STATIC_OBJECT_EV)
 				{
@@ -760,7 +765,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					events[nevents]  = SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV;
 
 					// Set to 0 again after emitting the information
-					memset (CallerAddresses, 0, sizeof(CallerAddresses));
+					xmemset (CallerAddresses, 0, sizeof(CallerAddresses));
 				}
 
 				if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -946,7 +951,7 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 #if defined(PARALLEL_MERGE)
-			free (vthreads_count);			
+			xfree (vthreads_count);			
 #endif
 		}
 	}
@@ -1192,14 +1197,7 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, int taskid, int tree
 	unsigned tmp, nevents;
 	int my_master = tree_myMaster (taskid, tree_fan_out, current_depth);
 
-	buffer = malloc (sizeof(paraver_rec_t)*prvfset->records_per_block);
-	if (buffer == NULL)
-	{
-		fprintf (stderr, "mpi2prv: ERROR! Slave %d was unable to allocate %llu bytes to hold records buffer\n", 
-			taskid, sizeof(paraver_rec_t)*prvfset->records_per_block);
-		fflush (stderr);
-		exit (0);
-	}
+	buffer = xmalloc (sizeof(paraver_rec_t)*prvfset->records_per_block);
 
 	/* This loop will locally sort the files. Master will only have 
 	   to partially sort all the events*/
@@ -1242,7 +1240,7 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, int taskid, int tree
 		MPI_CHECK(res, MPI_Send, "Failed to send the buffer of events to the MASTER");
 	}
 
-	free (buffer);
+	xfree (buffer);
 }
 #endif
 
@@ -1479,7 +1477,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 			fprintf (crd_fd, "%d %d %d %d\n", coords[i].X, coords[i].Y, coords[i].Z,
 			coords[i].T);
 		fclose (crd_fd);
-		free (coords);
+		xfree (coords);
 		fprintf (stdout, "\nCoordinate file generated\n");
 	}
 #endif /* FIXME */

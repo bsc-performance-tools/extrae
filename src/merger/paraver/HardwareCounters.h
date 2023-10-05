@@ -30,73 +30,130 @@
 #include "hwc_version.h"
 #include "record.h"
 #if defined(PAPI_COUNTERS)
-	#include "papiStdEventDefs.h"
+# include "papi.h"
+# include "papiStdEventDefs.h"
+# if defined(PAPIv3)
+#  include "MurmurHash2.h"
+# endif
 #endif
-#if !USE_HARDWARE_COUNTERS
-  /* Little things to have configured if PAPI cannot be used */
-# define PAPI_NATIVE_MASK 0x40000000 
+
+/**
+ * local_hwc_data_t stores the translations from local counter id's 
+ * (PAPI/PMAPI codes assigned to each thread) into global id's 
+ * (final paraver type). This information is indexed by ptask for 
+ * direct translation while processing mpit data. The counter
+ * information (name, description) can be accessed through the 
+ * global_hwc_data_t structure using the translated 'global_id' 
+ * as search key.
+ */
+typedef struct hwc_id_t
+{
+  int ptask;
+  int local_id;
+  int global_id;
+} hwc_id_t;
+
+typedef struct ptask_hwc_t
+{
+  hwc_id_t *local_to_global;
+  int num_counters;
+} ptask_hwc_t;
+
+typedef struct local_hwc_data_t
+{
+  ptask_hwc_t *ptask_counters;
+  int num_ptasks;
+} local_hwc_data_t;
+
+
+/** 
+ * global_hwc_data_t stores a list of unique counters from all 
+ * ptasks and threads. Those marked as 'used' appear in mpit data 
+ * and their labels have to appear in the final PCF. 
+ */
+typedef struct hwc_info_t
+{
+  char *name;
+  char *description;
+  int global_id;
+  int used;
+} hwc_info_t;
+
+typedef struct global_hwc_data_t
+{
+  hwc_info_t *counters_info;
+  int num_counters;
+} global_hwc_data_t;
+
+
+#if defined(PAPI_COUNTERS)
+int check_if_uncore_in_PFM(char *event_name);
 #endif
 
 /* Macro per calcular el tipus que cal assignar al comptador.
  * Els comptadors a linux son numeros aixi: 0x800000XX
- * Els comptadors a linux(natiu) son numeros aixi: 0x40000XXX
- * per tant, nomes cal tenir en compte el byte mes baix per
+ * Els comptadors a linux(natiu) son numeros aixi: 0x4000XXXX
+ * per tant, nomes cal tenir en compte els bytes mes baixos per
  * no tenir numeros inmensos. */
 
-# if defined(L4STAT)
-#  define HWC_L4STAT_BASE 72000000
-#  define HWC_COUNTER_TYPE(x) HWC_L4STAT_BASE + ((x & 0x000000FF))
-#elif defined(PAPI_COUNTERS)
+/* Uncore and native counters do not have a consistent numbering scheme, 
+ * as the assigned identifiers vary depending on the order of addition of 
+ * the counters to the PAPI EventSet. Therefore, different executions reading
+ * different counters will reuse the same id's. To assign univocal id's, 
+ * we compute the global id based on the counter name rather than the local PAPI id's.
+ * For PAPI presets, we still use the PAPI local id as we used to do before.
+ * When the sym is not present, thus the counter name is unknown, we use the 
+ * old method based on the local PAPI id's, which may have collisions.
+ */ 
+#if defined(PAPI_COUNTERS)
 # if defined(PAPIv2)
-#  define HWC_COUNTER_TYPE(x) (HWC_BASE + (x & 0x000000FF))
+#  define GET_PARAVER_CODE_FOR_HWC(x, name) (HWC_BASE_PAPI_PRESET + (x & 0x000000FF))
+#  define LEGACY_HWC_COUNTER_TYPE(x) (HWC_BASE_PAPI_PRESET + (x & 0x000000FF))
 # elif defined(PAPIv3)
-#  define HWC_COUNTER_TYPE(x) \
-		(x&PAPI_NATIVE_MASK)?(HWC_BASE_NATIVE + (x & 0x0000FFFF)):(HWC_BASE + (x & 0x0000FFFF))
+#  define HASH(name) ((name != NULL) ? (MurmurHash2(name, strlen(name), 0) % (1000000)) : 0)
+#  define IS_UNCORE(x) check_if_uncore_in_PFM(x)
+#  define GET_PARAVER_CODE_FOR_HWC(x, name) \
+	(IS_PRESET(x) ? (HWC_BASE_PAPI_PRESET + (x & 0x0000FFFF)) : \
+	                (IS_UNCORE(name) ? (HWC_BASE_PAPI_UNCORE + HASH(name)) : \
+	                                   (HWC_BASE_PAPI_NATIVE + HASH(name))))
+#  define LEGACY_HWC_COUNTER_TYPE(x) \
+	(IS_PRESET(x) ? HWC_BASE_PAPI_PRESET : HWC_BASE_PAPI_NATIVE) + (x & 0x0000FFFF)
 # endif
 #elif defined(PMAPI_COUNTERS)
-# define HWC_COUNTER_TYPE(cnt,x) (HWC_BASE + cnt*1000 + x)
-#else
-# define HWC_COUNTER_TYPE(x) x
+# define GET_PARAVER_CODE_FOR_HWC(x, name) (HWC_BASE_PMAPI + x)
+# define LEGACY_HWC_COUNTER_TYPE(x) (HWC_BASE_PMAPI + x)
+#elif defined(L4STAT)
+# define HWC_L4STAT_BASE HWC_BASE_PAPI_PRESET
+# define LEGACY_HWC_COUNTER_TYPE(x) HWC_L4STAT_BASE + ((x & 0x000000FF))
+# define GET_PARAVER_CODE_FOR_HWC(x, name) LEGACY_HWC_COUNTER_TYPE(x)
 #endif
 
-/*
- * CntQueue (type): structure to store the counter that has been readed during
- *                  the application execution.
- * FreeListItems  : Free CntQueue queue items list.
- * CountersTraced : Queue of CntQueue strucutures. Will contain a list of all
- *                  the conunters that has been traced during application
- *                  execution.
- */
-typedef struct _cQueue
-{
-  struct _cQueue *next, *prev;
+void HardwareCounters_AssignGlobalID (int ptask, int local_id, char *definition);
+int HardwareCounters_LocalToGlobalID (int ptask, int local_id);
+int HardwareCounters_GetUsed (hwc_info_t ***used_counters);
 
-  int Events[MAX_HWC];
-  int Traced[MAX_HWC];          /*
-                                 * * Boolean field for each counter that
-                                 * *  indicates if counter is readed or not.
-                                 * *
-                                 */
-} CntQueue;
-
-extern CntQueue CountersTraced;
-
+void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds);
+int HardwareCounters_Change (int ptask, int task, int thread, unsigned long long change_time, int newSet, unsigned int *outtypes, unsigned long long *outvalues);
+void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Event);
 int HardwareCounters_Emit (int ptask, int task, int thread,
 	unsigned long long time, event_t * Event,
-	int *outtype, unsigned long long *outvalue,
+	unsigned int *outtype, unsigned long long *outvalue,
 	int absolute);
 void HardwareCounters_Show (const event_t * Event, int ncounters);
-void HardwareCounters_Get (const event_t *Event, unsigned long long *buffer);
-void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds);
-int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id);
-int HardwareCounters_GetCurrentSet(int ptask, int task, int thread);
-void HardwareCounters_Change (int ptask, int task, int thread, int newSet, int *outtypes, unsigned long long *outvalues);
-void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Event);
 
 #if defined(PARALLEL_MERGE)
-void Share_Counters_Usage (int size, int rank);
-#endif
 
-#endif /* USE_HARDWARE_COUNTERS */
+#define resize(buffer, size)                            \
+{                                                       \
+        buffer ## _ ## size += size;                    \
+        buffer = xrealloc(buffer, buffer ## _ ## size); \
+}
+
+void Share_HWC_Before_Processing_MPITS (int rank);
+void Share_HWC_After_Processing_MPITS (int rank);
+
+#endif /* PARALLEL_MERGE */
+
+#endif /* USE_HARDWARE_COUNTERS || HETEROGENEOUS_SUPPORT */
 
 #endif /* _HARDWARE_COUNTERS_H */

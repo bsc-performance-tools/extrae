@@ -79,8 +79,8 @@ typedef struct thread_st
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 	unsigned long long last_hw_group_change;
-	int **HWCSets_types;
-	int **HWCSets;
+	hwc_id_t **HWCSets;
+
 	int num_HWCSets;
 	int current_HWCSet;
 	long long counters[MAX_HWC];     /* HWC values */
@@ -121,6 +121,7 @@ typedef struct binary_object_st
 	unsigned long long end_address;
 	unsigned long long offset;
 	unsigned index;
+	unsigned main_binary;
 #if defined(HAVE_BFD)
 	bfd *bfdImage;
 	asymbol **bfdSymbols;

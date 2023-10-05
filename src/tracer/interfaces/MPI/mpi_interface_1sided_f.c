@@ -124,7 +124,7 @@ void NAME_ROUTINE_C2F(mpi_win_create)(void *base, void *size, MPI_Fint *disp_uni
 #endif
 {
 	DLB(DLB_MPI_Win_create_F_enter, base, size, disp_unit, info, comm, win, ierror);
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -148,7 +148,7 @@ void NAME_ROUTINE_C2F(mpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierr
 {
 	DLB(DLB_MPI_Win_fence_F_enter, assert, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -172,7 +172,7 @@ void NAME_ROUTINE_C2F(mpi_win_start)(void *group, void *assert, void *win, MPI_F
 {
 	DLB(DLB_MPI_Win_start_F_enter, group, assert, win, ierror);
 	
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -196,7 +196,7 @@ void NAME_ROUTINE_C2F(mpi_win_free)(void *win, MPI_Fint *ierror)
 {
 	DLB(DLB_MPI_Win_free_F_enter, win, ierror);
 	
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -222,7 +222,7 @@ void NAME_ROUTINE_C2F(mpi_win_complete)(void *win, MPI_Fint *ierror)
 
 	DLB(DLB_MPI_Win_complete_F_enter, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -248,7 +248,7 @@ void NAME_ROUTINE_C2F(mpi_win_wait)(void *win, MPI_Fint *ierror)
 
 	DLB(DLB_MPI_Win_wait_F_enter, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -274,7 +274,7 @@ void NAME_ROUTINE_C2F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fi
 
 	DLB(DLB_MPI_Win_post_F_enter, group, assert, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -306,7 +306,7 @@ void NAME_ROUTINE_C2F(mpi_get)(void *origin_addr, MPI_Fint *origin_count,
 		target_rank, target_disp, target_count, target_datatype, win,
 		ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -340,7 +340,7 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 		target_rank, target_disp, target_count, target_datatype, win,
 		ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -358,7 +358,7 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_win_lock__,mpi_win_lock_,MPI_WIN_LOCK,mpi_win_lock,(MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, void *win, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_win_lock__,mpi_win_lock_,MPI_WIN_LOCK,mpi_win_lock,(MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, MPI_Fint *win, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_win_lock)(MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, MPI_Fint *win, MPI_Fint *ierror)
 #else
@@ -366,7 +366,7 @@ void NAME_ROUTINE_C2F(mpi_win_lock)(MPI_Fint *lock_type,MPI_Fint *rank, MPI_Fint
 #endif
 {
 	DLB(DLB_MPI_Win_lock_F_enter, lock_type, rank, assert, win, ierror);
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -389,7 +389,7 @@ void NAME_ROUTINE_C2F(mpi_win_unlock)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *i
 #endif
 {
 	DLB(DLB_MPI_Win_unlock_F_enter, rank, win, ierror);
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -416,7 +416,7 @@ void NAME_ROUTINE_C2F(mpi_get_accumulate)(void *origin_addr, MPI_Fint *origin_co
 	DLB(DLB_MPI_Get_accumulate_F_enter, origin_addr, origin_count, origin_datatype,
                 result_addr, result_count, result_datatype, target_rank, target_disp, 
                 target_count, target_datatype, op, win, ierror);
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -452,7 +452,7 @@ void NAME_ROUTINE_C2F(mpi_fetch_and_op)(void *origin_addr, void *result_addr,
 	DLB(DLB_MPI_Fetch_and_op_F_enter, origin_addr, result_addr, datatype,
 	  target_rank, target_disp, op, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation();
@@ -471,7 +471,7 @@ void NAME_ROUTINE_C2F(mpi_fetch_and_op)(void *origin_addr, void *result_addr,
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_compare_and_swap__,mpi_compare_and_swap_,MPI_COMPARE_AND_SWAP,mpi_compare_and_swap,
   (void *origin_addr, void *compare_addr, void *result_addr, MPI_Fint *datatype,
-   MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *ierror))
+   MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *win, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_compare_and_swap)(void *origin_addr, void *compare_addr,
   void *result_addr, MPI_Fint *datatype, MPI_Fint *target_rank,
@@ -485,7 +485,7 @@ void NAME_ROUTINE_C2F(mpi_compare_and_swap)(void *origin_addr, void *compare_add
 	DLB(DLB_MPI_Compare_and_swap_F_enter, origin_addr, compare_addr,
 	  result_addr, datatype, target_rank, target_disp, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -513,7 +513,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ie
 {
 	DLB(DLB_MPI_Win_flush_F_enter, rank, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -539,7 +539,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush_all)(MPI_Fint *win, MPI_Fint *ierror)
 {
 	DLB(DLB_MPI_Win_flush_all_F_enter, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -565,7 +565,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush_local)(MPI_Fint *rank, MPI_Fint *win, MPI_Fi
 {
 	DLB(DLB_MPI_Win_flush_local_F_enter, rank, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -591,7 +591,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush_local_all)(MPI_Fint *win, MPI_Fint *ierror)
 {
 	DLB(DLB_MPI_Win_flush_local_all_F_enter, win, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();

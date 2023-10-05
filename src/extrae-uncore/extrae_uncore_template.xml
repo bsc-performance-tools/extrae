@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="@sub_PREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+>
+  <mpi enabled="yes">
+    <counters enabled="no" />
+  </mpi>
+
+  <counters enabled="yes">
+    <cpu enabled="yes" starting-set-distribution="cyclic">
+	@sub_COUNTER_SETS@
+    </cpu>
+    <network enabled="no" />
+  </counters>
+
+  <storage enabled="yes">
+    <trace-prefix enabled="yes">TRACE-UNCORE@sub_READER_ID@</trace-prefix>
+    <size enabled="no">5</size>
+    <temporal-directory enabled="no">/scratch</temporal-directory>
+    <final-directory enabled="no">/scratch</final-directory>
+  </storage>
+
+  <buffer enabled="yes">
+    <size enabled="yes">5000000</size>
+    <circular enabled="no" />
+  </buffer>
+
+  <others enabled="no">
+    <minimum-time enabled="no">10M</minimum-time>
+    <finalize-on-signal enabled="no" 
+      SIGUSR1="no" SIGUSR2="no" SIGINT="no"
+      SIGQUIT="no" SIGTERM="no" SIGXCPU="no"
+      SIGFPE="no" SIGSEGV="no" SIGABRT="no"
+    />
+    <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
+  </others>
+
+  <sampling enabled="yes" type="default" period="@sub_SAMPLING_PERIOD@" variability="0m" />
+</trace>

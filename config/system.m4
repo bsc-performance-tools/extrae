@@ -11,7 +11,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	   [enable_mic="no"]
 	)
 	IS_MIC_MACHINE=${enable_mic}
-	
+
 	AC_ARG_ENABLE(arm,
 	   AC_HELP_STRING(
 	      [--enable-arm],
@@ -25,7 +25,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="arm"
 		target_os="linux"
 	fi
-	
+
 	AC_ARG_ENABLE(arm64,
 	   AC_HELP_STRING(
 	      [--enable-arm64],
@@ -39,7 +39,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="aarch64"
 		target_os="linux"
 	fi
-	
+
 	AC_ARG_ENABLE(sparc64,
 	   AC_HELP_STRING(
 	      [--enable-sparc64],
@@ -53,6 +53,34 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="sparc64"
 		target_os="linux"
 	fi
+
+	AC_ARG_ENABLE(riscv64,
+	   AC_HELP_STRING(
+	      [--enable-riscv64],
+	      [Enable compilation for RISCV64 architecture (disabled by default; needed when cross-compiling for RISCV64)]
+	   ),
+	   [enable_riscv64="${enableval}"],
+	   [enable_riscv64="no"]
+	)
+	IS_RISCV64_MACHINE=${enable_riscv64}
+	if test "${IS_RISCV64_MACHINE}" = "yes" ; then
+		target_cpu="riscv64"
+		target_os="linux"
+	fi
+
+    AC_ARG_ENABLE(powerpc64le,
+       AC_HELP_STRING(
+          [--enable-powerpc64le],
+          [Enable compilation for powerpc64le architecture (disabled by default; needed when cross-compiling for powerpc64le)]
+       ),
+       [enable_powerpc64le="${enableval}"],
+       [enable_powerpc64le="no"]
+    )
+    IS_POWERPC64LE_MACHINE=${enable_powerpc64le}
+    if test "${IS_POWERPC64LE_MACHINE}" = "yes" ; then
+        target_cpu="powerpc64le"
+        target_os="linux"
+    fi
 
 	AC_ARG_ENABLE(gr740,
 	   AC_HELP_STRING(
@@ -68,6 +96,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_os="rtems"
 	fi
 	AM_CONDITIONAL(IS_GR740_MACHINE, test "${IS_GR740_MACHINE}" = "yes")
+
 	# Check if this is an Altix machine and if it has an /dev/mmtimer device
 	# (which is a global clock!)
 	AC_ARG_ENABLE(check-altix,
@@ -82,17 +111,23 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	   AX_IS_ALTIX_MACHINE
 	   AX_HAVE_MMTIMER_DEVICE
 	fi
-	
+
 	AX_IS_CRAY_XT
+	if test "${IS_CXT_MACHINE}" = "yes" ; then
+	  IS_CRAY_MACHINE="yes"
+	fi
+    AM_CONDITIONAL(IS_CRAY_MACHINE, test "${IS_CXT_MACHINE}" = "yes")
+
 	AX_IS_BGL_MACHINE
 	AX_IS_BGP_MACHINE
 	AX_IS_BGQ_MACHINE
 	if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
 	  AC_DEFINE([IS_BG_MACHINE], 1, [Defined if this machine is a BG machine])
 	  IS_BG_MACHINE="yes"
+      cross_compiling="no"
 	fi
 	AM_CONDITIONAL(IS_BG_MACHINE, test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes")
-	
+
 	# Write defines in the output header file for the architecture and operating system
 	case "${target_cpu}" in
 	  arm*|aarch64*) Architecture="arm"
@@ -120,6 +155,12 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	             AC_DEFINE([ARCH_SPARC64], [1], [Define if architecture is SPARC64]) ;;
 	  sparc    ) Architecture="sparc"
 	             AC_DEFINE([ARCH_SPARC], [1], [Define if architecture is SPARC]) ;;
+	  riscv64  )
+	             Architecture="riscv"
+				 if test "${target_cpu}" == "riscv64" ; then
+	                AC_DEFINE([ARCH_RISCV64], [1], [Define if architecture is RISCV64])
+	             fi
+	             ;;
 	esac
 	
 	case "${target_os}" in
@@ -150,6 +191,7 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	AM_CONDITIONAL(ARCH_ALPHA,   test "${Architecture}"    = "alpha"   )
 	AM_CONDITIONAL(ARCH_MIPS,    test "${Architecture}"    = "mips"    )
 	AM_CONDITIONAL(ARCH_SPARC64, test "${Architecture}"    = "sparc64" )
+	AM_CONDITIONAL(ARCH_RISCV64, test "${Architecture}"    = "riscv64" )
 	 
     AM_CONDITIONAL(OS_ANDROID,   test "${OperatingSystem}" = "android" )
 	AM_CONDITIONAL(OS_LINUX,     test "${OperatingSystem}" = "linux"   )
@@ -157,8 +199,9 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	AM_CONDITIONAL(OS_DEC,       test "${OperatingSystem}" = "dec"     )
 	AM_CONDITIONAL(OS_IRIX,      test "${OperatingSystem}" = "irix"    )
 	AM_CONDITIONAL(OS_FREEBSD,   test "${OperatingSystem}" = "freebsd" )
-	AM_CONDITIONAL(OS_DARWIN,    test "${OperatingSystem}" = "darwin" )
+	AM_CONDITIONAL(OS_DARWIN,    test "${OperatingSystem}" = "darwin"  )
 	AM_CONDITIONAL(OS_SOLARIS,   test "${OperatingSystem}" = "solaris" )
+	AM_CONDITIONAL(OS_RTEMS,     test "${OperatingSystem}" = "rtems"   )
 
 	# Special flags for specific systems or architectures	
 	if test "${OperatingSystem}" = "freebsd" ; then

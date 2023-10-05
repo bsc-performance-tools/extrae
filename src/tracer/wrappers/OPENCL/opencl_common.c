@@ -38,6 +38,7 @@
 #include "taskid.h"
 #include "threadinfo.h"
 #include "wrapper.h"
+#include "xalloc.h"
 
 #define MAX_OPENCL_EVENTS 32768
 
@@ -160,14 +161,9 @@ void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
 		cl_event event;
 
 		idx = nCommandQueues;
-		CommandQueues = (RegisteredCommandQueue_t*) realloc (
+		CommandQueues = (RegisteredCommandQueue_t*) xrealloc (
 			CommandQueues,
 			sizeof(RegisteredCommandQueue_t)*(nCommandQueues+1));
-		if (CommandQueues == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Fatal error! Failed to allocate memory for OpenCL Command Queues\n");
-			exit (-1);
-		}
 
 		CommandQueues[idx].queue = queue;
 		CommandQueues[idx].isOutOfOrder =
@@ -571,14 +567,9 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, unsigned *pos)
 	{
 		unsigned long long v;
 	
-		Kernels = (AnnotatedKernel_st*) realloc (Kernels,
+		Kernels = (AnnotatedKernel_st*) xrealloc (Kernels,
 		  sizeof(AnnotatedKernel_st)*(nKernels+1));
 
-		if (Kernels == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Fatal error! Failed to allocate memory for OpenCL Kernels\n");
-			exit (-1);
-		}
 
 		Kernels[nKernels].KernelName = strdup (kname);
 		*pos = nKernels;
@@ -591,6 +582,6 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, unsigned *pos)
 	}
 
 	/* Free allocated kernel name */
-	free (kname);
+	xfree (kname);
 }
 

@@ -19,7 +19,9 @@ pi_instrumented:	pi_instrumented.c
 	$(CC) $(CFLAGS) pi_instrumented.c -o pi_instrumented $(LFLAGS)
 
 pi_instrumentedf:   pi_instrumented.f90
-	$(FC) -c $(EXTRAE_HOME)/include/extrae_module.f90
+	# To use the Extrae API in Fortran you need to compile extrae_module with
+	# the same compiler and include it with `use extrae_module` in your program
+	make -f $(EXTRAE_HOME)/include/Makefile.extrae_module
 	$(FC) $(FFLAGS) pi_instrumented.f90 -o pi_instrumentedf $(LFLAGS)
 
 clean:

@@ -77,6 +77,7 @@
 #include "misc_prv_semantics.h"
 #include "omp_prv_semantics.h"
 #include "pthread_prv_semantics.h"
+#include "gaspi_prv_semantics.h"
 #include "mpi_comunicadors.h"
 #include "labels.h"
 #include "trace_mode.h"
@@ -94,14 +95,17 @@
 #include "mpi_prv_events.h"
 #include "pthread_prv_events.h"
 #include "openshmem_prv_events.h"
+#include "openacc_prv_events.h"
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
 #include "opencl_prv_events.h"
 #include "cuda_prv_events.h"
 #include "java_prv_events.h"
+#include "gaspi_prv_events.h"
 #include "addr2info.h"
 #include "timesync.h"
 #include "vector.h"
+#include "xalloc.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -118,46 +122,22 @@ static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 {
   int i, j;
 
-  EnabledTasks = (int **) malloc (sizeof (int *) * numberofapplications);
-  if (EnabledTasks == NULL)
-  {
-    fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks'\n");
-    fflush (stderr);
-    exit (-1);
-  }
+  EnabledTasks = (int **) xmalloc (sizeof (int *) * numberofapplications);
   for (i = 0; i < numberofapplications; i++)
   {
-    EnabledTasks[i] = (int *) malloc (sizeof (int) * numberoftasks);
-    if (EnabledTasks[i] == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks[%d]'\n", i);
-      fflush (stderr);
-      exit (-1);
-    }
+    EnabledTasks[i] = (int *) xmalloc (sizeof (int) * numberoftasks);
     for (j = 0; j < numberoftasks; j++)
       EnabledTasks[i][j] = TRUE;
   }
 
   EnabledTasks_time =
-    (unsigned long long **) malloc (sizeof (unsigned long long *) *
+    (unsigned long long **) xmalloc (sizeof (unsigned long long *) *
                                     numberofapplications);
-  if (EnabledTasks_time == NULL)
-  {
-    fprintf (stderr, "mpi2prv: Error Unable to allocate memory for 'EnabledTasks_time'\n");
-    fflush (stderr);
-    exit (-1);
-  }
   for (i = 0; i < numberofapplications; i++)
   {
     EnabledTasks_time[i] =
-      (unsigned long long *) malloc (sizeof (unsigned long long) *
+      (unsigned long long *) xmalloc (sizeof (unsigned long long) *
                                      numberoftasks);
-    if (EnabledTasks_time[i] == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks_time[%d]'\n", i);
-      fflush (stderr);
-      exit (-1);
-    }
     for (j = 0; j < numberoftasks; j++)
       EnabledTasks_time[i][j] = 0LL;
   }
@@ -189,13 +169,8 @@ static void HandleStackedType (unsigned ptask, unsigned task, unsigned thread,
 			   this task/thread, create it */
 			pos = att->num_stacks;
 
-			att->stacked_type = (active_task_thread_stack_type_t*) realloc
+			att->stacked_type = (active_task_thread_stack_type_t*) xrealloc
 			  (att->stacked_type, sizeof(active_task_thread_stack_type_t)*(pos+1));
-			if (att->stacked_type == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Fatal error! Cannot reallocate stacked_type for the task/thread\n");
-				exit (0);
-			}
 			att->stacked_type[pos].stack = Stack_Init();
 			att->stacked_type[pos].type = EvType;
 			att->num_stacks++;
@@ -252,29 +227,14 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	fset = Create_FS (nfiles, files, taskid, PRV_SEMANTICS);
 	error = (fset == NULL);
 
-
-
 #if defined(OS_RTEMS)
+	// As there's no support to read XML from RTEMS we need to specify the program name and the destination folder as environment variables
+	char *prvfile = NULL;
+	env_program_name = getenv ("EXTRAE_PROGRAM_NAME");
+	env_final_dir = getenv ("EXTRAE_FINAL_DIR");
 
-	char *str,*path;
-	char PROGRAM_NAME[256];
-	char PATH_NAME[256];
-	char prvfile[256];
-	str = getenv ("EXTRAE_PROGRAM_NAME");
-	path = getenv ("EXTRAE_FINAL_DIR");
-
-	if(!path)
-		strncpy (PATH_NAME, "/mnt/traces/", strlen("TRACE")+1);
-	else
-		strncpy (PATH_NAME, path, sizeof(PATH_NAME));
-	if (!str)
-		strncpy (PROGRAM_NAME, "TRACE", strlen("TRACE")+1);
-	else
-		strncpy (PROGRAM_NAME, str, sizeof(PROGRAM_NAME));
-
-	strcpy(prvfile,PATH_NAME);
-	strcat(prvfile,"/");
-	strcat(prvfile,PROGRAM_NAME);
+	prvfile = xmalloc(6 + ((env_final_dir != NULL) ? strlen(env_final_dir) : 1) + ((env_program_name != NULL) ? strlen(env_program_name) : 5)));
+	sprintf (PATH_NAME, "%s/%s.prv", (env_final_dir != NULL) ? env_final_dir : ".", (env_program_name != NULL) ? env_program_name : "TRACE");
 
 #if defined(HAVE_BFD)
 	if (!__Extrae_Utils_file_exists(prvfile)){
@@ -283,17 +243,15 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	}
 #endif
 
-	strcat(prvfile,".prv\0");
 	set_merge_OutputTraceName (prvfile);
 	set_merge_GivenTraceName (TRUE);
 
-	if (taskid == 0)
-		Labels_loadRTEMSSymbols(prvfile,files);
+	if (taskid == 0) Labels_loadRTEMSSymbols(prvfile, files);
 
+    xfree(prvfile);
 #else
 
-	if (taskid == 0)
-		Labels_loadLocalSymbols (taskid, nfiles, files);
+	Labels_loadLocalSymbols (taskid, nfiles, files, &StartingTimes, &SynchronizationTimes);
 
 	/* If no actual filename is given, use the binary name if possible */
 	if (!get_merge_GivenTraceName())
@@ -311,7 +269,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			sprintf (prvfile, "%s.prv", basename(FirstBinaryName));
 			set_merge_OutputTraceName (prvfile);
 			set_merge_GivenTraceName (TRUE);
-			free (FirstBinaryName);
+			xfree (FirstBinaryName);
 		}
 	}
 
@@ -392,22 +350,12 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 
 /**************************************************************************************/
 
-	if (0 == taskid)
-	{
-		fprintf (stdout, "mpi2prv: Searching synchronization points...");
-		fflush (stdout);
-	}
-	Search_Synchronization_Times (taskid, numtasks, fset, &StartingTimes,
-	  &SynchronizationTimes);
-	if (0 == taskid)
-		fprintf (stdout, " done\n");
-
 #if defined(DEBUG)
 	for (i = 0; i < nfiles; i++)
 	{
 		fprintf (stderr, "[DEBUG] SynchronizationTimes[%d] = %llu "
 		                 " files[%d].SpawnOffset = %llu\n",
-		  i, SynchronizationTimes[i], i, files[i].SpawnOffset);
+		                 i, SynchronizationTimes[i], i, files[i].SpawnOffset);
 	}
 #endif
 
@@ -424,19 +372,19 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	{
 		if (0 == taskid)
 			fprintf (stdout, "mpi2prv: Enabling Time Synchronization (Node).\n");
-		TimeSync_CalculateLatencies (TS_NODE);
+		TimeSync_CalculateLatencies (TS_NODE, get_option_merge_SincronitzaApps());
 	}
 	else if (get_option_merge_SincronitzaTasks())
 	{
 		if (0 == taskid)
 			fprintf (stdout, "mpi2prv: Enabling Time Synchronization (Task).\n");
-		TimeSync_CalculateLatencies (TS_TASK);
+		TimeSync_CalculateLatencies (TS_TASK, get_option_merge_SincronitzaApps());
 	}
 	else 
 	{
 		if (0 == taskid)
 			fprintf(stdout, "mpi2prv: Time Synchronization disabled.\n");
-		TimeSync_CalculateLatencies (TS_NOSYNC);
+		TimeSync_CalculateLatencies (TS_NOSYNC, 0);
 	}
 	
 /**************************************************************************************/
@@ -494,7 +442,8 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
 			    Type == MPI_TYPE || Type == CUDA_TYPE || Type == OPENCL_TYPE ||
-			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE)
+			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE || Type == OPENACC_TYPE ||
+				Type == GASPI_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
@@ -512,15 +461,19 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 					else if (MPI_TYPE == Type)
 						Enable_MPI_Operation (EvType);
 					else if (CUDA_TYPE == Type)
-						Enable_CUDA_Operation (EvType);
+						Enable_CUDA_Operation (Get_EvValue(current_event));
 					else if (OPENCL_TYPE == Type)
 						Enable_OpenCL_Operation (EvType);
 					else if (OPENSHMEM_TYPE == Type)
 						Enable_OPENSHMEM_Operation (EvType);
 					else if (JAVA_TYPE == Type)
 						Enable_Java_Operation (EvType);
+					else if (OPENACC_TYPE == Type)
+						Enable_OPENACC_Operation(EvType);
+					else if (GASPI_TYPE == Type)
+						Enable_GASPI_Operation(EvType, Get_EvParam(current_event));
 				}
-				else	
+				else
 				{
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);
 				}
@@ -554,19 +507,19 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 					if (Sthread->last_hw_group_change != current_time)
 					{
 						int i;
-						int hwctype[MAX_HWC];
+						unsigned int hwctype[MAX_HWC];
 						unsigned long long hwcvalue[MAX_HWC];
+						int num_hwc = 0;
 
-						if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE))
-							for (i = 0; i < MAX_HWC; i++)
-								if (NO_COUNTER != hwctype[i])
-									trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+						num_hwc = HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE);
+						for (i = 0; i < num_hwc; i++)
+							trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+
 						if (get_option_merge_AbsoluteCounters())
 						{
-							if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE))
-								for (i = 0; i < MAX_HWC; i++)
-									if (NO_COUNTER != hwctype[i])
-										trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+							num_hwc = HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE);
+							for (i = 0; i < num_hwc; i++)
+								trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
 						}
 					}
 				}
@@ -586,11 +539,11 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 		(GET_THREAD_INFO(ptask,task,thread))->First_Event = FALSE;
 		(GET_THREAD_INFO(ptask,task,thread))->Previous_Event_Time = current_time;
 
+		parsed_events += tmp_nevents;
+		pct = ((double) parsed_events)/((double) num_of_events)*100.0f;
 		/* Right now, progress bar is only shown when numtasks is 1 */
 		if (1 == numtasks)
 		{
-			parsed_events += tmp_nevents;
-			pct = ((double) parsed_events)/((double) num_of_events)*100.0f;
 			if (pct > last_pct + 5.0 && pct <= 100.0f)
 			{
 				fprintf (stdout, "%d%% ", (int) pct);
@@ -602,22 +555,26 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 
 		current_event = GetNextEvent_FS (fset, &cpu, &ptask, &task, &thread);
 
+		long maxpct = get_option_merge_StopAtPercentage();
+		if ((maxpct > 0) && (maxpct < 100) && (pct >= maxpct))
+			current_event = NULL;
+
 	} while ((current_event != NULL) && !error);
 
 	if (1 == numtasks)
 	{
-		fprintf (stdout, "done\n");
-		fflush (stdout);
+		fprintf(stdout, "done\n");
+		fflush(stdout);
 	}
 
-	fprintf (stdout, "mpi2prv: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
-	fflush (stdout);
+	fprintf(stdout, "mpi2prv: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
+	fflush(stdout);
 
 #if defined(PARALLEL_MERGE)
 	if (numtasks > 1)
 	{
-		int res;
-		unsigned int temp;
+		int res, i;
+		unsigned int temp, max_param;
 		UINT64 temp2;
 
 		res = MPI_Allreduce (&error, &temp, 1, MPI_UNSIGNED, MPI_LOR, MPI_COMM_WORLD);
@@ -629,6 +586,13 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			res = MPI_Allreduce (&current_time, &temp2, 1, MPI_LONG_LONG, MPI_MAX, MPI_COMM_WORLD);
 			MPI_CHECK(res, MPI_Allreduce, "Failed to share end time!");
 			current_time = temp2;
+
+			for (i = 0; i<MAX_GASPI_PARAM_TYPE_ENTRIES; i++)
+			{
+				res = MPI_Allreduce(&GASPI_param_type_label[i].present, &max_param, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+				MPI_CHECK(res, MPI_Allreduce, "Failed to share GASPI parameters!");
+				GASPI_param_type_label[i].present = max_param;
+			}
 		}
 	}
 #endif

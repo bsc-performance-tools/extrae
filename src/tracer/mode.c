@@ -31,6 +31,7 @@
 #include "hwc.h"
 #include "mode.h"
 #include "utils.h"
+#include "xalloc.h"
 
 int *MPI_Deepness              = NULL;
 int *Current_Trace_Mode        = NULL;
@@ -72,40 +73,15 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 
 	size = sizeof(int) * new_num_threads;
 
-	MPI_Deepness = (int *)realloc(MPI_Deepness, size);
-	if (MPI_Deepness == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'MPI_Deepness'\n");
-		return FALSE; 
-	}
+	MPI_Deepness = (int *)xrealloc(MPI_Deepness, size);
 
-	Current_Trace_Mode = (int *)realloc(Current_Trace_Mode, size);
-	if (Current_Trace_Mode == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'Current_Trace_Mode'\n");
-		return FALSE;
-	}
+	Current_Trace_Mode = (int *)xrealloc(Current_Trace_Mode, size);
 
-	Future_Trace_Mode = (int *)realloc(Future_Trace_Mode,size);
-	if (Future_Trace_Mode == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'Future_Trace_Mode'\n");
-		return FALSE;
-	}
+	Future_Trace_Mode = (int *)xrealloc(Future_Trace_Mode,size);
 
-	Pending_Trace_Mode_Change = (int *)realloc(Pending_Trace_Mode_Change, size);
-	if (Pending_Trace_Mode_Change == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'Pending_Trace_Mode_Change'\n");
-		return FALSE;
-	}
+	Pending_Trace_Mode_Change = (int *)xrealloc(Pending_Trace_Mode_Change, size);
 
-	First_Trace_Mode = (int *)realloc(First_Trace_Mode, size);
-	if (First_Trace_Mode == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'First_Trace_Mode'\n");
-		return FALSE;
-	}
+	First_Trace_Mode = (int *)xrealloc(First_Trace_Mode, size);
 
 	for (i=old_num_threads; i<new_num_threads; i++)
 	{

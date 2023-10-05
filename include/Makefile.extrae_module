@@ -1,0 +1,10 @@
+EXTRAE_HOME=@sub_PREFIXDIR@
+FC=@sub_FC@
+
+all: extrae_module.mod
+
+extrae_module.mod: $(EXTRAE_HOME)/include/extrae_module.f90
+	${FC} -c $^
+
+clean:
+	rm -f extrae_module.mod extrae_module.o

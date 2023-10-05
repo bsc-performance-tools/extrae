@@ -46,6 +46,8 @@ paraver_FILES = \
  ../paraver/cuda_prv_semantics.c ../paraver/cuda_prv_semantics.h \
  ../paraver/opencl_prv_semantics.c ../paraver/opencl_prv_semantics.h \
  ../paraver/openshmem_prv_semantics.c ../paraver/openshmem_prv_semantics.h \
+ ../paraver/openacc_prv_semantics.c ../paraver/openacc_prv_semantics.h \
+ ../paraver/gaspi_prv_semantics.c ../paraver/gaspi_prv_semantics.h \
  ../paraver/mpi_prv_events.c ../paraver/mpi_prv_events.h \
  ../paraver/omp_prv_events.c ../paraver/omp_prv_events.h \
  ../paraver/pthread_prv_events.c ../paraver/pthread_prv_events.h \
@@ -54,6 +56,8 @@ paraver_FILES = \
  ../paraver/cuda_prv_events.c ../paraver/cuda_prv_events.h \
  ../paraver/opencl_prv_events.c ../paraver/opencl_prv_events.h \
  ../paraver/openshmem_prv_events.c ../paraver/openshmem_prv_events.h \
+ ../paraver/openacc_prv_events.c ../paraver/openacc_prv_events.h \
+ ../paraver/gaspi_prv_events.c ../paraver/gaspi_prv_events.h \
  ../paraver/write_file_buffer.c ../paraver/write_file_buffer.h \
  ../paraver/paraver_nprintf.c ../paraver/paraver_nprintf.h \
  ../paraver/MPI_EventEncoding.h
@@ -83,6 +87,12 @@ libmpimpi2prv_la_SOURCES = \
 mpimpi2prv_SOURCES = \
  ../merger.c
 
+if HAVE_PAPI
+if !HAVE_PAPI_EMBEDDED
+  PAPI_LINKER_FLAGS = @PAPI_LDFLAGS@ @PAPI_RPATH@ @PAPI_LIBS@
+endif
+endif
+
 libmpimpi2prv_la_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
 if HAVE_BINUTILS
 libmpimpi2prv_la_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
@@ -90,10 +100,10 @@ endif
 libmpimpi2prv_la_LDFLAGS = -o libmpimpi2prv.la $(CFLAGS) 
 
 mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ 
-mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv @MPI_LDFLAGS@ 
+mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv $(PAPI_LINKER_FLAGS) @MPI_LDFLAGS@ @MPI_RPATH@ @MPI_LIBS@
 if HAVE_BINUTILS
 mpimpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpimpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
+mpimpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_RPATH@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_RPATH@ @LIBERTY_LIBS@
 endif
 mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la
 
@@ -113,12 +123,13 @@ endif
 if HAVE_ZLIB
   libmpimpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpimpi2prv_CFLAGS += @LIBZ_CFLAGS@
-  mpimpi2prv_LDFLAGS += -L@LIBZ_SHAREDLIBSDIR@ -R @LIBZ_SHAREDLIBSDIR@ @LIBZ_LIBS@
+  mpimpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_RPATH@ @LIBZ_LIBS@
 endif
 
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
   libmpimpi2prv_la_CFLAGS += @PAPI_CFLAGS@
+  libmpimpi2prv_la_LDFLAGS += @PAPI_LDFLAGS@ @PAPI_RPATH@ @PAPI_LIBS@
   mpimpi2prv_CFLAGS += @PAPI_CFLAGS@
 endif
 endif
@@ -130,7 +141,7 @@ endif
 if HAVE_SIONLIB
   libmpimpi2prv_la_CFLAGS += @SIONLIB_CFLAGS@
   mpimpi2prv_CFLAGS += @SIONLIB_CFLAGS@
-  mpimpi2prv_LDFLAGS += -R @SIONLIB_LIBSDIR@ @SIONLIB_LDFLAGS@ -lsionmpi_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none
+  mpimpi2prv_LDFLAGS += @SIONLIB_LDFLAGS@ @SIONLIB_RPATH@ -lsionmpi_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none
 endif
 
 # Online support

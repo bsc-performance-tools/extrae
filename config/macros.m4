@@ -23,184 +23,414 @@ AC_DEFUN([AX_FLAGS_RESTORE],
    LDFLAGS="${saved_LDFLAGS}"
 ])
 
-
 # AX_FIND_INSTALLATION
-# --------------------
+#   (package, [list-of-possible-root-paths], 
+#    [list-of-required-bins], [list-of-optional-bins],
+#    [list-of-required-headers], [list-of-optional-headers],
+#    [list-of-required-libs], [list-of-optional-libs],
+#    [action-if-yes], [action-if-no])
+# ----------------------------------------------------------
 AC_DEFUN([AX_FIND_INSTALLATION],
 [
-	AC_REQUIRE([AX_SELECT_BINARY_TYPE])
+  AC_REQUIRE([AX_SELECT_BINARY_TYPE])
 
-	dnl Search for home directory
-	AC_MSG_CHECKING([for $1 installation])
-    for home_dir in [$2 "not found"]; do
-        if test -d "$home_dir/$BITS" ; then
-            home_dir="$home_dir/$BITS"
-            break
-        elif test -d "$home_dir" ; then
-            break
-        fi
-    done
-	AC_MSG_RESULT([$home_dir])
-	$1_HOME="$home_dir"
-	if test "$$1_HOME" = "not found" ; then
-		$1_HOME=""
-	else
+dnl AX_FLAGS_SAVE()
 
-		dnl Did the user passed a headers directory to check first?
-		AC_ARG_WITH([$3-headers],
-			AC_HELP_STRING(
-				[--with-$3-headers@<:@=ARG@:>@],
-				[Specify location of include files for package $3]
-			),
-			[ForcedHeaders="$withval"],
-			[ForcedHeaders=""]
-		)
+  dnl Generate lowercase and uppercase tokens for the package name (e.g. MPI), later used
+  dnl to add --with flags (e.g. --with-mpi-libs) and to declare the output variables (e.g. MPI_HOME)
+  m4_define([__pkg_name_lcase], m4_tolower($1))
+  m4_define([__pkg_name_ucase], m4_toupper($1))
 
-		dnl Search for includes directory
-		AC_MSG_CHECKING([for $1 includes directory])
+  dnl Search for home directory
+  AC_MSG_CHECKING([for __pkg_name_ucase installation])
+  for home_dir in [$2 "not found"]; do
+    if test -d "${home_dir}/${BITS}" ; then
+      home_dir="${home_dir}/${BITS}"
+      break
+    elif test -d "${home_dir}" ; then
+      break
+    fi
+  done
 
-		if test "${ForcedHeaders}" = "" ; then
-			for incs_dir in [$$1_HOME/include$BITS $$1_HOME/include "not found"] ; do
-				if test -d "$incs_dir" ; then
-					break
-				fi
-			done
-		else
-			for incs_dir in [${ForcedHeaders} "not found"] ; do
-				if test -d "$incs_dir" ; then
-					break
-				fi
-			done
-		fi
+  AC_MSG_RESULT([${home_dir}])
+  m4_define([__PKG_HOME], __pkg_name_ucase[]_HOME) dnl Output variable <PKG>_HOME
+  __PKG_HOME=${home_dir}
+  AC_SUBST(__PKG_HOME)
 
-		AC_MSG_RESULT([$incs_dir])
-		$1_INCLUDES="$incs_dir"
-		if test "$$1_INCLUDES" = "not found" ; then
-			AC_MSG_ERROR([Unable to find header directory for package $3. Check option --with-$3-headers.])
-		else
-			$1_CFLAGS="-I$$1_INCLUDES"
-			$1_CXXFLAGS="-I$$1_INCLUDES"
-			$1_CPPFLAGS="-I$$1_INCLUDES"
-			
-			if test ! -z "${multiarch_triplet}" ; then
-				$1_CFLAGS="${$1_CFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
-				$1_CXXFLAGS="${$1_CXXFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
-				$1_CPPFLAGS="${$1_CPPFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
-			fi
-		fi
+  dnl Control rpath setting per dependency
+  AC_ARG_ENABLE(__pkg_name_lcase[]-rpath,
+    AC_HELP_STRING(
+      [--disable-[]__pkg_name_lcase[]-rpath],
+      [Embed rpath for __pkg_name_ucase dependencies (enabled by default)]
+    ),
+    [enable_pkg_rpath="${enableval}"],
+    [enable_pkg_rpath="yes"]
+  )
 
-		dnl Did the user passed a headers directory to check first?
-		AC_ARG_WITH([$3-libs],
-			AC_HELP_STRING(
-				[--with-$3-libs@<:@=ARG@:>@],
-				[Specify location of library files for package $3]
-			),
-			[ForcedLibs="$withval"],
-			[ForcedLibs=""]
-		)
+  dnl Did the user pass a bin directory to check first?
+  AC_ARG_WITH([__pkg_name_lcase[]-binaries],
+    AC_HELP_STRING(
+      [--with-[]__pkg_name_lcase[]-binaries@<:@=DIR@:>@],
+      [Specify location of binary files for package __pkg_name_ucase]
+    ),
+    [ForcedBins="${withval}"],
+    [ForcedBins=""]
+  )
 
-		dnl Search for libs directory
-		AC_MSG_CHECKING([for $1 libraries directory])
-		if test "${ForcedLibs}" = "" ; then
-			for libs_dir in [$$1_HOME/lib$BITS $$1_HOME/lib $$1_HOME/lib/x86_64-linux-gnu "not found"] ; do
-				if test -d "$libs_dir" ; then
-					break
-				fi
-			done
-		else
-			for libs_dir in [${ForcedLibs} "not found"] ; do
-				if test -d "$libs_dir" ; then
-					break
-				fi
-			done
-		fi
+  dnl Search for binaries directory
+  AC_MSG_CHECKING([for __pkg_name_ucase binaries directory])
+  for bins_dir in [${ForcedBins} ${home_dir}/bin${BITS} ${home_dir}/bin "not found"] ; do
+    if test -d "${bins_dir}" ; then
+      break
+    fi
+  done
+  AC_MSG_RESULT([${bins_dir}])
 
-		AC_MSG_RESULT([$libs_dir])
-		$1_LIBSDIR="$libs_dir"
-		if test "$$1_LIBSDIR" = "not found" ; then
-			AC_MSG_ERROR([Unable to find library directory for package $3. Check option --with-$3-libs.])
-		else
-       $1_LDFLAGS="-L$$1_LIBSDIR"
-       if test -d "$$1_LIBSDIR/shared" ; then
-          $1_SHAREDLIBSDIR="$$1_LIBSDIR/shared"
-       else
-          $1_SHAREDLIBSDIR=$$1_LIBSDIR
-       fi
-		fi
-		
-		if test ! -z "${multiarch_triplet}" ; then
-			AC_MSG_CHECKING([for multiarch $1 libraries directory])
-			if test -d "$$1_HOME/lib/${multiarch_triplet}" ; then
-				AC_MSG_RESULT([$$1_HOME/lib/${multiarch_triplet}])
-				$1_LIBSDIR_MULTIARCH="$$1_HOME/lib/${multiarch_triplet}"
-			else
-				AC_MSG_RESULT([not found])
-			fi
-        else
-           $1_LIBSDIR_MULTIARCH=""
-		fi
-	fi
+  m4_define([__PKG_BINSDIR], __pkg_name_ucase[]_BINSDIR) dnl Output variable <PKG>_BINSDIR
+  __PKG_BINSDIR=${bins_dir}
+  AC_SUBST(__PKG_BINSDIR)
 
-	dnl Everything went OK?
-	if test "$$1_HOME" != "" -a "$$1_INCLUDES" != "" -a "$$1_LIBSDIR" != "" ; then
-		$1_INSTALLED="yes"
+  if test "${bins_dir}" != "not found"; then
+    bin_folder_found="yes"
+  else
+    bin_folder_found="no"
+  fi
 
-		AC_SUBST($1_HOME)
-		AC_SUBST($1_INCLUDES)
+  dnl Search for binaries
+  required_bins_found="yes"
+  if test "${bin_folder_found}" = "yes"; then
+    :
 
-    AC_SUBST($1_CFLAGS)
-    AC_SUBST($1_CXXFLAGS)
-    AC_SUBST($1_CPPFLAGS)
+    dnl Search for required binaries
+    m4_foreach_w([bin_name], [$3], [
+      AC_MSG_CHECKING([for __pkg_name_ucase required binary bin_name])
+      if test -x "${bins_dir}/bin_name" ; then
+        bin_path="${bins_dir}/bin_name"
 
-    AC_SUBST($1_LDFLAGS)
-    AC_SUBST($1_SHAREDLIBSDIR)
-    AC_SUBST($1_LIBSDIR)
+        dnl Make variable named <PKG>_BIN_<binary> (e.g. MPI_BIN_mpirun)
+        m4_pushdef([__PKG_BINARY_PATH], m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _))
+        dnl Assign value to this variable (e.g. MPI_BIN_mpirun=<path-to-mpirun>)
+        __PKG_BINARY_PATH=${bin_path}
+        dnl Make it available in the Makefiles
+        AC_SUBST(__PKG_BINARY_PATH)
+        m4_popdef([__PKG_BINARY_PATH])
+        AC_MSG_RESULT([${bins_dir}/bin_name])
+      else
+        AC_MSG_RESULT([no])
+        required_bins_found="no"
+      fi
+    ])
+
+    dnl Search for optional binaries
+    m4_foreach_w([bin_name], [$4], [
+      AC_MSG_CHECKING([for __pkg_name_ucase optional binary bin_name])
+
+      if test -x "${bins_dir}/bin_name" ; then
+        bin_path="${bins_dir}/bin_name"
+
+        dnl Make variable named <PKG>_BIN_<binary> (e.g. MPI_BIN_mpirun)
+        m4_pushdef([__PKG_BINARY_PATH], m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _))
+        dnl Assign value to this variable (e.g. MPI_BIN_mpirun=<path-to-mpirun>)
+        __PKG_BINARY_PATH=${bin_path}
+        dnl Make it available in the Makefiles
+        AC_SUBST(__PKG_BINARY_PATH)
+        m4_popdef([__PKG_BINARY_PATH])
+        AC_MSG_RESULT([${bins_dir}/bin_name])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    ])
+  fi
+
+  dnl Did the user pass a headers directory to check first?
+  AC_ARG_WITH([__pkg_name_lcase[]-headers],
+    AC_HELP_STRING(
+      [--with-[]__pkg_name_lcase[]-headers@<:@=DIR@:>@],
+      [Specify location of include files for package __pkg_name_ucase]
+    ),
+    [ForcedHeaders="${withval}"],
+    [ForcedHeaders=""]
+  )
+
+  dnl Search for includes directory
+  AC_MSG_CHECKING([for __pkg_name_ucase includes directory])
+  for incs_dir in [${ForcedHeaders} ${home_dir}/include${BITS} ${home_dir}/include "not found"] ; do
+    if test -d "${incs_dir}" ; then
+      break
+    fi
+  done
+  AC_MSG_RESULT([${incs_dir}])
+
+  m4_define([__PKG_INCSDIR], __pkg_name_ucase[]_INCSDIR) dnl Output variable <PKG>_INCSDIR
+  __PKG_INCSDIR=${incs_dir}
+  AC_SUBST(__PKG_INCSDIR)
+
+  m4_define([__PKG_INCLUDES], __pkg_name_ucase[]_INCLUDES) dnl Output variable <PKG>_INCLUDES (alias of <PKG>_INCSDIR, deprecated)
+  __PKG_INCLUDES=${incs_dir}
+  AC_SUBST(__PKG_INCLUDES)
+
+  if test "${incs_dir}" != "not found"; then
+    include_folder_found="yes"
+  else
+    include_folder_found="no"
+  fi
+
+  dnl Search for includes
+  required_headers_found="yes"
+  if test "${include_folder_found}" = "yes" ; then
+    m4_define([__PKG_CFLAGS], __pkg_name_ucase[]_CFLAGS) dnl Output variable <PKG>_CFLAGS
+    __PKG_CFLAGS="-I${incs_dir}"
+    m4_define([__PKG_CXXFLAGS], __pkg_name_ucase[]_CXXFLAGS) dnl Output variable <PKG>_CXXFLAGS
+    __PKG_CXXFLAGS="-I${incs_dir}"
+    m4_define([__PKG_CPPFLAGS], __pkg_name_ucase[]_CPPFLAGS) dnl Output variable <PKG>_CPPFLAGS
+    __PKG_CPPFLAGS="-I${incs_dir}"
+
+    if test ! -z "${multiarch_triplet}" ; then
+      if test -d "${incs_dir}/${multiarch_triplet}" ; then
+        __PKG_CFLAGS="${__PKG_CFLAGS} -I${incs_dir}/${multiarch_triplet}"
+        __PKG_CXXFLAGS="${__PKG_CXXFLAGS} -I${incs_dir}/${multiarch_triplet}"
+        __PKG_CPPFLAGS="${__PKG_CPPFLAGS} -I${incs_dir}/${multiarch_triplet}"
+      fi
+    fi
+
+    AC_SUBST(__PKG_CFLAGS)
+    AC_SUBST(__PKG_CXXFLAGS)
+    AC_SUBST(__PKG_CPPFLAGS)
 
     dnl Update the default variables so the automatic checks will take into account the new directories
-    CFLAGS="$CFLAGS $$1_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $$1_CXXFLAGS"
-    CPPFLAGS="$CPPFLAGS $$1_CPPFLAGS"
-    LDFLAGS="$LDFLAGS $$1_LDFLAGS"
-	else	
-		$1_INSTALLED="no"
-	fi
-])
+    CFLAGS="${CFLAGS} ${__PKG_CFLAGS}"
+    CXXFLAGS="${CXXFLAGS} ${__PKG_CXXFLAGS}"
+    CPPFLAGS="${CPPFLAGS} ${__PKG_CPPFLAGS}"
 
+    dnl Test for required headers
+    if test -n "$5"; then
+      AC_CHECK_HEADERS($5,
+        [ required_headers_found="yes" ],
+        [ required_headers_found="no" ])
+    fi
 
-# AX_CHECK_POINTER_SIZE
-# ---------------------
-AC_DEFUN([AX_CHECK_POINTER_SIZE],
-[
-   AC_REQUIRE([AX_IS_BGL_MACHINE])
-   AC_REQUIRE([AX_IS_BGP_MACHINE])
-   AC_REQUIRE([AX_IS_BGQ_MACHINE])
+    dnl Test for optional headers
+    if test -n "$6"; then
+      AC_CHECK_HEADERS($6,
+        [ optional_headers_found="yes" ],
+        [ optional_headers_found="no" ])
+    fi
+  fi
 
-   if test "${IS_BGQ_MACHINE}" = "yes" ; then
-      POINTER_SIZE=64
-   elif test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
-      POINTER_SIZE=32
-   elif test "${IS_MIC_MACHINE}" = "yes" ; then
-      POINTER_SIZE=64
-   elif test "${IS_ARM_MACHINE}" = "yes" ; then
-      POINTER_SIZE=32
-   elif test "${IS_ARM64_MACHINE}" = "yes" ; then
-      POINTER_SIZE=64
-   elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
-      POINTER_SIZE=64
-   elif test "${IS_GR740_MACHINE}" = "yes" ; then
-      POINTER_SIZE=32
-   else
-      AC_TRY_RUN(
-         [
-            int main()
-            {
-               return sizeof(void *)*8;
-            }
-         ],
-         [ POINTER_SIZE="0" ],
-         [ POINTER_SIZE="$?"]
-      )
-   fi
+  dnl Did the user pass a libraries directory to check first?
+  AC_ARG_WITH([__pkg_name_lcase[]-libs],
+    AC_HELP_STRING(
+      [--with-[]__pkg_name_lcase[]-libs@<:@=DIR@:>@],
+      [Specify location of library files for package __pkg_name_ucase]
+    ),
+    [ForcedLibs="${withval}"],
+    [ForcedLibs=""]
+  )
+
+  dnl Search for libs directory
+  AC_MSG_CHECKING([for __pkg_name_ucase libraries directory])
+  for libs_dir in [${ForcedLibs} ${home_dir}/lib${BITS} ${home_dir}/lib "not found"] ; do
+    if test -d "${libs_dir}" ; then
+      break
+    fi
+  done
+  AC_MSG_RESULT([${libs_dir}])
+
+  m4_define([__PKG_LIBSDIR], __pkg_name_ucase[]_LIBSDIR) dnl Output variable <PKG>_LIBSDIR
+  __PKG_LIBSDIR=${libs_dir}
+  AC_SUBST(__PKG_LIBSDIR)
+
+  if test "${libs_dir}" != "not found"; then
+    lib_folder_found="yes"
+  else
+    lib_folder_found="no"
+  fi
+
+  dnl Search for extra libs directories
+  if test "${lib_folder_found}" = "yes" ; then
+    m4_define([__PKG_LDFLAGS], __pkg_name_ucase[]_LDFLAGS) dnl Output variable <PKG>_LDFLAGS
+    __PKG_LDFLAGS="-L${libs_dir}"
+    m4_define([__PKG_RPATH], __pkg_name_ucase[]_RPATH) dnl Output variable <PKG>_RPATH
+    __PKG_RPATH="-R${libs_dir}"
+
+    AC_MSG_CHECKING([for __pkg_name_ucase shared library folder])
+    m4_define([__PKG_LIBSDIR_SHARED], __pkg_name_ucase[]_LIBSDIR_SHARED) dnl Output variable <PKG>_LIBSDIR_SHARED
+    __PKG_LIBSDIR_SHARED=""
+    if test -d "${libs_dir}/shared" ; then
+      __PKG_LIBSDIR_SHARED="${libs_dir}/shared" 
+      __PKG_LDFLAGS="-L${__PKG_LIBSDIR_SHARED} ${__PKG_LDFLAGS}"
+      __PKG_RPATH="-R${__PKG_LIBSDIR_SHARED} ${__PKG_RPATH}"
+      AC_MSG_RESULT([${__PKG_LIBSDIR_SHARED}])
+    else
+      dnl Added for retrocompatibility
+      __PKG_LIBSDIR_SHARED="${libs_dir}" 
+      AC_MSG_RESULT([no])
+    fi
+    AC_SUBST(__PKG_LIBSDIR_SHARED)
+
+    AC_MSG_CHECKING([for __pkg_name_ucase multiarch library folder])
+    m4_define([__PKG_LIBSDIR_MULTIARCH], __pkg_name_ucase[]_LIBSDIR_MULTIARCH) dnl Output variable <PKG>_LIBSDIR_MULTIARCH
+    __PKG_LIBSDIR_MULTIARCH=""
+    if test -n "${multiarch_triplet}" -a -d "${libs_dir}/${multiarch_triplet}" ; then
+      __PKG_LIBSDIR_MULTIARCH="${libs_dir}/${multiarch_triplet}" 
+      __PKG_LDFLAGS="-L${__PKG_LIBSDIR_MULTIARCH} ${__PKG_LDFLAGS}"
+      __PKG_RPATH="-R${__PKG_LIBSDIR_MULTIARCH} ${__PKG_RPATH}"
+      AC_MSG_RESULT([${__PKG_LIBSDIR_MULTIARCH}])
+    else
+      dnl Added for retrocompatibility
+      __PKG_LIBSDIR_MULTIARCH="${libs_dir}" 
+      AC_MSG_RESULT([no])
+    fi
+    AC_SUBST(__PKG_LIBSDIR_MULTIARCH)
+
+    if test "${enable_rpath}" = "no" -o "${enable_pkg_rpath}" = "no"; then
+      __PKG_RPATH=""
+    fi
+    AC_SUBST(__PKG_RPATH)
+    
+    m4_define([__PKG_LDFLAGS_RPATH], __pkg_name_ucase[]_LDFLAGS_RPATH) dnl Output variable <PKG>_LDFLAGS_RPATH
+    __PKG_LDFLAGS_RPATH="${__PKG_LDFLAGS} ${__PKG_RPATH}"
+
+    dnl Search for required libraries in any of the possible folders
+    required_libs_found="yes"
+    all_libs_dirs="${__PKG_LIBSDIR_MULTIARCH} ${__PKG_LIBSDIR_SHARED} ${__PKG_LIBSDIR}"
+
+    m4_define([__PKG_LIBS], __pkg_name_ucase[]_LIBS) dnl Output variable <PKG>_LIBS
+    __PKG_LIBS=""
+
+    m4_foreach_w([lib_name], [$7], [
+      AC_MSG_CHECKING([for __pkg_name_ucase required library lib[]lib_name])
+
+      found=0
+      for lib_path in $all_libs_dirs; do
+        for lib_extension in .so .dylib .a; do
+          if test -f "${lib_path}/lib[]lib_name[]${lib_extension}" ; then
+            AC_MSG_RESULT([${lib_path}/lib[]lib_name[]${lib_extension}])
+            __PKG_LIBS+="-l[]lib_name "
+            found=1
+
+            m4_pushdef([__PKG_LIBRARY_PATH], __pkg_name_ucase[]_LIB_[]lib_name) dnl Output variable <PKG>_LIB_<library> (e.g. MPI_LIB_mpich)
+            __PKG_LIBRARY_PATH=${lib_path}/lib[]lib_name[]${lib_extension}
+            AC_SUBST(__PKG_LIBRARY_PATH)
+            m4_popdef([__PKG_LIBRARY_PATH])
+
+            break 2
+          fi
+        done
+      done
+      if (( $found == 0 )); then
+        AC_MSG_RESULT([no])
+        required_libs_found="no"
+      fi
+    ])
+
+    dnl Search for optional libraries in any of the possible folders
+    m4_foreach_w([lib_name], [$8], [
+      AC_MSG_CHECKING([for __pkg_name_ucase optional library lib[]lib_name])
+
+      found=0
+      for lib_path in $all_libs_dirs; do
+        for lib_extension in .so .dylib .a; do
+          if test -f "${lib_path}/lib[]lib_name[]${lib_extension}" ; then
+            AC_MSG_RESULT([${lib_path}/lib[]lib_name[]${lib_extension}])
+            __PKG_LIBS+="-l[]lib_name "
+            found=1
+
+            m4_pushdef([__PKG_LIBRARY_PATH], __pkg_name_ucase[]_LIB_[]lib_name) dnl Output variable <PKG>_LIB_<library> (e.g. MPI_LIB_mpich)
+            __PKG_LIBRARY_PATH=${lib_path}/lib[]lib_name[]${lib_extension}
+            AC_SUBST(__PKG_LIBRARY_PATH)
+            m4_popdef([__PKG_LIBRARY_PATH])
+
+            break 2
+          fi
+        done 
+      done
+      if (( $found == 0 )); then
+        AC_MSG_RESULT([no])
+      fi
+    ])
+
+    __PKG_LDFLAGS="${__PKG_LDFLAGS} ${__PKG_LIBS}"
+    AC_SUBST(__PKG_LDFLAGS)
+    __PKG_LDFLAGS_RPATH="${__PKG_LDFLAGS_RPATH} ${__PKG_LIBS}"
+    AC_SUBST(__PKG_LDFLAGS_RPATH)
+    AC_SUBST(__PKG_LIBS)
+
+    dnl Update the default variables so the automatic checks will take into account the new directories
+    LDFLAGS="${LDFLAGS} ${__PKG_LDFLAGS}"
+  fi
+
+  dnl Add defines and Makefile conditionals for the detected binaries and libraries
+  m4_foreach_w([bin_name], [$3], [
+    if test "${m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)}" != ""; then
+      AC_DEFINE([HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)], 1, "Define to 1 if __pkg_name_ucase binary bin_name is found")
+    fi
+#    AM_CONDITIONAL(HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _), test "${__pkg_name_ucase[]_BIN_[]bin_name}" != "")
+  ])
+  m4_foreach_w([bin_name], [$4], [
+    if test "${m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)}" != ""; then
+      AC_DEFINE([HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _)], 1, "Define to 1 if __pkg_name_ucase binary bin_name is found")
+    fi
+#    AM_CONDITIONAL(HAVE_[]m4_bpatsubst(__pkg_name_ucase[]_BIN_[]bin_name, -, _), test "${__pkg_name_ucase[]_BIN_[]bin_name}" != "")
+  ])
+  m4_foreach_w([lib_name], [$7], [
+    if test "${__pkg_name_ucase[]_LIB_[]lib_name}" != ""; then
+      AC_DEFINE([HAVE_[]__pkg_name_ucase[]_LIB_[]lib_name], 1, "Define to 1 if __pkg_name_ucase library lib[]lib_name is found")
+    fi
+#    AM_CONDITIONAL(HAVE_[]__pkg_name_ucase[]_LIB_[]lib_name, test "${__pkg_name_ucase[]_LIB_[]lib_name}" != "")
+  ])
+  m4_foreach_w([lib_name], [$8], [
+    if test "${__pkg_name_ucase[]_LIB_[]lib_name}" != ""; then
+      AC_DEFINE([HAVE_[]__pkg_name_ucase[]_LIB_[]lib_name], 1, "Define to 1 if __pkg_name_ucase library lib[]lib_name is found")
+    fi
+#    AM_CONDITIONAL(HAVE_[]__pkg_name_ucase[]_LIB_[]lib_name, test "${__pkg_name_ucase[]_LIB_[]lib_name}" != "")
+  ])
+
+  dnl Everything went OK? (maybe we should tweak these checks a little bit)
+  AC_MSG_CHECKING([for __pkg_name_ucase valid installation])
+
+  m4_define([__PKG_INSTALLED], __pkg_name_ucase[]_INSTALLED) dnl Output variable <PKG>_INSTALLED
+  __PKG_INSTALLED="yes"
+
+  if test "${__PKG_HOME}" = "not found"; then
+    __PKG_INSTALLED="no"
+  fi
+
+  if test "$3" != "" -a "${bin_folder_found}" = "no" ; then
+    __PKG_INSTALLED="no"
+  fi
+
+  if test "${required_bins_found}" = "no"; then
+    __PKG_INSTALLED="no"
+  fi
+
+  if test "$5" != "" -a "${include_folder_found}" = "no" ; then
+    __PKG_INSTALLED="no"
+  fi
+
+  if test "${required_headers_found}" = "no"; then
+    __PKG_INSTALLED="no"
+  fi
+
+  if test "$7" != "" -a "${lib_folder_found}" = "no" ; then
+    __PKG_INSTALLED="no"
+  fi
+
+  if test "${required_libs_found}" = "no" ; then
+    __PKG_INSTALLED="no"
+  fi
+
+  dnl Run the action-if-yes / action-if-no
+  if test "${__PKG_INSTALLED}" = "yes" ; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_[]__pkg_name_ucase, [1], "Define when valid __pkg_name_ucase installation found")
+    $9
+  else
+    AC_MSG_RESULT([no])
+    $10
+  fi
+
+  dnl AX_FLAGS_RESTORE()
 ])
 
 
@@ -209,6 +439,8 @@ AC_DEFUN([AX_CHECK_POINTER_SIZE],
 # Check the binary type the user wants to build and verify whether it can be successfully built
 AC_DEFUN([AX_SELECT_BINARY_TYPE],
 [
+	AC_CHECK_SIZEOF([void *])
+
 	AC_ARG_WITH(binary-type,
 		AC_HELP_STRING(
 			[--with-binary-type@<:@=ARG@:>@],
@@ -233,8 +465,7 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 			[for $_AC_LANG_PREFIX[]_compiler compiler default binary type], 
 			[[]_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type],
 			[
-				AX_CHECK_POINTER_SIZE
-				Default_Binary_Type="$POINTER_SIZE"
+				Default_Binary_Type=$(( 8 * ${ac_cv_sizeof_void_p} ))
 				[]_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type="$Default_Binary_Type""-bit"
 			]
 		)
@@ -275,8 +506,7 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 				old_[]_AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS"
 				[]_AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS $flag"
 
-				AX_CHECK_POINTER_SIZE()
-				if test "$POINTER_SIZE" = "$Selected_Binary_Type" ; then
+				if test $(( 8 * ${ac_cv_sizeof_void_p})) = "${Selected_Binary_Type}" ; then
 					AC_MSG_RESULT([$flag])
 					break
 				else
@@ -315,31 +545,10 @@ AC_DEFUN([AX_ENSURE_CXX_PRESENT],
 # Test if the architecture is little or big endian
 AC_DEFUN([AX_CHECK_ENDIANNESS],
 [
-   AC_CACHE_CHECK([for the architecture endianness], [ac_cv_endianness],
-   [
-      AC_LANG_SAVE()
-      AC_LANG([C])
-      AC_TRY_RUN(
-      [
-         int main()
-         {
-            short s = 1;
-            short * ptr = &s;
-            unsigned char c = *((char *)ptr);
-            return c;
-         }
-      ],
-      [ac_cv_endianness="big endian" ],
-      [ac_cv_endianness="little endian" ]
-      )
-      AC_LANG_RESTORE()
-   ])
-   if test "$ac_cv_endianness" = "big endian" ; then
-      AC_DEFINE(IS_BIG_ENDIAN, 1, [Define to 1 if architecture is big endian])
-   fi
-   if test "$ac_cv_endianness" = "little endian" ; then
-      AC_DEFINE(IS_LITTLE_ENDIAN, 1, [Define to 1 if architecture is little endian])
-   fi
+   AC_C_BIGENDIAN(
+      AC_DEFINE(IS_BIG_ENDIAN, 1, [Define to 1 if architecture is big endian]),
+      AC_DEFINE(IS_LITTLE_ENDIAN, 1, [Define to 1 if architecture is little endian]),
+      AC_MSG_FAILURE([Cannot detect endianness]))
 ])
 
 
@@ -397,51 +606,122 @@ AC_DEFUN([AX_CHECK_PGI],
 
 # AX_PROG_XML2
 # -----------
+# Check for libxml2 installation
 AC_DEFUN([AX_PROG_XML2],
 [
-   XML2_HOME_BIN="`dirname ${XML2_CONFIG}`"
-   XML2_HOME="`dirname ${XML2_HOME_BIN}`"
+   AX_FLAGS_SAVE()
 
-   XML2_INCLUDES1="${XML2_HOME}/include/libxml2"
-   XML2_INCLUDES2="${XML2_HOME}/include"
-   XML2_CFLAGS="-I${XML2_INCLUDES1} -I${XML2_INCLUDES2}"
-   XML2_CPPFLAGS=${XML2_CFLAGS}
-   XML2_CXXFLAGS=${XML2_CFLAGS}
+   AC_ARG_WITH(xml-prefix,
+      AC_HELP_STRING(
+         [--with-xml-prefix@<:@=DIR@:>@],
+         [specify where to find libxml2 libraries and includes (deprecated, use --with-xml)]
+      ),
+      [xml_paths="${withval}"],
+      [xml_paths="/usr/local /usr"] dnl List of possible default paths
+   )
 
-   XML2_LIBS="-lxml2"
-   if test -f ${XML2_HOME}/lib${BITS}/libxml2.so -o \
-           -f ${XML2_HOME}/lib${BITS}/libxml2.dylib -o \
-           -f ${XML2_HOME}/lib${BITS}/libxml2.a ; then
-		XML2_LIBSDIR="${XML2_HOME}/lib${BITS}"
-   elif test -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.so -o \
-             -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.dylib -o \
-             -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.a ; then
-		XML2_LIBSDIR="${XML2_HOME}/lib/${multiarch_triplet}"
-   else
-      XML2_LIBSDIR="${XML2_HOME}/lib"
+   AC_ARG_WITH(xml,
+      AC_HELP_STRING(
+         [--with-xml@<:@=DIR@:>@],
+         [specify where to find libxml2 libraries and includes]
+      ),
+      [xml_paths="${withval}"]
+      dnl [xml_paths="/usr/local /usr"] dnl List of possible default not given here, taken from --with-xml-prefix
+      dnl                               dnl Activate this again when --with-xml-prefix is removed
+   )
+
+   AX_FIND_INSTALLATION([XML2], [${xml_paths}], [xml2-config], [], [], [], [xml2], [], [], [])
+   if test "$XML2_INSTALLED" = "yes" ; then
+
+      min_xml_version=ifelse([$1], ,2.0.0, [$1])
+      AC_MSG_CHECKING(for libxml2 version >= $min_xml_version)
+      min_xml_major_version=`echo ${min_xml_version} | cut -d. -f1`
+      min_xml_minor_version=`echo ${min_xml_version} | cut -d. -f2`
+      min_xml_micro_version=`echo ${min_xml_version} | cut -d. -f3`
+
+      xml_config_major_version=`${XML2_BIN_xml2_config} --version | cut -d. -f1`
+      xml_config_minor_version=`${XML2_BIN_xml2_config} --version | cut -d. -f2`
+      xml_config_micro_version=`${XML2_BIN_xml2_config} --version | cut -d. -f3`
+
+      if ((xml_config_major_version > min_xml_major_version)) ||
+         ((xml_config_major_version == min_xml_major_version && xml_config_minor_version > min_xml_minor_version)) ||
+         ((xml_config_major_version == major && xml_config_minor_version == min_xml_minor_version && xml_config_micro_version >= min_xml_micro_version)); then
+         AC_MSG_RESULT([yes ($xml_config_major_version.$xml_config_minor_version.$xml_config_micro_version)])
+      else
+         AC_MSG_RESULT([no ($xml_config_major_version.$xml_config_minor_version.$xml_config_micro_version)])
+         XML2_INSTALLED="no"
+      fi
+
+      XML2_CFLAGS="${XML2_CFLAGS} -I${XML2_INCLUDES}/libxml2"
+      XML2_CPPFLAGS="${XML2_CPPFLAGS} -I${XML2_INCLUDES}/libxml2"
+      XML2_CXXFLAGS="${XML2_CXXFLAGS} -I${XML2_INCLUDES}/libxml2"
+      AC_SUBST(XML2_CFLAGS)
+      AC_SUBST(XML2_CPPFLAGS)
+      AC_SUBST(XML2_CXXFLAGS)
+
+      CFLAGS=${XML2_CFLAGS}
+      AC_CHECK_HEADERS([libxml/parser.h libxml/xmlmemory.h], [], [$XML2_INSTALLED="no"])
    fi
-   XML2_LDFLAGS="-L${XML2_LIBSDIR}"
+   AX_FLAGS_RESTORE()
 
-   if test -d ${XML2_LIBSDIR}/shared ; then 
-      XML2_SHAREDLIBSDIR="${XML2_LIBSDIR}/shared"
-   else
-      XML2_SHAREDLIBSDIR=${XML2_LIBSDIR}
+   AM_CONDITIONAL(HAVE_XML2, test "${XML2_INSTALLED}" = "yes")
+   if test "$XML2_INSTALLED" = "yes" ; then
+      AC_DEFINE([HAVE_XML2], [1], [Defined if libxml2 is available])
    fi
+])
 
-   AC_SUBST(XML2_HOME)
-   AC_SUBST(XML2_CFLAGS)
-   AC_SUBST(XML2_CPPFLAGS)
-   AC_SUBST(XML2_CXXFLAGS)
-   AC_SUBST(XML2_INCLUDES)
-   AC_SUBST(XML2_LIBSDIR)
-   AC_SUBST(XML2_SHAREDLIBSDIR)
-   AC_SUBST(XML2_LIBS)
-   AC_SUBST(XML2_LDFLAGS)
+#
+# TEST_BFD_SECTION_FUNCTION
+# -------------------------
+# Receives "bfd_function" and defines "HAVE_BFD_FUNCTION"
+#
+AC_DEFUN([TEST_BFD_SECTION_FUNCTION],
+[
+	fn=$1
+
+	AC_MSG_CHECKING([whether $1 is defined in bfd.h])
+
+	#
+	# Section routines in versions prior to 2.34 need 2 parameters while newer
+	# ones just require one. Names also changed from bfd_get_* to bfd_*
+	#
+	bfd_fn_works="no"
+	if test "$fn" = "bfd_get_section_vma" -o "$fn" = "bfd_get_section_flags" ; then
+		AC_LINK_IFELSE(
+			[AC_LANG_PROGRAM([[ #include <bfd.h> ]],
+			[[
+				asection *section;
+				bfd *abfd;
+
+				int result = $1(abfd, section);
+			]]
+			)],
+			[ bfd_fn_works="yes" ]
+		)
+	else 
+		AC_LINK_IFELSE(
+			[AC_LANG_PROGRAM([[ #include <bfd.h> ]],
+			[[
+				asection *section;
+
+				int result = $1(section);
+			]]
+			)],
+			[ bfd_fn_works="yes" ]
+		)
+	fi
+	if [ test "$bfd_fn_works" = "yes" ]; then
+		AC_DEFINE(m4_join(_, [HAVE], m4_toupper($1)), [1], [Defined to 1 if bfd.h defines $1])
+		AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
 ])
 
 #
 # AX_PROG_BINUTILS
 # ----------------
+#
 AC_DEFUN([AX_PROG_BINUTILS],
 [
    BFD_INSTALLED="no"
@@ -472,7 +752,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
    fi
 
    UNAME_M=`uname -m`
-   IFS='-' read -a TARGET_CPU <<< ${target_cpu}
+   TARGET_CPU=${target_cpu%%-*}
 
    if test "${binutils_paths}" != "no" ; then
       AC_MSG_CHECKING([for binutils])
@@ -647,12 +927,11 @@ AC_DEFUN([AX_PROG_BINUTILS],
          AC_SUBST(BFD_LIBS)
          AC_SUBST(BFD_LIBSDIR)
          if test -d ${BFD_LIBSDIR}/shared ; then
-            BFD_SHAREDLIBSDIR="${BFD_LIBSDIR}/shared"
-         else
-            BFD_SHAREDLIBSDIR=${BFD_LIBSDIR}
+            BFD_LDFLAGS="${BFD_LDFLAGS} -L${BFD_LIBSDIR}/shared"
          fi
-         AC_SUBST(BFD_SHAREDLIBSDIR)
          AC_SUBST(BFD_LDFLAGS)
+         BFD_RPATH="-R${BFD_LIBSDIR}"
+         AC_SUBST(BFD_RPATH)
 
          LIBERTY_HOME="${binutils_home_dir}"
          LIBERTY_INCLUDES="${LIBERTY_HOME}/include"
@@ -673,64 +952,37 @@ AC_DEFUN([AX_PROG_BINUTILS],
          AC_SUBST(LIBERTY_LIBS)
          AC_SUBST(LIBERTY_LIBSDIR)
          if test -d ${LIBERTY_LIBSDIR}/shared ; then
-            LIBERTY_SHAREDLIBSDIR="${LIBERTY_LIBSDIR}/shared"
-         else
-            LIBERTY_SHAREDLIBSDIR=${LIBERTY_LIBSDIR}
+            LIBERTY_LDFLAGS="${LIBERTY_LDFLAGS} -L${LIBERTY_LIBSDIR}/shared"
          fi
-         AC_SUBST(LIBERTY_SHAREDLIBSDIR)
          AC_SUBST(LIBERTY_LDFLAGS)
+         LIBERTY_RPATH="-R${LIBERTY_LIBSDIR}"
+         AC_SUBST(LIBERTY_RPATH)
 
          BFD_INSTALLED="yes"
          LIBERTY_INSTALLED="yes"
 
          AC_DEFINE([HAVE_BFD], 1, [Define to 1 if BFD is installed in the system])
 
-         AC_MSG_CHECKING([whether bfd_get_section_size is defined in bfd.h])
-         AC_TRY_LINK(
-           [ #include <bfd.h> ],
-           [ 
-               asection *section;
-               int result = bfd_get_section_size(section); 
-           ],
-           [ bfd_get_section_size_found="yes"]
-         )
-         if test "${bfd_get_section_size_found}" = "yes" ; then
-            AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE, [1], [Defined to 1 if bfd.h defines bfd_get_section_size])
-            AC_MSG_RESULT([yes])
-         else
-            AC_MSG_RESULT([no])
-         fi
+	 # Test needed section functions
+	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_vma], [bfd_section_vma])
+	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_size], [bfd_section_size])
+	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_flags], [bfd_section_flags])
 
-         AC_MSG_CHECKING([whether bfd_get_section_size_before_reloc is defined in bfd.h])
-         AC_TRY_LINK(
-           [ #include <bfd.h> ],
-           [ 
-               asection *section;
-               int result = bfd_get_section_size_before_reloc(section); 
-           ],
-           [ bfd_get_section_size_before_reloc_found="yes"]
-         )
-         if test "${bfd_get_section_size_before_reloc_found}" = "yes" ; then
-            AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC, [1], [Defined to 1 if bfd.h defines bfd_get_section_size_before_reloc])
-            AC_MSG_RESULT([yes])
-         else
-            AC_MSG_RESULT([no])
-         fi
+	 TEST_BFD_SECTION_FUNCTION([bfd_get_section_size_before_reloc])
 
          AC_MSG_CHECKING([whether bfd_demangle is defined in bfd.h])
-         AC_TRY_LINK(
-           [ #include <bfd.h> ],
+	 AC_LINK_IFELSE(
+	   [AC_LANG_PROGRAM([[ #include <bfd.h> ]],
+             [[
+	         char *res = bfd_demangle ((void*)0, "", 0);
+	     ]])],
            [
-               char *res = bfd_demangle ((void*)0, "", 0);
-           ],
-           [ bfd_demangle_found="yes"]
-         )
-         if test "${bfd_demangle_found}" = "yes" ; then
-            AC_DEFINE(HAVE_BFD_DEMANGLE, [1], [Defined to 1 if bfd.h contains bfd_demangle])
-            AC_MSG_RESULT([yes])
-         else
-            AC_MSG_RESULT([no])
-         fi
+	     AC_DEFINE(HAVE_BFD_DEMANGLE, [1], [Defined to 1 if bfd.h contains bfd_demangle])
+             AC_MSG_RESULT([yes])
+	   ],[
+	     AC_MSG_RESULT([no])
+           ]
+	 )
 
       else
          AC_MSG_RESULT([no, see config.log for further details])
@@ -852,7 +1104,7 @@ AC_DEFUN([AX_PROG_MX],
    )
 
    dnl Search for MX installation
-   AX_FIND_INSTALLATION([MX], [$mx_paths], [mx])
+   AX_FIND_INSTALLATION([MX], [$mx_paths], [], [], [], [], [], [], [], [])
 
    if test "$MX_INSTALLED" = "yes" ; then
       AC_CHECK_HEADERS([myriexpress.h], [], [MX_INSTALLED="no"])
@@ -1004,7 +1256,7 @@ AC_DEFUN([AX_PROG_PAPI],
 
    dnl Search for PAPI installation, except for SPARC64 which is autoembedded
    if test "${IS_SPARC64_MACHINE}" != "yes" ; then
-      AX_FIND_INSTALLATION([PAPI], [$papi_paths], [papi])
+      AX_FIND_INSTALLATION([PAPI], [$papi_paths], [], [], [], [], [], [], [], [])
       PAPI_ENABLED="${PAPI_INSTALLED}"
    else
       papi_paths="/usr"
@@ -1055,7 +1307,7 @@ AC_DEFUN([AX_PROG_PAPI],
 
       AC_CHECK_LIB([papi], [PAPI_start],
          [ 
-            PAPI_LIBS="${LIBS}"
+            PAPI_LIBS="${LIBS} -lpfm"
             AC_SUBST(PAPI_LIBS)
          ],
          [PAPI_ENABLED="no"]
@@ -1310,7 +1562,7 @@ AC_DEFUN([AX_CHECK_UNWIND],
 
    if test "${unwind_paths}" != "no" ; then
 
-      AX_FIND_INSTALLATION([UNWIND], [$unwind_paths], [unwind])
+      AX_FIND_INSTALLATION([UNWIND], [$unwind_paths], [], [], [], [], [], [], [], [])
 
       if test "${UNWIND_INSTALLED}" = "yes" ; then 
 
@@ -1368,75 +1620,22 @@ AC_DEFUN([AX_CHECK_LIBZ],
       [libz_paths="/usr/local /usr"] dnl List of possible default paths
    )
 
-   for zhome_dir in [${libz_paths} "not found"]; do
-      if test -f "${zhome_dir}/${BITS}/include/zlib.h" ; then 
-         if test -f "${zhome_dir}/${BITS}/lib/libz.a" -o \
-                 -f "${zhome_dir}/${BITS}/lib/libz.so" -o \
-                 -f "${zhome_dir}/${BITS}/lib/libz.dylib" ; then
-            LIBZ_HOME="${zhome_dir}/${BITS}"
-            LIBZ_LIBSDIR="${zhome_dir}/${BITS}/lib"
-            break
-         fi
-      elif test -f "${zhome_dir}/include/zlib.h" ; then
-         if test -f "${zhome_dir}/lib${BITS}/libz.a" -o \
-                 -f "${zhome_dir}/lib${BITS}/libz.so" -o \
-                 -f "${zhome_dir}/lib${BITS}/libz.dylib" ; then
-            LIBZ_HOME="${zhome_dir}"
-            LIBZ_LIBSDIR="${zhome_dir}/lib${BITS}"
-            break
-         fi
-         if test -f "${zhome_dir}/lib/${multiarch_triplet}/libz.a" -o \
-                 -f "${zhome_dir}/lib/${multiarch_triplet}/libz.so" -o \
-                 -f "${zhome_dir}/lib/${multiarch_triplet}/libz.dylib" ; then
-            LIBZ_HOME="${zhome_dir}"
-            LIBZ_LIBSDIR="${zhome_dir}/lib/${multiarch_triplet}"
-            break
-         fi
-         if test -f "${zhome_dir}/lib/libz.a" -o \
-                 -f "${zhome_dir}/lib/libz.so" -o \
-                 -f "${zhome_dir}/lib/libz.dylib" ; then
-            LIBZ_HOME="${zhome_dir}"
-            LIBZ_LIBSDIR="${zhome_dir}/lib"
-            break
-         fi
+   AX_FIND_INSTALLATION([LIBZ], [${libz_paths}], [], [], [zlib.h], [], [z], [], [], [])
+
+   if test "${LIBZ_INSTALLED}" = "yes"; then
+      CFLAGS="${CFLAGS} ${LIBZ_CFLAGS}"
+      LIBS="${LIBS} ${LIBZ_LIBS}"
+      LDFLAGS="${LDFLAGS} ${LIBZ_LDFLAGS}"
+
+      AC_CHECK_LIB(z, inflateEnd, [zlib_cv_libz=yes], [zlib_cv_libz=no])
+
+      if test "${zlib_cv_libz}" = "yes"; then
+         AC_DEFINE([HAVE_ZLIB], [1], [Zlib available])
+         ZLIB_INSTALLED="yes"
+      else
+         ZLIB_INSTALLED="no"
       fi
-    done
-
-   LIBZ_INCLUDES="${LIBZ_HOME}/include"
-   LIBZ_CFLAGS="-I${LIBZ_INCLUDES}"
-   LIBZ_CPPFLAGS=${LIBZ_CFLAGS}
-   LIBZ_CXXFLAGS=${LIBZ_CFLAGS}
-   LIBZ_LIBS="-lz"
-   LIBZ_LDFLAGS="-L${LIBZ_LIBSDIR}"
-   if test -d ${LIBZ_LIBSDIR}/shared ; then 
-      LIBZ_SHAREDLIBSDIR="${LIBZ_LIBSDIR}/shared"
-   else
-      LIBZ_SHAREDLIBSDIR=${LIBZ_LIBSDIR}
-   fi
-
-   AC_SUBST(LIBZ_HOME)
-   AC_SUBST(LIBZ_CFLAGS)
-   AC_SUBST(LIBZ_CPPFLAGS)
-   AC_SUBST(LIBZ_CXXFLAGS)
-   AC_SUBST(LIBZ_INCLUDES)
-   AC_SUBST(LIBZ_LIBSDIR)
-   AC_SUBST(LIBZ_SHAREDLIBSDIR)
-   AC_SUBST(LIBZ_LIBS)
-   AC_SUBST(LIBZ_LDFLAGS)
-
-   CFLAGS="${CFLAGS} ${LIBZ_CFLAGS}"
-   LIBS="${LIBS} ${LIBZ_LIBS}"
-   LDFLAGS="${LDFLAGS} ${LIBZ_LDFLAGS}"
-
-   AC_CHECK_LIB(z, inflateEnd, [zlib_cv_libz=yes], [zlib_cv_libz=no])
-   AC_CHECK_HEADER(zlib.h, [zlib_cv_zlib_h=yes], [zlib_cv_zlib_h=no])
-
-   if test "${zlib_cv_libz}" = "yes" -a "${zlib_cv_zlib_h}" = "yes" ; then
-      AC_DEFINE([HAVE_ZLIB], [1], [Zlib available])
-			ZLIB_INSTALLED="yes"
-   else
-      ZLIB_INSTALLED="no"
-   fi
+   fi 
 
    AM_CONDITIONAL(HAVE_ZLIB, test "${ZLIB_INSTALLED}" = "yes")
 
@@ -1459,10 +1658,10 @@ AC_DEFUN([AX_PROG_LIBEXECINFO],
    )
 
    if test "${execinfo_paths}" != "no" ; then
-      AX_FIND_INSTALLATION([execinfo], [${execinfo_paths}], [execinfo])
+      AX_FIND_INSTALLATION([execinfo], [${execinfo_paths}], [], [], [], [], [], [], [], [])
       if test "${EXECINFO_INSTALLED}" = "yes" ; then
-        if test -f ${EXECINFO_HOME}/lib/execinfo.a -o \
-                -f ${EXECINFO_HOME}/lib/execinfo.so ; then
+        if test -f "${EXECINFO_HOME}/lib/execinfo.a" -o \
+                -f "${EXECINFO_HOME}/lib/execinfo.so" ; then
            if test -f ${EXECINFO_HOME}/include/execinfo.h ; then
               CFLAGS="-I ${XECINFO_HOME}/include"
               LIBS="-L ${EXECINFO_HOME}/lib -lexecinfo"
@@ -1509,27 +1708,27 @@ AC_DEFUN([AX_PROG_LIBDWARF],
    fi
 
    if test "${dwarf_paths}" != "no" ; then
-      AX_FIND_INSTALLATION([DWARF], [${dwarf_paths}], [dwarf])
+      AX_FIND_INSTALLATION([DWARF], [${dwarf_paths}], [], [], [], [], [], [], [], [])
       if test "${DWARF_INSTALLED}" = "yes" ; then
-        if test -f ${DWARF_LIBSDIR}/libdwarf.a -o \
-                -f ${DWARF_LIBSDIR}/libdwarf.so ; then
-           if test -f ${DWARF_HOME}/include/libdwarf.h -a \
-                   -f ${DWARF_HOME}/include/dwarf.h ; then
+        if test -f "${DWARF_LIBSDIR}/libdwarf.a" -o \
+                -f "${DWARF_LIBSDIR}/libdwarf.so" ; then
+           if test -f "${DWARF_HOME}/include/libdwarf.h" -a \
+                   -f "${DWARF_HOME}/include/dwarf.h" ; then
               libdwarf_found="yes"
-           elif test -f ${DWARF_HOME}/include/libdwarf/libdwarf.h -a \
-                     -f ${DWARF_HOME}/include/libdwarf/dwarf.h ; then
+           elif test -f "${DWARF_HOME}/include/libdwarf/libdwarf.h" -a \
+                     -f "${DWARF_HOME}/include/libdwarf/dwarf.h" ; then
               libdwarf_found="yes"
            else
               AC_MSG_ERROR([Cannot find DWARF header files in ${dwarf_paths}/include])
            fi
-        elif test -f ${DWARF_LIBSDIR_MULTIARCH}/libdwarf.a -o \
-                -f ${DWARF_LIBSDIR_MULTIARCH}/libdwarf.so ; then
-           if test -f ${DWARF_HOME}/include/libdwarf.h -a \
-                   -f ${DWARF_HOME}/include/dwarf.h ; then
+        elif test -f "${DWARF_LIBSDIR_MULTIARCH}/libdwarf.a" -o \
+                  -f "${DWARF_LIBSDIR_MULTIARCH}/libdwarf.so" ; then
+           if test -f "${DWARF_HOME}/include/libdwarf.h" -a \
+                   -f "${DWARF_HOME}/include/dwarf.h" ; then
               libdwarf_found="yes"
               DWARF_LIBSDIR="${DWARF_LIBSDIR_MULTIARCH}"
-           elif test -f ${DWARF_HOME}/include/libdwarf/libdwarf.h -a \
-                     -f ${DWARF_HOME}/include/libdwarf/dwarf.h ; then
+           elif test -f "${DWARF_HOME}/include/libdwarf/libdwarf.h" -a \
+                     -f "${DWARF_HOME}/include/libdwarf/dwarf.h" ; then
               libdwarf_found="yes"
               DWARF_LIBSDIR="${DWARF_LIBSDIR_MULTIARCH}"
            else
@@ -1566,20 +1765,20 @@ AC_DEFUN([AX_PROG_LIBELF],
    fi
 
    if test "${elf_paths}" != "no" ; then
-      AX_FIND_INSTALLATION([ELF], [${elf_paths}], [elf])
+      AX_FIND_INSTALLATION([ELF], [${elf_paths}], [], [], [], [], [], [], [], [])
       if test "${ELF_INSTALLED}" = "yes" ; then
-        if test -f ${ELF_LIBSDIR}/libelf.a -o \
-                -f ${ELF_LIBSDIR}/libelf.so ; then
-           if test -f ${ELF_INCLUDES}/libelf/libelf.h -o \
-                   -f ${ELF_INCLUDES}/libelf.h  ; then
+        if test -f "${ELF_LIBSDIR}/libelf.a" -o \
+                -f "${ELF_LIBSDIR}/libelf.so" ; then
+           if test -f "${ELF_INCLUDES}/libelf/libelf.h" -o \
+                   -f "${ELF_INCLUDES}/libelf.h"  ; then
               libelf_found="yes"
            else
               AC_MSG_ERROR([Cannot find ELF header files neither in ${ELF_INCLUDES} nor in ${ELF_INCLUDES}/libelf])
            fi
-        elif test -f ${ELF_LIBSDIR_MULTIARCH}/libelf.a -o \
-                  -f ${ELF_LIBSDIR_MULTIARCH}/libelf.so ; then
-           if test -f ${ELF_INCLUDES}/libelf/libelf.h -o \
-                   -f ${ELF_INCLUDES}/libelf.h  ; then
+        elif test -f "${ELF_LIBSDIR_MULTIARCH}/libelf.a" -o \
+                  -f "${ELF_LIBSDIR_MULTIARCH}/libelf.so" ; then
+           if test -f "${ELF_INCLUDES}/libelf/libelf.h" -o \
+                   -f "${ELF_INCLUDES}/libelf.h"  ; then
               libelf_found="yes"
               ELF_LIBSDIR="${ELF_LIBSDIR_MULTIARCH}"
            else
@@ -1630,7 +1829,7 @@ AC_DEFUN([AX_PROG_DYNINST],
    fi
 
    dnl Search for Dyninst installation
-   AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
+   AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [], [], [], [], [], [], [], [])
 
    if test "${dyninst_paths}" != "no" ; then
       if test -d "${DYNINST_LIBSDIR}" ; then
@@ -1686,10 +1885,10 @@ AC_DEFUN([AX_PROG_DYNINST],
    fi
 
    dnl Check for patchAPI within DynInst (is Dyninst > 7.0.1?)
-   AM_CONDITIONAL(DYNINST_HAVE_PATCHAPI, test -f ${DYNINST_LIBSDIR}/libpatchAPI.so)
+   AM_CONDITIONAL(DYNINST_HAVE_PATCHAPI, test -f "${DYNINST_LIBSDIR}/libpatchAPI.so")
 
    dnl Check for stackwalk within DynInst (is Dyninst > 7.0.1?)
-   AM_CONDITIONAL(DYNINST_HAVE_STACKWALK, test -f ${DYNINST_LIBSDIR}/libstackwalk.so)
+   AM_CONDITIONAL(DYNINST_HAVE_STACKWALK, test -f "${DYNINST_LIBSDIR}/libstackwalk.so")
 
    dnl Did the checks pass?
    AM_CONDITIONAL(HAVE_DYNINST, test "${DYNINST_INSTALLED}" = "yes")
@@ -1722,7 +1921,7 @@ AC_DEFUN([AX_PROG_SYNAPSE],
   )
 
   dnl Search for Synapse installation
-  AX_FIND_INSTALLATION([SYNAPSE], [$synapse_paths], [synapse])
+  AX_FIND_INSTALLATION([SYNAPSE], [$synapse_paths], [], [], [], [], [], [], [], [])
 
   if test "$SYNAPSE_INSTALLED" = "yes" ; then
     dnl Check for headers
@@ -1738,7 +1937,8 @@ AC_DEFUN([AX_PROG_SYNAPSE],
     dnl Check for libraries
     AC_MSG_CHECKING([for libsynapse_frontend])
 
-    if test -f ${SYNAPSE_LIBSDIR}/libsynapse_frontend.a ; then
+    if test -f "${SYNAPSE_LIBSDIR}/libsynapse_frontend.a" -o \
+       -f "${SYNAPSE_LIBSDIR}/libsynapse_frontend.so" ; then
       SYNAPSE_FE_LIBS="-lsynapse_frontend"
       AC_SUBST(SYNAPSE_FE_LIBS)
       AC_MSG_RESULT([yes])
@@ -1749,7 +1949,8 @@ AC_DEFUN([AX_PROG_SYNAPSE],
 
     AC_MSG_CHECKING([for libsynapse_backend])
     
-    if test -f ${SYNAPSE_LIBSDIR}/libsynapse_backend.a  ; then
+    if test -f "${SYNAPSE_LIBSDIR}/libsynapse_backend.a" -o \
+        -f "${SYNAPSE_LIBSDIR}/libsynapse_backend.so"; then
       SYNAPSE_BE_LIBS="-lsynapse_backend"
       AC_SUBST(SYNAPSE_BE_LIBS)
       AC_MSG_RESULT([yes])
@@ -1782,7 +1983,7 @@ AC_DEFUN([AX_PROG_CLUSTERING],
     [clustering_paths="not_set"] dnl List of possible default paths
   )
   dnl Search for Clustering installation
-  AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [clustering])
+  AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [], [], [], [], [], [], [], [])
 
   dnl Check for TreeDBSCAN online libraries
   if test "${CLUSTERING_INSTALLED}" = "yes" ; then
@@ -1829,7 +2030,7 @@ AC_DEFUN([AX_PROG_SPECTRAL],
   )
 
   dnl Search for Spectral Analysis installation
-  AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths], [spectral])
+  AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths], [], [], [], [], [], [], [], [])
   
   spectral_works="no"
   if test "x${SPECTRAL_INSTALLED}" = "xyes" ; then
@@ -1856,7 +2057,7 @@ AC_DEFUN([AX_PROG_SPECTRAL],
         [fft_paths="not_set"] dnl List of possible default paths
       )
       dnl Search for FFT installation
-      AX_FIND_INSTALLATION([FFT], [$fft_paths], [fft])
+      AX_FIND_INSTALLATION([FFT], [$fft_paths], [], [], [], [], [], [], [], [])
 
       LIBS="${LIBS} ${FFT_LDFLAGS} -lfftw3 -lm"
       AC_TRY_LINK(
@@ -1911,9 +2112,9 @@ AC_DEFUN([AX_PROG_ONLINE],
   fi
 
   if test "$ONLINE_enabled" = "yes" ; then
-   if test "${XML_enabled}" != "yes" ; then
+   if test "${XML2_INSTALLED}" != "yes" ; then
       AC_MSG_WARN([You enabled the on-line analysis mode, but a required dependency is missing!])
-      AC_MSG_ERROR([Please enable support for XML with --enable-xml])
+      AC_MSG_ERROR([Please enable support for XML with --with-xml])
    fi
   fi
 
@@ -2133,7 +2334,7 @@ AC_DEFUN([AX_PROG_MEMKIND],
   )
 
   dnl Search for Spectral Analysis installation
-  AX_FIND_INSTALLATION([MEMKIND], [$memkind_paths], [memkind])
+  AX_FIND_INSTALLATION([MEMKIND], [$memkind_paths], [], [], [], [], [], [], [], [])
 
   if test "x${MEMKIND_INSTALLED}" = "xyes" ; then
     AX_FLAGS_SAVE()

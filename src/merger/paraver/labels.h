@@ -26,6 +26,7 @@
 
 #include "mpi2out.h"
 #include "events.h"
+#include "xalloc.h"
 #include <extrae_vector.h>
 
 typedef enum {
@@ -48,25 +49,22 @@ typedef struct fcounter_t {
 
 }fcounter_t;
 
-#define INSERTAR_CONTADOR(fcounter,EvCnt) \
-{\
- struct fcounter_t* aux_fc;\
- \
- aux_fc=(struct fcounter_t*) malloc (sizeof(fcounter_t)); \
- if(aux_fc!=NULL) {		\
-  aux_fc->counter=EvCnt;\
-  aux_fc->prev=fcounter;	\
-  if(fcounter!=NULL)  \
-   fcounter->next=aux_fc;	\
-  fcounter=aux_fc; \
- }\
+#define INSERTAR_CONTADOR(fcounter,EvCnt)                  \
+{                                                          \
+ struct fcounter_t* aux_fc;                                \
+ aux_fc=(struct fcounter_t*) xmalloc (sizeof(fcounter_t)); \
+  aux_fc->counter=EvCnt;                                   \
+  aux_fc->prev=fcounter;                                   \
+  if(fcounter!=NULL)                                       \
+   fcounter->next=aux_fc;                                  \
+  fcounter=aux_fc;                                         \
 }
 
 /* Fi codi David Vicente */
 
 #define LET_SPACES(fd) fprintf((fd),"\n\n")
 
-#define TYPE_LBL   150
+#define TYPE_LBL   256
 typedef struct color_t
 {
   int value;
@@ -76,7 +74,7 @@ typedef struct color_t
 color_t;
 
 
-#define EVENT_LBL   150
+#define EVENT_LBL   256
 typedef struct evttype_t
 {
   int type;
@@ -85,7 +83,7 @@ typedef struct evttype_t
 evttype_t;
 
 
-#define VALUE_LBL   150
+#define VALUE_LBL   256
 typedef struct value_t
 {
   int value;
@@ -279,10 +277,15 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define STATE_31_LBL         "Freeing memory"
 #define STATE_31_COLOR       { 100, 216, 32 }
 
+#define STATE_32             32
+#define STATE_32_LBL         "Configuring accelerator"
+#define STATE_32_COLOR       { 118, 185, 0 }
+
+
 #define STATES_LBL           "STATES"
 #define STATES_COLOR_LBL     "STATES_COLOR"
 
-#define STATES_NUMBER        32
+#define STATES_NUMBER        33
 extern struct color_t states_inf[STATES_NUMBER];
 
 /******************************************************************************
@@ -461,9 +464,9 @@ extern unsigned int HaveSpectralEvents;
 void Address2Info_Write_Labels (FILE *);
 int Labels_GeneratePCFfile (char *name, long long options);
 void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
-	unsigned task, char *name, int report);
+	unsigned task, char *name, int report, UINT64 *io_TaskStartTime, UINT64 *io_TaskSyncTime);
 void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
-	struct input_t * IFiles);
+	struct input_t * IFiles, UINT64 **StartingTimes, UINT64 **SynchronizationTimes);
 int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description);
 void Share_File_Names(int taskid);
 int Unify_File_Id(unsigned ptask, unsigned task, int file_id);

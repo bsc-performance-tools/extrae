@@ -34,4 +34,6 @@
     Extrae_trace_callers (evttime, offset, CALLER_IO); \
 }
 
+void xtr_IO_enable_internals();
+
 #endif /* __IO_WRAPPER_H__ */

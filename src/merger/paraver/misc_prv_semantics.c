@@ -60,6 +60,7 @@
 
 #include "events.h"
 #include "paraver_state.h"
+#include "xalloc.h"
 
 int MPI_Caller_Multiple_Levels_Traced = FALSE;
 int *MPI_Caller_Labels_Used = NULL;
@@ -128,7 +129,8 @@ static int Flush_Event (event_t * current_event,
                         unsigned int thread,
                         FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -151,7 +153,7 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 	FileSet_t *fset)
 {
 	unsigned int EvType;
-	unsigned long EvValue, EvParam;
+	UINT64 EvValue, EvParam;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (event);
@@ -212,6 +214,12 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 					case IOCTL_EV:
 						io_type = IOCTL_VAL_EV;
 						break;
+					case CLOSE_EV:
+						io_type = CLOSE_VAL_EV;
+						break;
+					case FCLOSE_EV:
+						io_type = FCLOSE_VAL_EV;
+						break;
 					default:
 						io_type = 0;
 						break;
@@ -263,7 +271,8 @@ static int Tracing_Event (event_t * current_event,
                           unsigned int thread,
                           FileSet_t *fset)
 {
-	unsigned int EvType, EvValue, i;
+	unsigned int EvType, i;
+	UINT64 EvValue;
 	task_t * task_info;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -299,7 +308,8 @@ static int Appl_Event (event_t * current_event,
                        unsigned int thread,
                        FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -329,7 +339,8 @@ static int CPUEventInterval_Event (event_t * current_event,
                        unsigned int thread,
                        FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -356,7 +367,7 @@ static int User_Event (event_t * current_event,
                        FileSet_t *fset)
 {
 	int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the user event type.  */
@@ -409,6 +420,31 @@ static int User_Event (event_t * current_event,
 }
 
 /******************************************************************************
+ ***  L3_store_miss_Event
+ ******************************************************************************/
+
+static int L3_store_miss_Event (event_t * current_event,
+                                unsigned long long current_time,
+                                unsigned int cpu,
+                                unsigned int ptask,
+                                unsigned int task,
+                                unsigned int thread,
+                                FileSet_t *fset)
+{
+	int EvType;
+	unsigned long long EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+/******************************************************************************
  ***  MPI_Caller_Event
  ******************************************************************************/
 
@@ -433,7 +469,7 @@ static int MPI_Caller_Event (event_t * current_event,
 		MPI_Caller_Multiple_Levels_Traced = TRUE;	
 		if (MPI_Caller_Labels_Used == NULL) 
 		{
-			MPI_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+			MPI_Caller_Labels_Used = (int *)xmalloc(sizeof(int)*MAX_CALLERS);
 			for (i = 0; i < MAX_CALLERS; i++) 
 			{
 				MPI_Caller_Labels_Used[i] = FALSE;
@@ -481,7 +517,7 @@ static int GetRusage_Event (
 {
 	int i;
 	unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
@@ -518,7 +554,7 @@ static int Memusage_Event (
 {
     int i;
     unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
     UNREFERENCED_PARAMETER(fset);
 
     EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
@@ -554,7 +590,7 @@ static int MPI_Stats_Event (
 {
 	int i;
 	unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
@@ -660,7 +696,7 @@ static int Sampling_Address_Event (event_t * current,
 
 	if (Sample_Caller_Labels_Used == NULL) 
 	{
-		Sample_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+		Sample_Caller_Labels_Used = (int *)xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++) 
 			Sample_Caller_Labels_Used[i] = FALSE;
 	}	     
@@ -769,7 +805,7 @@ static int Sampling_Caller_Event (event_t * current,
 
 	if (Sample_Caller_Labels_Used == NULL) 
 	{
-		Sample_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+		Sample_Caller_Labels_Used = (int *)xmalloc(sizeof(int)*MAX_CALLERS);
 		for (i = 0; i < MAX_CALLERS; i++) 
 			Sample_Caller_Labels_Used[i] = FALSE;
 	}	     
@@ -841,7 +877,8 @@ static int Tracing_Mode_Event (event_t * current_event,
     unsigned long long current_time, unsigned int cpu, unsigned int ptask,
     unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -916,79 +953,20 @@ static int HWC_Change_Ev (
    FileSet_t *fset)
 {
 	int i;
-	int hwctype[MAX_HWC+1];
-	int prev_hwctype[MAX_HWC];
+	unsigned int hwctype[MAX_HWC+1];
 	unsigned long long hwcvalue[MAX_HWC+1];
-	thread_t * Sthread;
-	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
-	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
 
 	UNREFERENCED_PARAMETER(fset);
 
-	Sthread = GET_THREAD_INFO(ptask, task, thread);
-	Sthread->last_hw_group_change = current_time;
-	Sthread->HWCChange_count++;
 	int newSet = Get_EvValue(current_event);
 
-	/* HSG changing the HWC set do not should change the application state */
-	/* trace_paraver_state (cpu, ptask, task, thread, current_time); */
-
-	/* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
-	for (i=0; i<MAX_HWC; i++)
-	{
-#if defined(PMAPI_COUNTERS)
-		prev_hwctype[i] = HWC_COUNTER_TYPE(i, oldsIds[i]);
-#else
-		prev_hwctype[i] = HWC_COUNTER_TYPE(oldIds[i]);
-#endif
-	}
-
 	ResetCounters (ptask, task, thread);
-	HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
 
-	/* This loop starts at 0 and goes to MAX_HWC+1 because HardwareCounters_Change
-	   reports in hwctype[0] the counter group identifier */
-	for (i = 0; i < MAX_HWC+1; i++)
+	int num_new_hwc = HardwareCounters_Change (ptask, task, thread, current_time, newSet, hwctype, hwcvalue);
+
+	for (i = 0; i < num_new_hwc; i++)
 	{
-		if (NO_COUNTER != hwctype[i] && Sthread->HWCChange_count > 1)
-		{
-			int found = FALSE, k = 0;
-
-			/* Check the current counter (hwctype[i]) did not appear on the previous set. We don't want
-			 * it to appear twice in the same timestamp. This may happen because the HWC_CHANGE_EV is traced
-			 * right after the last valid emission of counters with the previous set, at the same timestamp.
-			 */
-
-			while (!found && k < MAX_HWC)
-			{
-				if (hwctype[i] == prev_hwctype[k])
-					found = TRUE;
-				k ++;
-			}
-
-			if (!found)
-			{
-				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-			}
-		}
-		/*
-		 * The first time we read the counters we cannot rely on their value, so
-		 * we set them to 0.
-		 */
-		else if (NO_COUNTER != hwctype[i] && Sthread->HWCChange_count == 1)
-		{
-			if (i > 0)
-			{
-				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], 0);
-			}
-			else
-			{
-				/* Index [0] contains the active set, not a counter. We always have to
-				 * emit its actual value.
-				 */
-				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[0], hwcvalue[0]);
-			}
-		}
+		trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
 	}
 	return 0;
 }
@@ -1086,7 +1064,8 @@ static int Online_Event (event_t * current_event,
     unsigned long long current_time, unsigned int cpu, unsigned int ptask,
     unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-  unsigned int EvType, EvValue;
+  unsigned int EvType;
+  UINT64 EvValue;
   UNREFERENCED_PARAMETER(fset);
 
   EvType  = Get_EvValue (current_event);
@@ -1375,13 +1354,8 @@ static int Resume_Virtual_Thread_Event (event_t * current_event,
 		if (task_info->num_active_task_threads < new_active_task_thread)
 		{
 			/* Allocate memory for the new coming threads */
-			task_info->active_task_threads = (active_task_thread_t*) realloc (task_info->active_task_threads,
+			task_info->active_task_threads = (active_task_thread_t*) xrealloc (task_info->active_task_threads,
 			  new_active_task_thread*sizeof(active_task_thread_t));
-			if (task_info->active_task_threads == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate information for active task threads\n");
-				exit (0);
-			}
 
 			/* Init their structures */
 			for (u = task_info->num_active_task_threads; u < new_active_task_thread; u++)
@@ -1517,7 +1491,8 @@ static int ForkWaitSystem_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	unsigned int state = 0;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -1581,7 +1556,7 @@ static int GetCPU_Event (event_t * current_event,
 	UNREFERENCED_PARAMETER(fset);
 
 	trace_paraver_event (cpu, ptask, task, thread, current_time,
-	  Get_EvEvent (current_event), Get_EvValue (current_event));
+	  Get_EvEvent (current_event), 1+Get_EvValue(current_event));
 
 	return 0;
 }
@@ -1601,7 +1576,7 @@ static int DynamicMemory_Event (event_t * event,
 
 	unsigned EvType = Get_EvEvent (event);
 	unsigned long long EvParam = Get_EvParam (event);
-	unsigned long long EvValue = Get_EvValue (event);
+	UINT64 EvValue = Get_EvValue (event);
 	int isBegin = EvValue == EVT_BEGIN;
 
 	if ((EvType == MALLOC_EV)                 ||
@@ -1609,7 +1584,10 @@ static int DynamicMemory_Event (event_t * event,
 	    (EvType == MEMKIND_POSIX_MEMALIGN_EV) ||
 	    (EvType == POSIX_MEMALIGN_EV)         ||
 	    (EvType == KMPC_MALLOC_EV)            ||
-	    (EvType == KMPC_ALIGNED_MALLOC_EV))
+	    (EvType == KMPC_ALIGNED_MALLOC_EV)    ||
+	    (EvType == CALLOC_EV)                 ||
+	    (EvType == MEMKIND_CALLOC_EV)         ||
+	    (EvType == KMPC_CALLOC_EV))
 	{
 		/* Malloc: in size, out pointer */
 		if (isBegin)
@@ -1667,47 +1645,43 @@ static int DynamicMemory_Event (event_t * event,
 	         (EvType == MEMKIND_REALLOC_EV) ||
 	         (EvType == KMPC_REALLOC_EV))
 	{
-		/* Realloc: in size, in pointer (in EVT_BEGIN+1), out ptr*/
+		/* Realloc: in pointer (in EVT_BEGIN), in size (in EVT_BEGIN+1), out ptr (in EVT_END) */
 		if (EvValue == EVT_BEGIN)
 		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_IN_EV, EvParam);
 
-			thread_info->AddressSpace_size = EvParam;
+			AddressSpace_remove (task_info->AddressSpace, EvParam);
+
 		}
 		else if (EvValue == EVT_BEGIN+1)
 		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
 
-			AddressSpace_remove (task_info->AddressSpace, EvParam);
-		}
-		else
-		{
-			trace_paraver_event (cpu, ptask, task, thread, time,
-			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
-
-			AddressSpace_add (task_info->AddressSpace, EvParam,
-			  EvParam+thread_info->AddressSpace_size,
-			  thread_info->AddressSpace_calleraddresses,
-			  thread_info->AddressSpace_callertype);
-		}
-	
-	}
-	else if ((EvType == CALLOC_EV)         ||
-	         (EvType == MEMKIND_CALLOC_EV) ||
-	         (EvType == KMPC_CALLOC_EV))
-	{
-		/* Calloc: in size, out pointer */
-		if (isBegin)
-		{
-			trace_paraver_event (cpu, ptask, task, thread, time,
-			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
-
 			thread_info->AddressSpace_size = EvParam;
+			thread_info->AddressSpace_timeCreation = time;
 		}
 		else
 		{
+			/* Emit information regarding the calling site to identify
+			   where the structure was allocated */
+			unsigned u;
+			for (u = 0; u < MAX_CALLERS; u++)
+			{
+				if (thread_info->AddressSpace_calleraddresses[u] != 0)
+					trace_paraver_event (cpu, ptask, task, thread,
+					  thread_info->AddressSpace_timeCreation,
+					  SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+u,
+					  thread_info->AddressSpace_calleraddresses[u]);
+			}
+
+			/* Emit event that will be replaced by the ID of the 
+			   location of structure allocation */
+			trace_paraver_event (cpu, ptask, task, thread,
+			  thread_info->AddressSpace_timeCreation,
+			  SAMPLING_ADDRESS_ALLOCATED_OBJECT_ALLOC_EV, 0);
+
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
 
@@ -1716,6 +1690,7 @@ static int DynamicMemory_Event (event_t * event,
 			  thread_info->AddressSpace_calleraddresses,
 			  thread_info->AddressSpace_callertype);
 		}
+
 	}
 
 	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
@@ -1746,12 +1721,25 @@ static int DynamicMemory_Partition_Event (event_t * event,
         unsigned int task, unsigned int thread, FileSet_t *fset)
 {
         unsigned EvType = Get_EvEvent (event);
-        unsigned long long EvValue = Get_EvValue (event);
+        UINT64 EvValue = Get_EvValue (event);
 
 	trace_paraver_event (cpu, ptask, task, thread, time, MEMKIND_PARTITION_EV, EvValue);
 
 	return 0;
 }
+
+static int DynamicMemory_Tracking_Event (event_t * event,
+        unsigned long long time, unsigned int cpu, unsigned int ptask,
+        unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+        unsigned EvType = Get_EvEvent (event);
+        unsigned long long EvValue = Get_EvValue (event);
+
+	trace_paraver_event (cpu, ptask, task, thread, time, EvType, EvValue);
+
+	return 0;
+}
+
 
 static int SystemCall_Event (event_t * event,                      
 	unsigned long long time, unsigned int cpu, unsigned int ptask,          
@@ -1759,7 +1747,7 @@ static int SystemCall_Event (event_t * event,
 {                                                                               
 	int i = 0;
 	unsigned EvType = Get_EvEvent (event);                                  
-	unsigned long long EvValue = Get_EvValue (event);
+	UINT64 EvValue = Get_EvValue (event);
 	unsigned long long SysCallID = Get_EvMiscParam (event);
 
   if (!Syscall_Events_Found)                                                  
@@ -1783,8 +1771,8 @@ static int SystemCall_Event (event_t * event,
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
-        { OPEN_EV, ReadWrite_Event },
-        { FOPEN_EV, ReadWrite_Event },
+	{ OPEN_EV, ReadWrite_Event },
+	{ FOPEN_EV, ReadWrite_Event },
 	{ READ_EV, ReadWrite_Event },
 	{ WRITE_EV, ReadWrite_Event },
 	{ FREAD_EV, ReadWrite_Event },
@@ -1796,6 +1784,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ WRITEV_EV, ReadWrite_Event },
 	{ PWRITEV_EV, ReadWrite_Event },
 	{ IOCTL_EV, ReadWrite_Event },
+	{ CLOSE_EV, ReadWrite_Event },
+	{ FCLOSE_EV, ReadWrite_Event },
 	{ APPL_EV, Appl_Event },
 	{ TRACE_INIT_EV, InitTracing_Event },
 	{ USER_EV, User_Event },
@@ -1836,7 +1826,10 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SAMPLING_ADDRESS_MEM_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_TLB_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_REFERENCE_COST_EV, Sampling_Address_MEM_TLB_Event },
+	{ SAMPLING_ADDRESS_L3_STORE_MISSES_EV, L3_store_miss_Event },
 	{ MALLOC_EV, DynamicMemory_Event },
+	{ ADD_RESERVED_MEM_EV, DynamicMemory_Tracking_Event },
+	{ SUB_RESERVED_MEM_EV, DynamicMemory_Tracking_Event },
 	{ CALLOC_EV, DynamicMemory_Event },
 	{ FREE_EV, DynamicMemory_Event },
 	{ REALLOC_EV, DynamicMemory_Event },

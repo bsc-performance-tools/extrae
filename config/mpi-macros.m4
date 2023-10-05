@@ -36,14 +36,15 @@ AC_DEFUN([AX_PROG_MPI],
    fi
 
    dnl Search for MPI installation
-   AX_FIND_INSTALLATION([MPI], [$mpi_paths], [mpi])
+   AX_FIND_INSTALLATION([MPI], [$mpi_paths], [], [], [], [], [], [], [], [])
 
    if test "${MPI_INSTALLED}" = "yes" ; then
 
       if test -d "${MPI_INCLUDES}/mpi" ; then
          MPI_INCLUDES="${MPI_INCLUDES}/mpi"
          MPI_CFLAGS="-I${MPI_INCLUDES}"
-         CPPFLAGS="${MPI_CFLAGS} ${CPPFLAGS}"
+         CFLAGS="${MPI_CFLAGS} ${CFLAGS}"
+         CPPFLAGS="${MPI_CPPFLAGS} ${CPPFLAGS}"
       fi
 
       dnl This check is for POE over linux -- libraries are installed in /opt/ibmhpc/ppe.poe/lib/libmpi{64}/libmpi_ibm.so
@@ -173,15 +174,14 @@ AC_DEFUN([AX_PROG_MPI],
       dnl If $MPICC is not set, check for mpicc under $MPI_HOME/bin. We don't want to mix multiple MPI installations.
       AC_MSG_CHECKING([for MPI C compiler])
       if test "${MPICC}" != "" ; then
-         IFS=' ' read -ra MPICC_parts <<< "${MPICC}"
-         if test -x ${MPICC_parts[0]} ; then
+         if test -x "`type -P ${MPICC}`" ; then
             MPICC_COMPILER=${MPICC}
             AC_MSG_RESULT([${MPICC_COMPILER}])
          else
-            AC_MSG_ERROR([Cannot find MPI C compiler ${MPICC}])
+            AC_MSG_ERROR([Cannot find MPI C compiler ${MPICC}, set in \${MPICC}])
          fi
       else
-         mpicc_compilers="mpicc mpiicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
+         mpicc_compilers="mpicc mpiicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifcc"
          for mpicc in [$mpicc_compilers]; do
             if test -x "${MPI_HOME}/bin${BITS}/${mpicc}" ; then
                MPICC_COMPILER="${MPI_HOME}/bin${BITS}/${mpicc}"
@@ -203,7 +203,7 @@ AC_DEFUN([AX_PROG_MPI],
    dnl check for mpif77 under $MPI_HOME/bin
    AC_MSG_CHECKING([for MPI F77 compiler])
    if test "${MPIF77}" = "" ; then
-      mpif77_compilers="mpif77 mpxlf_r mpxlf"
+      mpif77_compilers="mpif77 mpxlf_r mpxlf mpifrt"
       for mpif77 in [$mpif77_compilers]; do
          if test -x "${MPI_HOME}/bin${BITS}/${mpif77}" ; then
             MPIF77="${MPI_HOME}/bin${BITS}/${mpif77}"
@@ -238,7 +238,7 @@ AC_DEFUN([AX_PROG_MPI],
    dnl check for mpif90 under $MPI_HOME/bin
    AC_MSG_CHECKING([for MPI F90 compiler])
    if test "${MPIF90}" = "" ; then
-      mpif90_compilers="mpif90 mpxlf_r mpxlf"
+      mpif90_compilers="mpif90 mpxlf_r mpxlf mpifrt"
       for mpif90 in [$mpif90_compilers]; do
          if test -x "${MPI_HOME}/bin${BITS}/${mpif90}" ; then
             MPIF90="${MPI_HOME}/bin${BITS}/${mpif90}"
@@ -400,105 +400,23 @@ AC_DEFUN([AX_CHECK_MPI_F_STATUS_IGNORE],
 # ---------------------
 AC_DEFUN([AX_CHECK_MPI_STATUS_SIZE],
 [
-   AC_MSG_CHECKING([for size of the MPI_Status struct])
    AX_FLAGS_SAVE()
    CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
 
    if test "${IS_MIC_MACHINE}" = "yes" ; then
-     SIZEOF_MPI_STATUS=5
+     MPI_STATUS_FIELD_INDEX=5
    elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
-     SIZEOF_MPI_STATUS=5
+     MPI_STATUS_FIELD_INDEX=5
    else
-   AC_TRY_RUN(
-      [
-         #include <mpi.h>
-         int main()
-         {
-            return sizeof(MPI_Status)/sizeof(int);
-         }
-      ],
-      [ SIZEOF_MPI_STATUS="0" ],
-      [ SIZEOF_MPI_STATUS="$?"]
-   )
+     AC_CHECK_SIZEOF([MPI_Status], [], [#include <mpi.h>])
+     AC_CHECK_SIZEOF([int])
+
+     MPI_STATUS_FIELD_INDEX=$((${ac_cv_sizeof_MPI_Status}/${ac_cv_sizeof_int}))
    fi
-   AC_MSG_RESULT([${SIZEOF_MPI_STATUS}])
-   AC_DEFINE_UNQUOTED([SIZEOF_MPI_STATUS], ${SIZEOF_MPI_STATUS}, [Size of the MPI_Status structure in "sizeof-int" terms])
-   AX_FLAGS_RESTORE()
-])
 
-# AX_CHECK_MPI_SOURCE_OFFSET
-#------------------------
-AC_DEFUN([AX_CHECK_MPI_SOURCE_OFFSET],
-[
-   AX_FLAGS_SAVE()
-   CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
-
-   AC_CHECK_MEMBER(MPI_Status.MPI_SOURCE,,
-                [AC_MSG_ERROR([We need MPI_Status.MPI_SOURCE!])],
-                [#include <mpi.h>])
-
-   AC_MSG_CHECKING([for offset of SOURCE field in MPI_Status])
-   if test "${IS_MIC_MACHINE}" = "yes" ; then
-     MPI_SOURCE_OFFSET=2
-   elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
-     MPI_SOURCE_OFFSET=0
-   else
-   AC_TRY_RUN(
-      [
-         #include <mpi.h>
-         int main()
-         {
-            MPI_Status s;
-            long addr1 = (long) &s;
-            long addr2 = (long) &(s.MPI_SOURCE);
-
-            return (addr2 - addr1)/sizeof(int);
-         }
-      ],
-      [ MPI_SOURCE_OFFSET="0" ],
-      [ MPI_SOURCE_OFFSET="$?"]
-   )
-   fi
-   AC_MSG_RESULT([${MPI_SOURCE_OFFSET}])
-   AC_DEFINE_UNQUOTED([MPI_SOURCE_OFFSET], ${MPI_SOURCE_OFFSET}, [Offset of the SOURCE field in MPI_Status in sizeof-int terms])
-   AX_FLAGS_RESTORE()
-])
-
-# AX_CHECK_MPI_TAG_OFFSET
-#------------------------
-AC_DEFUN([AX_CHECK_MPI_TAG_OFFSET],
-[
-   AX_FLAGS_SAVE()
-   CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
-
-   AC_CHECK_MEMBER(MPI_Status.MPI_TAG,,
-                [AC_MSG_ERROR([We need MPI_Status.MPI_TAG!])],
-                [#include <mpi.h>])
-
-   AC_MSG_CHECKING([for offset of TAG field in MPI_Status])
-   if test "${IS_MIC_MACHINE}" = "yes" ; then
-     MPI_TAG_OFFSET=3
-   elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
-     MPI_TAG_OFFSET=1
-   else
-   AC_TRY_RUN(
-      [
-         #include <mpi.h>
-         int main()
-         {
-            MPI_Status s;
-            long addr1 = (long) &s;
-            long addr2 = (long) &(s.MPI_TAG);
-
-            return (addr2 - addr1)/sizeof(int);
-         }
-      ],
-      [ MPI_TAG_OFFSET="0" ],
-      [ MPI_TAG_OFFSET="$?"]
-   )
-   fi
-   AC_MSG_RESULT([${MPI_TAG_OFFSET}])
-   AC_DEFINE_UNQUOTED([MPI_TAG_OFFSET], ${MPI_TAG_OFFSET}, [Offset of the TAG field in MPI_Status in sizeof-int terms])
+   AC_MSG_CHECKING([for number of integer fields in MPI_Status struct])
+   AC_MSG_RESULT([${MPI_STATUS_FIELD_INDEX}])
+   AC_DEFINE_UNQUOTED([MPI_STATUS_FIELD_INDEX], ${MPI_STATUS_FIELD_INDEX}, [Number of integer fields in MPI_Status structure])
    AX_FLAGS_RESTORE()
 ])
 
@@ -626,7 +544,11 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_COMM_SPAWN],
 	AC_LANG([C])
 	AX_FLAGS_SAVE()
 
+	CC="${MPICC}"
+
 	AC_MSG_CHECKING([if MPI library supports MPI_Comm_spawn])
+	CFLAGS="${CFLAGS} ${MPI_CFLAGS}"
+	LDFLAGS="${LDFLAGS} -L${MPI_LIBSDIR} ${MPI_LIBS}"
 	AC_TRY_LINK(
 		[#include <mpi.h>], 
 		[
@@ -920,7 +842,7 @@ AC_DEFUN([AX_PROG_GM],
    )
 
    dnl Search for GM installation
-   AX_FIND_INSTALLATION([GM], [${gm_paths}], [gm])
+   AX_FIND_INSTALLATION([GM], [${gm_paths}], [], [], [], [], [], [], [], [])
 
    if test "$GM_INSTALLED" = "yes" ; then
       dnl Check for GM header files.

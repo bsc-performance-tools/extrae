@@ -37,6 +37,7 @@
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "events.h"
 #include "clock.h"
 #include "threadid.h"
@@ -79,13 +80,8 @@ static void HWCBE_PAPI_AddDefinition (unsigned event_code, char *code, char *des
 
 	if (!found)
 	{
-		hwc_used = (HWC_Definition_t*) realloc (hwc_used,
+		hwc_used = (HWC_Definition_t*) xrealloc (hwc_used,
 			sizeof(HWC_Definition_t)*(num_hwc_used+1));
-		if (hwc_used == NULL)
-		{
-			fprintf (stderr, "ERROR! Cannot allocate memory to add definitions for hardware counters\n");
-			return;
-		}
 		hwc_used[num_hwc_used].event_code = event_code;
 		snprintf (hwc_used[num_hwc_used].description,
 			MAX_HWC_DESCRIPTION_LENGTH, "%s [%s]", code, description);
@@ -107,12 +103,7 @@ int HWCBE_PAPI_Allocate_eventsets_per_thread (int num_set, int old_thread_num, i
 {
 	int i;
 
-	HWC_sets[num_set].eventsets = (int *) realloc (HWC_sets[num_set].eventsets, sizeof(int)*new_thread_num);
-	if (HWC_sets[num_set].eventsets == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for HWC_set\n");
-		return FALSE;
-	}
+	HWC_sets[num_set].eventsets = (int *) xrealloc (HWC_sets[num_set].eventsets, sizeof(int)*new_thread_num);
 
 	for (i = old_thread_num; i < new_thread_num; i++)
 		HWC_sets[num_set].eventsets[i] = PAPI_NULL;
@@ -127,18 +118,8 @@ int Add_Overflows_To_Set (int rank, int num_set, int pretended_set,
 	int cnt, i, found;
 	char *strtoul_check;
 
-	HWC_sets[num_set].OverflowCounter = (int*) malloc (sizeof(int) * num_overflows);
-	if (HWC_sets[num_set].OverflowCounter == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR cannot allocate memory for OverflowCounter structure at %s:%d\n",__FILE__,__LINE__);
-		return FALSE;
-	}
-	HWC_sets[num_set].OverflowValue = (long long*) malloc (sizeof(long long) * num_overflows);
-	if (HWC_sets[num_set].OverflowValue == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR cannot allocate memory for OverflowValue structure at %s:%d\n",__FILE__,__LINE__);
-		return FALSE;
-	}
+	HWC_sets[num_set].OverflowCounter = (int*) xmalloc (sizeof(int) * num_overflows);
+	HWC_sets[num_set].OverflowValue = (long long*) xmalloc (sizeof(long long) * num_overflows);
 	HWC_sets[num_set].NumOverflows = num_overflows;
 	for (cnt = 0; cnt < num_overflows; cnt++)
 	{
@@ -207,12 +188,7 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 		ncounters = MAX_HWC;
 	}
 	
-	HWC_sets = (struct HWC_Set_t *) realloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
-	if (HWC_sets == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for HWC_set (rank %d)\n", rank);
-		return 0;
-	}
+	HWC_sets = (struct HWC_Set_t *) xrealloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
 
 	/* Initialize this set */
 	HWC_sets[num_set].num_counters = 0;
@@ -616,7 +592,7 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 
 	//if (!forked)
 	{
-		memset (&options, 0, sizeof(options));
+		xmemset (&options, 0, sizeof(options));
 
 		for (i = 0; i < HWC_num_sets; i++)
 		{

@@ -34,6 +34,7 @@
 
 #include "persistent_requests.h"
 #include "wrapper.h"
+#include "xalloc.h"
 
 #if !defined(MPI_SUPPORT) /* This shouldn't be compiled if MPI is not used */
 # error "This should not be compiled outside MPI bounds"
@@ -83,9 +84,9 @@ void PR_Elimina_request (PR_Queue_t * cua, MPI_Request* reqid)
 #endif
     return;
   }
-  free (element_cua->request);
+  xfree (element_cua->request);
   REMOVE_ITEM (element_cua);
-  free (element_cua);
+  xfree (element_cua);
 #if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
   pthread_mutex_unlock(&pr_lock);
 #endif
@@ -103,16 +104,7 @@ void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
   /*
    * Es reserva memoria per la nova request 
    */
-  nova_pr = (persistent_req_t *) malloc (sizeof (persistent_req_t));
-
-	if (nova_pr == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot allocate memory for a new persistent request!\n");
-#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
-        pthread_mutex_unlock(&pr_lock);
-#endif
-		return;
-	}
+  nova_pr = (persistent_req_t *) xmalloc (sizeof (persistent_req_t));
 
   /*
    * Se li assignen les dades donades 
@@ -128,15 +120,8 @@ void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
   /*
    * S'afegeix la request a la col.lecció 
    */
-	nou_element_cua = (PR_Queue_t *) malloc (sizeof (PR_Queue_t));
-	if (nou_element_cua == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot add a new persistent request to the queue of requests!\n");
-#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
-        pthread_mutex_unlock(&pr_lock);
-#endif
-		return;
-	}
+	nou_element_cua = (PR_Queue_t *) xmalloc (sizeof (PR_Queue_t));
+
   nou_element_cua->request = nova_pr;
   INSERT_ITEM_INCREASING (cua, nou_element_cua, PR_Queue_t, request->req);
 #if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)

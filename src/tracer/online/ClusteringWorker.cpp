@@ -27,6 +27,7 @@
 # include "hwc.h"
 #endif
 #include "utils.h"
+#include "xalloc.h"
 
 #include "BurstsExtractor.h"
 #include "OnlineControl.h"

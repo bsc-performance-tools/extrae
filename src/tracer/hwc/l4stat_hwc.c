@@ -91,7 +91,8 @@ int HWCBE_L4STAT_Add_Set(int pretended_set, int rank, int ncounters, char **coun
 						 char *domain, char *change_at_globalops, char *change_at_time,
 						 int num_overflows, char **overflow_counters, unsigned long long *overflow_values)
 {
-	int i, rc, num_set = HWC_num_sets;
+	int i, j, rc, num_set = HWC_num_sets;
+	int counter;
 	char *info;
 
 	UNREFERENCED_PARAMETER(num_overflows);
@@ -171,7 +172,31 @@ int HWCBE_L4STAT_Add_Set(int pretended_set, int rank, int ncounters, char **coun
 
 	HWC_sets[num_set].change_type = CHANGE_NEVER;
 
-	/* We validate this set */
+	// Initializes reading of counters here as it has to be done just once instead of in Start_Set that is called per thread
+	for (i = 0; i < 4; i++)
+	{
+		counter = HWC_sets[0].num_counters * i;
+
+		for (j = 0; j < HWC_sets[0].num_counters; j++)
+		{
+			//printf("Enabling counter %i, cpu %i event: %i \n", counter, i,  HWC_sets[0].counters[j] );
+			ret = l4stat_counter_enable(counter, HWC_sets[0].counters[j], i, 0);
+			if (ret != L4STAT_ERR_OK)
+			{
+				printf("Error: %s failed on l4stat_counter_enable!\n", __func__);
+				exit(1);
+			}
+			ret = l4stat_counter_set(counter, 0);
+			if (ret != L4STAT_ERR_OK)
+			{
+				printf("Error: %s failed on l4stat_counter_set!\n", __func__);
+				return -1;
+			}
+			counter++;
+		}
+	}
+
+    /* We validate this set */
 	HWC_num_sets++;
 
 	if (rank == 0)
@@ -201,7 +226,6 @@ int HWCBE_L4STAT_Add_Set(int pretended_set, int rank, int ncounters, char **coun
 
 int HWCBE_L4STAT_Start_Set(UINT64 countglops, UINT64 time, int numset, int threadid)
 {
-
 	int rc;
 
 	/* The given set is a valid one? */
@@ -226,6 +250,8 @@ int HWCBE_L4STAT_Stop_Set(UINT64 time, int numset, int threadid)
 
 void HWCBE_L4STAT_CleanUp(unsigned nthreads)
 {
+	UNREFERENCED_PARAMETER(nthreads);
+
 	int ret;
 	int i;
 
@@ -234,13 +260,13 @@ void HWCBE_L4STAT_CleanUp(unsigned nthreads)
 		ret = l4stat_counter_clear(i);
 		if (ret != L4STAT_ERR_OK)
 		{
-			printf("Error: l4stat clear!\n");
+			printf("Error: %s failed in l4stat_counter_clear!\n", __func__);
 			exit(1);
 		}
 		ret = l4stat_counter_disable(i);
 		if (ret != L4STAT_ERR_OK)
 		{
-			printf("Error: l4stat disable!\n");
+			printf("Error: %s failed in l4stat_counter_disable!\n", __func__);
 			exit(1);
 		}
 	}
@@ -254,48 +280,8 @@ void HWCBE_L4STAT_CleanUp(unsigned nthreads)
 
 void HWCBE_L4STAT_Initialize(int TRCOptions)
 {
-	int ret;
-	int i, j, counter;
-	for (i = 0; i < 16; i++)
-	{
-		ret = l4stat_counter_clear(i);
-		if (ret != L4STAT_ERR_OK)
-		{
-			printf("Error: l4stat clear!\n");
-			exit(1);
-		}
-		ret = l4stat_counter_disable(i);
-		if (ret != L4STAT_ERR_OK)
-		{
-			printf("Error: l4stat disable!\n");
-			exit(1);
-		}
-	}
-
-	for (i = 0; i < 4; i++)
-	{
-
-		counter = HWC_sets[0].num_counters * i;
-
-		for (j = 0; j < HWC_sets[0].num_counters; j++)
-		{
-
-			//printf("Enabling counter %i, cpu %i event: %i \n", counter, i,  HWC_sets[0].counters[j] );
-			ret = l4stat_counter_enable(counter, HWC_sets[0].counters[j], i, 0);
-			if (ret != L4STAT_ERR_OK)
-			{
-				printf("Error: l4stat enable!\n");
-				exit(1);
-			}
-			ret = l4stat_counter_set(counter, 0);
-			if (ret != L4STAT_ERR_OK)
-			{
-				printf("Error: l4stat init thread!\n");
-				return -1;
-			}
-			counter++;
-		}
-	}
+	UNREFERENCED_PARAMETER(TRCOptions);
+	HWCBE_L4STAT_CleanUp(0);
 }
 
 int HWCBE_L4STAT_Init_Thread(UINT64 time, int threadid, int forked)

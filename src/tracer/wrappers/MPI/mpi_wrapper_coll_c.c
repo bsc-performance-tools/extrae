@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *                        ANALYSIS PERFORMANCE TOOLS                         *
+*                        ANALYSIS PERFORMANCE TOOLS                         *
  *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
@@ -2016,9 +2016,12 @@ int xtr_MPI_Comm_neighbors_count(MPI_Comm comm, int *indegree, int *outdegree)
     }
     case MPI_DIST_GRAPH:
     {
-      int weighted; 
-      ret = PMPI_Dist_graph_neighbors_count(comm, indegree, outdegree, &weighted);
+      int local_indegree, local_outdegree, weighted;
+
+      ret = PMPI_Dist_graph_neighbors_count(comm, &local_indegree, &local_outdegree, &weighted);
       MPI_CHECK(ret, PMPI_Dist_graph_neighbors_count)
+		if (indegree  != NULL) *indegree  = local_indegree;
+		if (outdegree != NULL) *outdegree = local_outdegree;
       break;
     }
     case MPI_UNDEFINED:
@@ -2081,6 +2084,33 @@ int MPI_Dist_graph_create_C_Wrapper (MPI_Comm comm_old, int n, int *sources, int
 }
 
 /******************************************************************************
+ ***  MPI_Dist_graph_create_adjacent_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Dist_graph_create_adjacent_C_Wrapper (MPI_Comm comm_old, int indegree, const int sources[],
+    const int sourceweights[], int outdegree, const int destinations[], const int destweights[],
+    MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)
+{
+  int ierror;
+
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  ierror = PMPI_Dist_graph_create_adjacent (comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph);
+
+  if (*comm_dist_graph != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+  {
+    Trace_MPI_Communicator (*comm_dist_graph, LAST_READ_TIME, FALSE);
+  }
+
+  TRACE_MPIEVENT (TIME, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  updateStats_OTHER(global_mpi_stats);
+
+  return ierror;
+}
+
+
+/******************************************************************************
  ***  MPI_Neighbor_allgather_C_Wrapper
  ******************************************************************************/
 
@@ -2126,7 +2156,7 @@ int MPI_Neighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
 
   return ret;
 }
@@ -2177,7 +2207,7 @@ int MPI_Ineighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
 
   return ret;
 }
@@ -2346,7 +2376,7 @@ int MPI_Neighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype 
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
 
   return ret;
 }
@@ -2397,7 +2427,7 @@ int MPI_Ineighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
     Extrae_MPI_getCurrentOpGlobal());
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
 
   return ret;
 }
@@ -2606,7 +2636,7 @@ int MPI_Neighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint *
 }
 
 /******************************************************************************
- ***  MPI_Ineighbor_alltoall_C_Wrapper
+ ***  MPI_Ineighbor_alltoallw_C_Wrapper
  ******************************************************************************/
 
 int MPI_Ineighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint *sdispls, MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, MPI_Aint *rdispls, MPI_Datatype *recvtypes, MPI_Comm comm, MPI_Request *request)

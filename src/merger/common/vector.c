@@ -32,18 +32,13 @@
 #endif
 
 #include "vector.h"
+#include "xalloc.h"
 
 #define ALLOC_SIZE 32
 
 mpi2prv_vector_t * Vector_Init (void)
 {
-	mpi2prv_vector_t *tmp = (mpi2prv_vector_t*) malloc (sizeof(mpi2prv_vector_t));
-
-	if (tmp == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot allocate memory for vector!\n");
-		exit (0);
-	}
+	mpi2prv_vector_t *tmp = (mpi2prv_vector_t*) xmalloc (sizeof(mpi2prv_vector_t));
 
 	tmp->count = tmp->allocated = 0;
 	tmp->data = NULL;
@@ -68,12 +63,7 @@ void Vector_Add (mpi2prv_vector_t *vec, unsigned long long v)
 	{
 		if (vec->data == NULL || vec->count+1 >= vec->allocated)
 		{
-			vec->data = realloc (vec->data, (vec->allocated + ALLOC_SIZE)*sizeof(unsigned long long));
-			if (vec->data == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for vector!\n");
-				exit (0);
-			}
+			vec->data = xrealloc (vec->data, (vec->allocated + ALLOC_SIZE)*sizeof(unsigned long long));
 			vec->allocated += ALLOC_SIZE;
 		}
 		vec->data[vec->count] = v;

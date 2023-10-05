@@ -30,6 +30,7 @@
 #include "object_tree.h"
 #include "utils.h"
 #include "debug.h"
+#include "xalloc.h"
 
 appl_t ApplicationTable;
 
@@ -50,14 +51,12 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	for (i = 0; i < nfiles; i++)
 		ntasks[files[i].ptask-1] = MAX(files[i].task, ntasks[files[i].ptask-1]);
 
-	nthreads = (unsigned**) malloc (num_appl*sizeof(unsigned*));
-	ASSERT(nthreads!=NULL, "Cannot allocate memory to store nthreads for whole applications");
-
+	nthreads = (unsigned**) xmalloc (num_appl*sizeof(unsigned*));
+	
 	for (i = 0; i < num_appl; i++)
 	{
-		nthreads[i] = (unsigned*) malloc (ntasks[i]*sizeof(unsigned));
-		ASSERT(nthreads[i]!=NULL, "Cannot allocate memory to store nthreads for application");
-
+		nthreads[i] = (unsigned*) xmalloc (ntasks[i]*sizeof(unsigned));
+		
 		for (j = 0; j < ntasks[i]; j++)
 			nthreads[i][j] = 0;
 	}
@@ -67,16 +66,14 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 
 	/* Second step, allocate structures respecting the number of apps, tasks and threads found */
 	ApplicationTable.nptasks = num_appl;
-	ApplicationTable.ptasks = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
-	ASSERT(ApplicationTable.ptasks!=NULL, "Unable to allocate memory for ptasks");
-
+	ApplicationTable.ptasks = (ptask_t*) xmalloc (sizeof(ptask_t)*num_appl);
+	
 	for (i = 0; i < ApplicationTable.nptasks; i++)
 	{
 		/* Allocate per task information within each ptask */
 		ApplicationTable.ptasks[i].ntasks = ntasks[i];
-		ApplicationTable.ptasks[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks[i]);
-		ASSERT(ApplicationTable.ptasks[i].tasks!=NULL, "Unable to allocate memory for tasks");
-
+		ApplicationTable.ptasks[i].tasks = (task_t*) xmalloc (sizeof(task_t)*ntasks[i]);
+		
 		for (j = 0; j < ApplicationTable.ptasks[i].ntasks; j++)
 		{
 			/* Initialize pending communication queues for each task */
@@ -85,14 +82,9 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			  &(ApplicationTable.ptasks[i].tasks[j].recv_queue));
 
 			/* Allocate per thread information within each task */
-			ApplicationTable.ptasks[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*nthreads[i][j]);
-			ASSERT(ApplicationTable.ptasks[i].tasks[j].threads!=NULL,"Unable to allocate memory for threads");
+			ApplicationTable.ptasks[i].tasks[j].threads = (thread_t*) xmalloc (sizeof(thread_t)*nthreads[i][j]);
 		}
 	}
-
-#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-	INIT_QUEUE (&CountersTraced);
-#endif
 
 	/* 3rd step, Initialize the object table structure */
 	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++)
@@ -134,7 +126,6 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 					thread_info->AddressSpace_calleraddresses[v] = 0;
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
-				thread_info->HWCSets_types = NULL;
 				thread_info->num_HWCSets = 0;
 				thread_info->current_HWCSet = 0;
 #endif
@@ -162,8 +153,8 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	{
 		for (i = 0; i < num_appl; i++)
 			if (nthreads[i] != NULL)
-				free (nthreads[i]);
-		free (nthreads);		
+				xfree (nthreads[i]);
+		xfree (nthreads);		
 	}
 }
 
@@ -172,7 +163,7 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 	char *binary)
 {
 	task_t *task_info = GET_TASK_INFO(ptask, task);
-	unsigned found = FALSE, u;
+	//unsigned found = FALSE, u;
 
 	if (!__Extrae_Utils_file_exists(binary))
 	{
@@ -180,39 +171,46 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 		return;
 	}
 
-	for (u = 0; u < task_info->num_binary_objects && !found; u++)
-		found = strcmp (task_info->binary_objects[u].module, binary) == 0;
+	/* Do not discard repeated entries for the same binary. It seems 
+	 * there can be repetitions in /proc/self/maps with different
+	 * address ranges.
+	 *
+	 * for (u = 0; u < task_info->num_binary_objects && !found; u++)
+	 *	found = strcmp (task_info->binary_objects[u].module, binary) == 0;
+	 *
+   * if (!found)
+	 */
+	
+	unsigned last_index = task_info->num_binary_objects;
+	task_info->binary_objects = (binary_object_t*) xrealloc (
+	  task_info->binary_objects,
+	  (last_index+1) * sizeof(binary_object_t));
+	task_info->binary_objects[last_index].module = strdup (binary);
+	task_info->binary_objects[last_index].start_address = start;
+	task_info->binary_objects[last_index].end_address = end;
+	task_info->binary_objects[last_index].offset = offset;
+	task_info->binary_objects[last_index].index = last_index+1;
 
-	if (!found)
+	/* Check if the current binary is the main binary and flag it */
+	if (last_index == 0) task_info->binary_objects[last_index].main_binary = 1;
+	else 
 	{
-		unsigned last_index = task_info->num_binary_objects;
-		task_info->binary_objects = (binary_object_t*) realloc (
-		  task_info->binary_objects,
-		  (last_index+1) * sizeof(binary_object_t));
-		if (task_info->binary_objects == NULL)
-		{
-			fprintf (stderr, "Fatal error! Cannot allocate memory for binary object!\n");
-			exit (-1);
-		}
-		task_info->binary_objects[last_index].module = strdup (binary);
-		task_info->binary_objects[last_index].start_address = start;
-		task_info->binary_objects[last_index].end_address = end;
-		task_info->binary_objects[last_index].offset = offset;
-		task_info->binary_objects[last_index].index = last_index+1;
+		task_info->binary_objects[last_index].main_binary =
+			(strcmp (task_info->binary_objects[last_index].module, task_info->binary_objects[0].module) == 0);
+	}
 
 #if defined(HAVE_BFD)
-		task_info->binary_objects[last_index].nDataSymbols = 0;
-		task_info->binary_objects[last_index].dataSymbols = NULL;
+	task_info->binary_objects[last_index].nDataSymbols = 0;
+	task_info->binary_objects[last_index].dataSymbols = NULL;
 
-		BFDmanager_loadBinary (binary,
-		  &(task_info->binary_objects[last_index].bfdImage),
-		  &(task_info->binary_objects[last_index].bfdSymbols),
-		  &(task_info->binary_objects[last_index].nDataSymbols),
-		  &(task_info->binary_objects[last_index].dataSymbols));
+	BFDmanager_loadBinary (binary,
+	  &(task_info->binary_objects[last_index].bfdImage),
+	  &(task_info->binary_objects[last_index].bfdSymbols),
+	  &(task_info->binary_objects[last_index].nDataSymbols),
+	  &(task_info->binary_objects[last_index].dataSymbols));
 #endif
 
-		task_info->num_binary_objects++;
-	}
+	task_info->num_binary_objects++;
 }
 
 void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
@@ -247,7 +245,7 @@ binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, U
 
 	for (u = 0; u < task_info->num_binary_objects; u++)
 		if (address >= task_info->binary_objects[u].start_address &&
-		    address <= task_info->binary_objects[u].end_address)
+		    address < task_info->binary_objects[u].end_address)
 			return &(task_info->binary_objects[u]);
 
 	return NULL;
@@ -296,27 +294,32 @@ void ObjectTable_dumpAddresses (FILE *fd, unsigned eventstart)
 	/* Emitting the rest of ptask/task requires some changes in mpimpi2prv */
 
 	for (_ptask = 1; _ptask <= 1 /* ApplicationTable.nptasks */; _ptask++)
+	{
 		for (_task = 1; _task <= 1 /* ApplicationTable.ptasks[_ptask].ntasks */; _task++)
 		{
 			task_t *task_info = GET_TASK_INFO(_ptask, _task);
 
-			fprintf (fd, "EVENT_TYPE\n");
-			fprintf (fd, "0 %u Object addresses for task %u.%u\n", eventstart++, _ptask, _task);
-			fprintf (fd, "VALUES\n");
-
-			/* For now, emit only data symbols for binary object 0 */
-			for (_address = 0; _address < task_info->binary_objects[0].nDataSymbols; _address++)
+			if (task_info->binary_objects[0].nDataSymbols > 0)
 			{
-				data_symbol_t *d = &task_info->binary_objects[0].dataSymbols[_address];
+				fprintf (fd, "EVENT_TYPE\n");
+				fprintf (fd, "0 %u Object addresses for task %u.%u\n", eventstart++, _ptask, _task);
+				fprintf (fd, "VALUES\n");
 
-				fprintf (fd, "%u %s [0x%08llx-0x%08llx]\n",
-				  _address+1,
-				  d->name,
-				  (unsigned long long) d->address, 
-				  ((unsigned long long) d->address)+d->size-1);
+				/* For now, emit only data symbols for binary object 0 */
+				for (_address = 0; _address < task_info->binary_objects[0].nDataSymbols; _address++)
+				{
+					data_symbol_t *d = &task_info->binary_objects[0].dataSymbols[_address];
+
+					fprintf (fd, "%u %s [0x%08llx-0x%08llx]\n",
+					  _address+1,
+					  d->name,
+					  (unsigned long long) d->address, 
+					  ((unsigned long long) d->address)+d->size-1);
+				}
+				fprintf (fd, "\n");
 			}
-			fprintf (fd, "\n");
 		}
+	}
 }
 #endif
 

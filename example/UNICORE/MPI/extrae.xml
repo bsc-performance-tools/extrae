@@ -8,6 +8,7 @@
 
   <mpi enabled="yes">
     <counters enabled="yes" />
+    <comm-calls enabled="yes" />
   </mpi>
 
   <callers enabled="yes">
@@ -44,7 +45,9 @@
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
+    translate-addresses="yes"
     sort-addresses="yes"
+    translate-data-addresses="yes"
     overwrite="yes"
   >
     $UNICORE_PRV$

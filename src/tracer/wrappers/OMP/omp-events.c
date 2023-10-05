@@ -61,10 +61,12 @@ void Extrae_OpenMP_UF_Entry (const void *uf)
 {
 	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_UF_Entry ((UINT64) uf);
+	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_OpenMP_UF_Exit (void)
 {
+	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
@@ -249,9 +251,9 @@ void Extrae_OpenMP_SetNumThreads_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_TaskID (long long id)
+void Extrae_OpenMP_TaskID (long long id, int inst_or_exec)
 {
-	Probe_OpenMP_TaskID (id);
+	Probe_OpenMP_TaskID (id, inst_or_exec);
 }
 
 void Extrae_OpenMP_TaskLoopID (long long id)
@@ -275,10 +277,12 @@ void Extrae_OpenMP_TaskUF_Entry (const void* uf)
 {
 	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_TaskUF_Entry ((UINT64) uf);
+	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_OpenMP_TaskUF_Exit (void)
 {
+	Backend_Enter_Instrumentation ();
 	Probe_OpenMP_TaskUF_Exit ();
 	Backend_Leave_Instrumentation ();
 }

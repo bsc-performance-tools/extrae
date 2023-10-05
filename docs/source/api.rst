@@ -19,10 +19,14 @@ The following routines are defined in :file:`${EXTRAE_HOME}/include/extrae.h`
 These routines are intended to be called by C/C++ programs. The instrumentation
 package also provides bindings for Fortran applications. The Fortran API
 bindings have the same name as the C API but honoring the Fortran compiler
-function name mangling scheme. To use the API in Fortran applications you must
-use the module provided in :file:`${EXTRAE_HOME}/include/extrae_module.f` by
-using the language clause ``use``. This module which provides the appropriate
-function and constant declarations for |TRACE|.
+function name mangling scheme. To use the API in Fortran applications
+use the module provided in :file:`${EXTRAE_HOME}/include/extrae_module.f90` by
+using the Fortran ``use`` clause. This module has to be compiled beforehand with
+the same compiler as the program being instrumented, with the following command:
+
+    .. code-block:: sh
+
+      make -f ${EXTRAE_HOME}/include/Makefile.extrae_module
 
 .. _func:extrae_get_version:
 
@@ -223,6 +227,18 @@ function and constant declarations for |TRACE|.
   * EXTRAE_UF_HWC_OPTION
   
     Activates hardware counter gathering in the user functions.
+
+  * EXTRAE_PTHREAD_OPTION
+
+    Activates pthreads instrumentation
+
+  * EXTRAE_PTHREAD_HWC_OPTION
+
+    Activates hardware counters gathering in pthread routines
+
+  * EXTRAE_SAMPLING_OPTION
+
+    Activates instrumentation using time-based sampling
 
 .. _func:extrae_network_counters:
 

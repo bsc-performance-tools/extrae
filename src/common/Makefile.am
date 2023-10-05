@@ -11,18 +11,22 @@ common_SRCS = \
  timesync.c timesync.h \
  new-queue.c new-queue.h \
  extrae_vector.c extrae_vector.h \
+ MurmurHash2.c MurmurHash2.h \
  intel-pebs-types.h \
  debug.h \
  common.h \
  num_hwc.h \
  types.h \
- hwc_version.h
+ hwc_version.h \
+ xalloc.h \
+ symptr.h
 
 common_INCLUDES = -I$(COMMON_INC)
 
 noinst_LTLIBRARIES = libcommon.la
 libcommon_la_SOURCES = $(common_SRCS)
 libcommon_la_CFLAGS  = $(common_INCLUDES)
+libcommon_la_LDFLAGS = -lrt 
 
 #
 #noinst_PROGRAMS = common

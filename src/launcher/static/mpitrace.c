@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "xalloc.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -188,7 +189,7 @@ void setup_environment ()
 
 	if (strcmp(mpi_flush_signal, "") != 0)
 	{
-		char *duplicat = malloc ((strlen(mpi_flush_signal)+32+1)*sizeof(char));
+		char *duplicat = xmalloc ((strlen(mpi_flush_signal)+32+1)*sizeof(char));
 		sprintf (duplicat, "EXTRAE_SIGNAL_FLUSH_TERMINATE=%s", mpi_flush_signal);
 		printf ("%s\n", duplicat);
 		putenv (duplicat);

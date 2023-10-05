@@ -73,12 +73,28 @@ static int Get_State (unsigned int EvType)
 		case MPI_FILE_CLOSE_EV:
 		case MPI_FILE_READ_EV:
 		case MPI_FILE_READ_ALL_EV:
-		case MPI_FILE_WRITE_EV:
-		case MPI_FILE_WRITE_ALL_EV:
+		case MPI_FILE_READ_ALL_BEGIN_EV:
+		case MPI_FILE_READ_ALL_END_EV:
 		case MPI_FILE_READ_AT_EV:
 		case MPI_FILE_READ_AT_ALL_EV:
+		case MPI_FILE_READ_AT_ALL_BEGIN_EV:
+		case MPI_FILE_READ_AT_ALL_END_EV:
+		case MPI_FILE_READ_ORDERED_EV:
+		case MPI_FILE_READ_ORDERED_BEGIN_EV:
+		case MPI_FILE_READ_ORDERED_END_EV:
+		case MPI_FILE_READ_SHARED_EV:
+		case MPI_FILE_WRITE_EV:
+		case MPI_FILE_WRITE_ALL_EV:
+		case MPI_FILE_WRITE_ALL_BEGIN_EV:
+		case MPI_FILE_WRITE_ALL_END_EV:
 		case MPI_FILE_WRITE_AT_EV:
 		case MPI_FILE_WRITE_AT_ALL_EV:
+		case MPI_FILE_WRITE_AT_ALL_BEGIN_EV:
+		case MPI_FILE_WRITE_AT_ALL_END_EV:
+		case MPI_FILE_WRITE_ORDERED_EV:
+		case MPI_FILE_WRITE_ORDERED_BEGIN_EV:
+		case MPI_FILE_WRITE_ORDERED_END_EV:
+		case MPI_FILE_WRITE_SHARED_EV:
 			state = STATE_IO;
 		break;
 		case MPI_WIN_FREE_EV:
@@ -89,7 +105,9 @@ static int Get_State (unsigned int EvType)
 		case MPI_COMM_CREATE_EV:
 		case MPI_COMM_FREE_EV:
 		case MPI_COMM_DUP_EV:
+		case MPI_COMM_DUP_WITH_INFO_EV:
 		case MPI_COMM_SPLIT_EV:
+		case MPI_COMM_SPLIT_TYPE_EV:
 		case MPI_COMM_SPAWN_EV:
 		case MPI_COMM_SPAWN_MULTIPLE_EV:
 		case MPI_CART_CREATE_EV:
@@ -105,6 +123,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_WIN_UNLOCK_EV:
 		case MPI_GRAPH_CREATE_EV:
 		case MPI_DIST_GRAPH_CREATE_EV:
+		case MPI_DIST_GRAPH_CREATE_ADJACENT_EV:
 		case MPI_WIN_FLUSH_EV:
 		case MPI_WIN_FLUSH_ALL_EV:
 		case MPI_WIN_FLUSH_LOCAL_EV:
@@ -182,16 +201,16 @@ static int Get_State (unsigned int EvType)
 		case MPI_REDUCE_SCATTER_BLOCK_EV:
 		case MPI_ALLTOALLW_EV:
 		case MPI_IALLTOALLW_EV:
-                case MPI_NEIGHBOR_ALLGATHER_EV:
-                case MPI_INEIGHBOR_ALLGATHER_EV:
-                case MPI_NEIGHBOR_ALLGATHERV_EV:
-                case MPI_INEIGHBOR_ALLGATHERV_EV:
-                case MPI_NEIGHBOR_ALLTOALL_EV:
-                case MPI_INEIGHBOR_ALLTOALL_EV:
-                case MPI_NEIGHBOR_ALLTOALLV_EV:
-                case MPI_INEIGHBOR_ALLTOALLV_EV:
-                case MPI_NEIGHBOR_ALLTOALLW_EV:
-                case MPI_INEIGHBOR_ALLTOALLW_EV:
+		case MPI_NEIGHBOR_ALLGATHER_EV:
+		case MPI_INEIGHBOR_ALLGATHER_EV:
+		case MPI_NEIGHBOR_ALLGATHERV_EV:
+		case MPI_INEIGHBOR_ALLGATHERV_EV:
+		case MPI_NEIGHBOR_ALLTOALL_EV:
+		case MPI_INEIGHBOR_ALLTOALL_EV:
+		case MPI_NEIGHBOR_ALLTOALLV_EV:
+		case MPI_INEIGHBOR_ALLTOALLV_EV:
+		case MPI_NEIGHBOR_ALLTOALLW_EV:
+		case MPI_INEIGHBOR_ALLTOALLW_EV:
 			state = STATE_BCAST;
 		break;
 		case MPI_WIN_FENCE_EV:
@@ -220,7 +239,8 @@ static int Any_Send_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned recv_thread, recv_vthread, EvType, EvValue;
+	unsigned recv_thread, recv_vthread, EvType;
+	UINT64 EvValue;
 	thread_t *thread_info;
 	task_t *task_info, *task_info_partner;
 	event_t * recv_begin, * recv_end;
@@ -528,7 +548,8 @@ static int GlobalOP_event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	unsigned int comm_id, send_size, receive_size, is_root;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -574,7 +595,8 @@ static int Other_MPI_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask, 
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -615,22 +637,25 @@ static int Other_MPI_Event (event_t * current_event,
  ******************************************************************************/
 
 static int MPIIO_Event (event_t * current_event,
-        unsigned long long current_time, unsigned int cpu, unsigned int ptask,
-        unsigned int task, unsigned int thread, FileSet_t *fset)
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-        unsigned int EvType, EvValue;
-        UNREFERENCED_PARAMETER(fset);
+	unsigned int EvType;
+	UINT64 EvValue;
+	UNREFERENCED_PARAMETER(fset);
 
-        EvType  = Get_EvEvent (current_event);
-        EvValue = Get_EvValue (current_event);
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
 
-        Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
+	Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
 
-        trace_paraver_state (cpu, ptask, task, thread, current_time);
-        trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-        trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_IO_SIZE_EV, Get_EvSize( current_event ));
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType,
+	    EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	    MPI_IO_SIZE_EV, Get_EvSize(current_event));
 
-        Enable_MPI_Soft_Counter (EvType);
+	Enable_MPI_Soft_Counter (EvType);
 
 	return 0;
 }
@@ -645,7 +670,8 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 {
 	event_t *send_begin, *send_end;
 	off_t send_position;
-	unsigned EvType, EvValue, send_thread, send_vthread;
+	unsigned EvType, send_thread, send_vthread;
+	UINT64 EvValue;
 	thread_t *thread_info;
 	task_t *task_info, *task_info_partner;
 	int EvComm;
@@ -728,10 +754,12 @@ static int IRecv_Event (event_t * current_event,
 {
 	event_t *send_begin, *send_end;
 	off_t send_position;
-	unsigned EvType, EvValue, send_thread, send_vthread;
-	thread_t *thread_info;
+	thread_t *thread_info, *irecved_thread_info;
+	unsigned EvType, send_thread, send_vthread;
+	UINT64 EvValue;
 	task_t *task_info, *task_info_partner;
 	int EvComm;
+	int irecved_found_in_thread = 0;
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_info = GET_TASK_INFO(ptask, task);
@@ -746,7 +774,9 @@ static int IRecv_Event (event_t * current_event,
 	{
 		if (MatchComms_Enabled(ptask, task))
 		{
-			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
+			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file, &irecved_found_in_thread);
+			irecved_thread_info = GET_THREAD_INFO(ptask, task, irecved_found_in_thread);
+
 			if (NULL != receive)
 			{
 				if (MPI_PROC_NULL != Get_EvTarget(receive))
@@ -767,14 +797,15 @@ static int IRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stderr, "IRECV_CMD DID NOT find COMM\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(receive), Get_EvTag(receive), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, irecved_found_in_thread, irecved_thread_info->virtual_thread, Get_EvTarget(receive), Get_EvTag(receive), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stderr, "IRECV_CMD find COMM (partner times = %lld/%lld)\n", Get_EvTime(send_begin), Get_EvTime(send_end));
+
 #endif
-							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, irecved_found_in_thread, irecved_thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -786,8 +817,8 @@ static int IRecv_Event (event_t * current_event,
 
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
-							thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, irecved_found_in_thread,
+							irecved_thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
 					}
 #endif
 				}
@@ -809,7 +840,8 @@ int MPI_PersistentRequest_Init_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -832,13 +864,14 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	thread_t *thread_info;
+	thread_t *thread_info, *irecved_thread_info;
 	task_t *task_info, *task_info_partner;
 	event_t *recv_begin, *recv_end;
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned recv_thread, send_thread, recv_vthread, send_vthread;
 	int EvComm; 
+	int irecved_found_in_thread = 0;
 
 	EvComm = Get_EvComm( current_event );
 
@@ -906,7 +939,9 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 
 		if (MatchComms_Enabled(ptask, task))
 		{
-			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
+			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file, &irecved_found_in_thread);
+			irecved_thread_info = GET_THREAD_INFO(ptask, task, irecved_found_in_thread);
+
 			if (NULL != receive)
 			{
 				int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
@@ -928,14 +963,14 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stderr, "PER_REQ_IRECV_CMD DID NOT find a partner\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, irecved_found_in_thread, irecved_thread_info->virtual_thread, Get_EvTarget(receive), Get_EvTag(receive), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stderr, "PERS_REQ_IRECV_CMD find partner (send position = %llu)\n", (unsigned long long) send_position);
 #endif
-							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, irecved_found_in_thread, irecved_thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -947,8 +982,8 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
-							thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, irecved_found_in_thread-1,
+							irecved_thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
 					}
 #endif
 				}
@@ -967,7 +1002,8 @@ int MPI_PersistentRequest_Free_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -990,7 +1026,8 @@ int MPI_Start_Event (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	thread_t * thread_info;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -1026,7 +1063,8 @@ int MPI_Software_Counter_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -1049,7 +1087,7 @@ int MPI_Elapsed_Time_In_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned int EvType;
-	unsigned long long EvValue;
+	UINT64 EvValue;
 	UINT64 elapsed_time;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -1181,25 +1219,44 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_COMM_CREATE_EV, Other_MPI_Event },
 	{ MPI_COMM_FREE_EV, Other_MPI_Event },
 	{ MPI_COMM_SPLIT_EV, Other_MPI_Event },
+	{ MPI_COMM_SPLIT_TYPE_EV, Other_MPI_Event },
 	{ MPI_COMM_SPAWN_EV, Other_MPI_Event },
 	{ MPI_COMM_SPAWN_MULTIPLE_EV, Other_MPI_Event },
 	{ MPI_COMM_DUP_EV, Other_MPI_Event },
+	{ MPI_COMM_DUP_WITH_INFO_EV, Other_MPI_Event },
 	{ MPI_CART_CREATE_EV, Other_MPI_Event },
 	{ MPI_CART_SUB_EV, Other_MPI_Event },
 	{ MPI_INTERCOMM_CREATE_EV, Other_MPI_Event },
 	{ MPI_INTERCOMM_MERGE_EV, Other_MPI_Event },
 	{ MPI_GRAPH_CREATE_EV, Other_MPI_Event },
 	{ MPI_DIST_GRAPH_CREATE_EV, Other_MPI_Event },
+	{ MPI_DIST_GRAPH_CREATE_ADJACENT_EV, Other_MPI_Event },
 	{ MPI_FILE_OPEN_EV, Other_MPI_Event },
 	{ MPI_FILE_CLOSE_EV, Other_MPI_Event },
 	{ MPI_FILE_READ_EV, MPIIO_Event },
 	{ MPI_FILE_READ_ALL_EV, MPIIO_Event },
-	{ MPI_FILE_WRITE_EV, MPIIO_Event },
-	{ MPI_FILE_WRITE_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ALL_END_EV, MPIIO_Event },
 	{ MPI_FILE_READ_AT_EV, MPIIO_Event },
 	{ MPI_FILE_READ_AT_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_READ_AT_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_READ_AT_ALL_END_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ORDERED_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ORDERED_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ORDERED_END_EV, MPIIO_Event },
+	{ MPI_FILE_READ_SHARED_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ALL_END_EV, MPIIO_Event },
 	{ MPI_FILE_WRITE_AT_EV, MPIIO_Event },
 	{ MPI_FILE_WRITE_AT_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_AT_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_AT_ALL_END_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ORDERED_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ORDERED_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ORDERED_END_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_SHARED_EV, MPIIO_Event },
 	{ MPI_PUT_EV, MPI_RMA_Event},
 	{ MPI_GET_EV, MPI_RMA_Event},
 	{ MPI_WIN_CREATE_EV, MPI_RMA_Event},

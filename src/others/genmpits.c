@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "xalloc.h"
 
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -133,12 +134,7 @@ int main (int argc, char *argv[])
 	int pidlabel = FALSE;
 	int i;
 
-	files = (char**) malloc (MAX_MPIT_FILES*sizeof(char*));
-	if (files == NULL)
-	{
-		fprintf (stderr, "Cannot allocate %ld bytes of memory to allocate file names\n", MAX_MPIT_FILES*sizeof(char*));
-		return -2;
-	}
+	files = (char**) xmalloc (MAX_MPIT_FILES*sizeof(char*));
 	for (i = 0; i < MAX_MPIT_FILES; i++)
 		files[i] = NULL;
 
@@ -201,7 +197,7 @@ int main (int argc, char *argv[])
 	SortFilesByTime ();
 	DumpFiles (pidlabel);
 
-	free (files);
+	xfree (files);
 
 	return 0;
 }

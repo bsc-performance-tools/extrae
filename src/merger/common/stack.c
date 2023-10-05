@@ -32,18 +32,13 @@
 #endif
 
 #include "stack.h"
+#include "xalloc.h"
 
 #define ALLOC_SIZE 32
 
 mpi2prv_stack_t * Stack_Init (void)
 {
-	mpi2prv_stack_t *tmp = (mpi2prv_stack_t*) malloc (sizeof(mpi2prv_stack_t));
-
-	if (tmp == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot allocate memory for stack!\n");
-		exit (0);
-	}
+	mpi2prv_stack_t *tmp = (mpi2prv_stack_t*) xmalloc (sizeof(mpi2prv_stack_t));
 
 	tmp->count = tmp->allocated = 0;
 	tmp->data = NULL;
@@ -55,12 +50,7 @@ void Stack_Push (mpi2prv_stack_t *s, unsigned long long v)
 {
 	if (s->data == NULL || s->count+1 >= s->allocated)
 	{
-		s->data = realloc (s->data, (s->allocated + ALLOC_SIZE)*sizeof(unsigned long long));
-		if (s->data == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for stack!\n");
-			exit (0);
-		}
+		s->data = xrealloc (s->data, (s->allocated + ALLOC_SIZE)*sizeof(unsigned long long));
 		s->allocated += ALLOC_SIZE;
 	}
 
@@ -77,7 +67,7 @@ void Stack_Pop (mpi2prv_stack_t *s)
 		/* If we pop the whole stack, free the allocated memory */
 		if (s->count == 0)
 		{
-			free (s->data);
+			xfree (s->data);
 			s->data = NULL;
 			s->allocated = 0;
 		}

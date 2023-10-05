@@ -23,5 +23,5 @@ fi
 
 echo "Applying modification in ${PATHTOCHANGE} - Key = ${KEY} for value = ${VALUE}"
 
-/usr/bin/find ${PATHTOCHANGE} -type f -exec ${SCRIPT_LOCATION} "${SED}" "${KEY}" "${VALUE}" {} \;
+command find ${PATHTOCHANGE} -type f -exec ${SCRIPT_LOCATION} "${SED}" "${KEY}" "${VALUE}" {} \;
 

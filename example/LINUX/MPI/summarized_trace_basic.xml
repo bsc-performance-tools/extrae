@@ -8,11 +8,12 @@
 
   <mpi enabled="yes">
     <counters enabled="yes" />
+    <comm-calls enabled="yes" />
   </mpi>
 
   <openmp enabled="yes" ompt="no">
     <locks enabled="no" />
-		<taskloop enabled="no" />
+    <taskloop enabled="no" />
     <counters enabled="yes" />
   </openmp>
 
@@ -48,7 +49,7 @@
 
   <dynamic-memory enabled="no" />
 
-	<input-output enabled="no" />
+  <input-output enabled="no" internals="no"/>
 
   <syscall enabled="no" />
 
@@ -58,7 +59,9 @@
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
+    translate-addresses="yes"
     sort-addresses="yes"
+    translate-data-addresses="yes"
     overwrite="yes"
   />
 

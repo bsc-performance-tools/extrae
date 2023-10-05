@@ -49,6 +49,8 @@ paraver_FILES = \
  paraver/cuda_prv_semantics.c paraver/cuda_prv_semantics.h \
  paraver/opencl_prv_semantics.c paraver/opencl_prv_semantics.h \
  paraver/openshmem_prv_semantics.c paraver/openshmem_prv_semantics.h \
+ paraver/openacc_prv_semantics.c paraver/openacc_prv_semantics.h \
+ paraver/gaspi_prv_semantics.c paraver/gaspi_prv_semantics.h \
  paraver/mpi_prv_events.c paraver/mpi_prv_events.h \
  paraver/omp_prv_events.c paraver/omp_prv_events.h \
  paraver/misc_prv_events.c paraver/misc_prv_events.h \
@@ -57,6 +59,8 @@ paraver_FILES = \
  paraver/cuda_prv_events.c paraver/cuda_prv_events.h \
  paraver/opencl_prv_events.c paraver/opencl_prv_events.h \
  paraver/openshmem_prv_events.c paraver/openshmem_prv_events.h \
+ paraver/openacc_prv_events.c paraver/openacc_prv_events.h \
+ paraver/gaspi_prv_events.c paraver/gaspi_prv_events.h \
  paraver/write_file_buffer.c paraver/write_file_buffer.h \
  paraver/paraver_nprintf.c paraver/paraver_nprintf.h \
  paraver/MPI_EventEncoding.h
@@ -81,16 +85,22 @@ libmpi2prv_la_SOURCES = \
 mpi2prv_SOURCES = \
  merger.c
 
+if HAVE_PAPI
+if !HAVE_PAPI_EMBEDDED
+  PAPI_LINKER_FLAGS = @PAPI_LDFLAGS@ @PAPI_RPATH@ @PAPI_LIBS@
+endif
+endif
+
 libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
 if HAVE_BINUTILS
 libmpi2prv_la_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@ 
 endif
 
 mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
-mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_LIB)/libcommon.la
+mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_LIB)/libcommon.la $(PAPI_LINKER_FLAGS)
 if HAVE_BINUTILS
 mpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
+mpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_RPATH@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_RPATH@ @LIBERTY_LIBS@
 endif
 mpi2prv_DEPENDENCIES = libmpi2prv.la $(COMMON_LIB)/libcommon.la
 
@@ -104,7 +114,7 @@ endif
 if HAVE_ZLIB
   libmpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpi2prv_CFLAGS += @LIBZ_CFLAGS@
-  mpi2prv_LDFLAGS += -L@LIBZ_SHAREDLIBSDIR@ -R @LIBZ_SHAREDLIBSDIR@ @LIBZ_LIBS@
+  mpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_RPATH@ @LIBZ_LIBS@
 endif
 
 if HAVE_PAPI
@@ -121,7 +131,7 @@ endif
 if HAVE_SIONLIB
   libmpi2prv_la_CFLAGS += @SIONLIB_CFLAGS@
   mpi2prv_CFLAGS += @SIONLIB_CFLAGS@
-  mpi2prv_LDFLAGS += -R @SIONLIB_LIBSDIR@ @SIONLIB_LDFLAGS@ -lsionmpi_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none
+  mpi2prv_LDFLAGS += @SIONLIB_LDFLAGS@ @SIONLIB_RPATH@ -lsionmpi_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none
 endif
 
 # Online support

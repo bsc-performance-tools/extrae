@@ -86,7 +86,7 @@
 #define TEMPLATE_NODE_SEPARATOR_CHAR '@'
 
 #define TEMPLATE_DIGITS "%.10d%.6d%.6u"
-#define TEMPLATE_PTT    "%s/%s"TEMPLATE_NODE_SEPARATOR"%s."TEMPLATE_DIGITS"%s"  // dir/app@hostname.digits.ext
+#define TEMPLATE_PTT    "%s/%s" TEMPLATE_NODE_SEPARATOR "%s." TEMPLATE_DIGITS "%s"  // dir/app@hostname.digits.ext
 #define TEMPLATE_P      "%s/%s%s"
 
 /* Uses pid, task id and thread id to generate the name of the file */

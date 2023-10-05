@@ -82,7 +82,7 @@ int main (int argc, char *argv[], char *envp[])
 		i++;
 
 	envp[i] = preload = (char *) malloc ((strlen("LD_PRELOAD=")+strlen(getenv("EXTRAE_HOME"))+strlen("/lib/")+strlen(argv[1])+1)*sizeof(char));
-	if (preload == NULL)
+	if (preload == NULL)	
 	{
 		fprintf (stderr, "Cannot allocate memory for preload env variable\n");
 		return -1;
@@ -91,10 +91,10 @@ int main (int argc, char *argv[], char *envp[])
 	i++;
 
 	envp[i] = xml = (char*) malloc ((strlen ("EXTRAE_CONFIG_FILE=")+strlen(argv[2])+1)*sizeof(char));
-	if (xml == NULL)
+	if (xml == NULL)	
 	{
 		fprintf (stderr, "Cannot allocate memory for xml env variable\n");
-		return -1;
+		return -1;	
 	}
 	sprintf (xml, "EXTRAE_CONFIG_FILE=%s", argv[2]);
 	i++;

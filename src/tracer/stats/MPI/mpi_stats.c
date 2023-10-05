@@ -23,6 +23,7 @@
 
 #include "mpi_stats.h"
 #include "utils.h"
+#include "xalloc.h"
 
 #ifndef HAVE_STDIO_H
 # include <stdio.h>
@@ -36,26 +37,11 @@ mpi_stats_t * mpi_stats_init(int num_tasks)
 {
     mpi_stats_t *mpi_stats = NULL;
 
-    mpi_stats = (mpi_stats_t *)malloc(sizeof(mpi_stats_t));
-    if (mpi_stats == NULL)
-    { 
-        fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for MPI Stats");
-        exit(-1);
-    }
+    mpi_stats = (mpi_stats_t *)xmalloc(sizeof(mpi_stats_t));
     mpi_stats->ntasks = num_tasks;
 
-    mpi_stats->P2P_Partner_In = (int *) malloc (mpi_stats->ntasks * sizeof(int));
-    if (mpi_stats->P2P_Partner_In == NULL)
-    {
-        fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for MPI Stats");
-        exit(-1);
-    }
-    mpi_stats->P2P_Partner_Out = (int *) malloc (mpi_stats->ntasks * sizeof(int));
-    if (mpi_stats->P2P_Partner_Out == NULL)
-    {
-        fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for MPI Stats");
-        exit(-1);
-    }
+    mpi_stats->P2P_Partner_In = (int *) xmalloc (mpi_stats->ntasks * sizeof(int));
+    mpi_stats->P2P_Partner_Out = (int *) xmalloc (mpi_stats->ntasks * sizeof(int));
 
     mpi_stats_reset(mpi_stats);
 

@@ -1,4 +1,4 @@
-/* Automagically generated file by ./genstubs-kmpc-11.sh at dl oct 16 15:52:40 CEST 2017 */
+/* Automagically generated file by genstubs-kmpc-11.sh at Fri 21 Aug 19:22:04 CEST 2020 */
 #include <stdarg.h>
 #include <wrapper.h>
 #include <omp-events.h>
@@ -17,7 +17,6 @@ void __kmpc_parallel_wrap_0_args (int *p1, int *p2, void *task_ptr)
 	void (*task_real)(int*,int*) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -35,7 +34,6 @@ void __kmpc_parallel_wrap_1_args (int *p1, int *p2, void *task_ptr, void *arg1)
 	void (*task_real)(int*,int*,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -53,7 +51,6 @@ void __kmpc_parallel_wrap_2_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -71,7 +68,6 @@ void __kmpc_parallel_wrap_3_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -89,7 +85,6 @@ void __kmpc_parallel_wrap_4_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -107,7 +102,6 @@ void __kmpc_parallel_wrap_5_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -125,7 +119,6 @@ void __kmpc_parallel_wrap_6_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -143,7 +136,6 @@ void __kmpc_parallel_wrap_7_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -161,7 +153,6 @@ void __kmpc_parallel_wrap_8_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -179,7 +170,6 @@ void __kmpc_parallel_wrap_9_args (int *p1, int *p2, void *task_ptr, void *arg1, 
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -197,7 +187,6 @@ void __kmpc_parallel_wrap_10_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -215,7 +204,6 @@ void __kmpc_parallel_wrap_11_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -233,7 +221,6 @@ void __kmpc_parallel_wrap_12_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -251,7 +238,6 @@ void __kmpc_parallel_wrap_13_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -269,7 +255,6 @@ void __kmpc_parallel_wrap_14_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -287,7 +272,6 @@ void __kmpc_parallel_wrap_15_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -305,7 +289,6 @@ void __kmpc_parallel_wrap_16_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -323,7 +306,6 @@ void __kmpc_parallel_wrap_17_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -341,7 +323,6 @@ void __kmpc_parallel_wrap_18_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -359,7 +340,6 @@ void __kmpc_parallel_wrap_19_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -377,7 +357,6 @@ void __kmpc_parallel_wrap_20_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -395,7 +374,6 @@ void __kmpc_parallel_wrap_21_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -413,7 +391,6 @@ void __kmpc_parallel_wrap_22_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -431,7 +408,6 @@ void __kmpc_parallel_wrap_23_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -449,7 +425,6 @@ void __kmpc_parallel_wrap_24_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -467,7 +442,6 @@ void __kmpc_parallel_wrap_25_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -485,7 +459,6 @@ void __kmpc_parallel_wrap_26_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -503,7 +476,6 @@ void __kmpc_parallel_wrap_27_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -521,7 +493,6 @@ void __kmpc_parallel_wrap_28_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -539,7 +510,6 @@ void __kmpc_parallel_wrap_29_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -557,7 +527,6 @@ void __kmpc_parallel_wrap_30_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -575,7 +544,6 @@ void __kmpc_parallel_wrap_31_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -593,7 +561,6 @@ void __kmpc_parallel_wrap_32_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -611,7 +578,6 @@ void __kmpc_parallel_wrap_33_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -629,7 +595,6 @@ void __kmpc_parallel_wrap_34_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -647,7 +612,6 @@ void __kmpc_parallel_wrap_35_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -665,7 +629,6 @@ void __kmpc_parallel_wrap_36_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -683,7 +646,6 @@ void __kmpc_parallel_wrap_37_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -701,7 +663,6 @@ void __kmpc_parallel_wrap_38_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -719,7 +680,6 @@ void __kmpc_parallel_wrap_39_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -737,7 +697,6 @@ void __kmpc_parallel_wrap_40_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -755,7 +714,6 @@ void __kmpc_parallel_wrap_41_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -773,7 +731,6 @@ void __kmpc_parallel_wrap_42_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -791,7 +748,6 @@ void __kmpc_parallel_wrap_43_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -809,7 +765,6 @@ void __kmpc_parallel_wrap_44_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -827,7 +782,6 @@ void __kmpc_parallel_wrap_45_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -845,7 +799,6 @@ void __kmpc_parallel_wrap_46_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -863,7 +816,6 @@ void __kmpc_parallel_wrap_47_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -881,7 +833,6 @@ void __kmpc_parallel_wrap_48_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -899,7 +850,6 @@ void __kmpc_parallel_wrap_49_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -917,7 +867,6 @@ void __kmpc_parallel_wrap_50_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -935,7 +884,6 @@ void __kmpc_parallel_wrap_51_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -953,7 +901,6 @@ void __kmpc_parallel_wrap_52_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -971,7 +918,6 @@ void __kmpc_parallel_wrap_53_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -989,7 +935,6 @@ void __kmpc_parallel_wrap_54_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1007,7 +952,6 @@ void __kmpc_parallel_wrap_55_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1025,7 +969,6 @@ void __kmpc_parallel_wrap_56_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1043,7 +986,6 @@ void __kmpc_parallel_wrap_57_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56, arg57);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1061,7 +1003,6 @@ void __kmpc_parallel_wrap_58_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56, arg57, arg58);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1079,7 +1020,6 @@ void __kmpc_parallel_wrap_59_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56, arg57, arg58, arg59);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1097,7 +1037,6 @@ void __kmpc_parallel_wrap_60_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56, arg57, arg58, arg59, arg60);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1115,7 +1054,6 @@ void __kmpc_parallel_wrap_61_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56, arg57, arg58, arg59, arg60, arg61);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1133,7 +1071,6 @@ void __kmpc_parallel_wrap_62_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56, arg57, arg58, arg59, arg60, arg61, arg62);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1151,7 +1088,6 @@ void __kmpc_parallel_wrap_63_args (int *p1, int *p2, void *task_ptr, void *arg1,
 	void (*task_real)(int*,int*,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *) = task_ptr;
 
 	Extrae_OpenMP_UF_Entry ((void *)task_real);
-	Backend_Leave_Instrumentation (); /* We're entering user code */
 	task_real (p1, p2, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30, arg31, arg32, arg33, arg34, arg35, arg36, arg37, arg38, arg39, arg40, arg41, arg42, arg43, arg44, arg45, arg46, arg47, arg48, arg49, arg50, arg51, arg52, arg53, arg54, arg55, arg56, arg57, arg58, arg59, arg60, arg61, arg62, arg63);
 	Extrae_OpenMP_UF_Exit ();
 }

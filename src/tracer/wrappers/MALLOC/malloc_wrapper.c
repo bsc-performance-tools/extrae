@@ -41,6 +41,7 @@
 # include <memkind.h>
 #endif
 
+#include "xalloc.h"
 #include "wrapper.h"
 #include "trace_macros.h"
 #include "malloc_probe.h"
@@ -82,84 +83,126 @@ static void (*real_kmpc_free)(void *) = NULL;
    those allocations. To this end, we store in malloc entries a vector of pointers
    returned by malloc/realloc that surpass the threshold and that may need later
    instrumentation of their respective free. */
-static void ** mallocentries = NULL;
-static unsigned nmallocentries_allocated = 0;
-static unsigned nmallocentries = 0;
+
 #define NMALLOCENTRIES_MALLOC 16*1024
 
-/* Registers a new address to be tracked for future free() calls */
-static pthread_mutex_t mutex_allocations = PTHREAD_MUTEX_INITIALIZER;
-static void Extrae_malloctrace_add (void *p)
+static __thread struct mallocList * mallocentries= NULL;
+
+typedef struct mallocList {
+	struct node * used;
+	struct node * free;
+} mallocList_T;
+
+typedef struct node {
+    void *val;
+    struct node * next;
+} listnode_t;
+
+
+static void *xtr_mem_tracked_allocs_initblock ()
 {
-	if (p != NULL)
+	struct node *free_list = xmalloc(NMALLOCENTRIES_MALLOC * sizeof(struct node));
+	int i = 0;
+
+	for (i=0; i<NMALLOCENTRIES_MALLOC-1; i++)
 	{
-		unsigned u;
-		assert (real_realloc != NULL);
+        	free_list[i].next = &free_list[i+1];
+	}
+	free_list[NMALLOCENTRIES_MALLOC-1].next = NULL;
 
-		pthread_mutex_lock (&mutex_allocations);
-	
-		if (nmallocentries == nmallocentries_allocated)
-		{
-			mallocentries = real_realloc (mallocentries,
-			  (nmallocentries_allocated+NMALLOCENTRIES_MALLOC) * sizeof(void*));
-			assert (mallocentries != NULL);
-			for (u = nmallocentries_allocated;
-			     u < nmallocentries_allocated+NMALLOCENTRIES_MALLOC;
-			     u++)
-				mallocentries[u] = NULL;
-			nmallocentries_allocated += NMALLOCENTRIES_MALLOC;
-		}
-	
-		for (u = 0; u < nmallocentries_allocated; u++)
-			if (mallocentries[u] == NULL)
-			{
-				mallocentries[u] = p;
-				nmallocentries++;
-				break;
-			}
+	return free_list;
+}
 
-		pthread_mutex_unlock (&mutex_allocations);
+static void xtr_mem_tracked_allocs_initlist () {
+	struct mallocList *new_list = xmalloc(sizeof(struct mallocList));
+
+	new_list->free = xtr_mem_tracked_allocs_initblock();
+	new_list->used = NULL;
+	mallocentries = new_list;
+}
+
+/**
+ * xtr_mem_tracked_allocs_add
+ * xtr_mem_tracked_allocs_remove
+ * xtr_mem_tracked_allocs_replace
+ *
+ * Accessing the TLS variable mallocentries results in internal calls to glibc's __tls_get_addr(), 
+ * which in turn calls free(), triggering its tracing wrapper again. So to avoid an infinite loop, 
+ * these functions are only to be called between Backend_Enter_Instrumentation() 
+ * and Backend_Leave_Instrumentation().
+ */
+
+static void xtr_mem_tracked_allocs_add (const void *p, size_t s)
+{
+	if (p)
+	{
+		if (mallocentries == NULL) xtr_mem_tracked_allocs_initlist();
+		if (mallocentries->free == NULL) mallocentries->free = xtr_mem_tracked_allocs_initblock();
+		
+		struct node *newNode = mallocentries->free;
+		mallocentries->free = newNode->next;
+
+		newNode->val = p;
+		newNode->next = mallocentries->used;
+		mallocentries->used = newNode;
 	}
 }
 
-/* Removes an entry from the list of registered addresses */
-static int Extrae_malloctrace_remove (const void *p)
+static int xtr_mem_tracked_allocs_remove (const void *p)
 {
 	unsigned found = FALSE;
-	if (p != NULL)
-	{
-		pthread_mutex_lock (&mutex_allocations);
 
-		unsigned u;
-		for (u = 0; u < nmallocentries_allocated; u++)
-			if (mallocentries[u] == p)
+	if (mallocentries == NULL) xtr_mem_tracked_allocs_initlist();
+
+	if (mallocentries != NULL && p != NULL)
+	{
+
+		listnode_t * previousNode = NULL;
+		listnode_t * currentNode = mallocentries->used;
+
+		while (currentNode != NULL)
+			if (currentNode->val == p) 	//found
 			{
-				mallocentries[u] = NULL;
-				nmallocentries--;
+				if (previousNode == NULL) mallocentries->used = currentNode->next;
+				else previousNode->next = currentNode->next;
+
+				currentNode->next = mallocentries->free;
+				mallocentries->free = currentNode;
+
 				found = TRUE;
 				break;
+			} else { 					//not found
+				previousNode = currentNode;
+				currentNode = currentNode->next;
 			}
-
-		pthread_mutex_unlock (&mutex_allocations);
 	}
+
 	return found;
 }
 
-static void Extrae_malloctrace_replace (const void *p1, void *p2)
+static void xtr_mem_tracked_allocs_replace (const void *p1, void *p2, size_t s)
 {
-	if (p1 != NULL)
+	if (mallocentries == NULL) xtr_mem_tracked_allocs_initlist();
+
+	int replaced = FALSE;
+	if (p1)
 	{
-		pthread_mutex_lock (&mutex_allocations);
-
-		unsigned u;
-		for (u = 0; u < nmallocentries_allocated; u++)
-			if (mallocentries[u] == p1)
-			{
-				mallocentries[u] = p2;
-				break;
-			}
-
-		pthread_mutex_unlock (&mutex_allocations);
+		listnode_t * currentNode = mallocentries->used;
+		while (currentNode != NULL){
+				if (currentNode->val == p1)
+				{
+					currentNode->val = p2;
+					replaced = TRUE;
+					break;
+				} else 
+					currentNode = currentNode->next;
+		}
+	}
+	// If we didn't find the pointer, we probably omitted its creation (because of
+	// threshold, e.g.). Need to create an entry for this new allocation if it is
+	// above the threshold.
+	if (!replaced){
+		xtr_mem_tracked_allocs_add(p1, s);
 	}
 }
 
@@ -193,7 +236,7 @@ void *malloc (size_t s)
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_malloc == NULL)
-		real_malloc = EXTRAE_DL_INIT (__func__);
+		real_malloc = XTR_FIND_SYMBOL (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -213,7 +256,7 @@ void *malloc (size_t s)
 		res = real_malloc (s);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			xtr_mem_tracked_allocs_add (res, s);
 		}
 		Probe_Malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -239,15 +282,24 @@ void *malloc (size_t s)
  */
 static unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
 
-int __in_free = FALSE;
+static __thread int __in_free = 0;
+static __thread void *__in_free_ptr = NULL;
 
 void free (void *p)
 {
+
 	if (p == extrae_dlsym_static_buffer) return;
+
+	__in_free ++;
+	if (__in_free_ptr == p) return;
+	__in_free_ptr = p;
 
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
 	                    mpitrace_on                          &&
-	                    Extrae_get_trace_malloc();
+	                    Extrae_get_trace_malloc()            &&
+			    (__in_free == 1);
+	int present = FALSE;
+
 	/*
 	 * Can't be evaluated before, the compiler optimizes the if's clauses,
 	 * and THREADID calls a null callback if Extrae is not yet initialized
@@ -258,34 +310,36 @@ void free (void *p)
 	 * If we don't have the pointer to the real free funtion and we are not
 	 * already inside a dlsym, call dlsym
 	*/
-	if (real_free == NULL && !__in_free)
+	if (real_free == NULL && __in_free == 1)
 	{
-		__in_free = TRUE;
-		real_free = EXTRAE_DL_INIT (__func__);
-		__in_free = FALSE;
+		real_free = XTR_FIND_SYMBOL (__func__);
 	}
 
 #if defined(DEBUG)
-	if (canInstrument && !__in_free) // fprintf() seems to call free()!
+	if (canInstrument) // fprintf() seems to call free()!
 	{
-		__in_free = TRUE;
 		fprintf(stderr, PACKAGE_NAME": free is at %p\n", real_free);
 		fprintf(stderr, PACKAGE_NAME": free params %p\n", p);
-		__in_free = FALSE;
 	}
 #endif
 
-	int present = Extrae_malloctrace_remove (p);
-
 	if (Extrae_get_trace_malloc_free() && real_free != NULL &&
-	    canInstrument && present)
+	    canInstrument)
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
 		Backend_Enter_Instrumentation();
-		Probe_Free_Entry(p);
-		real_free(p);
-		Probe_Free_Exit();
+		present = xtr_mem_tracked_allocs_remove (p);
+		if (present)
+		{
+			Probe_Free_Entry(p);
+			real_free(p);
+			Probe_Free_Exit();
+		}
+		else
+		{
+			real_free(p);
+		}
 		Backend_Leave_Instrumentation();
 	} else if (real_free != NULL)
 	{
@@ -299,6 +353,8 @@ void free (void *p)
 		 * happen once during the initialization.
 		*/
 	}
+	__in_free --;
+	if (__in_free == 0) __in_free_ptr = NULL;
 }
 
 /* Unfortunately, calloc seems to be invoked if dlsym fails and generates an
@@ -312,7 +368,9 @@ void *calloc (size_t nmemb, size_t size)
 	void *res;
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
                             mpitrace_on                          &&
-                            Extrae_get_trace_malloc();
+                            Extrae_get_trace_malloc()			&&
+                            Extrae_get_trace_malloc_allocate()   &&
+                            (nmemb*size) >= Extrae_get_trace_malloc_allocate_threshold();
 	/*
 	 * Can't be evaluated before because the compiler optimizes the if's
 	 * clauses, and THREADID calls a null callback if Extrae is not yet
@@ -324,7 +382,7 @@ void *calloc (size_t nmemb, size_t size)
 	{
 		if (__in_calloc_depth == 1)
 		{
-			real_calloc = EXTRAE_DL_INIT (__func__);
+			real_calloc = XTR_FIND_SYMBOL (__func__);
 		} else if (__in_calloc_depth == 2)
 		{
 			int i = 0;
@@ -332,10 +390,10 @@ void *calloc (size_t nmemb, size_t size)
 			/* Check if the requested size fits in the static buffer */
 			if ((nmemb*size) > DLSYM_CALLOC_SIZE)
 			{
-				fprintf(stderr, PACKAGE_NAME
+				fprintf (stderr, PACKAGE_NAME
 				    ": The size requested by calloc (%zu) is bigger"
 				    " than DLSYM_CALLOC_SIZE, please increase its value and"
-				    "recompile.\n", nmemb*size);
+				    " recompile.\n", nmemb*size);
 				abort();
 			}
 
@@ -365,7 +423,12 @@ void *calloc (size_t nmemb, size_t size)
 	{
 		Backend_Enter_Instrumentation ();
 		Probe_Calloc_Entry (nmemb, size);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_calloc (nmemb, size);
+		if (res != NULL)
+		{
+			xtr_mem_tracked_allocs_add (res, size);
+		}
 		Probe_Calloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -396,7 +459,7 @@ void *realloc (void *p, size_t s)
         if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_realloc == NULL)
-		real_realloc = EXTRAE_DL_INIT (__func__);
+		real_realloc = XTR_FIND_SYMBOL (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -410,19 +473,26 @@ void *realloc (void *p, size_t s)
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and remove and add the pointers to the list of recorded pointers */
+
+		int usable_size;
+
 		Backend_Enter_Instrumentation ();
-		Probe_Realloc_Entry (p, s);
+		usable_size = Probe_Realloc_Entry (p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
 		if (res != NULL)
-			Extrae_malloctrace_replace (p, res);
-		Probe_Realloc_Exit (res);
+		{
+			xtr_mem_tracked_allocs_replace (p, res, s);
+		}
+		Probe_Realloc_Exit (res, usable_size);
 		Backend_Leave_Instrumentation ();
 	}
 	else if (real_realloc != NULL)
 	{
 		/* Otherwise, call the original */
 		res = real_realloc (p, s);
+		// We may need to remove the previous pointer
+		xtr_mem_tracked_allocs_remove (p);
 	}
 	else
 	{
@@ -446,7 +516,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 
   if (real_posix_memalign == NULL)
   {
-	real_posix_memalign = EXTRAE_DL_INIT (__func__);
+	real_posix_memalign = XTR_FIND_SYMBOL (__func__);
   }
 
 #if defined(DEBUG)
@@ -465,9 +535,9 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
     res = real_posix_memalign(memptr, alignment, size);
     if (res == 0)
     {
-      Extrae_malloctrace_add (*memptr);
+      xtr_mem_tracked_allocs_add (*memptr, size);
     }
-    Probe_memkind_malloc_Exit (*memptr);
+    Probe_posix_memalign_Exit (*memptr);
     Backend_Leave_Instrumentation ();
   }
   else if (real_posix_memalign != NULL)
@@ -525,7 +595,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
 
   if (real_memkind_malloc == NULL)
   {
-	real_memkind_malloc = EXTRAE_DL_INIT (__func__);
+	real_memkind_malloc = XTR_FIND_SYMBOL (__func__);
   }
 
 #if defined(DEBUG)
@@ -544,7 +614,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
     res = real_memkind_malloc(kind, size);
     if (res != NULL)
     {
-      Extrae_malloctrace_add (res);
+      xtr_mem_tracked_allocs_add (res, size);
     }
     Probe_memkind_malloc_Exit (res);
     Backend_Leave_Instrumentation ();
@@ -568,13 +638,13 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
-                      size >= Extrae_get_trace_malloc_allocate_threshold();
+                      (num*size) >= Extrae_get_trace_malloc_allocate_threshold();
   /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
   if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_calloc == NULL)
   {
-	real_memkind_calloc = EXTRAE_DL_INIT (__func__);
+	real_memkind_calloc = XTR_FIND_SYMBOL (__func__);
   }
 
 #if defined(DEBUG)
@@ -593,7 +663,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
     res = real_memkind_calloc(kind, num, size);
     if (res != NULL)
     {
-      Extrae_malloctrace_add (res); 
+      xtr_mem_tracked_allocs_add (res, num*size); 
     }
     Probe_memkind_calloc_Exit (res);
     Backend_Leave_Instrumentation ();
@@ -623,7 +693,7 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 
   if (real_memkind_realloc == NULL)
   {
-	real_memkind_realloc = EXTRAE_DL_INIT (__func__);
+	real_memkind_realloc = XTR_FIND_SYMBOL (__func__);
   }
 
 #if defined(DEBUG)
@@ -636,18 +706,25 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 
   if (real_memkind_realloc != NULL && canInstrument)
   {
+
+  	int usable_size;
+
     Backend_Enter_Instrumentation ();
-    Probe_memkind_realloc_Entry (get_memkind_partition( kind ), ptr, size);
+    usable_size = Probe_memkind_realloc_Entry (get_memkind_partition( kind ), ptr, size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_realloc(kind, ptr, size);
     if (res != NULL)
-	  Extrae_malloctrace_replace (ptr, res);
-    Probe_memkind_realloc_Exit (res);
+    {
+	  xtr_mem_tracked_allocs_replace (ptr, res, size);
+    }
+    Probe_memkind_realloc_Exit (res, usable_size);
     Backend_Leave_Instrumentation ();
   }
   else if (real_memkind_realloc != NULL)
   {
     res = real_memkind_realloc(kind, ptr, size);
+    // We may need to remove the previous pointer
+    xtr_mem_tracked_allocs_remove (ptr);
   }
   else
   {
@@ -670,7 +747,7 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
 
   if (real_memkind_posix_memalign == NULL)
   {
-	real_memkind_posix_memalign = EXTRAE_DL_INIT (__func__);
+	real_memkind_posix_memalign = XTR_FIND_SYMBOL (__func__);
   }
 
 #if defined(DEBUG)
@@ -689,7 +766,7 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
     res = real_memkind_posix_memalign(kind, memptr, alignment, size);
     if (res == 0)
     {
-      Extrae_malloctrace_add (*memptr);
+      xtr_mem_tracked_allocs_add (*memptr, size);
     }
     Probe_memkind_posix_memalign_Exit (*memptr);
     Backend_Leave_Instrumentation ();
@@ -711,12 +788,14 @@ void memkind_free(memkind_t kind, void *ptr)
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc();
+  int present = FALSE;
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
   if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_free == NULL)
   {
-	real_memkind_free = EXTRAE_DL_INIT (__func__);
+	real_memkind_free = XTR_FIND_SYMBOL (__func__);
   }
 
 #if defined(DEBUG)
@@ -728,15 +807,21 @@ void memkind_free(memkind_t kind, void *ptr)
     __in_free = FALSE;
   }
 #endif
-  
-  int present = Extrae_malloctrace_remove (ptr);
-  
-  if (Extrae_get_trace_malloc_free() && real_memkind_free != NULL && canInstrument && present)
+
+  if (Extrae_get_trace_malloc_free() && real_memkind_free != NULL && canInstrument)
   {
     Backend_Enter_Instrumentation ();
-    Probe_memkind_free_Entry (get_memkind_partition( kind ), ptr);
-    real_memkind_free (kind, ptr);
-    Probe_memkind_free_Exit ();
+    present = xtr_mem_tracked_allocs_remove (ptr);
+    if (present)
+    {
+      Probe_memkind_free_Entry (get_memkind_partition( kind ), ptr);
+      real_memkind_free (kind, ptr);
+      Probe_memkind_free_Exit ();
+    }
+    else
+    {
+      real_memkind_free (kind, ptr);
+    }
     Backend_Leave_Instrumentation ();
   }
   else if (real_memkind_free != NULL)
@@ -767,7 +852,7 @@ kmpc_malloc( size_t size )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_malloc == NULL)
-		real_kmpc_malloc = EXTRAE_DL_INIT (__func__);
+		real_kmpc_malloc = XTR_FIND_SYMBOL (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -787,7 +872,7 @@ kmpc_malloc( size_t size )
 		res = real_kmpc_malloc (size);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			xtr_mem_tracked_allocs_add (res, size);
 		}
 		Probe_kmpc_malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -821,7 +906,7 @@ kmpc_aligned_malloc( size_t size, size_t alignment )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_aligned_malloc == NULL)
-		real_kmpc_aligned_malloc = EXTRAE_DL_INIT (__func__);
+		real_kmpc_aligned_malloc = XTR_FIND_SYMBOL (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -841,7 +926,7 @@ kmpc_aligned_malloc( size_t size, size_t alignment )
 		res = real_kmpc_aligned_malloc (size, alignment);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			xtr_mem_tracked_allocs_add (res, size);
 		}
 		Probe_kmpc_aligned_malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -869,13 +954,13 @@ kmpc_calloc( size_t nelem, size_t elsize )
 	                    mpitrace_on                          &&
 	                    Extrae_get_trace_malloc()            &&
 	                    Extrae_get_trace_malloc_allocate()   &&
-	                    elsize >= Extrae_get_trace_malloc_allocate_threshold();
+	                    (nelem*elsize) >= Extrae_get_trace_malloc_allocate_threshold();
 	/* Can't be evaluated before because the compiler optimizes the if's clauses,
 	 * and THREADID calls a null callback if Extrae is not yet initialized */
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_calloc == NULL)
-		real_kmpc_calloc = EXTRAE_DL_INIT (__func__);
+		real_kmpc_calloc = XTR_FIND_SYMBOL (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -895,7 +980,7 @@ kmpc_calloc( size_t nelem, size_t elsize )
 		res = real_kmpc_calloc (nelem, elsize);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			xtr_mem_tracked_allocs_add (res, nelem*elsize);
 		}
 		Probe_kmpc_calloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -929,7 +1014,7 @@ kmpc_realloc( void *ptr, size_t size )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_realloc == NULL)
-		real_kmpc_realloc = EXTRAE_DL_INIT (__func__);
+		real_kmpc_realloc = XTR_FIND_SYMBOL (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -943,19 +1028,27 @@ kmpc_realloc( void *ptr, size_t size )
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
+
+		int usable_size;
+
+
 		Backend_Enter_Instrumentation ();
-		Probe_kmpc_realloc_Entry (ptr, size);
+		usable_size = Probe_kmpc_realloc_Entry (ptr, size);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_realloc (ptr, size);
 		if (res != NULL)
-			Extrae_malloctrace_replace (ptr, res);
-		Probe_kmpc_realloc_Exit (res);
+		{
+			xtr_mem_tracked_allocs_replace (ptr, res, size);
+		}
+		Probe_kmpc_realloc_Exit (res, usable_size);
 		Backend_Leave_Instrumentation ();
 	}
 	else if (real_kmpc_realloc != NULL)
 	{
 		/* Otherwise, call the original */
 		res = real_kmpc_realloc (ptr, size);
+		// We may need to remove the previous pointer
+		xtr_mem_tracked_allocs_remove (ptr);
 	}
 	else
 	{
@@ -973,12 +1066,14 @@ kmpc_free ( void *ptr )
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
 	                    mpitrace_on                          &&
 	                    Extrae_get_trace_malloc();
+	int present = FALSE;
+
 	/* Can't be evaluated before because the compiler optimizes the if's clauses,
 	 * and THREADID calls a null callback if Extrae is not yet initialized */
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_free == NULL)
-		real_kmpc_free = EXTRAE_DL_INIT (__func__);
+		real_kmpc_free = XTR_FIND_SYMBOL (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument && !__in_free) // fprintf() seems to call free()!
@@ -990,19 +1085,24 @@ kmpc_free ( void *ptr )
 	}
 #endif
 
-	int present = Extrae_malloctrace_remove (ptr);
-
 	if (Extrae_get_trace_malloc_free() &&
 	    real_kmpc_free != NULL         &&
-			canInstrument                  &&
-			present)
+	    canInstrument)
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
 		Backend_Enter_Instrumentation ();
-		Probe_kmpc_free_Entry (ptr);
-		real_kmpc_free (ptr);
-		Probe_kmpc_free_Exit ();
+		present = xtr_mem_tracked_allocs_remove (ptr);
+		if (present)
+		{
+			Probe_kmpc_free_Entry (ptr);
+			real_kmpc_free (ptr);
+			Probe_kmpc_free_Exit ();
+		}
+		else
+		{
+			real_kmpc_free (ptr);
+		}
 		Backend_Leave_Instrumentation ();
 	}
 	else if (real_kmpc_free != NULL)

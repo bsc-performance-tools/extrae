@@ -27,6 +27,7 @@
 #include <string.h>
 #include <pthread.h>
 #include "hash_table.h"
+#include "xalloc.h"
 
 
 /*** Prototypes ***/
@@ -53,37 +54,17 @@ xtr_hash_t * xtr_hash_new (xtr_hash_size_t hash_size, int data_size, int flags)
 	xtr_hash_t *hash = NULL;
 
 	// Allocate memory for the new hash
-	if ((hash = malloc(sizeof(xtr_hash_t))) == NULL)
-	{
-		perror("xtr_hash_new: malloc");
-		exit(-1);
-	}
-	memset(hash, 0, sizeof(xtr_hash_t));
-	//hash = xmalloc_and_zero(sizeof(xtr_hash_t));
+	hash = xmalloc_and_zero(sizeof(xtr_hash_t));
 
 	// Allocate memory for head and collision arrays
 	hash->head_size = hash_size;
-	if ((hash->head = malloc(hash->head_size * sizeof(xtr_hash_cell_t))) == NULL)
-	{
-		perror("xtr_hash_new: hash->head: malloc");
-		exit(-1);
-	}
+	hash->head = xmalloc(hash->head_size * sizeof(xtr_hash_cell_t));
 	hash->collision_size = XTR_HASH_COLLISION_ARRAY_SIZE(hash->head_size);
-	if ((hash->collision = malloc(hash->collision_size * sizeof(xtr_hash_cell_t))) == NULL)
-	{
-		perror("xtr_hash_new: hash->collision: malloc");
-		exit(-1);
-	}
+	hash->collision = xmalloc(hash->collision_size * sizeof(xtr_hash_cell_t));
 
 	// Allocate memory for the data storage pool
 	hash->data_size = data_size;
-	if ((hash->data_pool = malloc(data_size * (hash->head_size + hash->collision_size))) == NULL)
-	{
-		perror("xtr_hash_new: hash->data_pool: malloc");
-		exit(-1);
-	}
-	memset(hash->data_pool, 0, data_size * (hash->head_size + hash->collision_size));
-	//hash->data_pool = xmalloc_and_zero(data_size * (hash->head_size + hash->collision_size));
+	hash->data_pool = xmalloc_and_zero(data_size * (hash->head_size + hash->collision_size));
 
 	// Set statistics to zero
 	xtr_hash_stats_reset(hash);
@@ -132,17 +113,17 @@ void xtr_hash_free(xtr_hash_t *hash)
 	{
 		if (hash->data_pool != NULL)
 		{
-			free(hash->data_pool);
+			xfree(hash->data_pool);
 		}
 		if (hash->collision != NULL)
 		{
-			free(hash->collision);
+			xfree(hash->collision);
 		}
 		if (hash->head != NULL)
 		{
-			free(hash->head);
+			xfree(hash->head);
 		}
-		free(hash);
+		xfree(hash);
 	}
 }
 
@@ -159,6 +140,8 @@ void xtr_hash_free(xtr_hash_t *hash)
  */
 int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 {
+	int added = 1;
+
 	// Apply the hash function to find corresponding cell in the head array
 	xtr_hash_cell_t *cell = XTR_HASH_GET_CELL_FOR_KEY(hash, key);
 	xtr_hash_cell_t *cell_to_add = cell;
@@ -176,13 +159,16 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 	{
 		// There was a previous key stored, get a free collision cell to fill
 		cell_to_add = hash->next_free_collision_cell;
-		if (cell_to_add == XTR_HASH_FULL) return 0;
-		hash->next_free_collision_cell = cell_to_add->next;
-		// Mark the hash cell with 1+ collisions
-		XTR_KEY_HASHED_WITH_COLLISION(cell, cell_to_add);
+
+		if ((added = (cell_to_add != XTR_HASH_FULL))) 
+		{
+			hash->next_free_collision_cell = cell_to_add->next;
+			// Mark the hash cell with 1+ collisions
+			XTR_KEY_HASHED_WITH_COLLISION(cell, cell_to_add);
 #if defined(DEBUG)
-		xtr_hash_stats_update(hash, num_collisions);
+			xtr_hash_stats_update(hash, num_collisions);
 #endif
+		}
 	}
 	else
 	{
@@ -191,10 +177,13 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 	}
 
 	// Store the key and copy the data to the data storage
-	cell_to_add->key = key;
-	if (data != NULL)
+	if (added)
 	{
-		memcpy(cell_to_add->data, data, hash->data_size);
+		cell_to_add->key = key;
+		if (data != NULL)
+		{
+			memcpy(cell_to_add->data, data, hash->data_size);
+		}
 	}
 
 	if (hash->flags & XTR_HASH_LOCK)
@@ -202,7 +191,7 @@ int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data)
 		pthread_rwlock_unlock(&hash->lock);
 	}
 
-	return 1;
+	return added;
 }
 
 
@@ -259,6 +248,8 @@ static int xtr_hash_search (xtr_hash_t *hash, uintptr_t key, xtr_hash_cell_t **p
  */
 int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 {
+	int found = 0;
+
 	xtr_hash_cell_t *previous = NULL, *cell = NULL;
 
         if (hash->flags & XTR_HASH_LOCK)
@@ -278,7 +269,7 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
 		{
 			memcpy(data, cell->data, hash->data_size);
 		}
-		return 1;
+		found = 1;
 	}
 
         if (hash->flags & XTR_HASH_LOCK)
@@ -286,7 +277,7 @@ int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data)
                 pthread_rwlock_unlock(&hash->lock);
         }
 
-	return 0;
+	return found;
 }
 
 

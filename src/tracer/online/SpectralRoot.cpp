@@ -31,6 +31,7 @@ using std::endl;
 using std::stringstream;
 
 #include "utils.h"
+#include "xalloc.h"
 
 #include "SpectralRoot.h"
 #include "OnlineConfig.h"
@@ -204,7 +205,7 @@ int SpectralRoot::FindRepresentative( signal_t *chop, Period_t *period )
       /* Save a new representative period */
       RepresentativePeriod_t rep_period;    
 
-      rep_period.period = (Period_t *)malloc(sizeof(Period_t));
+      rep_period.period = (Period_t *)xmalloc(sizeof(Period_t));
       memcpy(rep_period.period, period, sizeof(Period_t));
       rep_period.seen   = 1;
       rep_period.traced = 0;

@@ -24,6 +24,8 @@
 #ifndef _QUEUE_H
 #define _QUEUE_H
 
+#include "xalloc.h"
+
 /* Define macros for the queue manipulation functions. */
 
 /*
@@ -248,11 +250,7 @@
      * by allocating several structs at once. \
      */ \
     if ((free_item_ptr) == NULL) { \
-        new_ptr = (void *) malloc((NITEMS) * (item_size)); \
-        if ((new_ptr) == NULL) { \
-            fprintf(stderr, "%s: out of memory\n", name); \
-            exit(1); \
-        } \
+        new_ptr = (void *) xmalloc((NITEMS) * (item_size)); \
  \
         /* Link all the free structs using the first field in the struct. */ \
         /* This assumes that the structure is large enough to hold a pointer. */ \
@@ -285,11 +283,7 @@
      * by allocating several structs at once. \
      */ \
     if ((free_item_ptr) == NULL) { \
-        new_ptr = (void *) malloc((NITEMS) * (item_size)); \
-        if ((new_ptr) == NULL) { \
-            fprintf(stderr, "%s: out of memory\n", name); \
-            exit(1); \
-        } \
+        new_ptr = (void *) xmalloc((NITEMS) * (item_size)); \
  \
         /* Link all the free structs using the first field in the struct. */ \
         /* This assumes that the structure is large enough to hold a pointer. */ \
@@ -305,7 +299,7 @@
     /* Remove a free item from the front of the list. */ \
     new_ptr = free_item_ptr; \
     free_item_ptr = (void *) *(long **)(free_item_ptr); \
-    memset(new_ptr, 0, item_size); \
+    xmemset(new_ptr, 0, item_size); \
 }
 
 /* define a macro for free-ing a new structure */
@@ -327,11 +321,7 @@
      * by allocating several structs at once. \
      */ \
     if ((free_item_ptr) == NULL) { \
-        new_ptr = (void *) malloc((NITEMS) * (item_size)); \
-        if ((new_ptr) == NULL) { \
-            fprintf(stderr, "%s: out of memory\n", name); \
-            exit(1); \
-        } \
+        new_ptr = (void *) xmalloc((NITEMS) * (item_size)); \
  \
         /* Link all the free structs using the first field in the struct. */ \
         /* This assumes that the structure is large enough to hold a pointer. */ \
@@ -358,11 +348,7 @@
      * by allocating several structs at once. \
      */ \
     if ((free_item_ptr) == NULL) { \
-        new_ptr = (void *) malloc((NITEMS) * (item_size)); \
-        if ((new_ptr) == NULL) { \
-            fprintf(stderr, "%s: out of memory\n", name); \
-            exit(1); \
-        } \
+        new_ptr = (void *) xmalloc((NITEMS) * (item_size)); \
  \
         /* Link all the free structs using the first field in the struct. */ \
         /* This assumes that the structure is large enough to hold a pointer. */ \
@@ -378,7 +364,7 @@
     /* Remove a free item from the front of the list. */ \
     new_ptr = free_item_ptr; \
     free_item_ptr = (void *) *(long **)(free_item_ptr); \
-    memset(new_ptr, 0, item_size); \
+    xmemset(new_ptr, 0, item_size); \
     fprintf(stderr, "%s NEWZ 0x%x 0x%x\n", (name), (void *) (new_ptr), (item_size)); \
 }
 

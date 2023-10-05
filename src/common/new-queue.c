@@ -34,6 +34,7 @@
 #endif
 
 #include "new-queue.h"
+#include "xalloc.h"
 
 NewQueue_t * NewQueue_create (size_t SizeOfElement, int ElementsPerAllocation)
 {
@@ -43,12 +44,7 @@ NewQueue_t * NewQueue_create (size_t SizeOfElement, int ElementsPerAllocation)
 	fprintf (stderr, "NewQueue_create (SizeOfElement = %d, ElementsPerAllocation = %d)\n", SizeOfElement, ElementsPerAllocation);
 #endif
 
-	tmp = (NewQueue_t*) malloc (sizeof(NewQueue_t));
-	if (NULL == tmp)
-	{
-		fprintf (stderr, "mpi2prv: Failed to allocate the new queue!\n");
-		exit (-1);
-	}
+	tmp = (NewQueue_t*) xmalloc (sizeof(NewQueue_t));
 
 	tmp->ElementsAllocated = 0;
 	tmp->NumOfElements = 0;
@@ -77,12 +73,7 @@ void NewQueue_add (NewQueue_t *q, void *data)
 
 	if (q->NumOfElements == q->ElementsAllocated)
 	{
-		q->Data = realloc (q->Data, (q->ElementsAllocated+q->ElementsPerAllocation) * q->SizeOfElement);
-		if (NULL == q->Data)
-		{
-			fprintf (stderr, "mpi2prv: Failed to reallocate the new queue!\n");
-			exit (-1);
-		}
+		q->Data = xrealloc (q->Data, (q->ElementsAllocated+q->ElementsPerAllocation) * q->SizeOfElement);
 		q->ElementsAllocated = q->ElementsAllocated+q->ElementsPerAllocation;
 	}
 

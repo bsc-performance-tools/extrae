@@ -117,7 +117,6 @@ do
 	done
 	echo -e ") = task_ptr;\n"                                                    >> ${INTERMEDIATE_WRAPPERS}
 	echo -e "\tExtrae_OpenMP_UF_Entry ((void *)task_real);"                                                            >> ${INTERMEDIATE_WRAPPERS}
-	echo -e "\tBackend_Leave_Instrumentation (); /* We're entering user code */" >> ${INTERMEDIATE_WRAPPERS}
 	echo -e -n "\ttask_real (p1, p2"                                             >> ${INTERMEDIATE_WRAPPERS}
 	for i in `seq 1 ${number}`
 	do

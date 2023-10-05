@@ -541,3 +541,61 @@ void Probe_IO_ioctl_Exit (void)
   }
 }
 
+/**
+ * Probe_IO_close_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'close'
+ * \param fildes A file descriptor
+ */
+void
+Probe_IO_close_Entry(int fildes)
+{
+	if (mpitrace_on && trace_io_enabled)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CLOSE_EV, EVT_BEGIN, fildes);
+	}
+}
+
+/**
+ * Probe_IO_close_Exit
+ *
+ * Probe injected at the end of the I/O call 'close'
+ */
+void
+Probe_IO_close_Exit(void)
+{
+	if (mpitrace_on && trace_io_enabled)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CLOSE_EV, EVT_END, EMPTY);
+	}
+}
+
+/**
+ * Probe_IO_fclose_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'fclose'
+ * \param stream A pointer to FILE
+ */
+void
+Probe_IO_fclose_Entry(FILE *stream)
+{
+	if (mpitrace_on && trace_io_enabled)
+	{
+		int fd = (stream != NULL) ? fileno(stream) : -1;
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, FCLOSE_EV, EVT_BEGIN, fd);
+	}
+}
+
+/**
+ * Probe_IO_fclose_Exit
+ *
+ * Probe injected at the end of the I/O call 'fclose'
+ */
+void
+Probe_IO_fclose_Exit(void)
+{
+	if (mpitrace_on && trace_io_enabled)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, FCLOSE_EV, EVT_END, EMPTY);
+	}
+}

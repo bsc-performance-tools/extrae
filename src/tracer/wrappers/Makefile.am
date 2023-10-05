@@ -12,7 +12,7 @@ if HAVE_MPI
 SUBDIRS += MPI
 endif
 
-if WANT_CUDAorCUPTI
+if HAVE_CUDA
 SUBDIRS += CUDA
 endif
 
@@ -26,4 +26,12 @@ endif
 
 if WANT_JAVA_JVMTI
 SUBDIRS += JAVA
+endif
+
+if WANT_OPENACC
+SUBDIRS += OPENACC
+endif
+
+if HAVE_GASPI
+SUBDIRS += GASPI
 endif

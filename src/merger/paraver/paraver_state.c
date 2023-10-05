@@ -41,6 +41,7 @@
 #include "object_tree.h"
 #include "paraver_state.h"
 #include "paraver_generator.h"
+#include "xalloc.h"
 
 // #define DEBUG_STATES
 
@@ -81,16 +82,10 @@ unsigned Push_State (unsigned new_state, unsigned ptask, unsigned task, unsigned
 	/* Do we have space to inser the state? If not, allocate it! */
 	if (thread_info->nStates == thread_info->nStates_Allocated)
 	{
-		thread_info->State_Stack = (int*) realloc (thread_info->State_Stack,
+		thread_info->State_Stack = (int*) xrealloc (thread_info->State_Stack,
 		  (thread_info->nStates_Allocated + MAX_STATES_ALLOCATION)*sizeof(int));
 
-		if (thread_info->State_Stack == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Error! Cannot reallocate state stack for object %d:%d:%d\n", ptask, task, thread);
-			exit (-1);
-		}
-		else
-			thread_info->nStates_Allocated += MAX_STATES_ALLOCATION;
+		thread_info->nStates_Allocated += MAX_STATES_ALLOCATION;
 	}
 
 	thread_info->State_Stack[thread_info->nStates++] = new_state;
@@ -297,12 +292,7 @@ void Initialize_States (FileSet_t * fset)
    thread_t * thread_info;
 
    num_excluded_states = 1;
-   excluded_states = (int *)malloc(sizeof(int) * num_excluded_states);
-	if (excluded_states == NULL)
-	{
-		fprintf(stderr, "mpi2prv: Fatal error! Cannot allocate memory for excluded_states\n");
-		exit (-1);
-	}
+   excluded_states = (int *)xmalloc(sizeof(int) * num_excluded_states);
    excluded_states[0] = STATE_IDLE;
 
    for (obj = 0; obj < num_Files_FS (fset); obj++)

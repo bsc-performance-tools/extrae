@@ -45,31 +45,27 @@
 #include "trace_macros.h"
 #include "pthread_probe.h"
 
-// #define DEBUG
+//#define DEBUG
 //#define DEBUG_MUTEX
 
 #if defined(PIC)
+
 static int (*pthread_create_real)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*) = NULL;
 static int (*pthread_join_real)(pthread_t,void**) = NULL;
 static int (*pthread_detach_real)(pthread_t) = NULL;
 static void (*pthread_exit_real)(void*) = NULL;
-#if defined(HAVE_PTHREAD_BARRIER_WAIT)
 static int (*pthread_barrier_wait_real)(pthread_barrier_t *barrier) = NULL;
-#endif
 
 static int (*pthread_mutex_lock_real)(pthread_mutex_t*) = NULL;
 static int (*pthread_mutex_trylock_real)(pthread_mutex_t*) = NULL;
 static int (*pthread_mutex_timedlock_real)(pthread_mutex_t*,const struct timespec *) = NULL;
 static int (*pthread_mutex_unlock_real)(pthread_mutex_t*) = NULL;
 
-#if 0
-/* HSG
-   instrumenting these routines makes the included examples deadlock when running... 
-*/
-static int (*pthread_cond_signal_real)(pthread_cond_t*) = NULL;
+#if defined(WANT_PTHREAD_COND_CALLS)
 static int (*pthread_cond_broadcast_real)(pthread_cond_t*) = NULL;
-static int (*pthread_cond_wait_real)(pthread_cond_t*,pthread_mutex_t*) = NULL;
 static int (*pthread_cond_timedwait_real)(pthread_cond_t*,pthread_mutex_t*,const struct timespec *) = NULL;
+static int (*pthread_cond_signal_real)(pthread_cond_t*) = NULL;
+static int (*pthread_cond_wait_real)(pthread_cond_t*,pthread_mutex_t*) = NULL;
 #endif
 
 static int (*pthread_rwlock_rdlock_real)(pthread_rwlock_t *) = NULL;
@@ -103,13 +99,11 @@ static void GetpthreadHookPoints (int rank)
 	if (pthread_join_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_join in DSOs!!\n");
 
-#if defined(HAVE_PTHREAD_BARRIER_WAIT)
-  	/* Obtain @ for pthread_barrier_wait */
+	/* Obtain @ for pthread_barrier_wait */
 	pthread_barrier_wait_real =
 		(int(*)(pthread_barrier_t *)) dlsym (RTLD_NEXT, "pthread_barrier_wait");
 	if (pthread_barrier_wait_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_barrier_wait in DSOs!!\n");
-#endif
 
 	/* Obtain @ for pthread_detach */
 	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
@@ -141,7 +135,7 @@ static void GetpthreadHookPoints (int rank)
 	if (pthread_mutex_timedlock_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_mutex_timedlock in DSOs!!\n");
 
-#if 0
+#if defined(WANT_PTHREAD_COND_CALLS)
 	/* Obtain @ for pthread_cond_signal */
 	pthread_cond_signal_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_signal");
 	if (pthread_cond_signal_real == NULL && rank == 0)
@@ -162,7 +156,7 @@ static void GetpthreadHookPoints (int rank)
 	if (pthread_cond_timedwait_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_timedwait in DSOs!!\n");
 #endif
-	
+
 	/* Obtain @ for pthread_rwlock_rdlock */
 	pthread_rwlock_rdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_rdlock");
 	if (pthread_rwlock_rdlock_real == NULL && rank == 0)
@@ -216,9 +210,7 @@ struct pthread_create_info
 	int pthreadID;
 	void *(*routine)(void*);
 	void *arg;
-	
-	pthread_cond_t wait;
-	pthread_mutex_t lock;
+	pthread_barrier_t barrier;
 };
 
 static void * pthread_create_hook (void *p1)
@@ -230,10 +222,8 @@ static void * pthread_create_hook (void *p1)
 
 	Backend_SetpThreadIdentifier (i->pthreadID);
 
-	/* Notify the calling thread */
-	pthread_mutex_lock_real (&(i->lock));
-	pthread_cond_signal (&(i->wait));
-	pthread_mutex_unlock_real (&(i->lock));
+	/* Wake up the calling thread */
+	pthread_barrier_wait_real(&(i->barrier));
 
 	Backend_Enter_Instrumentation ();
 	Probe_pthread_Function_Entry (routine);
@@ -289,13 +279,10 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 
 			Probe_pthread_Create_Entry(p3);
 
-			pthread_cond_init(&(i.wait), NULL);
-			pthread_mutex_init(&(i.lock), NULL);
-			pthread_mutex_lock_real(&(i.lock));
-
 			i.arg = p4;
 			i.routine = p3;
 			i.pthreadID = Backend_getNumberOfThreads();
+			pthread_barrier_init(&(i.barrier), NULL, 2);
 
 			/*
 			 * XXX Should this be Backend_getMaximumOfThreads()? If we
@@ -309,16 +296,22 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 
 			if (0 == res)
 			{
-				/* if succeded, wait for a completion on copy the info */
-				pthread_cond_wait(&(i.wait), &(i.lock));
-
 				Backend_SetpThreadID(p1, i.pthreadID);
+
+				/* Wait for the new thread to copy data from the structure 'i'
+				 * before continuing (and potentially destroying 'i' by the end
+				 * of this function). This synchronization was done before with
+				 * pthread_cond_signal/wait, but there were issues here 
+				 * calling pthread_cond_destroy. Now we rely on pthread_barrier_wait, 
+				 * but this might not be always available, and we currently turn off 
+				 * pthread tracing support if this is not available. If we find
+				 * systems that can't use this, consider changing this synchronization
+				 * into a semaphore (sem_wait).
+				 */
+				pthread_barrier_wait_real(&(i.barrier));
 			}
 
-			pthread_mutex_unlock_real(&(i.lock));
-			pthread_mutex_destroy(&(i.lock));
-			pthread_cond_destroy(&(i.wait));
-
+			pthread_barrier_destroy(&(i.barrier));
 			Probe_pthread_Create_Exit();
 			Backend_Leave_Instrumentation();
 
@@ -601,8 +594,7 @@ int pthread_mutex_unlock (pthread_mutex_t *m)
 	return res;
 }
 
-
-#if 0
+#if defined(WANT_PTHREAD_COND_CALLS)
 int pthread_cond_signal (pthread_cond_t *c)
 {
 	int res = 0;
@@ -721,7 +713,7 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_timedwait (%p,%p,%p)\n", c, m, t);
-	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_wait_real at %p\n", pthread_cond_wait_real);
+	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_timedwait_real at %p\n", pthread_cond_timedwait_real);
 #endif
 
 	if (pthread_cond_timedwait_real != NULL && EXTRAE_INITIALIZED() &&
@@ -1007,7 +999,6 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 	return res;
 }
 
-#if defined(HAVE_PTHREAD_BARRIER_WAIT)
 int pthread_barrier_wait (pthread_barrier_t *barrier)
 {
 	int res = 0;
@@ -1042,7 +1033,7 @@ int pthread_barrier_wait (pthread_barrier_t *barrier)
 	}
 	return res;
 }
-#endif /* OS_ANDROID */
+
 #endif /* PIC */
 
 /*

@@ -58,11 +58,13 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "utils.h"
+#include "xalloc.h"
 #include "hwc.h"
 #include "xml-parse.h"
 #include "wrapper.h"
 #include "signals.h"
 #if defined(MPI_SUPPORT)
+# include "mpi_interface.h"
 # include "mpi_wrapper.h"
 #endif
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
@@ -84,6 +86,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(CUDA_SUPPORT)
 # include "cuda_probe.h"
 #endif
+#if defined(GASPI_SUPPORT)
+# include "gaspi_probe.h"
+#endif
 #if defined(SAMPLING_SUPPORT)
 # include "sampling-common.h"
 # include "sampling-timer.h"
@@ -93,6 +98,12 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #if defined(PTHREAD_SUPPORT)
 # include "pthread_probe.h"
+#endif
+#if defined(INSTRUMENT_IO)
+# include "io_wrapper.h"
+#endif
+#if defined(OPENACC_SUPPORT)
+# include "openacc_wrapper.h"
 #endif
 #include "malloc_probe.h"
 
@@ -139,7 +150,7 @@ static xmlChar * deal_xmlChar_env (int rank, xmlChar *str)
 		if (sublen > 1 && tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
 		{
 			char tmp2[sublen];
-			memset (tmp2, 0, sublen);
+			xmemset (tmp2, 0, sublen);
 			strncpy (tmp2, (const char*) &tmp[1], sublen-2);
 
 			if (getenv (tmp2) == NULL)
@@ -221,14 +232,70 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
-			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <MPI> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			mfprintf (stdout, PACKAGE_NAME
+			    ": <%s> tag at <MPI> level will be ignored."
+			    " This library does not support CPU HW counters.\n",
+			    TRACE_COUNTERS);
 			tracejant_hwc_mpi = FALSE;
 #endif
+			XML_FREE(enabled);
+		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_MPI_COMM_CALLS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			capture_mpi_comm_calls = enabled != NULL && !xmlStrcasecmp (enabled, xmlYES);
+			mfprintf (stdout, PACKAGE_NAME": %s MPI_Comm_* calls will be %s.\n", 
+			          (capture_mpi_comm_calls ? "All" : "Some"),
+			          (capture_mpi_comm_calls ? "traced" : "excluded")); 
 			XML_FREE(enabled);
 		}
 		else
 		{
 			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <MPI> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
+
+#if defined(GASPI_SUPPORT)
+/* Configure GASPI related parameters */
+static void Parse_XML_GASPI(int rank, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	/* Parse all TAGs and annotate them for later use */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip comments */
+		if (!xmlStrcasecmp(tag->name, xmlCOMMENT) ||
+		    !xmlStrcasecmp(tag->name, xmlTEXT))
+		{
+		}
+		/* Shall we gather counters in GASPI calls? */
+		else if (!xmlStrcasecmp(tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp_env(rank, tag, TRACE_ENABLED);
+			Extrae_set_trace_GASPI_HWC(enabled != NULL && !xmlStrcasecmp(enabled, xmlYES));
+#if USE_HARDWARE_COUNTERS
+			mfprintf(stdout, PACKAGE_NAME
+			    ": GASPI routines will %scollect HW counters information.\n",
+			    Extrae_get_trace_GASPI_HWC()?"":"NOT ");
+#else
+			mfprintf(stdout, PACKAGE_NAME
+			    ": <%s> tag at <GASPI> level will be ignored."
+			    "This library does not support CPU HW counters.\n",
+			    TRACE_COUNTERS);
+			Extrae_set_trace_GASPI_HWC(FALSE);
+#endif
+			XML_FREE(enabled);
+		} else
+		{
+			mfprintf(stderr, PACKAGE_NAME
+			    ": XML unknown tag '%s' at <GASPI> level\n",
+			    tag->name);
 		}
 
 		tag = tag->next;
@@ -332,6 +399,22 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
                         XML_FREE(enabled);
 #else
                         mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support SHMEM.\n", TRACE_SHMEM);
+#endif
+		}
+		else if (!xmlStrcasecmp(tag->name, TRACE_GASPI))
+		{
+#if defined(GASPI_SUPPORT)
+			xmlChar *enabled = xmlGetProp_env(rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp(enabled, xmlYES))
+			{
+				char *callers = (char *)xmlNodeListGetString_env(rank, xmldoc, tag->xmlChildrenNode, 1);
+				if (callers != NULL)
+					Parse_Callers(rank, callers, CALLER_MPI);
+				XML_FREE(callers);
+			}
+			XML_FREE(enabled);
+#else
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support GASPI.\n", TRACE_GASPI);
 #endif
 		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_DYNAMIC_MEMORY))
@@ -699,6 +782,28 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 
 				XML_FREE (sfrequency);
 				XML_FREE (speriod);
+
+				xmlNodePtr subtag;
+				subtag = tag->xmlChildrenNode;
+
+				while (subtag != NULL)
+				{
+					/* Skip coments */
+					if (!xmlStrcasecmp (subtag->name, xmlTEXT) || !xmlStrcasecmp (subtag->name, xmlCOMMENT))
+					{
+					}
+					/* Is the user passing information related to sampling pebs loads? */
+					else if (!xmlStrcasecmp (subtag->name, TRACE_PEBS_SAMPLING_STORES_OFFCORE_L3Ms))
+					{
+						xmlChar *offcore_stl3m_enabled = xmlGetProp_env (rank, subtag, TRACE_ENABLED);
+						if (offcore_stl3m_enabled != NULL && !xmlStrcasecmp (offcore_stl3m_enabled, xmlYES))
+						{
+							Extrae_IntelPEBS_setOffcoreStoreL3MSampling(TRUE);
+						}
+						XML_FREE(offcore_stl3m_enabled);
+					}
+					subtag = subtag->next;
+				}
 			}
 			XML_FREE(enabled);
 		}
@@ -1044,19 +1149,9 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 
 	if (num_sampling_hwc > 0)
 	{
-		t_counters = (char **) malloc (sizeof(char*) * num_sampling_hwc);
-		if (t_counters == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! cannot allocate information for the sampling counters\n");
-			exit (-1);
-		}
-		t_periods = (unsigned long long *) malloc (sizeof(unsigned long long) * num_sampling_hwc);
-		if (t_periods == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! cannot allocate information for the sampling periods\n");
-			exit (-1);
-		}
-	
+		t_counters = (char **) xmalloc (sizeof(char*) * num_sampling_hwc);
+		t_periods = (unsigned long long *) xmalloc (sizeof(unsigned long long) * num_sampling_hwc);
+		
 		/* Parse all HWC sets, and annotate them to use them later */
 		set_tag = current->xmlChildrenNode;
 		i = 0;
@@ -1195,6 +1290,10 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 			}
 			XML_FREE(hwc_startset);
 			XML_FREE(hwc_enabled);
+		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_UNCORE))
+		{
+			// This is only considered by the new launcher
 		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_NETWORK))
 		{
@@ -1379,6 +1478,10 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	xmlChar *sortaddresses;
 	xmlChar *keepmpits;
 	xmlChar *traceoverwrite;
+	xmlChar *stopatpct_s;
+	long     stopatpct = 0;
+	xmlChar *translate_addresses;
+	xmlChar *translate_data_addresses;
 	char *filename;
 
 	if (tracetype != NULL && !xmlStrcasecmp (tracetype, TRACE_TYPE_DIMEMAS))
@@ -1397,12 +1500,6 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		set_option_merge_TraceOverwrite (!xmlStrcasecmp (traceoverwrite, xmlYES));
 	else
 		set_option_merge_TraceOverwrite (TRUE);
-
-	sortaddresses = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SORTADDRESSES);
-	if (sortaddresses != NULL)
-		set_option_merge_SortAddresses (!xmlStrcasecmp (sortaddresses, xmlYES));
-	else
-		set_option_merge_SortAddresses (FALSE);
 
 	synchronization = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SYNCHRONIZATION);
 	if (synchronization != NULL && !xmlStrcasecmp (synchronization, TRACE_MERGE_SYN_DEFAULT))
@@ -1447,6 +1544,20 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		}
 	}
 
+	stopatpct_s = xmlGetProp_env(rank, current_tag, TRACE_MERGE_STOP_AT_PCT);
+	if (stopatpct_s != NULL)
+	{
+		stopatpct = strtol((char *)stopatpct_s, NULL, 10);
+		if (stopatpct <= 0 || stopatpct >= 100)
+		{
+			mfprintf(stderr, PACKAGE_NAME": Warning! Invalid value '%ld' for property <%s> in tag <%s>. This option will be ignored.\n", stopatpct, TRACE_MERGE, TRACE_MERGE_STOP_AT_PCT);
+			stopatpct = 0;
+		}
+		set_option_merge_StopAtPercentage(stopatpct);
+
+		XML_FREE(stopatpct_s);
+	}
+
 #if defined(MPI_SUPPORT)
 	treefanout = xmlGetProp_env (rank, current_tag, TRACE_MERGE_TREE_FAN_OUT);
 	if (treefanout != NULL)
@@ -1464,7 +1575,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 #endif
 
 	binary = xmlGetProp_env (rank, current_tag, TRACE_MERGE_BINARY);
-	if (binary != NULL)	
+	if (binary != NULL)
 		set_merge_ExecutableFileName ((const char*)binary);
 
 	jointstates = xmlGetProp_env (rank, current_tag, TRACE_MERGE_JOINT_STATES);
@@ -1472,6 +1583,29 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		set_option_merge_JointStates (FALSE);
 	else
 		set_option_merge_JointStates (TRUE);
+
+	translate_addresses = xmlGetProp_env(rank, current_tag, TRACE_MERGE_TRANSLATE_ADDRESSES);
+	sortaddresses = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SORTADDRESSES);
+	if (translate_addresses != NULL && !xmlStrcasecmp(translate_addresses, xmlNO))
+	{
+		set_option_merge_TranslateAddresses(FALSE);
+		set_option_merge_SortAddresses (FALSE);
+	}
+	else
+	{
+		set_option_merge_TranslateAddresses(TRUE);
+
+		if (sortaddresses != NULL && !xmlStrcasecmp(sortaddresses, xmlNO))
+			set_option_merge_SortAddresses (FALSE);
+		else
+			set_option_merge_SortAddresses (TRUE);
+	}
+
+	translate_data_addresses = xmlGetProp_env(rank, current_tag, TRACE_MERGE_TRANSLATE_DATA_ADDRESSES);
+	if (translate_data_addresses != NULL && !xmlStrcasecmp(translate_data_addresses, xmlNO))
+		set_option_merge_TranslateDataAddresses(FALSE);
+	else
+		set_option_merge_TranslateDataAddresses(TRUE);
 
 	filename = (char*) xmlNodeListGetString_env (rank, xmldoc, current_tag->xmlChildrenNode, 1);
 	if (filename == NULL || strlen(filename) == 0)
@@ -1493,6 +1627,8 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	XML_FREE (jointstates);
 	XML_FREE (keepmpits);
 	XML_FREE (traceoverwrite);
+	XML_FREE (translate_addresses);
+	XML_FREE (translate_data_addresses);
 }
 #endif
 
@@ -1663,7 +1799,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 	xmlNodePtr current_tag;
 	xmlDocPtr  xmldoc;
 	xmlNodePtr root_tag;
-	char cwd[TMP_DIR];
+	char cwd[TMP_DIR_LEN];
 	int DynamicMemoryInstrumentation = FALSE;
 	int IOInstrumentation = FALSE;
 	int SysCallInstrumentation = FALSE;
@@ -1711,7 +1847,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 				{
 					if (tracehome != NULL)
 					{
-						strncpy (trace_home, tracehome, TMP_DIR);
+						strncpy (trace_home, tracehome, TMP_DIR_LEN);
 						mfprintf (stdout, PACKAGE_NAME": Tracing package is located on %s\n", trace_home);
 					}
 					else
@@ -1851,6 +1987,31 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 							tracejant_mpi = FALSE;
 						XML_FREE(enabled);
 					}
+					/* GASPI related configuration */
+					else if (!xmlStrcasecmp(current_tag->name, TRACE_GASPI))
+					{
+						xmlChar *enabled = xmlGetProp_env(rank, current_tag, TRACE_ENABLED);
+
+						if (enabled != NULL && !xmlStrcasecmp(enabled, xmlYES))
+						{
+#if defined(GASPI_SUPPORT)
+							Extrae_set_trace_GASPI(TRUE);
+							Parse_XML_GASPI(rank, current_tag);
+#else
+							mfprintf(stdout, PACKAGE_NAME
+							    ": Warning! <%s> tag will be ignored. "
+							    "This library does not support GASPI.\n",
+							    TRACE_GASPI);
+#endif
+						}
+#if defined(GASPI_SUPPORT)
+						else if (enabled != NULL && !xmlStrcasecmp(enabled, xmlNO))
+						{
+							Extrae_set_trace_GASPI(FALSE);
+						}
+#endif
+						XML_FREE(enabled);
+					}
 					/* Bursts related configuration */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_BURSTS))
 					{
@@ -1980,7 +2141,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 #if defined(EMBED_MERGE_IN_TRACE)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						xmlChar *tracetype = xmlGetProp_env (rank, root_tag, TRACE_TYPE);
-						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES) && getenv("EXTRAE_DISABLE_MERGE") == NULL)
 						{
 							Parse_XML_Merge (rank, xmldoc, current_tag, tracetype);
 							MergeAfterTracing = TRUE;
@@ -2005,7 +2166,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						}
 						XML_FREE(enabled);
 #else
-						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting dynamic memory calls.\n", TRACE_DYNAMIC_MEMORY);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting dynamic memory calls.\n", TRACE_DYNAMIC_MEMORY);
 #endif
 					}
 					/* Check for basic I/O instrumentation */
@@ -2014,24 +2175,36 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 #if defined(INSTRUMENT_IO)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
 							IOInstrumentation = TRUE;
+
+							xmlChar *internals = xmlGetProp_env (rank, current_tag, TRACE_IO_INTERNALS);
+							if (internals != NULL && !xmlStrcasecmp (internals, xmlYES))
+							{
+								mfprintf (stdout, PACKAGE_NAME": Internals activated for I/O instrumentation.\n");
+								xtr_IO_enable_internals();
+							}
+							XML_FREE(internals);
+						}
 						XML_FREE(enabled);
+
+
 #else
-						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting I/O calls.\n", TRACE_IO);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting I/O calls.\n", TRACE_IO);
 #endif
 					}
-          /* Check for syscall instrumentation */                             
-          else if (!xmlStrcasecmp (current_tag->name, TRACE_SYSCALL))                
-          {                                                                     
-#if defined(INSTRUMENT_SYSCALL)                                                      
-            xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-            if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))            
-              SysCallInstrumentation = TRUE;                                         
-            XML_FREE(enabled);                                                  
-#else                                                                           
-            mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting system calls.\n", TRACE_SYSCALL);
-#endif                                                                          
-          }                                                                     
+					/* Check for syscall instrumentation */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_SYSCALL))
+					{
+#if defined(INSTRUMENT_SYSCALL)
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							SysCallInstrumentation = TRUE;
+						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting system calls.\n", TRACE_SYSCALL);
+#endif
+					}
 					/* Check for intel pebs sampling */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_PEBS_SAMPLING))
 					{
@@ -2041,7 +2214,21 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 							Parse_XML_PEBS_Sampling (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 #else
-						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support PEBS sampling.\n", TRACE_PEBS_SAMPLING);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support PEBS sampling.\n", TRACE_PEBS_SAMPLING);
+#endif
+					}
+					/* Check for OpenACC instrumentation */
+					else if (!xmlStrcasecmp(current_tag->name, TRACE_OPENACC))
+					{
+#if defined(OPENACC_SUPPORT)
+						xmlChar *enabled = xmlGetProp_env(rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							Extrae_set_trace_OpenACC(TRUE);
+						else
+							Extrae_set_trace_OpenACC(FALSE);
+						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OPENACC instrumentation.\n", TRACE_OPENACC);
 #endif
 					}
 					else
@@ -2088,6 +2275,11 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 
   if (SysCallInstrumentation)                                                        
     mfprintf (stdout, PACKAGE_NAME": System calls instrumentation cannot be enabled using static version of the instrumentation library.\n");
+#endif
+
+#if defined(OPENACC_SUPPORT)
+	mfprintf (stdout, PACKAGE_NAME": OPENACC instrumentation is %s.\n",
+	Extrae_get_trace_OpenACC()?"enabled":"disabled");
 #endif
 
 	mfprintf (stdout, PACKAGE_NAME": Parsing the configuration file (%s) has ended\n", filename);   

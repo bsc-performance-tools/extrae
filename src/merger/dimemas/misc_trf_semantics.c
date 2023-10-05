@@ -142,7 +142,7 @@ static int Evt_SetCounters (event_t * current_event, unsigned long long current_
 
 	Dimemas_CPU_Burst (fset->output_file, task-1, thread-1, 0);
 	ResetCounters (ptask, task, thread);
-	HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
+	HardwareCounters_Change (ptask, task, thread, current_time, newSet, hwctype, hwcvalue);
 
 	for (i = 0; i < MAX_HWC+1; i++)
 		if (NO_COUNTER != hwctype[i])
