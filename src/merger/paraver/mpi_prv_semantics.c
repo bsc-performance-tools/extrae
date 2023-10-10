@@ -566,8 +566,8 @@ static int GlobalOP_event (event_t * current_event,
             (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_MATCHES) && /* The buffer behavior is to skip matches */
             (!MatchComms_Enabled(ptask, task))                         && /* Not matching already */
             (EvValue == EVT_END)                                       && /* End of the collective */
-            (Get_EvSize(current_event) == GET_NUM_TASKS(ptask))           /* World collective */
-            /* (getTagForCircularBuffer() == Get_EvAux(current_event)) */)
+            (Get_EvSize(current_event) == GET_NUM_TASKS(ptask))        && /* World collective */
+            (getTagForCircularBuffer() == Get_EvAux(current_event)))
 	{
 		MatchComms_On(ptask, task);
 	}
