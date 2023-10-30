@@ -90,15 +90,20 @@ AC_DEFUN([AX_CHECK_OPENMP],
 AC_DEFUN([AX_HAVE_SYNC_FETCH_AND_ADD],
 [
 	AC_MSG_CHECKING([for __sync_fetch_and_add availability])
-	AC_TRY_LINK(
-		[ ], 
-		[ volatile int i; __sync_fetch_and_add(&i,1); ],
-		[ have_sync_fetch_and_add="yes" ]
-	)
-
-	if test "${have_sync_fetch_and_add}" = "yes" -a "${IS_GR740_MACHINE}" = "no" ; then
-		AC_DEFINE([HAVE__SYNC_FETCH_AND_ADD], 1, [Define if __sync_fetch_and_add is available])
-		AC_MSG_RESULT([yes])
+    # GR740 has a non-functional __sync_fetch_and_add
+    if test "${IS_GR740_MACHINE}" = "no"; then
+    	AC_TRY_LINK(
+    		[ ], 
+    		[ volatile int i; __sync_fetch_and_add(&i,1); ],
+    		[ have_sync_fetch_and_add="yes" ]
+    	)
+    
+    	if test "${have_sync_fetch_and_add}" = "yes"; then
+    		AC_DEFINE([HAVE__SYNC_FETCH_AND_ADD], 1, [Define if __sync_fetch_and_add is available])
+    		AC_MSG_RESULT([yes])
+        else
+            AC_MSG_RESULT([no])
+        fi
 	else
 		AC_MSG_RESULT([no])
 	fi

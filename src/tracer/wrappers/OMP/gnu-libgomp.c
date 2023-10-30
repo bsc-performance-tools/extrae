@@ -2839,20 +2839,7 @@ static int gnu_libgomp_get_hook_points (int rank)
 	int count = 0;
 
 	UNREFERENCED_PARAMETER(rank);
-#if defined (OS_RTEMS)
 
-if ((__GOMP_version = getenv("EXTRAE___GOMP_version")) != NULL) {
-		if ((strcmp(__GOMP_version, GOMP_API_4_5) != 0) &&
-		    (strcmp(__GOMP_version, GOMP_API_4_0) != 0) &&
-		    (strcmp(__GOMP_version, GOMP_API_3_1) != 0)) {
-			fprintf(stderr, PACKAGE_NAME": ERROR! Unsupported GOMP version (%s). Valid versions are: 3.1, 4.0 and 4.5. Exiting ...\n", __GOMP_version);
-			exit (-1);
-		}
-	}
-	else{
-		printf("GOMP version not found, please specify the EXTRAE___GOMP_version environment variable");
-	}
-#else
 	// Detect the OpenMP version supported by the runtime
 	if ((__GOMP_version = getenv("EXTRAE___GOMP_version")) != NULL) {
 		if ((strcmp(__GOMP_version, GOMP_API_4_5) != 0) &&
@@ -2861,20 +2848,22 @@ if ((__GOMP_version = getenv("EXTRAE___GOMP_version")) != NULL) {
 			fprintf(stderr, PACKAGE_NAME": ERROR! Unsupported GOMP version (%s). Valid versions are: 3.1, 4.0 and 4.5. Exiting ...\n", __GOMP_version);
 			exit (-1);
 		}
-	} else if (dlsym(RTLD_NEXT, "GOMP_taskloop") != NULL) {
+	}
+#if !defined (OS_RTEMS)
+    else if (dlsym(RTLD_NEXT, "GOMP_taskloop") != NULL) {
 		__GOMP_version = GOMP_API_4_5;
 	} else if (dlsym(RTLD_NEXT, "GOMP_taskgroup_start") != NULL) {
 		__GOMP_version = GOMP_API_4_0;
 	} else {
 		__GOMP_version = GOMP_API_3_1;
 	}
+#endif /* !OS_RTEMS */
 
 	if (TASKID == 0)
 	{
 		fprintf (stdout, PACKAGE_NAME": Detected GOMP version is %s\n", __GOMP_version);
 	}
 
-#endif
 
   /**********************/
   /***** OpenMP 3.1 *****/

@@ -42,10 +42,12 @@
 	}                                                                      \
 }
 
+#if defined(PIC) || defined (OS_RTEMS)
 int (*omp_get_thread_num_real)(void) = NULL;
 void (*omp_set_num_threads_real)(int) = NULL;
 void (*omp_set_lock_real)(omp_lock_t *) = NULL;
 void (*omp_unset_lock_real)(omp_lock_t *) = NULL;
+#endif /* PIC */
 
 #if defined (OS_RTEMS)
 extern int __real_omp_get_thread_num (void ) __attribute__((weak));

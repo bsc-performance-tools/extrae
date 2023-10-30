@@ -228,6 +228,12 @@ int __Extrae_Utils_append_from_to_file (const char *source, const char *destinat
 
 int __Extrae_Utils_rename_or_copy (char *origen, char *desti)
 {
+#if defined (OS_RTEMS)
+    /* 
+     * Renaming to an already existing filename using NFS on GR740 caused errors so we delete the destination file first
+     */ 
+	remove(desti);
+#endif
 	if (rename (origen, desti) == -1)
 	{
 		if (errno == EXDEV)
@@ -281,13 +287,6 @@ int __Extrae_Utils_rename_or_copy (char *origen, char *desti)
 			/* Remove the files */
 			unlink (origen);
 		}
-#if defined (OS_RTEMS)
-		else if (errno == EEXIST)
-		{
-			if (remove(desti) != -1)
-			__Extrae_Utils_rename_or_copy (origen, desti);
-		}
-#endif
 		else
 		{
 			perror("rename");

@@ -472,6 +472,7 @@ AC_CHECK_SIZEOF(ssize_t,${size_t_size})
 AC_CHECK_SIZEOF(size_t,${size_t_size})
 AC_CHECK_SIZEOF(void*,${voidp_size})
 
+# GR740 has a non-functional mallinfo structure
 if test "${IS_GR740_MACHINE}" != "yes" ; then
 AC_CHECK_MEMBER(struct mallinfo.arena,
    [AC_DEFINE([HAVE_MALLINFO], [1], [Whether the system supports mallinfo structure])],
