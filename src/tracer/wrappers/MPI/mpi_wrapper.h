@@ -37,7 +37,6 @@
 #include "defines.h"
 
 #include "wrapper.h"
-#include "mpi_stats.h"
 #include "hash_table.h"
 
 #if !defined(MPI_HAS_MPI_F_STATUS_SIZE)
@@ -100,9 +99,6 @@ void Extrae_network_routes_Wrapper(int mpi_rank);
 void Extrae_tracing_tasks_Wrapper(unsigned from, unsigned to);
 char *Extrae_core_get_mpits_file_name(void);
 void Extrae_MPI_prepareDirectoryStructures(int me, int world_size);
-
-void Extrae_MPI_stats_Wrapper(iotimer_t timestamp);
-
 
 void translateLocalToGlobalRank(MPI_Comm comm, MPI_Group group, int dest, int *receiver);
 

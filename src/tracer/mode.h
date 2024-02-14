@@ -48,13 +48,19 @@ int Trace_Mode_FirstMode (unsigned thread);
 
 /* Bursts mode specific */
 
-extern unsigned long long BurstsMode_Threshold;
-extern int BurstsMode_MPI_Stats;
+extern unsigned long long BurstMode_Threshold;
+extern int BurstMode_MPI_Stats;
+extern int BurstMode_OMP_Stats;
+extern int BurstMode_OMP_Summarization;
 
-#define MINIMUM_BURST_DURATION (BurstsMode_Threshold)
-#define TRACING_MPI_STATISTICS (BurstsMode_MPI_Stats)
+#define MINIMUM_BURST_DURATION (BurstMode_Threshold)
+#define TRACING_MPI_STATISTICS (BurstMode_MPI_Stats)
+#define TRACING_OMP_STATISTICS (BurstMode_OMP_Stats)
+#define OMP_SUMMARIZATION_ENABLED (BurstMode_OMP_Summarization)
 
-void TMODE_setBurstsThreshold  (unsigned long long threshold);
-void TMODE_setBurstsStatistics (int status);
+
+void TMODE_setBurstThreshold  (unsigned long long threshold);
+void TMODE_setBurstStatistics (int type,int status);
+void TMODE_setBurstOMPSummarization (int status);
 
 #endif /* __MODE_H__ */

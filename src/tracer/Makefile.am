@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-SUBDIRS = clocks hwc interfaces wrappers stats sampling
+SUBDIRS = clocks hwc interfaces wrappers sampling stats burst-mode
 
 if HAVE_ONLINE
   SUBDIRS += online
@@ -440,31 +440,25 @@ if HAVE_MPI
 if SINGLE_MPI_LIBRARY
 ADDITIONAL_MPI_LIBS_CF = $(INTERFACES_LIB)/MPI/libiface_mpicf.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_cf.la \
- $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 ADDITIONAL_MPI_DYNLIBS_CF = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpicf.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_cf.la \
- $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 endif
 
 ADDITIONAL_MPI_LIBS_C = $(INTERFACES_LIB)/MPI/libiface_mpi.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_c.la \
- $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 ADDITIONAL_MPI_DYNLIBS_C = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpic.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_c.la \
- $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 
 
 ADDITIONAL_MPI_LIBS_F = $(INTERFACES_LIB)/MPI/libiface_mpif.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_f.la \
- $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 ADDITIONAL_MPI_DYNLIBS_F = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpif.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_f.la \
- $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 endif
 
@@ -589,7 +583,9 @@ lib_dyn_cudampitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL
 #
 core_INCLUDES = \
  -I$(TRACER_INC) -I$(HWC_INC) -I$(CLOCKS_INC) -I$(INTERFACES_INC)/API -I$(INTERFACES_INC)/MPI \
+ -I$(STATS_INC) \
  -I$(STATS_INC)/MPI \
+ -I$(STATS_INC)/OMP \
  -I$(WRAPPERS_INC)/API \
  -I$(WRAPPERS_INC)/MPI \
  -I$(WRAPPERS_INC)/OMP \
@@ -798,6 +794,53 @@ if SINGLE_MPI_LIBRARY
 
   libmpitracecf_la_CFLAGS    += -DHAVE_ONLINE -I$(ONLINE_INC)
   libompitracecf_la_CFLAGS   += -DHAVE_ONLINE -I$(ONLINE_INC)
+endif
+
+endif
+
+
+omp_burst_MODULES = $(STATS_LIB)/libstats.la $(BURST_LIB)/libburstmode_omp.la
+mpi_burst_MODULES = $(STATS_LIB)/libstats.la $(BURST_LIB)/libburstmode_mpi.la
+newompi_burst_MODULES = $(STATS_LIB)/libstats.la $(BURST_LIB)/libburstmode_ompi.la
+
+burst_CFLAGS  = -DHAVE_BURST -I$(STATS_INC) -I$(BURST_INC)
+
+libnewomptrace_la_LIBADD     += $(omp_burst_MODULES)
+libnewomptrace_la_CFLAGS     += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
+
+if HAVE_MPI
+libmpitrace_la_LIBADD        += $(mpi_burst_MODULES)
+libmpitracef_la_LIBADD       += $(mpi_burst_MODULES)
+libptmpitrace_la_LIBADD      += $(mpi_burst_MODULES)
+libptmpitracef_la_LIBADD     += $(mpi_burst_MODULES)
+libompitrace_la_LIBADD       += $(mpi_burst_MODULES)
+libompitracef_la_LIBADD      += $(mpi_burst_MODULES)
+lib_dyn_mpitracec_la_LIBADD  += $(mpi_burst_MODULES)
+lib_dyn_mpitracef_la_LIBADD  += $(mpi_burst_MODULES)
+lib_dyn_mpitracecf_la_LIBADD += $(mpi_burst_MODULES)
+
+libnewompitrace_la_LIBADD    += $(newompi_burst_MODULES)
+
+libmpitrace_la_CFLAGS        += $(burst_CFLAGS)
+libmpitracef_la_CFLAGS       += $(burst_CFLAGS)
+libptmpitrace_la_CFLAGS      += $(burst_CFLAGS)
+libptmpitracef_la_CFLAGS     += $(burst_CFLAGS)
+libompitrace_la_CFLAGS       += $(burst_CFLAGS)
+libompitracef_la_CFLAGS      += $(burst_CFLAGS)
+lib_dyn_mpitracec_la_CFLAGS  += $(burst_CFLAGS)
+lib_dyn_mpitracef_la_CFLAGS  += $(burst_CFLAGS)
+lib_dyn_mpitracecf_la_CFLAGS += $(burst_CFLAGS)
+
+libnewompitrace_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+
+if SINGLE_MPI_LIBRARY
+  libmpitracecf_la_LIBADD    += $(mpi_burst_MODULES)
+  libptmpitracecf_la_LIBADD  += $(mpi_burst_MODULES)
+  libompitracecf_la_LIBADD   += $(mpi_burst_MODULES)
+
+  libmpitracecf_la_CFLAGS    += $(burst_CFLAGS)
+  libptmpitracecf_la_CFLAGS  += $(burst_CFLAGS)
+  libompitracecf_la_CFLAGS   += $(burst_CFLAGS)
 endif
 
 endif

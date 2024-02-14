@@ -16,3 +16,4 @@ ONLINE_DIR           = $(TRACER_DIR)/online
 MERGER_DIR           = $(SRC_DIR)/merger
 PRV_MERGER_DIR       = $(MERGER_DIR)/paraver
 TRF_MERGER_DIR       = $(MERGER_DIR)/dimemas
+BURST_MODE_DIR       = $(TRACER_DIR)/burst-mode

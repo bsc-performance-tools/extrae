@@ -222,9 +222,9 @@ void xtr_probe_entry_GOMP_teams_reg() __attribute__((weak));
 void xtr_probe_exit_GOMP_teams_reg() __attribute__((weak));
 
 void xtr_probe_entry_omp_set_num_threads() __attribute__((weak));
-void xtr_probe_exit_omp_set_num_threads() __attribute__((weak));
+void xtr_probe_exit_omp_set_num_threads(int num_threads) __attribute__((weak));
 void xtr_probe_entry_omp_set_num_threads_() __attribute__((weak));
-void xtr_probe_exit_omp_set_num_threads_() __attribute__((weak));
+void xtr_probe_exit_omp_set_num_threads_(int num_threads) __attribute__((weak));
 
 void xtr_probe_entry_omp_set_lock(void *lock) __attribute__((weak));
 void xtr_probe_exit_omp_set_lock(void *lock) __attribute__((weak));

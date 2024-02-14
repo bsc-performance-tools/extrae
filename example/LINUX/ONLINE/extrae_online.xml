@@ -76,7 +76,7 @@
                      min_likeness: minimum similarity to compare to periods equivalent -->
                 <spectral_advanced enabled="no" burst_threshold="80">
                     <periodic_zone     detail_level="profile"/>                <!-- choose from: none, profile         -->
-                    <non_periodic_zone detail_level="none" min_duration="1s"/> <!-- choose from: none, profile, bursts -->
+                    <non_periodic_zone detail_level="none" min_duration="1s"/> <!-- choose from: none, profile, burst -->
                 </spectral_advanced>
             </spectral>
         </online>
@@ -93,10 +93,8 @@
     <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
 
-  <bursts enabled="no">
-    <threshold enabled="yes">500u</threshold>
-    <mpi-statistics enabled="yes" />
-  </bursts>
+  <burst enabled="no" threshold="500u" mpi-statistics="yes" omp-statistics="yes" omp-summarization="no" />
+
 
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 

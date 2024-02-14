@@ -43,15 +43,17 @@ static int *First_Trace_Mode          = NULL;
 int Starting_Trace_Mode = TRACE_MODE_DETAIL;
 
 /* Bursts mode specific configuration variables */
-unsigned long long BurstsMode_Threshold = 10000000; /* 10ms */
-int                BurstsMode_MPI_Stats = ENABLED; 
+unsigned long long BurstMode_Threshold = 10000000; /* 10ms */
+int BurstMode_MPI_Stats = DISABLED;
+int BurstMode_OMP_Stats = DISABLED;
+int BurstMode_OMP_Summarization = DISABLED;
 
 static int is_ValidMode (int mode)
 {
 	switch(mode)
 	{
 		case TRACE_MODE_DETAIL:
-		case TRACE_MODE_BURSTS:
+		case TRACE_MODE_BURST:
 			return TRUE;
 		default:
 			return FALSE;
@@ -113,10 +115,12 @@ int Trace_Mode_Initialize (int num_threads)
 			case TRACE_MODE_DETAIL:
 				fprintf(stdout, "Detail.\n");
 				break;
-			case TRACE_MODE_BURSTS:
+			case TRACE_MODE_BURST:
 				fprintf(stdout, "CPU Bursts.\n");
-				fprintf(stdout, PACKAGE_NAME": Minimum burst threshold is %llu ns.\n", BurstsMode_Threshold);
-				fprintf(stdout, PACKAGE_NAME": MPI statistics are %s.\n", (BurstsMode_MPI_Stats ? "enabled" : "disabled"));
+				fprintf(stdout, PACKAGE_NAME": Minimum burst threshold is %llu ns.\n", BurstMode_Threshold);
+				fprintf(stdout, PACKAGE_NAME": MPI statistics are %s.\n", (BurstMode_MPI_Stats ? "enabled" : "disabled"));
+				fprintf(stdout, PACKAGE_NAME": OpenMP statistics are %s.\n", (BurstMode_OMP_Stats ? "enabled" : "disabled"));
+				fprintf(stdout, PACKAGE_NAME": OpenMP summarization is %s.\n", (BurstMode_OMP_Summarization ? "enabled" : "disabled"));
 				break;
 			default:
 				fprintf(stdout, "Unknown.\n");
@@ -137,7 +141,7 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 			{
 				case TRACE_MODE_DETAIL:
 					break;
-				case TRACE_MODE_BURSTS:
+				case TRACE_MODE_BURST:
 					ACCUMULATED_COUNTERS_RESET(tid);
 					break;
 				default:
@@ -165,7 +169,7 @@ Trace_mode_switch(void)
 	for (i=0; i<Backend_getNumberOfThreads(); i++)
 	{
 		Pending_Trace_Mode_Change[i] = TRUE;
-		Future_Trace_Mode[i] = (Current_Trace_Mode[i] == TRACE_MODE_DETAIL)?TRACE_MODE_BURSTS:TRACE_MODE_DETAIL;
+		Future_Trace_Mode[i] = (Current_Trace_Mode[i] == TRACE_MODE_DETAIL)?TRACE_MODE_BURST:TRACE_MODE_DETAIL;
 	}
 }
 
@@ -183,29 +187,55 @@ void TMODE_setInitial (int mode)
 	}
 }
 
-/* Bursts mode specific */
+/* Burst mode specific */
 
-void TMODE_setBurstsThreshold (unsigned long long threshold)
+void TMODE_setBurstThreshold (unsigned long long threshold)
 {
 	if (threshold > 0)
 	{
-		BurstsMode_Threshold = threshold;
+		BurstMode_Threshold = threshold;
 	}
 	else
 	{
-		fprintf(stderr, PACKAGE_NAME": TMODE_setBurstsThreshold: Invalid minimum threshold '%llu'.\n", threshold);
+		fprintf(stderr, PACKAGE_NAME": TMODE_setBurstThreshold: Invalid minimum threshold '%llu'.\n", threshold);
 	}
 }
 
-void TMODE_setBurstsStatistics (int status)
+void TMODE_setBurstStatistics (int type, int status)
+{
+	if ((status != TRUE) && (status != FALSE))
+	{
+		fprintf(stderr, PACKAGE_NAME": TMODE_setBurstStatistics: Invalid argument '%d'.\n", status); 
+		return;
+	}
+	switch (type)
+	{
+	case TM_BURST_OMP_STATISTICS:
+		BurstMode_OMP_Stats = status;
+		if (TASKID == 0 )
+			fprintf(stdout, PACKAGE_NAME": Tracing OMP runtime statistics \n");
+		break;
+
+	case TM_BURST_MPI_STATISTICS:
+		BurstMode_MPI_Stats = status;
+		if (TASKID == 0 )
+			fprintf(stdout, PACKAGE_NAME": Tracing mpi runtime statistics \n");
+		break;
+
+	default:
+		break;
+	}
+}
+
+void TMODE_setBurstOMPSummarization (int status)
 {
 	if ((status == TRUE) || (status == FALSE))
 	{
-		BurstsMode_MPI_Stats = status;
+		BurstMode_OMP_Summarization = status;
 	}
 	else
 	{
-		fprintf(stderr, PACKAGE_NAME": TMODE_setBurstsStatistics: Invalid argument '%d'.\n", status);
+		fprintf(stderr, PACKAGE_NAME": TMODE_setBurstOMPSummarization: Invalid argument '%d'.\n", status);
 	}
 }
 

@@ -17,14 +17,15 @@ enum
   NEW_OMP_TASKGROUP_EV,               // Phases of a TASKGROUP synchronization
   NEW_OMP_TASKING_EV,                 // TASK and TASKLOOP constructs
 
-  NEW_OMP_OUTLINED_ADDRESS_EV,        // Address of outlined function
+  NEW_OMP_ADDRESS_EV,                 // Address of outlined function without state change
+  NEW_OMP_OUTLINED_ADDRESS_EV,        // Address of outlined function with state change. TODO: split into NEW_OMP_ADDRESS_EV and NEW_OMP_OUTLINED_EV
   NEW_OMP_OUTLINED_LINE_EV,           // Emitted in merger for file/line of NEW_OMP_OUTLINED_ADDRESS_EV
 
   NEW_OMP_TASK_INST_ID_EV,            // Task ID    (instantiation)
-  NEW_OMP_TASK_INST_ADDRESS_EV,       // Task @ADDR (instantiation)
+  NEW_OMP_TASK_INST_ADDRESS_EV,       // Task @ADDR (instantiation) TODO: review
   NEW_OMP_TASK_INST_LINE_EV,          // Emitted in merger for file/line of OMP_TASK_INST_ADDRESS_EV
   NEW_OMP_TASK_EXEC_ID_EV,            // Task ID    (execution)
-  NEW_OMP_TASK_EXEC_ADDRESS_EV,       // Task @ADDR (execution)
+  NEW_OMP_TASK_EXEC_ADDRESS_EV,       // Task @ADDR (execution). TODO: split into NEW_OMP_ADDRESS_EV and NEW_OMP_TASK_EXEC_EV
   NEW_OMP_TASK_EXEC_LINE_EV           // Emitted in merger for file/line of OMP_TASK_EXEC_ADDRESS_EV
 };
 

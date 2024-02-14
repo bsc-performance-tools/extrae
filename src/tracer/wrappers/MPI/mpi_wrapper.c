@@ -93,6 +93,8 @@
 	a tracejar quan es cridi al MPI_init i acabar al MPI_Finalize.
 */
 #include "misc_wrapper.h"
+#include "mpi_stats.h"
+
 
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
@@ -675,7 +677,7 @@ int MPI_Generate_Task_File_List ()
 					sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 
 				/* If the file exists, remove it and its associated .spawn file */
-				if (__Extrae_Utils_file_exists(tmpname))
+				if ( __Extrae_Utils_file_exists(tmpname) )
 				{
 					if (unlink (tmpname) != 0)
 						fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
@@ -1181,6 +1183,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Extrae_barrier_tasks();
 
 	initTracingTime = MPI_Init_end_time = TIME;
+	xtr_stats_MPI_update_other(MPI_Init_start_time, MPI_Init_end_time);
 
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return;
@@ -1195,9 +1198,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Start_Uncore_Service();
 #endif
 
-	/* Stats Init */
-	global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
-	updateStats_OTHER(global_mpi_stats);
 }
 
 
@@ -1297,6 +1297,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	Extrae_barrier_tasks();
 
 	initTracingTime = MPI_Init_end_time = TIME;
+	xtr_stats_MPI_update_other(MPI_Init_start_time, MPI_Init_end_time);
 
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return;
@@ -1311,9 +1312,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	Start_Uncore_Service();
 #endif
 
-	/* Stats Init */
-	global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
-	updateStats_OTHER(global_mpi_stats);
 }
 #endif /* MPI_HAS_INIT_THREAD_F */
 
@@ -1332,15 +1330,14 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	BGL_disable_barrier_inside = 1;
 #endif
 
-	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)
 	{
-        updateStats_OTHER(global_mpi_stats);
-		Extrae_MPI_stats_Wrapper (LAST_READ_TIME);
 		Trace_mode_switch();
 		Trace_Mode_Change (THREADID, LAST_READ_TIME);
 	}
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); 
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); 
 
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 0;
@@ -1351,7 +1348,9 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	Stop_Uncore_Service();
 #endif
 
-	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Finalize now only if its initialized by MPI_init call, wait for the
 	 * program to end otherwise */
@@ -1436,7 +1435,7 @@ void Normal_PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, 
 
 void PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
 {
-	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)
 	{
 		Bursts_PMPI_Request_get_status_Wrapper (request, flag, status, ierror);
 	}
@@ -1460,7 +1459,8 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_CANCEL_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_CANCEL_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   CtoF77 (pmpi_cancel) (request, ierror);
@@ -1470,9 +1470,10 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, MPI_CANCEL_EV, EVT_END, req, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t current_time = TIME;
+  xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_CANCEL_EV, EVT_END, req, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  updateStats_OTHER(global_mpi_stats);
 }
 
 
@@ -1482,13 +1483,15 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 
 void PMPI_Comm_Rank_Wrapper (MPI_Fint *comm, MPI_Fint *rank, MPI_Fint *ierror)
 {
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 	CtoF77 (pmpi_comm_rank) (comm, rank, ierror);
-	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 
@@ -1498,13 +1501,15 @@ void PMPI_Comm_Rank_Wrapper (MPI_Fint *comm, MPI_Fint *rank, MPI_Fint *ierror)
 
 void PMPI_Comm_Size_Wrapper (MPI_Fint *comm, MPI_Fint *size, MPI_Fint *ierror)
 {
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 	CtoF77 (pmpi_comm_size) (comm, size, ierror);
-	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 /******************************************************************************
@@ -1516,7 +1521,8 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 {
 	MPI_Fint cnull;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1529,10 +1535,11 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 /******************************************************************************
@@ -1544,7 +1551,8 @@ void PMPI_Comm_Create_Group_Wrapper(MPI_Fint *comm, MPI_Fint *group,
 {
     MPI_Fint cnull;
 
-    TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_CREATE_GROUP_EV, EVT_BEGIN, EMPTY,
+		iotimer_t begin_time = LAST_READ_TIME;
+    TRACE_MPIEVENT (begin_time, MPI_COMM_CREATE_GROUP_EV, EVT_BEGIN, EMPTY,
       EMPTY, EMPTY, EMPTY, EMPTY);
 
     cnull = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1557,10 +1565,12 @@ void PMPI_Comm_Create_Group_Wrapper(MPI_Fint *comm, MPI_Fint *group,
         Trace_MPI_Communicator(comm_id, LAST_READ_TIME, TRUE);
     }
 
-    TRACE_MPIEVENT(TIME, MPI_COMM_CREATE_GROUP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
+		iotimer_t current_time = TIME;
+		xtr_stats_MPI_update_other(begin_time, current_time);
+    TRACE_MPIEVENT(current_time, MPI_COMM_CREATE_GROUP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
       EMPTY, EMPTY);
 
-    updateStats_OTHER(global_mpi_stats);
+
 }
 
 /******************************************************************************
@@ -1571,14 +1581,16 @@ void PMPI_Comm_Free_Wrapper (MPI_Fint *comm, MPI_Fint *ierror)
 {
 	UNREFERENCED_PARAMETER(comm);
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	*ierror = MPI_SUCCESS;
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 /******************************************************************************
@@ -1590,7 +1602,8 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 {
 	MPI_Fint cnull;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1603,10 +1616,11 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 		EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 
@@ -1619,7 +1633,8 @@ void PMPI_Comm_Dup_With_Info_Wrapper (MPI_Fint *comm, MPI_Fint *info,
 {
 	MPI_Fint cnull;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1632,10 +1647,11 @@ void PMPI_Comm_Dup_With_Info_Wrapper (MPI_Fint *comm, MPI_Fint *info,
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 		EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 
@@ -1648,7 +1664,8 @@ void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 {
 	MPI_Fint cnull;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_SPLIT_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1661,10 +1678,11 @@ void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SPLIT_EV, EVT_END, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 #if defined(MPI3)
@@ -1677,7 +1695,8 @@ void PMPI_Comm_Split_Type_Wrapper (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fin
 {
 	MPI_Fint cnull;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1690,10 +1709,11 @@ void PMPI_Comm_Split_Type_Wrapper (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fin
                 Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 #endif /* MPI3 */
 
@@ -1721,9 +1741,10 @@ void PMPI_Comm_Spawn_Wrapper (char *command, char *argv, MPI_Fint *maxprocs, MPI
     *intercomm = PMPI_Comm_c2f(comm_c); // Spawn_Parent_Sync sets the XTR_SPAWNED_INTERCOMM attribute in comm_c, copy this attribute to resulting intercomm
   }
 
-  TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+  xtr_stats_MPI_update_other(SpawnStartTime, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  updateStats_OTHER(global_mpi_stats);
 }
 
 /******************************************************************************
@@ -1749,9 +1770,10 @@ void PMPI_Comm_Spawn_Multiple_Wrapper (MPI_Fint *count, char *array_of_commands,
     *intercomm = PMPI_Comm_c2f(comm_c); // Spawn_Parent_Sync sets the XTR_SPAWNED_INTERCOMM attribute in comm_c, copy this attribute to resulting intercomm
   }
 
-  TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+  xtr_stats_MPI_update_other(SpawnStartTime, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  updateStats_OTHER(global_mpi_stats);
 }
 #endif
 
@@ -1846,7 +1868,8 @@ void PMPI_Request_free_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 	 *   tag : ---                           comm : ---
 	 *   aux : ---
 	 */
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT (begin_time, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	// Usually MPI_Request_free will be called on inactive persistent requests, try to delete it from hash_persistent_requests
 	if (!xtr_hash_remove(hash_persistent_requests, MPI_REQUEST_TO_HASH_KEY(*request), NULL))
@@ -1863,9 +1886,10 @@ void PMPI_Request_free_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 	 *   tag : ---                           comm : ---
 	 *   aux : ---
 	 */
-	TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 
@@ -1874,7 +1898,8 @@ void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
 {
 	MPI_Fint comm_null;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_SUB_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_CART_SUB_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1887,10 +1912,11 @@ void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_CART_SUB_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_CART_SUB_EV, EVT_END, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
@@ -1899,7 +1925,8 @@ void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 {
 	MPI_Fint comm_null;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_CART_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
@@ -1913,10 +1940,11 @@ void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_CREATE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = LAST_READ_TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_CART_CREATE_EV, EVT_END, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 }
 
 void PMPI_Intercomm_create_F_Wrapper (MPI_Fint *local_comm, MPI_Fint *local_leader,
@@ -2073,7 +2101,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Extrae_barrier_tasks();
 
 	initTracingTime = MPI_Init_end_time = TIME;
-
+	xtr_stats_MPI_update_other(MPI_Init_start_time, MPI_Init_end_time);
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return val;
 
@@ -2087,9 +2115,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Start_Uncore_Service();
 #endif
 
-	/* Stats Init */
-	global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
-	updateStats_OTHER(global_mpi_stats);
 
 	return val;
 }
@@ -2187,6 +2212,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	Extrae_barrier_tasks();
 
 	initTracingTime = MPI_Init_end_time = TIME;
+	xtr_stats_MPI_update_other(MPI_Init_start_time, MPI_Init_end_time);
 
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return val;
@@ -2201,9 +2227,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	Start_Uncore_Service();
 #endif
 
-	/* Stats Init */
-        global_mpi_stats = mpi_stats_init(Extrae_get_num_tasks());
-	updateStats_OTHER(global_mpi_stats);
 
 	return val;
 }
@@ -2238,15 +2261,14 @@ int MPI_Finalize_C_Wrapper (void)
 	xtr_hash_stats_dump(hash_persistent_requests );
 #endif
 
-	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)
 	{
-        updateStats_OTHER(global_mpi_stats);
-		Extrae_MPI_stats_Wrapper (LAST_READ_TIME);
 		Trace_mode_switch();
 		Trace_Mode_Change (THREADID, LAST_READ_TIME);
 	}
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 0;
@@ -2257,7 +2279,10 @@ int MPI_Finalize_C_Wrapper (void)
 	Stop_Uncore_Service();
 #endif
 
-	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
 
 	/* Finalize now only if its initialized by MPI_init call, wait for the
 	 * program to end otherwise */
@@ -2348,7 +2373,7 @@ int MPI_Request_get_status_C_Wrapper(MPI_Request request, int *flag, MPI_Status 
 {
     int ret;
 
-    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)
     {
         ret = Bursts_MPI_Request_get_status(request, flag, status);
     }
@@ -2373,7 +2398,8 @@ int MPI_Cancel_C_Wrapper (MPI_Request *request)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_CANCEL_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_CANCEL_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Cancel (request);
 
@@ -2382,9 +2408,10 @@ int MPI_Cancel_C_Wrapper (MPI_Request *request)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, MPI_CANCEL_EV, EVT_END, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+  xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_CANCEL_EV, EVT_END, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -2398,13 +2425,15 @@ int MPI_Comm_rank_C_Wrapper (MPI_Comm comm, int *rank)
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 	ierror = PMPI_Comm_rank (comm, rank);
-	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -2419,13 +2448,15 @@ int MPI_Comm_size_C_Wrapper (MPI_Comm comm, int *size)
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 	ierror = PMPI_Comm_size (comm, size);
-	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -2439,17 +2470,19 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 {
   int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Comm_create (comm, group, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
     Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -2461,21 +2494,23 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 int MPI_Comm_create_group_C_Wrapper(MPI_Comm comm, MPI_Group group, int tag,
   MPI_Comm *newcomm)
 {
-    int ierror;
+		int ierror;
 
-    TRACE_MPIEVENT(LAST_READ_TIME, MPI_COMM_CREATE_GROUP_EV, EVT_BEGIN, EMPTY,
-      EMPTY, EMPTY, EMPTY, EMPTY);
+		iotimer_t begin_time = LAST_READ_TIME;
+		TRACE_MPIEVENT(begin_time, MPI_COMM_CREATE_GROUP_EV, EVT_BEGIN, EMPTY,
+			EMPTY, EMPTY, EMPTY, EMPTY);
 
-    ierror = PMPI_Comm_create_group(comm, group, tag, newcomm);
-    if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    {
-        Trace_MPI_Communicator(*newcomm, LAST_READ_TIME, FALSE);
-    }
+		ierror = PMPI_Comm_create_group(comm, group, tag, newcomm);
+		if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+		{
+				Trace_MPI_Communicator(*newcomm, LAST_READ_TIME, FALSE);
+		}
 
-    TRACE_MPIEVENT(TIME, MPI_COMM_CREATE_GROUP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
-      EMPTY, EMPTY);
+		iotimer_t current_time = TIME;
+		xtr_stats_MPI_update_other(begin_time, current_time);
+		TRACE_MPIEVENT(current_time, MPI_COMM_CREATE_GROUP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
+			EMPTY, EMPTY);
 
-    updateStats_OTHER(global_mpi_stats);
 
     return ierror;
 }
@@ -2488,13 +2523,15 @@ int MPI_Comm_free_C_Wrapper (MPI_Comm *comm)
 {
 	UNREFERENCED_PARAMETER(comm);
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_COMM_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return MPI_SUCCESS;
 }
@@ -2508,7 +2545,8 @@ int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm)
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	ierror = PMPI_Comm_dup (comm, newcomm);
@@ -2517,10 +2555,11 @@ int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm)
 		Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 		EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -2534,7 +2573,8 @@ int MPI_Comm_dup_with_info_C_Wrapper (MPI_Comm comm, MPI_Info info, MPI_Comm *ne
 {
 	int ierror;
 
-        TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
+        iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
                 EMPTY, EMPTY, EMPTY);
 
 	ierror = PMPI_Comm_dup_with_info (comm, info, newcomm);
@@ -2543,10 +2583,11 @@ int MPI_Comm_dup_with_info_C_Wrapper (MPI_Comm comm, MPI_Info info, MPI_Comm *ne
 		Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
 	}
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                 EMPTY);
 
-        updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -2560,17 +2601,19 @@ int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newco
 {
   int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_SPLIT_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Comm_split (comm, color, key, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
     Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SPLIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 		EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -2585,17 +2628,19 @@ int MPI_Comm_split_type_C_Wrapper (MPI_Comm comm, int split_type, int key, MPI_I
 {
   int ierror;
 
-        TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
+        iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
                 EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Comm_split_type (comm, split_type, key, info, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
     Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
 
-        TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+        iotimer_t current_time = TIME;
+        xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                 EMPTY);
 
-        updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -2622,10 +2667,10 @@ int MPI_Comm_spawn_C_Wrapper (char *command, char **argv, int maxprocs, MPI_Info
     Spawn_Parent_Sync (SpawnStartTime, intercomm, comm);
   }
 
-  TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
 
-  updateStats_COLLECTIVE(global_mpi_stats, 0, 0);
-
+	xtr_stats_MPI_update_collective(SpawnStartTime, current_time, 0, 0);
+  TRACE_MPIEVENT (current_time, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
   return ierror;
 }
  
@@ -2663,7 +2708,8 @@ int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_CART_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	ierror = PMPI_Cart_create (comm_old, ndims, dims, periods, reorder,
@@ -2672,10 +2718,11 @@ int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
 	if (ierror == MPI_SUCCESS && *comm_cart != MPI_COMM_NULL)
 		Trace_MPI_Communicator (*comm_cart, LAST_READ_TIME, FALSE);
 
-	TRACE_MPIEVENT (TIME, MPI_CART_CREATE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_CART_CREATE_EV, EVT_END, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -2687,7 +2734,8 @@ int MPI_Cart_sub_C_Wrapper (MPI_Comm comm, int *remain_dims, MPI_Comm *comm_new)
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_SUB_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_CART_SUB_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
 	ierror = PMPI_Cart_sub (comm, remain_dims, comm_new);
@@ -2695,10 +2743,11 @@ int MPI_Cart_sub_C_Wrapper (MPI_Comm comm, int *remain_dims, MPI_Comm *comm_new)
 	if (ierror == MPI_SUCCESS && *comm_new != MPI_COMM_NULL)
 		Trace_MPI_Communicator (*comm_new, LAST_READ_TIME, FALSE);
 
-	TRACE_MPIEVENT (TIME, MPI_CART_SUB_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_CART_SUB_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 		EMPTY); 
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -2845,7 +2894,8 @@ int MPI_Request_free_C_Wrapper (MPI_Request *request)
 	 *   tag : ---                           comm : ---
 	 *   aux : ---
 	 */
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT (begin_time, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	// Usually MPI_Request_free will be called on inactive persistent requests, try to delete it from hash_persistent_requests
 	if (!xtr_hash_remove(hash_persistent_requests, MPI_REQUEST_TO_HASH_KEY(*request), NULL))
@@ -2862,66 +2912,15 @@ int MPI_Request_free_C_Wrapper (MPI_Request *request)
 	 *   tag : ---                           comm : ---
 	 *   aux : ---
 	 */
-	TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
 
 #endif /* defined(C_SYMBOLS) */
-
-void Extrae_MPI_stats_Wrapper (iotimer_t timestamp)
-{
-  int i=0;
-  unsigned int vec_types [MPI_STATS_EVENTS_COUNT];
-  for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
-    vec_types[i] = MPI_STATS_EV;
-
-  unsigned int vec_values[MPI_STATS_EVENTS_COUNT] = {
-    MPI_STATS_P2P_COUNT_EV,
-    MPI_STATS_P2P_BYTES_SENT_EV,
-    MPI_STATS_P2P_BYTES_RECV_EV,
-    MPI_STATS_GLOBAL_COUNT_EV,
-    MPI_STATS_GLOBAL_BYTES_SENT_EV,
-    MPI_STATS_GLOBAL_BYTES_RECV_EV,
-    MPI_STATS_TIME_IN_MPI_EV, 
-    MPI_STATS_P2P_INCOMING_COUNT_EV,
-    MPI_STATS_P2P_OUTGOING_COUNT_EV,
-    MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV,
-    MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV,
-    MPI_STATS_TIME_IN_OTHER_EV,
-    MPI_STATS_TIME_IN_P2P_EV,
-    MPI_STATS_TIME_IN_GLOBAL_EV,
-    MPI_STATS_OTHER_COUNT_EV
-  };
-
-  unsigned int vec_params[MPI_STATS_EVENTS_COUNT] = {
-    global_mpi_stats->P2P_Communications, 
-    global_mpi_stats->P2P_Bytes_Sent,
-    global_mpi_stats->P2P_Bytes_Recv, 
-    global_mpi_stats->COLLECTIVE_Communications,
-    global_mpi_stats->COLLECTIVE_Bytes_Sent, 
-    global_mpi_stats->COLLECTIVE_Bytes_Recv,
-    global_mpi_stats->Elapsed_Time_In_MPI, 
-    global_mpi_stats->P2P_Communications_In,
-    global_mpi_stats->P2P_Communications_Out,
-    mpi_stats_get_num_partners(global_mpi_stats, global_mpi_stats->P2P_Partner_In),
-    mpi_stats_get_num_partners(global_mpi_stats, global_mpi_stats->P2P_Partner_Out),
-    (global_mpi_stats->Elapsed_Time_In_MPI - global_mpi_stats->Elapsed_Time_In_P2P_MPI - global_mpi_stats->Elapsed_Time_In_COLLECTIVE_MPI),
-    global_mpi_stats->Elapsed_Time_In_P2P_MPI,
-    global_mpi_stats->Elapsed_Time_In_COLLECTIVE_MPI,
-    global_mpi_stats->MPI_Others_count
-  };
-
-  if (TRACING_MPI_STATISTICS)
-  {
-    TRACE_N_MISCEVENT (timestamp, MPI_STATS_EVENTS_COUNT, vec_types, vec_values, vec_params);
-  }
-
-  /* Reset the counters */
-  mpi_stats_reset(global_mpi_stats);
-}
 
 void Extrae_network_counters_Wrapper (void)
 {
@@ -3582,14 +3581,14 @@ void processRequest_C(iotimer_t ts, MPI_Request request, MPI_Status *status)
 		{
 			// Communication was completed 
 			if (xtr_hash_remove(hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data) )
-			{    
+			{
 				/*
 				 * Retrieve the request from the hash table to query the communicator used in the MPI_I*recv.
 				 * Then, we query the status for the source rank of the sender (the source rank is local to the communicator used).
 				 * With the source rank and the communicator, we translate the local rank into the global rank.
 				 */
 				getCommInfoFromStatus_C(status, MPI_BYTE, request_data.commid, request_data.group, &size, &tag, &src_world);
-				updateStats_P2P(global_mpi_stats, src_world, size, 0);
+
 				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, request_data.commid, request);
 			}
 			else

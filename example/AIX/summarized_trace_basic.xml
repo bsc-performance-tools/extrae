@@ -36,10 +36,8 @@
     <memory-usage enabled="no" />
   </counters>
 
-  <bursts enabled="yes">
-    <threshold enabled="yes">500u</threshold>
-    <mpi-statistics enabled="yes" />
-  </bursts>
+  <burst enabled="no" threshold="500u" mpi-statistics="yes" omp-statistics="yes" omp-summarization="no" />
+
 
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 

@@ -393,30 +393,6 @@ typedef struct memusage_evt_t {
 #define MEMUSAGE_INUSE_LBL		"Total memory in use"
 extern struct memusage_evt_t memusage_evt_labels[MEMUSAGE_EVENTS_COUNT];
 
-typedef struct mpi_stats_evt_t
-{
-	int evt_type;
-	char * label;
-} mpi_stats_evt_t;
-
-/* Original stats */
-#define MPI_STATS_P2P_COUNT_LBL                    "Number of P2P MPI calls"
-#define MPI_STATS_P2P_BYTES_SENT_LBL               "Bytes sent in P2P MPI calls"
-#define MPI_STATS_P2P_BYTES_RECV_LBL               "Bytes received in P2P MPI calls"
-#define MPI_STATS_GLOBAL_COUNT_LBL                 "Number of GLOBAL MPI calls"
-#define MPI_STATS_GLOBAL_BYTES_SENT_LBL            "Bytes sent in GLOBAL MPI calls"
-#define MPI_STATS_GLOBAL_BYTES_RECV_LBL            "Bytes received in GLOBAL MPI calls"
-#define MPI_STATS_TIME_IN_MPI_LBL                  "Elapsed time in MPI"
-/* New stats */
-#define MPI_STATS_P2P_INCOMING_COUNT_LBL           "Number of incoming P2P MPI calls"
-#define MPI_STATS_P2P_OUTGOING_COUNT_LBL           "Number of outgoing P2P MPI calls"
-#define MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_LBL  "Number of partners in incoming communications"
-#define MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_LBL  "Number of partners in outgoing communications"
-#define MPI_STATS_TIME_IN_OTHER_LBL                "Elapsed time in OTHER MPI calls"
-#define MPI_STATS_TIME_IN_P2P_LBL                  "Elapsed time in P2P MPI calls"
-#define MPI_STATS_TIME_IN_GLOBAL_LBL               "Elapsed time in GLOBAL MPI calls"
-#define MPI_STATS_OTHER_COUNT_LBL                  "Number of OTHER MPI calls"
-
 typedef struct syscall_evt_t
 {
 	int evt_type;
@@ -424,8 +400,6 @@ typedef struct syscall_evt_t
 } syscall_evt_t;
 
 #define SYSCALL_SCHED_YIELD_LBL "sched_yield()"
-
-extern struct mpi_stats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT];
 
 /* Clustering events labels */
 #define CLUSTER_ID_LABEL   "Cluster ID"

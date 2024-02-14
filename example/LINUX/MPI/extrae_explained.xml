@@ -5,7 +5,7 @@
      it's not enabled, then the value can be set to some default.
 -->
 
-<!-- Must we activate the tracing? Which is the tracing mode? (detail/bursts) Where is it located? Which kind of trace? Version of the XML parser?-->
+<!-- Must we activate the tracing? Which is the tracing mode? (detail/burst) Where is it located? Which kind of trace? Version of the XML parser?-->
 <trace enabled="yes"
  home="@sub_PREFIXDIR@"
  initial-mode="detail"
@@ -167,16 +167,10 @@
     <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
 
-
-  <!-- Bursts library enabled? This requires an special library! -->
-  <bursts enabled="no">
-    <!-- Specify the threshold. This is mandatory! In this example, the
-         threshold is limitted to 500 microseconds
-     -->
-    <threshold enabled="yes">500u</threshold>
-    <!-- Report MPI statistics? -->
-    <mpi-statistics enabled="yes" />
-  </bursts>
+  <!-- Burst mode filters all tracing activity leaving only significant computations(ones that last longer than the defined threshold).  -->
+  <!-- [mpi|omp]-statistics: reports the runtime activity as statistics. -->
+  <!--  omp-summarization: Consider parallel regions as burst. And reporst statistics at entry and exit points -->
+  <burst enabled="no" threshold="500u" mpi-statistics="yes" omp-statistics="yes" omp-summarization="no" />
 
   <!-- Enable sampling capabilities using system clock.
        Type may refer to: default, real, prof and virtual.
@@ -194,6 +188,23 @@
 
   <!-- Enable system calls instrumentation (experimental) -->
   <syscall enabled="no" />
+
+	<!-- Enable extra emission of the executing core id (Beware: High overhead!)
+			 options:
+				 frequency = Emit at instrumentation points only if enough time passed since last measurement
+				 emit-always = { yes, no } Emit even if core id has not changed since last measurement
+				 poi = { openmp } Emit at entry/exit of OpenMP outlined functions, tasks and work dispatches
+  -->
+	<cpu-events enabled="no" frequency="0" emit-always="no" poi="openmp" />
+
+
+  <!-- Enable extra emission of the executing core id (Beware: High overhead!)
+        options:
+          frequency = Emit at instrumentation points only if enough time passed since last measurement
+          emit-always = { yes, no } Emit even if core id has not changed since last measurement
+          poi = { openmp } Emit at entry/exit of OpenMP outlined functions, tasks and work dispatches
+  -->
+  <cpu-events enabled="no" frequency="0" emit-always="no" poi="openmp" />
 
   <!-- Do merge the intermediate tracefiles into the final tracefile?
        Named according to the binary name

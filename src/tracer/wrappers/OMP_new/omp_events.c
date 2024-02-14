@@ -152,6 +152,24 @@ void Extrae_OpenMP_Outlined_Exit (void)
 	}
 }
 
+void Extrae_OpenMP_Outlined_Entry_At (UINT64 time, const void *outlined_fn)
+{
+	TRACE_OMPEVENT(time, NEW_OMP_ADDRESS_EV, (UINT64)outlined_fn, EMPTY);
+	if (xtr_OMP_check_config(OMP_ANNOTATE_CPU))
+	{
+		Extrae_AnnotateCPU (); 
+	}
+}
+
+void Extrae_OpenMP_Outlined_Exit_At ( UINT64 time )
+{
+  TRACE_OMPEVENT(time, NEW_OMP_ADDRESS_EV, EVT_END, EMPTY);
+	if (xtr_OMP_check_config(OMP_ANNOTATE_CPU))
+	{
+		Extrae_AnnotateCPU (); 
+	}
+}
+
 void Extrae_OpenMP_Task_Inst_Entry (const void *task, long long task_id)
 {
 	TRACE_OMPEVENT(LAST_READ_TIME, NEW_OMP_TASKING_EV, NEW_OMP_TASK_INST_VAL, EMPTY);
