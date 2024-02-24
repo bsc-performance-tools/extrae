@@ -619,13 +619,13 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 		/* If using PAPI, they can be stored in absolute or relative manner,
 		 * depending whether sampling was activated or not 
 		 */
-# if defined(SAMPLING_SUPPORT)
+# if defined(SAMPLING_SUPPORT) && !defined(L4STAT)
 		if (SetHWCIds[cnt].local_id != NO_COUNTER && SetHWCIds[cnt].local_id != SAMPLE_COUNTER)
 # else 
 		if (SetHWCIds[cnt].local_id != NO_COUNTER)
 # endif
 		{
-# if defined(SAMPLING_SUPPORT)
+# if defined(SAMPLING_SUPPORT) && !defined(L4STAT)
 			// Protect when counters are incorrect (major timestamp, lower counter value)
 			if (Event->HWCValues[cnt] >= Sthread->counters[cnt])
 # endif

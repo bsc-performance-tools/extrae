@@ -1060,6 +1060,14 @@ static int read_environment_variables (int me)
 		}
 	}
 
+	str = getenv ("EXTRAE_MERGE_AFTER_TRACING");
+	if (str != NULL && (strcmp (str, "1") == 0))
+	{
+		MergeAfterTracing = (getenv("EXTRAE_DISABLE_MERGE") == NULL);
+    	if (me == 0)
+    		fprintf (stdout, PACKAGE_NAME": Merge after tracing is %s.\n", (MergeAfterTracing ? "enabled" : "disabled"));
+	}
+		
 	/* Set extrae-cmd folder prefix */
 	str = getenv("EXTRAE_CMD_PREFIX");
 	if (str != NULL)
@@ -1070,6 +1078,7 @@ static int read_environment_variables (int me)
 	/* Add sampling capabilities */
 #if defined(SAMPLING_SUPPORT)
 	str = getenv ("EXTRAE_SAMPLING_PERIOD");
+	#if !defined(OS_RTEMS)
 	if (str != NULL)
 	{
 		unsigned long long sampling_period = __Extrae_Utils_getTimeFromStr (
@@ -1113,6 +1122,10 @@ static int read_environment_variables (int me)
 	}
 	if (getenv ("EXTRAE_SAMPLING_CALLER") != NULL)
 		Parse_Callers (me, getenv("EXTRAE_SAMPLING_CALLER"), CALLER_SAMPLING);
+#else
+	if(str!=NULL)
+		setTimeSampling(atoi(str));
+#endif
 #endif
 
 	return 1;
@@ -2719,7 +2732,7 @@ void Backend_Enter_Instrumentation ()
 	if (Trace_Mode_FirstMode(thread))
 		Trace_Mode_Change (thread, current_time);
 
-#if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS)
+#if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS) || defined(L4STAT)
 	/* Must change counters? check only at detail tracing, at bursty
      tracing it is leveraged to the mpi macros at BURSTS_MODE_TRACE_MPIEVENT */
 	if (CURRENT_TRACE_MODE(thread) == TRACE_MODE_DETAIL)
@@ -3016,7 +3029,10 @@ static void Extrae_getExecutableInfo (void)
         static Extrae_getExecutableInfo_first_time_call = 0;
         if (!Extrae_getExecutableInfo_first_time_call)
         {
+#if !defined(OS_RTEMS)
             fprintf (stderr, PACKAGE_NAME": Warning! File /proc/self/maps doesn't exist. Address translation may be limited.\n");
+#endif
+
         }
     }
 #endif

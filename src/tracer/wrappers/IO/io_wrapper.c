@@ -114,7 +114,11 @@ static ssize_t (*real_writev)(int fd, const struct iovec *iov, int iovcnt)      
 static ssize_t (*real_preadv)(int fd, const struct iovec *iov, int iovcnt, off_t offset)        = NULL;
 static ssize_t (*real_preadv64)(int fd, const struct iovec *iov, int iovcnt, off_t offset)      = NULL;
 static ssize_t (*real_pwritev)(int fd, const struct iovec *iov, int iovcnt, off_t offset)       = NULL;
+#if defined(OS_RTEMS)
+static ssize_t (*real_pwritev64)(int fd, const struct iovec *iov, int iovcnt, _off64_t offset) = NULL;
+#else
 static ssize_t (*real_pwritev64)(int fd, const struct iovec *iov, int iovcnt, __off64_t offset) = NULL;
+#endif
 static int     (*real_ioctl)(int fd, unsigned long request, ...)                                          = NULL;
 static int     (*real_close)(int fildes) = NULL;
 static int     (*real_fclose)(FILE *stream) = NULL;
