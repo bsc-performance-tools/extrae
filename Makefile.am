@@ -1,3 +1,4 @@
+AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = src include scripts etc tests
 if GENERATE_DOCUMENTATION
@@ -10,7 +11,9 @@ EXTRA_DIST = \
   example \
   INSTALL-examples \
   substitute \
-  substitute-all
+  substitute-all \
+  README.md \
+  README-DEEP.md
 
 VPATH=@srcdir@
 SRCDIR=@srcdir@
