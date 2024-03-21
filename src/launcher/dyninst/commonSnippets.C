@@ -482,9 +482,10 @@ string decodeBasicBlocks(BPatch_function * function, string routine)
         ParseAPI::Block* b  = ParseAPI::convert(block);
         void * buf  = b->region()->getPtrToInstruction(b->start());
         InstructionAPI::InstructionDecoder dec((unsigned char*)buf,b->size(),b->region()->getArch());
-        InstructionAPI::Instruction::Ptr insn;
-        while((insn = dec.decode())) {
-            res <<loop_name<<"# "<<line++<<": "<< insn->format() << endl;
+        InstructionAPI::Instruction insn = dec.decode();
+        while(insn.isValid()) {
+            res <<loop_name<<"# "<<line++<<": "<< insn.format() << endl;
+	    insn = dec.decode();
         }
     }
     return res.str();
