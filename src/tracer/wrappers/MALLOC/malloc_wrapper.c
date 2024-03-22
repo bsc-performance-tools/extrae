@@ -280,7 +280,7 @@ void *malloc (size_t s)
  * Static buffer to return when calloc is called from within dlsym and we don't
  * have the pointer to the real calloc function
  */
-static unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
+static __thread unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
 
 static __thread int __in_free = 0;
 static __thread void *__in_free_ptr = NULL;
@@ -361,7 +361,7 @@ void free (void *p)
 infinite loop of recursive calls to calloc */
 
 /* Used to know the depth of calloc calls */
-int __in_calloc_depth = 0;
+static __thread int __in_calloc_depth = 0;
 void *calloc (size_t nmemb, size_t size)
 {
 	__in_calloc_depth++;
