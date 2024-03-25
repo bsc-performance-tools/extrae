@@ -45,12 +45,9 @@ static int Get_State (unsigned int EvValue)
 		case OPENACC_EXIT_DATA_VAL:
 			return STATE_ALLOCMEM;
 		case OPENACC_UPDATE_VAL:
-		case OPENACC_ENQUEUE_UPLOAD_VAL:
-		case OPENACC_ENQUEUE_DOWNLOAD_VAL:
 			return STATE_MEMORY_XFER;
 		case OPENACC_COMPUTE_VAL:
-		case OPENACC_ENQUEUE_KERNEL_LAUNCH_VAL:
-			return STATE_OVHD;
+			return STATE_CONFACCEL;
 		case OPENACC_WAIT_VAL:
 			return STATE_SYNC;
 		default:
@@ -84,8 +81,34 @@ OpenACC_Data_Event(event_t *current_event, unsigned long long current_time,
 	UNREFERENCED_PARAMETER(fset);
 	unsigned int  EvType  = Get_EvEvent(current_event);
 	unsigned long EvValue = Get_EvValue(current_event);
+	unsigned long EvParam = Get_EvParam(current_event);
 
-	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+	switch(EvParam)
+	{
+		case OPENACC_ENQUEUE_UPLOAD_VAL:
+		case OPENACC_ENQUEUE_DOWNLOAD_VAL:
+			Switch_State(STATE_MEMORY_XFER, (EvValue != EVT_END), ptask, task, thread);
+			trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, ((EvValue == EVT_BEGIN) ? EvParam : EVT_END));
+			break;
+		default:
+			trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+	}
+
+	return 0;
+}
+
+static int
+OpenACC_Launch_Event(event_t *current_event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+	unsigned int  EvType  = Get_EvEvent(current_event);
+	unsigned long EvValue = Get_EvValue(current_event);
+	unsigned long EvParam = Get_EvParam(current_event);
+
+	Switch_State(STATE_CONFACCEL, (EvValue != EVT_END), ptask, task, thread);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, ((EvValue == EVT_BEGIN) ? EvParam : EVT_END));
 
 	return 0;
 }
@@ -93,5 +116,6 @@ OpenACC_Data_Event(event_t *current_event, unsigned long long current_time,
 SingleEv_Handler_t PRV_OPENACC_Event_Handlers[] = {
 	{OPENACC_EV, OpenACC_Event},
 	{OPENACC_DATA_EV, OpenACC_Data_Event},
+	{OPENACC_LAUNCH_EV, OpenACC_Launch_Event},
 	{NULL_EV, NULL }
 };

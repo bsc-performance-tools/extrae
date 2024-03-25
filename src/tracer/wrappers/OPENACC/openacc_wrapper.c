@@ -64,16 +64,16 @@ OACC_init(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *apii
 	switch(ei.event_type)
 	{
 		case acc_ev_device_init_start:
-			Probe_OPENACC_device_init_start();
+			Probe_OPENACC_device_init_start(ei.implicit);
 			break;
 		case acc_ev_device_init_end:
-			Probe_OPENACC_device_init_end();
+			Probe_OPENACC_device_init_end(ei.implicit);
 			break;
 		case acc_ev_device_shutdown_start:
-			Probe_OPENACC_device_shutdown_start();
+			Probe_OPENACC_device_shutdown_start(ei.implicit);
 			break;
 		case acc_ev_device_shutdown_end:
-			Probe_OPENACC_device_shutdown_end();
+			Probe_OPENACC_device_shutdown_end(ei.implicit);
 			break;
 		default:
 			break;
@@ -102,16 +102,16 @@ OACC_data(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *apii
 	switch(ei.event_type)
 	{
 		case acc_ev_enter_data_start:
-			Probe_OPENACC_enter_data_start();
+			Probe_OPENACC_enter_data_start(ei.implicit);
 			break;
 		case acc_ev_enter_data_end:
-			Probe_OPENACC_enter_data_end();
+			Probe_OPENACC_enter_data_end(ei.implicit);
 			break;
 		case acc_ev_exit_data_start:
-			Probe_OPENACC_exit_data_start();
+			Probe_OPENACC_exit_data_start(ei.implicit);
 			break;
 		case acc_ev_exit_data_end:
-			Probe_OPENACC_exit_data_end();
+			Probe_OPENACC_exit_data_end(ei.implicit);
 			break;
 		default:
 			break;
@@ -140,16 +140,16 @@ OACC_data_alloc(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info
 	switch(ei.event_type)
 	{
 		case acc_ev_create:
-			Probe_OPENACC_create();
+			Probe_OPENACC_create(ei.implicit);
 			break;
 		case acc_ev_delete:
-			Probe_OPENACC_delete();
+			Probe_OPENACC_delete(ei.implicit);
 			break;
 		case acc_ev_alloc:
-			Probe_OPENACC_alloc();
+			Probe_OPENACC_alloc(ei.implicit);
 			break;
 		case acc_ev_free:
-			Probe_OPENACC_free();
+			Probe_OPENACC_free(ei.implicit);
 			break;
 		default:
 			break;
@@ -177,10 +177,10 @@ OACC_update(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *ap
 	switch (ei.event_type)
 	{
 		case acc_ev_update_start:
-			Probe_OPENACC_update_start();
+			Probe_OPENACC_update_start(ei.implicit);
 			break;
 		case acc_ev_update_end:
-			Probe_OPENACC_update_end();
+			Probe_OPENACC_update_end(ei.implicit);
 			break;
 		default:
 			break;
@@ -209,10 +209,10 @@ OACC_compute(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *a
 	switch (ei.event_type)
 	{
 		case acc_ev_compute_construct_start:
-			Probe_OPENACC_compute_construct_start();
+			Probe_OPENACC_compute_construct_start(ei.implicit);
 			break;
 		case acc_ev_compute_construct_end:
-			Probe_OPENACC_compute_construct_end();
+			Probe_OPENACC_compute_construct_end(ei.implicit);
 			break;
 		default:
 			break;
@@ -241,10 +241,10 @@ OACC_launch(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *ap
 	switch(ei.event_type)
 	{
 		case acc_ev_enqueue_launch_start:
-			Probe_OPENACC_enqueue_launch_start();
+			Probe_OPENACC_enqueue_launch_start(ei.implicit);
 			break;
 		case acc_ev_enqueue_launch_end:
-			Probe_OPENACC_enqueue_launch_end();
+			Probe_OPENACC_enqueue_launch_end(ei.implicit);
 			break;
 		default:
 			break;
@@ -273,16 +273,16 @@ OACC_data_update(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_inf
 	switch(ei.event_type)
 	{
 		case acc_ev_enqueue_upload_start:
-			Probe_OPENACC_enqueue_upload_start();
+			Probe_OPENACC_enqueue_upload_start(ei.implicit);
 			break;
 		case acc_ev_enqueue_upload_end:
-			Probe_OPENACC_enqueue_upload_end();
+			Probe_OPENACC_enqueue_upload_end(ei.implicit);
 			break;
 		case acc_ev_enqueue_download_start:
-			Probe_OPENACC_enqueue_download_start();
+			Probe_OPENACC_enqueue_download_start(ei.implicit);
 			break;
 		case acc_ev_enqueue_download_end:
-			Probe_OPENACC_enqueue_download_end();
+			Probe_OPENACC_enqueue_download_end(ei.implicit);
 			break;
 		default:
 			break;
@@ -310,10 +310,10 @@ void OACC_wait(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info 
 	switch(ei.event_type)
 	{
 		case acc_ev_wait_start:
-			Probe_OPENACC_wait_start();
+			Probe_OPENACC_wait_start(ei.implicit);
 			break;
 		case acc_ev_wait_end:
-			Probe_OPENACC_wait_end();
+			Probe_OPENACC_wait_end(ei.implicit);
 			break;
 		default:
 			break;

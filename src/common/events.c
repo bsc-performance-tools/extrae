@@ -402,11 +402,12 @@ unsigned IsMPICollective(unsigned EvType)
    return FALSE;
 }
 
-#define OPENACC_EVENTS 2
+#define OPENACC_EVENTS 3
 static unsigned openacc_events[] =
 {
 	OPENACC_EV,
 	OPENACC_DATA_EV,
+	OPENACC_LAUNCH_EV
 };
 
 unsigned
