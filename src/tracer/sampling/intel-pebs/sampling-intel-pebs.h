@@ -39,6 +39,7 @@ void Extrae_IntelPEBS_setLoadSampling (int enabled);
 void Extrae_IntelPEBS_setMinimumLoadLatency (int numcycles);
 void Extrae_IntelPEBS_setStoreSampling (int enabled);
 void Extrae_IntelPEBS_setLoadL3MSampling (int enabled);
+void Extrae_IntelPEBS_setOffcoreStoreL3MSampling (int enabled);
 
 void Extrae_IntelPEBS_startSampling (void);
 void Extrae_IntelPEBS_stopSampling (void); 
