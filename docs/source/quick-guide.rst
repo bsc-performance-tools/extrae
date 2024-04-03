@@ -173,11 +173,11 @@ application, issue the following command:
 
   export LD_PRELOAD=${EXTRAE_HOME}/lib/<LIB>
 
-where `<LIB>` is one of the libraries listed in :numref:`tab:AvailableExtraeLIBS`.
+where `<LIB>` is one of the libraries listed under :command:`${EXTRAE_HOME}/lib` :numref:`tab:AvailableExtraeLIBS`.
 
 .. tabularcolumns:: |l|c|c|c|c|c|c|c|c|c|
 
-.. table:: Available libraries in |TRACE|. Their availability depends upon the
+.. table:: Some of the available libraries in |TRACE|. Their availability depends upon the
   configure process.
   :name: tab:AvailableExtraeLIBS
 

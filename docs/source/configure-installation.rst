@@ -204,6 +204,12 @@ enabled or disabled. To enable them use ``--enable-X`` or ``--with-X=``
   specify where to find Synapse libraries and includes. This library is a
   front-end of the MRNet library.
 
+* .. option:: --with-openacc=<PATH>
+
+  Specifies the location of OpenACC includes and libraries. It usually is the base installation folder of the compiler
+  with support to OpenACC. Enables host activity instrumentation, to capture device activity support for CUDA must be
+  also enabled.
+  
 * .. option:: --with-opencl=<PATH>
 
   Specify the location for the OpenCL package, including library and include

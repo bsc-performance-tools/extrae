@@ -45,6 +45,8 @@ JAVA_EXAMPLE_FILES=null
 FORK_EXAMPLE_FILES=null
 GASPI_EXAMPLE_FILES=null
 GASPIOMP_EXAMPLE_FILES=null
+OPENACC_EXAMPLE_FILES=null
+MPIOPENACC_EXAMPLE_FILES=null
 UNICORE_EXAMPLE_FILES= $(top_srcdir)/example/UNICORE/*
 
 if IS_BG_MACHINE
@@ -362,6 +364,14 @@ GASPIOMP_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/GASPI+OMP/extrae.xml \
  $(top_srcdir)/example/LINUX/GASPI+OMP/ld-preload
 
+OPENACC_EXAMPLE_FILES+=\
+ $(top_srcdir)/example/LINUX/OACC/extrae.xml \
+ $(top_srcdir)/example/LINUX/OACC/ld-preload
+
+MPIOPENACC_EXAMPLE_FILES+=\
+ $(top_srcdir)/example/LINUX/MPI+OACC/extrae.xml \
+ $(top_srcdir)/example/LINUX/MPI+OACC/ld-preload
+
 endif #!IS_BG_MACHINE
 endif #OS_LINUX
 
@@ -444,6 +454,12 @@ else
 	$(top_srcdir)/substitute $(SED) "@sub_GASPI_LIBS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
 
+if WANT_OPENACC
+	$(top_srcdir)/substitute $(SED) "@sub_OPENACC_HOME@" "@OPENACC_HOME@" $(DESTDIR)$(datadir)/example/Makefile.inc
+else
+	$(top_srcdir)/substitute $(SED) "@sub_OPENACC_HOME@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+endif
+
 if WANT_JAVA
 	$(top_srcdir)/substitute $(SED) "@sub_JAVAC@" "`which ${JAVAC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_JAR@" "`which ${JAR}`" $(DESTDIR)$(datadir)/example/Makefile.inc
@@ -492,6 +508,11 @@ if WANT_OPENMP
 	cp -fr $(MPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMP
 	cd $(DESTDIR)$(datadir)/example/MPI+OMP ; cp ../Makefile.inc .
 endif
+if WANT_OPENACC
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OACC
+	cp -fr $(MPIOPENACC_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OACC
+	cd $(DESTDIR)$(datadir)/example/MPI+OACC ; cp ../Makefile.inc .
+endif
 endif
 if WANT_OPENMP
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMP
@@ -537,6 +558,11 @@ if HAVE_GASPI
 	cp -fr $(GASPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/GASPI+OMP
 	cd $(DESTDIR)$(datadir)/example/GASPI+OMP ; cp ../Makefile.inc .
 endif
+if WANT_OPENACC
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OACC
+	cp -fr $(OPENACC_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OACC
+	cd $(DESTDIR)$(datadir)/example/OACC ; cp ../Makefile.inc .
+endif
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
 #
@@ -566,6 +592,9 @@ endif
 if WANT_OPENMP
 	rm -r $(DESTDIR)$(datadir)/example/MPI+OMP
 endif
+if WANT_OPENACC
+	rm -r $(DESTDIR)$(datadir)/example/MPI+OACC
+endif
 endif
 if WANT_OPENMP
 	rm -r $(DESTDIR)$(datadir)/example/OMP
@@ -591,6 +620,9 @@ endif
 if HAVE_GASPI
 	rm -r $(DESTDIR)$(datadir)/example/GASPI
 	rm -r $(DESTDIR)$(datadir)/example/GASPI+OMP
+endif
+if WANT_OPENACC
+	rm -r $(DESTDIR)$(datadir)/example/OACC
 endif
 	rm -r $(DESTDIR)$(datadir)/example/UNICORE
 	rm    $(DESTDIR)$(datadir)/example/Makefile.inc

@@ -325,6 +325,20 @@ tracing buffer for the device gets filled if no calls to this routines are
 executed.
 
 
+.. sec:OPENACCinstrumentedroutines:
+
+These are the instrumented OpenACC routines in the |TRACE| package:
+
+* OACC_init
+* OACC_compute
+* OACC_data
+* OACC_data_alloc
+* OACC_data_update
+* OACC_launch
+* OACC_update
+* OACC_wait
+
+
 .. sec:OPENCLinstrumentedroutines:
 
 OpenCL

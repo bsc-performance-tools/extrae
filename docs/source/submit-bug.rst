@@ -30,7 +30,7 @@ The following list of items are valuable when reporting a compilation problem:
 * |TRACE| configuration information, such as:
 
   * the configure output and the generated :file:`config.log` file.
-  * versions of any additional libraries (PAPI, libunwind, DynInst, CUDA,
+  * versions of any additional libraries (PAPI, libunwind, DynInst, CUDA, OpenACC,
     OpenCL, libxml2, libdwarf, libelf, ...)
 
 * The compilation error itself as reported by invoking :command:`make V=1`.
@@ -48,7 +48,7 @@ The following list of items are valuable when reporting an execution problem:
 * |TRACE| configuration information, such as:
 
   * the configure output and the generated :file:`config.log` file,
-  * versions of any additional libraries (PAPI, libunwind, DynInst, CUDA,
+  * versions of any additional libraries (PAPI, libunwind, DynInst, CUDA, OpenACC,
     OpenCL, libxml2, libdwarf, libelf, ...), and/or
   * the :command:`${EXTRAE_HOME}/etc/configured.sh` output.
 

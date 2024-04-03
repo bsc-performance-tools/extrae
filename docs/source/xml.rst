@@ -636,6 +636,20 @@ This section indicates whether the CUDA calls should be instrumented or not. If
 will not be instrumented.
 
 
+.. _sec:XMLSectionOPENACC:
+
+XML Section: OpenACC
+--------------------
+
+.. highlight:: xml
+
+.. literalinclude:: xml/openacc.xml
+
+This section indicates wheter OpenACC host activity should be instrumented. If ``enabled`` is set to yes, OpenACC
+activity made by the host will be instrumented, otherwise it will be not. If the user wants to capture device activity,
+they must also enable CUDA instrumentation.
+
+
 .. _sec:XMLSectionOPENCL:
 
 XML Section: OpenCL

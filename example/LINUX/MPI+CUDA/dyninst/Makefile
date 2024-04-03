@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-CFLAGS = -O2 -g $(MPI_CFLAGS)
+CFLAGS = -O2 -g --generate-line-info $(MPI_CFLAGS)
 CLIBS = -O2 -g $(MPI_LDFLAGS) $(MPI_LIBS)
 
 all: mpi_hello 

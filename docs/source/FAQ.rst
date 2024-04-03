@@ -378,9 +378,11 @@ Merging traces FAQ
   
   Answer:
     This usually happens when the code has not been compiled and linked with the
-    :option:`-g` flag. Moreover, some high level optimizations (which includes
-    inlining, interprocedural analysis, and so on) can lead to generate bad
-    references.
+    :option:`-g` flag. If your code invokes CUDA kernels you may also need to
+    link with the :option:`--generate-line-info` flag to generate debug symbols
+    for device code.
+    Moreover, some high level optimizations (which includes inlining,
+    interprocedural analysis, and so on) can lead to generate bad references.
 
 .. admonition:: Question:
 
