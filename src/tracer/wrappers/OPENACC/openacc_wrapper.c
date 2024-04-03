@@ -24,10 +24,6 @@
 #include "common.h"
 #include <acc_prof.h>
 #include "wrapper.h"
-#if defined(CUDA_SUPPORT)
-# warning "Including cuda_common.h"
-# include "cuda_common.h"
-#endif
 #include "openacc_probe.h"
 
 static int trace_openacc = TRUE;
@@ -49,14 +45,6 @@ OACC_init(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *apii
 {
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC())
 		return;
-
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-	else
-#endif
 
 	Backend_Enter_Instrumentation ();
 
@@ -88,14 +76,6 @@ OACC_data(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *apii
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC() || apiinfo->device_api != acc_device_api_cuda)
 		return;
 
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-	else
-#endif
-
 	Backend_Enter_Instrumentation ();
 
 	acc_other_event_info ei = eventinfo->other_event;
@@ -125,14 +105,6 @@ OACC_data_alloc(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info
 {
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC())
 		return;
-
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-	else
-#endif
 
 	Backend_Enter_Instrumentation ();
 
@@ -164,13 +136,6 @@ OACC_update(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *ap
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC())
 		return;
 
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-#endif
-
 	Backend_Enter_Instrumentation ();
 
 	acc_other_event_info ei = eventinfo->other_event;
@@ -194,14 +159,6 @@ OACC_compute(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *a
 {
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC())
 		return;
-
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-	else
-#endif
 
 	Backend_Enter_Instrumentation ();
 
@@ -227,14 +184,6 @@ OACC_launch(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info *ap
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC())
 		return;
 
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-	else
-#endif
-
 	Backend_Enter_Instrumentation ();
 
 	acc_launch_event_info ei = eventinfo->launch_event;
@@ -258,14 +207,6 @@ OACC_data_update(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_inf
 {
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC())
 		return;
-
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-	else
-#endif
 
 	Backend_Enter_Instrumentation ();
 
@@ -295,14 +236,6 @@ void OACC_wait(acc_prof_info *profinfo, acc_event_info *eventinfo, acc_api_info 
 {
 	if (!mpitrace_on || !Extrae_get_trace_OpenACC())
 		return;
-
-#if defined(CUDA_SUPPORT)
-	if (apiinfo->device_api == acc_device_api_cuda)
-	{
-		Extrae_CUDA_Initialize(profinfo->device_number);
-	}
-	else
-#endif
 
 	Backend_Enter_Instrumentation ();
 
