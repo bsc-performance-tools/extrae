@@ -61,5 +61,4 @@ int xtr_random(void);
 
 #define STRINGIFY(s) #s
 
-
 #endif /* __UTILS_H__ */

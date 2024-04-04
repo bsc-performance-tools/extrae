@@ -25,6 +25,7 @@
 #include "common.h"
 
 //#define DEBUG_SPAWN
+//#define DEBUG
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -65,6 +66,7 @@
 #include "mpi_interface.h"
 #include "mode.h"
 #include "threadinfo.h"
+#include "hash_table.h"
 
 #include <mpi.h>
 #include "extrae_mpif.h"
@@ -92,9 +94,6 @@
 */
 #include "misc_wrapper.h"
 
-/* Cal tenir requests persistents per algunes operacions */
-#include "persistent_requests.h"
-
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
@@ -107,8 +106,6 @@
 		fflush (stderr); \
 		exit (1); \
 	}
-
-#define MAX_WAIT_REQUESTS 16384
 
 static unsigned Extrae_MPI_NumTasks (void)
 {
@@ -166,10 +163,13 @@ char *Extrae_core_get_mpits_file_name (void)
 	return MpitsFileName;
 }
 
-xtr_hash_t *hash_requests = NULL; // MPI_Request stored in a hash in order to search them fast
-xtr_hash_t *hash_messages = NULL; // MPI_Message stored in a hash in order to search them fast
+// MPI_Request stored in a hash to do the communication matching
+xtr_hash *hash_persistent_requests = NULL;
+xtr_hash *hash_requests = NULL;
 
-PR_Queue_t PR_queue;              // Persistent requests queue
+// MPI_Message stored in a hash to do the communication matching
+xtr_hash *hash_messages = NULL;
+
 static int *ranks_global;         // Global ranks vector (from 1 to NProcs)
 static MPI_Group CommWorldRanks;     // Group attached to the MPI_COMM_WORLD
 
@@ -177,7 +177,7 @@ static MPI_Group CommWorldRanks;     // Group attached to the MPI_COMM_WORLD
 static int BGL_disable_barrier_inside = 0;
 #endif
 
-
+#if defined(DEBUG)
 static int amIFirstOnNode() {
     int rank, size;
     PMPI_Comm_rank( MPI_COMM_WORLD, &rank );
@@ -192,6 +192,7 @@ static int amIFirstOnNode() {
     }
     return lower == rank;
 }
+#endif
 
 MPI_Comm uncore_intercomm = MPI_COMM_NULL;
 
@@ -199,8 +200,6 @@ static void Stop_Uncore_Service()
 {
 	if (uncore_intercomm != MPI_COMM_NULL)
 	{
-		MPI_Request req;
-		MPI_Status status;
 		int rank;
 
 		PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -238,7 +237,9 @@ static void Start_Uncore_Service()
 
 	PMPI_Bcast (&activate_readers, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-	//fprintf(stderr, "[DEBUG] Start_Uncore_Service: rank=%d num_readers=%d noderep=%d numNodes=%d\n", rank, (getenv("EXTRAE_UNCORE") != NULL ? atoi(getenv("EXTRAE_UNCORE")) : 0), amIFirstOnNode(), numNodes);
+#if defined(DEBUG)
+	fprintf(stderr, "[DEBUG] Start_Uncore_Service: rank=%d num_readers=%d noderep=%d numNodes=%d\n", rank, (getenv("EXTRAE_UNCORE") != NULL ? atoi(getenv("EXTRAE_UNCORE")) : 0), amIFirstOnNode(), numNodes);
+#endif
 
 	if (activate_readers)
 	{
@@ -246,6 +247,30 @@ static void Start_Uncore_Service()
 	}
 }
 
+/*
+ * EXTRAE_MAX_MPI_HANDLES environment variable allows to override MAX_MPI_HANDLES (see mpi_wrapper.h).
+ * The minimum of the two values determines the maximum number of MPI handles that can be stored in local arrays.
+ * If set to 0, all proxy handles are stored in dynamically allocated memory.
+ */
+int dynamicMPIHandlesThreshold = MAX_MPI_HANDLES;
+
+/**
+ * @brief Common point for MPI-related initializations right after MPI_Init(_thread)
+ */
+static void xtr_MPI_common_initializations()
+{
+	// Read the EXTRAE_MAX_MPI_HANDLES environment variable to override MAX_MPI_HANDLES
+	char *env_extrae_max_mpi_handles = getenv("EXTRAE_MAX_MPI_HANDLES");
+	if (env_extrae_max_mpi_handles != NULL)
+	{
+		int max_mpi_handles = atoi(env_extrae_max_mpi_handles);
+		if (max_mpi_handles >= 0)
+		{
+			if (TASKID == 0) fprintf (stdout, PACKAGE_NAME": Setting MAX_MPI_HANDLES threshold to %d\n", max_mpi_handles);
+			dynamicMPIHandlesThreshold = max_mpi_handles;
+		}
+	}
+}
 
 /******************************************************************************
  *** CheckGlobalOpsTracingIntervals()
@@ -284,7 +309,7 @@ int getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype)
  ***  translateLocalToGlobalRank
  ******************************************************************************/
 
-void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_local, int *partner_world, int send_or_recv)
+void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_local, int *partner_world)
 {
 	int inter = 0;
 
@@ -374,41 +399,42 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_loc
 	}
 }
 
-/******************************************************************************
- ***  Traceja_Persistent_Request
- ******************************************************************************/
-
-static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
+/**
+ * @brief Searches for the given persistent request in the hash tables, and initiates a new ongoing request if found. 
+ * 
+ * Recovers the communication information associated to the given persistent request stored in the persistent hash table.
+ * This information is used to emit the corresponding MPI_PERSIST_REQ_EV event.
+ * If the operation is a receive, it also stores the ongoing request in the requests hash table to be completed later in 
+ * the Wait/Test calls.
+ * 
+ * @param p_request Persistent MPI_Request handle received in the MPI_Start* call 
+ * @param ts Timestamp of the emitted event
+ */
+static void tracePersistentRequest (MPI_Request* p_request, iotimer_t ts)
 {
-	persistent_req_t *p_request;
-	int size, src_world, ret;
-	int send_or_recv;
+	xtr_hash_data_persistent_request_t p_request_data;
+	int datatype_size = 0, source_world = 0, ret = 0;
 
-	/*
-	 * S'intenta recuperar la informacio d'aquesta request per tracejar-la 
-	 */
-	p_request = PR_Busca_request (&PR_queue, reqid);
-	if (p_request == NULL)
+	// Look for the given persistent request in the hash table 
+	if (!xtr_hash_search(hash_persistent_requests, MPI_REQUEST_TO_HASH_KEY(*p_request), &p_request_data))
+	{
+#if defined(DEBUG)
+		fprintf(stderr, "[DEBUG] tracePersistentRequest: Failed to find persistent request ID %lu\n", MPI_REQUEST_TO_HASH_KEY(*p_request));
+#endif
 		return;
+	}
 
-	/* 
-	  HSG, aixo es pot emmagatzemar a la taula de hash! A mes,
-	  pot ser que hi hagi un problema a l'hora de calcular els  bytes p2p
-	  pq ignora la quantitat de dades enviada
-	*/
-	ret = PMPI_Type_size (p_request->datatype, &size);
+	// If found, translate the source rank into its MPI_COMM_WORLD rank
+	translateLocalToGlobalRank (p_request_data.comm, MPI_GROUP_NULL, p_request_data.task, &source_world);
+
+	// Also get the datatype size in bytes
+	ret = PMPI_Type_size (p_request_data.datatype, &datatype_size);
 	MPI_CHECK(ret, PMPI_Type_size);
 
-	send_or_recv = (p_request->tipus == MPI_IRECV_EV ? OP_TYPE_RECV : OP_TYPE_SEND );
-
-	translateLocalToGlobalRank (p_request->comm, MPI_GROUP_NULL, p_request->task, &src_world, send_or_recv);
-
-	if (p_request->tipus == MPI_IRECV_EV)
+	// Save the ongoing request in the hash table (only for receive operations)
+	if (p_request_data.type == MPI_IRECV_EV)
 	{
-		/*
-		 * Als recv guardem informacio pels WAITs 
-		 */
-		SaveRequest(*reqid, p_request->comm);
+		saveRequest(*p_request, p_request_data.comm);
 	}
 
 	/*
@@ -417,8 +443,8 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 	 *   tag : message tag or MPI_ANY_TAG              commid: Communicator id
 	 *   aux: request id
 	 */
-	TRACE_MPIEVENT_NOHWC (temps, MPI_PERSIST_REQ_EV, p_request->tipus,
-	  src_world, size, p_request->tag, p_request->comm, p_request->req);
+	TRACE_MPIEVENT_NOHWC (ts, MPI_PERSIST_REQ_EV, p_request_data.type,
+	  source_world, datatype_size * p_request_data.count, p_request_data.tag, p_request_data.comm, *p_request);
 }
 
 
@@ -522,7 +548,7 @@ static void InitMPICommunicators (void)
  ******************************************************************************/
 void MPI_remove_file_list (int all)
 {
-	char tmpname[1024];
+	char tmpname[2048];
 
 	if (all || (!all && TASKID == 0))
 	{
@@ -539,8 +565,8 @@ char **TasksNodes = NULL;
 
 static void Gather_Nodes_Info (void)
 {
-	unsigned u, v;
-	int rc;
+	unsigned u;
+	int rc, v = 0;
 	size_t s;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
 	char *buffer_names = NULL;
@@ -565,19 +591,19 @@ static void Gather_Nodes_Info (void)
 
 	/* Store the information in a global array */
 	TasksNodes = (char **)xmalloc (Extrae_get_num_tasks() * sizeof(char *));
-	for (u=0; u<Extrae_get_num_tasks(); u++)
+	for (u = 0; u < Extrae_get_num_tasks(); u ++)
 	{
-    int found = FALSE;
+	    int found = FALSE;
 
 		char *tmp = &buffer_names[u*MPI_MAX_PROCESSOR_NAME];
 		TasksNodes[u] = (char *)xmalloc((strlen(tmp)+1) * sizeof(char));
 		strcpy (TasksNodes[u], tmp);
 
-		for (v=0; v<numNodes && !found; v++)
+		for (v = 0; v < numNodes && !found; v ++)
 		{
 			if (!strcmp(TasksNodes[u], UniqueNodes[v]))
 			{
-        found = TRUE;
+        		found = TRUE;
 			}
 		}
 
@@ -592,7 +618,7 @@ static void Gather_Nodes_Info (void)
 	/* Free the local array, not the global one */
 	xfree (buffer_names);
 
-	for (v=0; v<numNodes; v++)
+	for (v = 0; v < numNodes; v ++)
 	{
 		xfree(UniqueNodes[v]);
 	}
@@ -607,7 +633,7 @@ int MPI_Generate_Task_File_List ()
 {
 	int filedes, ierror;
 	unsigned u, ret, thid;
-	char tmpname[1024];
+	char tmpname[2048];
 	unsigned *buffer = NULL;
 	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
 	MPI_Comm cparent = MPI_COMM_NULL;
@@ -709,7 +735,7 @@ int MPI_Generate_Task_File_List ()
 
 		for (u = 0; u < Extrae_get_num_tasks(); u++)
 		{
-			char tmpline[2048];
+			char tmpline[4096];
 			unsigned TID = buffer[u*3+0];
 			unsigned PID = buffer[u*3+1];
 			unsigned NTHREADS = buffer[u*3+2];
@@ -1068,10 +1094,9 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 {
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_NONE);
-	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_NONE);
-
-	PR_queue_init (&PR_queue);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_NONE);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_ALLOW_DUPLICATES);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_ALLOW_DUPLICATES);
 
 #ifdef WITH_PMPI_HOOK
         int (*real_mpi_init)(MPI_Fint *ierror) = NULL;
@@ -1084,6 +1109,8 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
         {
                 CtoF77 (pmpi_init) (ierror);
         }
+
+	xtr_MPI_common_initializations();
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());
@@ -1183,10 +1210,9 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 {
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-        hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK);
-        hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK);
-
-	PR_queue_init (&PR_queue);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_LOCK);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
 
 #ifdef WITH_PMPI_HOOK
         int (*real_mpi_init_thread)(MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror) = NULL;
@@ -1199,6 +1225,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
         {
 		CtoF77 (pmpi_init_thread) (required, provided, ierror);
         }
+
+	xtr_MPI_common_initializations();
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());
@@ -1425,7 +1453,7 @@ void PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fin
 
 void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 {
-	MPI_Request req = PMPI_Request_f2c(*request);
+  MPI_Request req = PMPI_Request_f2c(*request);
 
   /*
    *   event : CANCEL_EV                    value : EVT_BEGIN
@@ -1706,29 +1734,34 @@ void PMPI_Comm_Spawn_Multiple_Wrapper (MPI_Fint *count, char *array_of_commands,
 
 void PMPI_Start_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 {
-	MPI_Request req;
+	MPI_Request  local_request;
+	MPI_Request *proxy_request = NULL;
 
-  /*
-   *   type : START_EV                     value : EVT_BEGIN
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
+	/*
+	 *   type : START_EV                     value : EVT_BEGIN
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_START_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	/* Execute the real function */
+	makeProxies_F (1, request, &local_request, &proxy_request, 0, NULL, NULL, NULL);
+
 	CtoF77 (pmpi_start) (request, ierror);
 
-	/* Store the resulting request */
-	req = PMPI_Request_f2c(*request);
-	Traceja_Persistent_Request (&req, LAST_READ_TIME);
+	// If the call was successful, trace the ongoing request
+	if (*ierror == MPI_SUCCESS)
+	{
+		tracePersistentRequest (proxy_request, LAST_READ_TIME);
+	}
+	freeProxies(proxy_request, &local_request, NULL, NULL, NULL);
 
-  /*
-   *   type : START_EV                     value : EVT_END
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
+	/*
+	 *   type : START_EV                     value : EVT_END
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
 	TRACE_MPIEVENT (TIME, MPI_START_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
@@ -1737,49 +1770,38 @@ void PMPI_Start_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
  ***  PMPI_Startall_Wrapper
  ******************************************************************************/
 
-void PMPI_Startall_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
-	MPI_Fint *ierror)
+void PMPI_Startall_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests, MPI_Fint *ierror)
 {
-  MPI_Fint save_reqs[MAX_WAIT_REQUESTS];
-  int ii;
+	MPI_Request  local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request *proxy_array_of_requests = NULL;
 
-  /*
-   *   type : START_EV                     value : EVT_BEGIN
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	/*
+	 *   type : STARTALL_EV                  value : EVT_BEGIN
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  /*
-   * Algunes implementacions es poden carregar aquesta informacio.
-   * Cal salvar-la per poder tracejar després de fer la crida pmpi. 
-   */
-  memcpy (save_reqs, array_of_requests, (*count) * sizeof (MPI_Fint));
+	makeProxies_F (*count, array_of_requests, local_array_of_requests, &proxy_array_of_requests, 0, NULL, NULL, NULL);
 
-  /*
-   * Primer cal fer la crida real 
-   */
-  CtoF77 (pmpi_startall) (count, array_of_requests, ierror);
+	CtoF77 (pmpi_startall) (count, array_of_requests, ierror);
 
-  /*
-   * Es tracejen totes les requests 
-   */
-	for (ii = 0; ii < (*count); ii++)
+	// If the call was successful, trace the ongoing requests
+	if (*ierror == MPI_SUCCESS)
 	{
-		MPI_Request req = PMPI_Request_f2c(save_reqs[ii]);
-		Traceja_Persistent_Request (&req, LAST_READ_TIME);
+		int i = 0;
+		for (i = 0; i < (*count); i++) tracePersistentRequest (&(proxy_array_of_requests[i]), LAST_READ_TIME);
 	}
+	freeProxies(proxy_array_of_requests, local_array_of_requests, NULL, NULL, NULL);
 
-  /*
-   *   type : START_EV                     value : EVT_END
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	/*
+	 *   type : STARTALL_EV                  value : EVT_END
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	 TRACE_MPIEVENT (TIME, MPI_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 
@@ -1790,40 +1812,30 @@ void PMPI_Startall_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 
 void PMPI_Request_free_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 {
-	MPI_Request req;
+	/*
+	 *   type : REQUEST_FREE_EV              value : EVT_BEGIN
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  /*
-   *   type : START_EV                     value : EVT_BEGIN
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY,
-                  EMPTY, EMPTY);
+	// Usually MPI_Request_free will be called on inactive persistent requests, try to delete it from hash_persistent_requests
+	if (!xtr_hash_remove(hash_persistent_requests, MPI_REQUEST_TO_HASH_KEY(*request), NULL))
+	{
+		// But it may be used to free a non-persistent request as well, try to delete from hash_requests if not found in hash_persistent_requests
+		xtr_hash_remove(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), NULL);
+	}
 
-  /*
-   * Cal guardar la request perque algunes implementacions se la carreguen. 
-   */
-  req = PMPI_Request_f2c (*request);
+	CtoF77 (pmpi_request_free) (request, ierror);
 
-  /*
-   * S'intenta alliberar aquesta persistent request 
-   */
-  PR_Elimina_request (&PR_queue, &req);
-
-  /*
-   * Primer cal fer la crida real 
-   */
-  CtoF77 (pmpi_request_free) (request, ierror);
-
-  /*
-   *   type : START_EV                     value : EVT_END
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	/*
+	 *   type : REQUEST_FREE_EV              value : EVT_END
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 }
@@ -1947,10 +1959,9 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_NONE);
-	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_NONE);
-
-	PR_queue_init (&PR_queue);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_NONE);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_ALLOW_DUPLICATES);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_ALLOW_DUPLICATES);
 
 #ifdef WITH_PMPI_HOOK
 	int (*real_mpi_init)(int *argc, char ***argv) = NULL;
@@ -1962,6 +1973,8 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	{
 		val = PMPI_Init (argc, argv);
 	}
+
+	xtr_MPI_common_initializations();
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());
@@ -2060,10 +2073,9 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK);
-	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK);
-	
-	PR_queue_init (&PR_queue);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_LOCK);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
 
 #ifdef WITH_PMPI_HOOK
 	int (*real_mpi_init_thread)(int *argc, char ***argv, int required, int *provided) = NULL;
@@ -2075,6 +2087,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	{
 		val = PMPI_Init_thread (argc, argv, required, provided);
 	}
+
+	xtr_MPI_common_initializations();
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());
@@ -2168,6 +2182,14 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 #endif /* MPI_HAS_INIT_THREAD_C */
 
 
+#if defined(DEBUG)
+void pretty_request(FILE *fd, void *data) {
+  UINT64 *x = data;
+
+  fprintf(fd, "%lu", *x);
+}
+#endif
+
 /******************************************************************************
  ***  MPI_Finalize_C_Wrapper
  ******************************************************************************/
@@ -2178,6 +2200,14 @@ int MPI_Finalize_C_Wrapper (void)
 
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 1;
+#endif
+
+#if defined(DEBUG)
+	usleep(TASKID*1000);
+	xtr_hash_dump(hash_requests, pretty_request);
+	xtr_hash_stats_dump(hash_requests );
+	xtr_hash_dump(hash_persistent_requests, pretty_request);
+	xtr_hash_stats_dump(hash_persistent_requests );
 #endif
 
 	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
@@ -2672,31 +2702,38 @@ int MPI_Intercomm_merge_C_Wrapper (MPI_Comm intercomm, int high,
 
 int MPI_Start_C_Wrapper (MPI_Request *request)
 {
-  int ierror;
+	MPI_Request  local_request;
+	MPI_Request *proxy_request = NULL;
+	int ierror;
 
-  /*
-   *   type : START_EV                     value : EVT_BEGIN
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_START_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	/*
+	 *   type : START_EV                     value : EVT_BEGIN
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_START_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  /* Primer cal fer la crida real */
-  ierror = PMPI_Start (request);
+	makeProxies_C (1, request, &local_request, &proxy_request, 0, NULL, NULL, NULL);
 
-  /* S'intenta tracejar aquesta request */
-  Traceja_Persistent_Request (request, LAST_READ_TIME);
+	ierror = PMPI_Start (request);
 
-  /*
-   *   type : START_EV                     value : EVT_END
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_START_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-  return ierror;
+	// If the call was successful, trace the ongoing request
+	if (ierror == MPI_SUCCESS)
+	{
+		tracePersistentRequest (proxy_request, LAST_READ_TIME);
+	}
+	freeProxies(proxy_request, &local_request, NULL, NULL, NULL);
+
+	/*
+	 *   type : START_EV                     value : EVT_END
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (TIME, MPI_START_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	return ierror;
 }
 
 
@@ -2706,40 +2743,38 @@ int MPI_Start_C_Wrapper (MPI_Request *request)
 
 int MPI_Startall_C_Wrapper (int count, MPI_Request *array_of_requests)
 {
-  MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-  int ii, ierror;
+	MPI_Request  local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request *proxy_array_of_requests = NULL;
+	int ierror;
 
-  /*
-   *   type : START_EV                     value : EVT_BEGIN
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	/*
+	 *   type : STARTALL_EV                     value : EVT_BEGIN
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  /*
-   * Algunes implementacions es poden carregar aquesta informacio.
-   * Cal salvar-la per poder tracejar després de fer la crida pmpi. 
-   */
-  memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
+	makeProxies_C (count, array_of_requests, local_array_of_requests, &proxy_array_of_requests, 0, NULL, NULL, NULL);
+	
+	ierror = PMPI_Startall (count, array_of_requests);
 
-  /* Primer cal fer la crida real */
-  ierror = PMPI_Startall (count, array_of_requests);
+	// If the call was successful, trace the ongoing requests
+	if (ierror == MPI_SUCCESS)
+	{
+		int i = 0;
+		for (i = 0; i < count; i++) tracePersistentRequest (&(proxy_array_of_requests[i]), LAST_READ_TIME);
+	}
+	freeProxies(proxy_array_of_requests, local_array_of_requests, NULL, NULL, NULL);
 
-  /* Es tracejen totes les requests */
-  for (ii = 0; ii < count; ii++)
-    Traceja_Persistent_Request (&(save_reqs[ii]), LAST_READ_TIME);
-
-  /*
-   *   type : START_EV                     value : EVT_END
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
-  return ierror;
+	/*
+	 *   type : STARTALL_EV                     value : EVT_END
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (TIME, MPI_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	return ierror;
 }
 
 
@@ -2748,35 +2783,36 @@ int MPI_Startall_C_Wrapper (int count, MPI_Request *array_of_requests)
  ******************************************************************************/
 int MPI_Request_free_C_Wrapper (MPI_Request *request)
 {
-  int ierror;
+	int ierror;
 
-  /*
-   *   type : START_EV                     value : EVT_BEGIN
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY,
-                  EMPTY, EMPTY);
+	/*
+	 *   type : REQUEST_FREE_EV                     value : EVT_BEGIN
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  /* Free from our structures */
-  PR_Elimina_request (&PR_queue, request);
+	// Usually MPI_Request_free will be called on inactive persistent requests, try to delete it from hash_persistent_requests
+	if (!xtr_hash_remove(hash_persistent_requests, MPI_REQUEST_TO_HASH_KEY(*request), NULL))
+	{
+		// But it may be used to free a non-persistent request as well, try to delete from hash_requests if not found in hash_persistent_requests
+		xtr_hash_remove(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), NULL);
+	}
 
-  /* Perform the real call */
-  ierror = PMPI_Request_free (request);
+	ierror = PMPI_Request_free (request);
 
-  /*
-   *   type : START_EV                     value : EVT_END
-   *   target : ---                        size  : ----
-   *   tag : ---                           comm : ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	/*
+	 *   type : REQUEST_FREE_EV                     value : EVT_END
+	 *   target : ---                        size  : ----
+	 *   tag : ---                           comm : ---
+	 *   aux : ---
+	 */
+	TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
-  return ierror;
+	return ierror;
 }
 
 #endif /* defined(C_SYMBOLS) */
@@ -3091,6 +3127,16 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 	}
 }
 
+/**
+ * @brief Get the group associated with given communicator
+ * 
+ * If the communicator is MPI_COMM_WORLD, the group is set to MPI_GROUP_NULL.
+ * If the communicator is an intercommunicator, the group is set to the remote group.
+ * Otherwise, the group is set to the local group.
+ * 
+ * @param comm MPI_Comm handle 
+ * @param[out] group Group handle in communicator 
+ */
 void getCommunicatorGroup(MPI_Comm comm, MPI_Group *group)
 {
 	int ret, inter;
@@ -3117,55 +3163,344 @@ void getCommunicatorGroup(MPI_Comm comm, MPI_Group *group)
         }
 }
 
-void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *global_source)
+/**
+ * @brief Retrieves communication information from the given status, datatype and comm handles.
+ * 
+ * The size of the message is calculated from the count and datatype.
+ * The tag is retrieved from the status.
+ * The source rank is retrieved from the status and translated to the global rank.
+ *  
+ * @param status MPI_Status handle (can't be MPI_STATUS_IGNORE, we've made proxies earlier)
+ * @param datatype MPI_Datatype handle
+ * @param comm MPI_Comm handle
+ * @param group The group associated with the communicator (may be MPI_GROUP_NULL)
+ * @param[out] size The size of the message
+ * @param[out] tag The tag of the message
+ * @param[out] source_global The global rank of the source
+ */
+void getCommInfoFromStatus_C (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *source_global)
 {
-  int recved_count;
-  int local_source;
+  int recved_count = MPI_UNDEFINED;
+  int source_local = MPI_UNDEFINED;
 
   // Retrieve number of received elements
-  PMPI_Get_count (status, datatype, &recved_count);
-  if (recved_count == MPI_UNDEFINED)
+  if (PMPI_Get_count (status, datatype, &recved_count) == MPI_SUCCESS)
   {
-    recved_count = 0;
+	if (recved_count == MPI_UNDEFINED)
+	{
+		recved_count = 0;
+	}
+	*size = getMsgSizeFromCountAndDatatype(recved_count, datatype);
+
+	// Retrieve the message tag
+	*tag = status->MPI_TAG;
+
+	// Retrieve the source rank (this is local to the communicator used)
+	source_local = status->MPI_SOURCE;
+
+	// Transform local rank into MPI_COMM_WORLD rank
+	translateLocalToGlobalRank (comm, group, source_local, source_global);
   }
-  *size = getMsgSizeFromCountAndDatatype(recved_count, datatype);
-
-  // Retrieve the message tag
-  *tag = status->MPI_TAG;
-
-  // Retrieve the source rank (this is local to the communicator used)
-  local_source = status->MPI_SOURCE;
-
-  // Transform local rank into MPI_COMM_WORLD rank
-  translateLocalToGlobalRank (comm, group, local_source, global_source, OP_TYPE_RECV);
+  else 
+  {
+	*size          = MPI_UNDEFINED;
+	*tag           = MPI_UNDEFINED;
+	*source_global = MPI_UNDEFINED;
+  }
 }
 
-void SaveRequest(MPI_Request request, MPI_Comm comm)
+/**
+ * @brief Analogous to getCommInfoFromStatus_C but for Fortran handles.
+ */
+void getCommInfoFromStatus_F (MPI_Fint *f_status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *source_global)
+{
+	MPI_Status c_status;	
+	PMPI_Status_f2c(f_status, &c_status);
+	getCommInfoFromStatus_C(&c_status, datatype, comm, group, size, tag, source_global);
+}
+
+/**
+ * @brief Makes a copy of the user's request array.
+ * 
+ * We need to keep a copy because the original handles are invalidated after the PMPI calls.
+ * The copy goes to the local_requests array if the number of requests is less than (EXTRAE_)MAX_MPI_HANDLES.
+ * Otherwise, we allocate memory for the copy.
+ * The function returns a pointer to either the local array or the dynamically allocated one.
+ * 
+ * @param count Number of elements in the request array
+ * @param user_requests Array of MPI_Request handles provided by the user
+ * @param local_requests Local array of MPI_Request (of size MAX_MPI_HANDLES) handles to hold the copy
+ * @return MPI_Request* Pointer to the array that holds the copy
+ */
+static MPI_Request * copyRequests_C (int count, MPI_Request *user_requests, MPI_Request *local_requests)
+{
+	MPI_Request *copy_requests = local_requests;
+
+	if ((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) || (local_requests == NULL))
+	{
+		// If the number of requests is greater than MAX_MPI_HANDLES, we need to allocate memory for the copy
+		copy_requests = (MPI_Request *) xmalloc (count * sizeof(MPI_Request));
+	}
+	memcpy (copy_requests, user_requests, count * sizeof(MPI_Request));
+	return copy_requests;
+}
+
+/**
+ * @brief Analogous to copyRequests_C but for Fortran handles.
+ */
+static MPI_Request * copyRequests_F (int count, MPI_Fint *user_requests, MPI_Request *local_requests)
+{
+	int i = 0;
+	MPI_Request *copy_requests = local_requests;
+
+	if ((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) || (local_requests == NULL))
+	{
+		copy_requests = (MPI_Request *) xmalloc (count * sizeof(MPI_Request));
+	}
+	for (i = 0; i < count; i ++)
+	{
+		copy_requests[i] = PMPI_Request_f2c(user_requests[i]);
+	}
+	return copy_requests;
+}
+
+/**
+ * @brief Replaces user's status handles with our own only if the user is using MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE.
+ * 
+ * This function processes the status array provided by the user. If the user is using MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE, 
+ * it will return a pointer to the local static array declared in the wrapper. If count is greater than (EXTRAE_)MAX_MPI_HANDLES, it will
+ * return a pointer to a dynamically allocated array. 
+ * 
+ * After selecting the proper array, it initializes the MPI_SOURCE field in the status array to MPI_UNDEFINED, so we can detect after the PMPI
+ * whether the request corresponds to an Isend/Irecv. The MPI library only updates the MPI_SOURCE field if the request originates from a succesful Irecv.
+ * 
+ * @param count Number of elements in the status array
+ * @param user_statuses MPI_Status pointer provided by the user (can be MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE)
+ * @param local_statuses MPI_Status pointer to a local status array declared in the wrapper. If set to NULL and user_status is MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE, it will be allocated dynamically
+ * @return MPI_Status* Pointer to the status array to be used (either the user's, the local static, or the dynamically allocated one)
+ */
+static MPI_Status * substituteStatusIgnore_C(int count, MPI_Status *user_statuses, MPI_Status *local_statuses)
+{
+        int i = 0;
+
+		// Check if the user is using MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE to use an array of our own
+        MPI_Status *proxy_statuses = ((user_statuses == ((count > 1) ? MPI_STATUSES_IGNORE : MPI_STATUS_IGNORE)) ? local_statuses : user_statuses);
+
+		// Check if we need to allocate memory for the status array
+		if (((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) && (proxy_statuses != user_statuses)) || (proxy_statuses == NULL))
+		{
+			proxy_statuses = (MPI_Status *) xmalloc (count * sizeof(MPI_Status));
+		}
+
+		/* 
+		 * Initialize the MPI_SOURCE field in the status array to MPI_UNDEFINED to later detect if the request corresponds to an Isend/Irecv
+		 */
+        for (i = 0; i < count; i ++)
+        {
+            proxy_statuses[i].MPI_SOURCE = MPI_UNDEFINED;
+        }
+        return proxy_statuses;
+}
+
+/**
+ * @brief Analogous to substituteStatusIgnore_C but for Fortran handles.
+ */
+static MPI_Fint * substituteStatusIgnore_F(int count, MPI_Fint *user_statuses, MPI_Fint *local_statuses)
+{
+	int i = 0;
+
+	// Check if the user is using MPI_F_STATUS_IGNORE or MPI_F_STATUSES_IGNORE to use an array of our own 
+	MPI_Fint *proxy_statuses = ((user_statuses == ((count > 1) ? MPI_F_STATUSES_IGNORE : MPI_F_STATUS_IGNORE)) ? local_statuses : user_statuses);
+
+	// Check if we need to allocate memory for the status array
+	if (((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) && (proxy_statuses != user_statuses)) || (proxy_statuses == NULL))
+	{
+		proxy_statuses = (MPI_Fint *) xmalloc (count * MPI_F_STATUS_SIZE * sizeof(MPI_Fint));
+	}
+
+	/* 
+	 * Initialize the MPI_SOURCE field in the status array to MPI_UNDEFINED, so we can detect after the PMPI whether the request corresponds to an isend/irecv
+	 * The MPI library only updates the MPI_SOURCE field if the request originates from a succesful irecv 
+	 */
+	for (i = 0; i < count; i ++)
+	{
+		MPI_Status c_status;
+
+		PMPI_Status_f2c(&proxy_statuses[i * MPI_F_STATUS_SIZE], &c_status);
+		c_status.MPI_SOURCE = MPI_UNDEFINED;
+		PMPI_Status_c2f(&c_status, &proxy_statuses[i * MPI_F_STATUS_SIZE]);
+	}
+	return proxy_statuses;
+}
+
+/**
+ * @brief Generates proxy handles for requests and statuses.
+ * 
+ * MPI_Request handles are copied to keep them valid as the original user_request handles may be invalidated after a call to PMPI.
+ * MPI_Status handles are substituted by a new handle when the original is set to MPI_STATUS_IGNORE, MPI_STATUSES_IGNORE, etc.
+ * The new handles are stored in local arrays pointed by local_requests and local_statuses, only when their respective counts are smaller than MAX_MPI_HANDLES. 
+ * If the counts exceed MAX_MPI_HANDLES, memory is allocated dynamically to store the new handles.
+ * The output parameters proxy_requests and proxy_statuses are set to point to the proper handles, either the original, local or dynamically allocated copies.
+ * 
+ * @param count_requests Number of MPI_Request handles to be processed.
+ * @param user_requests Array of original MPI_Request handles received from the user.
+ * @param local_requests Local array of MPI_Request handles of size MAX_MPI_HANDLES.
+ * @param[out] proxy_requests Pointer to the copy of the user_requests array.
+ * @param count_statuses Number of MPI_Status handles to be processed.
+ * @param user_statuses Array of original MPI_Status handles received from the user (may be MPI_STATUSES_IGNORE)
+ * @param local_statuses Local array of MPI_Status handles of size MAX_MPI_HANDLES.
+ * @param[out] proxy_statuses Pointer to the new status handles if users's are MPI_STATUSES_IGNORE, or to the original handles otherwise.
+ */
+void makeProxies_C (int count_requests, MPI_Request *user_requests, MPI_Request *local_requests, MPI_Request **proxy_requests, int count_statuses, MPI_Status *user_statuses, MPI_Status *local_statuses, MPI_Status **proxy_statuses)
+{
+	if ((count_requests > 0) && (user_requests != NULL) && (proxy_requests != NULL))
+	{
+		*proxy_requests = copyRequests_C(count_requests, user_requests, local_requests);
+	}
+
+	if ((count_statuses > 0) && (user_statuses != NULL) && (proxy_statuses != NULL))
+	{
+		*proxy_statuses = substituteStatusIgnore_C(count_statuses, user_statuses, local_statuses);
+	}
+}
+
+/**
+ * @brief Analogous to makeProxies_C but for Fortran handles.
+ */
+void makeProxies_F (int count_requests, MPI_Fint *user_requests, MPI_Request *local_requests, MPI_Request **proxy_requests, int count_statuses, MPI_Fint *user_statuses, MPI_Fint *local_statuses, MPI_Fint **proxy_statuses)
+{
+	if ((count_requests > 0) && (user_requests != NULL) && (proxy_requests != NULL))
+	{
+		*proxy_requests = copyRequests_F(count_requests, user_requests, local_requests);
+	}
+
+	if ((count_statuses > 0) && (user_statuses != NULL) && (proxy_statuses != NULL))
+	{
+		*proxy_statuses = substituteStatusIgnore_F(count_statuses, user_statuses, local_statuses);
+	}
+}
+
+/**
+ * @brief Frees the memory allocated by makeProxies_C/F.
+ * 
+ * @param local_request Local array of MPI_Request handles of size MAX_MPI_HANDLES.
+ * @param proxy_request Pointer to the copy of the user_requests array.
+ * @param user_status Array of original MPI_Status handles received from the user (may be MPI_STATUSES_IGNORE)
+ * @param local_status Local array of MPI_Status handles of size MAX_MPI_HANDLES.
+ * @param proxy_status Pointer to the new status handles if users's are MPI_STATUSES_IGNORE, or to the original handles otherwise.
+ */
+void freeProxies(void *local_request, void *proxy_request, void *user_status, void *local_status, void *proxy_status)
+{
+	if (proxy_request != local_request)
+	{
+		xfree(proxy_request);
+	}
+	if (proxy_status != user_status && proxy_status != local_status)
+	{
+		xfree(proxy_status);
+	}
+}
+
+/**
+ * @brief Store the communication information associated to the given persistent request in the hash table to retrieve it later in the Start/Startall calls. 
+ * 
+ * @param p_request The persistent MPI_Request handle in the MPI_Recv/Send_init calls
+ * @param datatype MPI_Datatype handle in the MPI_Recv/Send_init calls
+ * @param comm MPI_Comm handle in the MPI_Recv/Send_init calls
+ * @param type Can be set to MPI_IRECV_EV, MPI_I{B|R|S}SEND_EV to identify the operation
+ * @param count The count argument in the MPI_Recv/Send_init calls
+ * @param partner The source/dest argument in the MPI_Recv/Send_init calls
+ * @param tag The tag argument in the MPI_Recv/Send_init calls
+ */
+void savePersistentRequest_C(MPI_Request p_request, MPI_Datatype datatype, MPI_Comm comm, int type, int count, int partner, int tag)
+{
+	static int once = 0;
+
+	if (p_request != MPI_REQUEST_NULL)
+	{
+		xtr_hash_data_persistent_request_t p_request_data;
+		p_request_data.datatype = datatype;
+		p_request_data.comm = comm;
+		p_request_data.type = type;
+		p_request_data.count = count;
+		p_request_data.task = partner;
+		p_request_data.tag = tag;
+
+		if (!xtr_hash_add(hash_persistent_requests, MPI_REQUEST_TO_HASH_KEY(p_request), &p_request_data, NULL) && !once)
+		{
+			fprintf(stderr, PACKAGE_NAME": WARNING: savePersistentRequest: "
+							"Hash table for persistent MPI_Request's is full. "
+			                "The resulting trace will contain unmatched communications. "
+							"Please recompile Extrae increasing the size of the table or make it expandable (see xtr_hash_new flags in mpi_wrapper.c), "
+							"and verify the application is calling MPI_Test*/Wait* routines.\n");
+            once = 1;
+		}
+	}
+}
+
+/**
+ * @brief Analogous to savePersistentRequest_C but for Fortran handles.
+ */
+void savePersistentRequest_F(MPI_Fint *p_request, MPI_Fint *datatype, MPI_Fint *comm, int type, int count, int partner, int tag)
+{
+	MPI_Request  c_request = PMPI_Request_f2c (*p_request);
+	MPI_Datatype c_type    = PMPI_Type_f2c(*datatype);
+	MPI_Comm     c_comm    = PMPI_Comm_f2c(*comm);
+
+	savePersistentRequest_C(c_request, c_type, c_comm, type, count, partner, tag);
+}
+
+/**
+ * @brief Stores the given non-persistent request in the hash table to retrieve the associated communicator and group later in the Wait/Test calls
+ * 
+ * @param request The MPI_Request handle in the MPI_Irecv calls (Isend calls are not stored in the hash table)
+ * @param comm The MPI_Comm handle in the MPI_Irecv calls
+ */
+void saveRequest(MPI_Request request, MPI_Comm comm)
 {
 	static int once = 0;
 
 	if (request != MPI_REQUEST_NULL) 
 	{
 		xtr_hash_data_request_t request_data;
-
 		request_data.commid = comm;
 		getCommunicatorGroup(comm, &request_data.group);
 
-		if (!xtr_hash_add (hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data) && !once)
+		if (!xtr_hash_add (hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data, NULL) && !once)
 		{
-			fprintf(stderr, PACKAGE_NAME": WARNING: SaveRequest: Hash table for MPI_Request's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Test*/Wait* routines.\n");
+			fprintf(stderr, PACKAGE_NAME": WARNING: saveRequest: "
+			                "Hash table for MPI_Request's is full. "
+							"The resulting trace will contain unmatched communications. "
+							"Please recompile Extrae increasing the size of the table or make it expandable (see xtr_hash_new flags in mpi_wrapper.c), "
+							"and verify the application is calling MPI_Test*/Wait* routines.\n");
 			once = 1;
 		}
 	}
 }
 
-void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
+/**
+ * @brief Checks whether the given request corresponds to a completed or cancelled communication and emits events for the communication matching.
+ *
+ * If the communication was cancelled, the corresponding MPI_REQUEST_CANCELLED_EV event is emitted.
+ * If the communication was completed, we extract the communication information from the hash table and the status, and emit the corresponding MPI_IRECVED_EV event.
+ * In both cases, the request is eliminated from the hash table. 
+ * Doesn't do anything if the request originated from a MPI_I*send call. We know this because we mark the corresponding status->MPI_SOURCE 
+ * field with MPI_UNDEFINED before the PMPI call (see makeProxies -> substituteStatusIgnore). The status isn't updated either if the call fails, 
+ * or it's from an I*send.
+ *  
+ * @param ts Timestamp of the emitted event
+ * @param request MPI_Request handle to be processed
+ * @param status MPI_Status handle to be processed
+ */
+void processRequest_C(iotimer_t ts, MPI_Request request, MPI_Status *status)
 {
-	if (request != MPI_REQUEST_NULL)
+	// The operand (status->MPI_SOURCE != MPI_UNDEFINED) discards processing requests originated from I*sends (we mark those statuses with MPI_UNDEFINED before the PMPI and MPI_SOURCE is not updated for them)
+	if ((request != MPI_REQUEST_NULL) && (status->MPI_SOURCE != MPI_UNDEFINED))
 	{
 		xtr_hash_data_request_t request_data;
 		int cancel_flag, src_world, size, tag, ierror;
 
+		// Current request refers to a receive operation (only MPI_I*recv requests are stored in the hash)
 		ierror = PMPI_Test_cancelled(status, &cancel_flag);
 		MPI_CHECK(ierror, PMPI_Test_cancelled);
 
@@ -3174,71 +3509,94 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 			// Communication was cancelled
 			TRACE_MPIEVENT_NOHWC (ts, MPI_REQUEST_CANCELLED_EV, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, request);
 
-			CancelRequest(request);
+			cancelRequest(request);
 		}
 		else
 		{
 			// Communication was completed 
-
-			if (xtr_hash_fetch(hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data))
-			{
-				// Current request refers to a receive operation (only MPI_I*recv requests are stored in the hash)
-      
-				/* Retrieve the request from the hash table to query the communicator used in the MPI_I*recv.
-				Then, we query the status for the source rank of the sender (the source rank is local to the communicator used).
-				With the source rank and the communicator, we translate the local rank into the global rank.
-				*/
-
-				getCommDataFromStatus(status, MPI_BYTE, request_data.commid, request_data.group, &size, &tag, &src_world);
-
+			if (xtr_hash_remove(hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data) )
+			{    
+				/*
+				 * Retrieve the request from the hash table to query the communicator used in the MPI_I*recv.
+				 * Then, we query the status for the source rank of the sender (the source rank is local to the communicator used).
+				 * With the source rank and the communicator, we translate the local rank into the global rank.
+				 */
+				getCommInfoFromStatus_C(status, MPI_BYTE, request_data.commid, request_data.group, &size, &tag, &src_world);
 				updateStats_P2P(global_mpi_stats, src_world, size, 0);
-  
 				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, request_data.commid, request);
 			}
-			else 
+			else
 			{
-				// Current request refers to a send operation (send requests are not stored in the hash) 
-
-				/* This case would also trigger if a receive request was not found in the hash (e.g. hash full) 
-				This should not happen unless there's errors in xtr_hash_add or we've missed instrumenting any recv calls. 
-				*/
+				/* 
+				 * This case would trigger if a receive request was not found in the hash (e.g. hash full) 
+				 * This should not happen unless there's errors in xtr_hash_add or we've missed instrumenting any recv calls. 
+				 */
 				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, EMPTY, EMPTY, status->MPI_TAG, EMPTY, request);
 			}
 		}
 	}
 }
 
-void CancelRequest(MPI_Request request)
+/**
+ * @brief Analogous to processRequest_C but for Fortran handles.
+ */
+void processRequest_F(iotimer_t ts, MPI_Request request, MPI_Fint *status)
+{
+	MPI_Status c_status;
+	PMPI_Status_f2c (status, &c_status);
+	processRequest_C (ts, request, &c_status);
+}
+
+/**
+ * @brief Removes the given request from the hash table
+ * 
+ * @param request MPI_Request handle
+ */
+void cancelRequest(MPI_Request request)
 {
 	if (request != MPI_REQUEST_NULL) 
 	{
-		xtr_hash_fetch(hash_requests, MPI_REQUEST_TO_HASH_KEY(request), NULL);
+		xtr_hash_remove(hash_requests, MPI_REQUEST_TO_HASH_KEY(request), NULL);
 	}
 }
 
 #if defined(MPI3)
 
-void SaveMessage(MPI_Message message, MPI_Comm comm)
+/**
+ * @brief Stores the given message handle along with its associated communicator in the messages hash table to be retrieved later in the {M|Im}recv calls
+ * 
+ * @param message MPI_Message handle received from the user in MPI_{M|Im}probe calls
+ * @param comm MPI_Comm handle associated to the message to be stored in the hash table
+ */
+void saveMessage(MPI_Message message, MPI_Comm comm)
 {
 	static int once = 0;
 
 	if (message != MPI_MESSAGE_NULL)
 	{
 		xtr_hash_data_message_t message_data;
-
 		message_data.commid = comm;
 		getCommunicatorGroup(comm, &message_data.group);
 
-		if (!xtr_hash_add (hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data) && !once)
+		if (!xtr_hash_add (hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data, NULL) && !once)
 		{
-			fprintf(stderr, PACKAGE_NAME": WARNING: SaveMessage: Hash table for MPI_Message's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Mrecv/Imrecv routines.\n");
+			fprintf(stderr, PACKAGE_NAME": WARNING: saveMessage: Hash table for MPI_Message's is full. "
+			                "The resulting trace will contain unmatched communications." 
+							"Please recompile Extrae increasing the size of the table or make it expandable (see xtr_hash_new flags in mpi_wrapper.c), "
+							"and verify the application is calling MPI_Mrecv/Imrecv routines.\n");
 			once = 1;
 		}
 	}
 }
 
-
-MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
+/**
+ * @brief Retrieves the communicator associated to the given message handle from the hash table and removes it from the hash table.
+ * 
+ * @param message MPI_Message handle received from the user in the {M|Im}recv calls
+ * @param request MPI_Request handle only for the inmediate MPI_Imrecv calls 
+ * @return MPI_Comm The communicator associated to the message handle previously stored through saveMessage in MPI_{M|Im}probe calls
+ */
+MPI_Comm processMessage(MPI_Message message, MPI_Request *request)
 {
 	static int once = 0;
 
@@ -3247,7 +3605,7 @@ MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 		xtr_hash_data_message_t message_data;
 
 		// Retrieve message from hash
-		if (xtr_hash_fetch(hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data))
+		if (xtr_hash_remove(hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data))
 		{
 			if (request != NULL)
 			{
@@ -3258,9 +3616,12 @@ MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 				request_data.group  = message_data.group;
 
 				// Save the request in the hash with the message's comm data
-				if (!xtr_hash_add(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), &request_data) && !once)
+				if (!xtr_hash_add(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), &request_data, NULL) && !once)
 				{
-					fprintf(stderr, PACKAGE_NAME": WARNING: ProcessMessage: Hash table for MPI_Request's is full. The resulting trace will contain unmatched communications. Please recompile Extrae increasing the size of the table and/or verify the application is calling MPI_Test*/Wait* routines.\n");
+					fprintf(stderr, PACKAGE_NAME": WARNING: processMessage: Hash table for MPI_Request's is full. "
+							"The resulting trace will contain unmatched communications. "
+							"Please recompile Extrae increasing the size of the table or make it expandable (see xtr_hash_new flags in mpi_wrapper.c), "
+							"and verify the application is calling MPI_Test*/Wait* routines.\n");
 					once = 1;
 				}
 			}

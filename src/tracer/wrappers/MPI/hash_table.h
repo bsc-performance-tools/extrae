@@ -21,73 +21,61 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#pragma once 
+#pragma once
 
 #include <pthread.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <mpi.h>
+#ifndef UNIT_TEST
+# include "common.h"
+#else
+typedef unsigned long UINT64;
+#endif /* UNIT_TEST */
 
 /***
 
-  This data structure represents a hash table with shared overflow. Main design details follow:
+  This data structure represents a hash table with collision resolution by chaining. Main design features are:
+  - The hash function is a simple module operation of the key by the hash size. 
+  - The hash elements are stored in a memory pool that is dynamically allocated once, and the update of the elements is done through a linked list.
+  - The data associated with the keys is stored in a separate memory pool of configurable size.
+  - The hash table can be locked for multithread access.
+  - The hash table can be configured to allow duplicate keys.
+  - The hash table can be configured to automatically expand when full.
+  - TODO: The hash table can be configured to automatically shrink when empty.
+  - The elements are stored in LIFO order, so the last element added is the first to be removed.
+  - TODO: The hash table can be configured to store the elements in FIFO order.
+  - The hash table can be configured to return the data associated with the key when searching, removing or adding duplicates. 
 
-  - The first key hashed is stored in the corresponding hash index of the 'Head' array.
-  - Empty cells in the head array are marked with XTR_KEY_NOT_HASHED (NULL).
-  - Further keys that collide are stored in the 'Collision' list.
-  - Each head cell points to its own collision list. 
-  - Starting from the head cell, you can iterate all collisions through pointer 'next', as a linked list. 
-  - Last element in the collision list points to itself. 
-  - Free cells in the collision list are pointed by 'next_free_collision_cell' and linked through the 'next' pointer.
-  - Last free cell points to XTR_HASH_FULL (NULL).
-  - Collisions are added in LIFO order, i.e. becomes 1st in the collision list (head cell points to the newest collision)
-  - When head cells are free'd, first collision gets promoted to the head array.
-  - Each cell has a reserved spot in the data_pool to store user data.
-  - Initially the data_pool storage is assigned to the head cells (h1, h2...) , then to the collision cells (c1, c2...), in order.
-  - If freeing a head cell causes a promotion (move 1st collision to head), the data pointers get switched to avoid memcpy's (see promote_collision)
+key % hash_size = bucket array that points to a linked list of elements with the same index
 
+buckets          pool_array[0].item_pool
+   \                                    \ 
+    [ Index_0 ]                          \ _______________  
+    [ Index_1 ] ------------------------> |    |    |     |
+    [ ...     ]                           | i1 | i2 | ... | i1, i2, ..., iN are chained through next pointer when they fall in the same bucket
+                                          |____|____|_____| 
+                                         /|    |    |     | 
+                                        / |____|____|_____|  
+                         pool_first_free  |    |    |     | pool_first_free points to the first free element in (any of) the item pool(s)
+                                          |____|____|_____|
+                                          |    |    |     | 
+                                          |    |    | iN  | N is the hash size. 
+                                          |____|____|_____| When iN is reached, pool_array grows with a new pair of item and data pools
 
-                  XTR_HASH_FUNCTION(MPI_Request)      +--> XTR_KEY_NOT_HASHED
-                          ↘         ↘         ↘       |
-                         +------------------------------------
-              Head array | S4 |   | R1 |   | T1 |   | X | ...
-                         +------------------------------------
-                           |         |         ↺         
-                           |         |   
-                     next  +----+    |   +--------- next_free_collision_cell
-                                |    |   |
-                                v    v   v
-                    +---------------------------+
-     Collision list | R2 | R3 | S5 | R6 |   |   |
-                    +---------------------------+
-                    ↻ ^   |  ^  ↺   |     |  ^ |
-                      |   |  |      |     |  | |
-                next  +---+  +------+     +--+ +--> XTR_HASH_FULL
-                             
-
-                           +--------------------------
-                      Head |  |  |  |  |  |  |  | ...
-                           +--------------------------
-                            |
-                            |                   +-----------------------
-                     data   |         Collision |  |  |  |  |  |  | ...
-              ______________|                   +-----------------------
- data_pool   ↓                             data  ↓
-         ↘ +------------------------------------------------------------------------------------+
-           | h1 | h2 | ...                         | c1 | c2 | ...                              | 
-           +------------------------------------------------------------------------------------+
-           <-----    data_size * head_size     ----><-----    data_size * collision_size    -----> 
+                  pool_array[0].data_pool                   data_pool matches the item_pool in size, and stores the data associated with the keys
+                                         \                  so i1 points to d1, i2 points to d2, ..., iN points to dN
+                                          \_______________ 
+                                          |    |    |     |
+                                          | d1 | d2 | ... | 
+                                          |____|____|_____| 
+                                          |    |    |     | 
+                                          |____|____|_____|  
+                                          |    |    |     | 
+                                          |____|____|_____|
+                                          |    |    |     | 
+                                          |    |    | dN  | 
+                                          |____|____|_____|
+ 
 
 ***/
-
-
-/*** Defines ***/
-
-// Mark cells in heads array as empty
-#define XTR_KEY_NOT_HASHED NULL 
-
-// Mark free list as full
-#define XTR_HASH_FULL      NULL
 
 /*
  * Some prime numbers for the hash size
@@ -117,158 +105,120 @@
  *    589933   655471   721013   786553   852079
  *    917629   983153
  */
-typedef enum
-{
-  XTR_HASH_SIZE_TINY   = 55411,
-  XTR_HASH_SIZE_SMALL  = 114809,
+typedef enum {
+  XTR_HASH_SIZE_TINY = 55411,
+  XTR_HASH_SIZE_SMALL = 114809,
   XTR_HASH_SIZE_MEDIUM = 229499,
-  XTR_HASH_SIZE_LARGE  = 458879,
+  XTR_HASH_SIZE_LARGE = 458879,
   XTR_HASH_SIZE_XLARGE = 917629
-} xtr_hash_size_t;
+} xtr_hash_size;
 
-#define XTR_HASH_COLLISION_ARRAY_SIZE(head_array_size) ((head_array_size*15)/100)
-
-// Hash creation flags 
-enum
-{
+// Hash creation flags
+enum {
   XTR_HASH_NONE = 0,
-  XTR_HASH_LOCK = 1 << 0
+  XTR_HASH_LOCK = 1 << 0,             // Lock hash for multithread access
+  XTR_HASH_ALLOW_DUPLICATES = 1 << 1, // Allow duplicate keys
+  XTR_HASH_AUTO_EXPAND = 1 << 2       // Hash automatically expands when full
 };
 
 
-/*** Types, structures & macros ***/
-
 /**
- * xtr_hash_cell_t
- * 
- * This structure holds a (key, data) element in the hash.
- * 'key' is the stored element identifier.
- * 'data' points to the hash data pool where the data is stored.
- * 'next' can have multiple values:
- *   (a) When the cell belongs to the head array:
- *       - XTR_KEY_NOT_HASHED (NULL) indicates the cell is empty
- *       - Points to itself when there are no collisions.
- *       - Points to the next cell in the collision list when there are 1+ collisions.
- *   (b) When the cell belongs to the collision list:
- *       - Points to itself when this is the last collision.
- *       - Points to the next cell in the collision list if there are more collisions.
- *   (c) When the cell belongs to the free list:
- *       - XTR_HASH_FULL (NULL) indicating there are no more free cells.
- *       - Points to the next free cell in the collision list.
- */
-typedef struct xtr_hash_cell_t xtr_hash_cell_t;
-
-struct xtr_hash_cell_t
-{
- 	uintptr_t        key;
-	void            *data;
-	xtr_hash_cell_t *next;
-};
-
-/**
- * xtr_hash_stats_t
- * 
+ * xtr_hash_stats
+ *
  * Holds usage statistics for debugging purposes.
- * 'num_add' counts the number of calls to xtr_hash_add().
- * 'num_query' counts the number of calls to xtr_hash_query().
- * 'num_fetch' counts the number of calls to xtr_hash_fetch().
- * 'num_collisions' counts how many additions provoked a collision.
- * 'leftovers' counts how many elements are currently in the hash
- *             when xtr_hash_stats_dump() is called.
+ * 
+ * 'num_adds' counts the number of calls to xtr_hash_add() that successfully insert the element. 
+ * 'num_overflows' counts the number of calls to xtr_hash_add() that can't insert the element because hash is full. 
+ * 'num_hits' counts the number of calls to xtr_hash_search()/_remove() that find the key.
+ * 'num_misses' counts the number of calls to xtr_hash_search()/_remove() that don't find the key. 
+ * 'num_deletes' counts the number of calls to xtr_hash_remove() that succesfully delete an element. 
+ * 'num_collisions' counts how many additions provoked a collision. 
+ * 'num_duplicates' counts how many additions provoked a duplicate.
  */
-typedef struct xtr_hash_stats_t
-{
-	int num_add;
-	int num_query;
-	int num_fetch;
-	int num_collisions;
-	int leftovers;
-} xtr_hash_stats_t;
+typedef struct xtr_hash_stats {
+  int num_adds;
+  int num_overflows;
+  int num_hits;
+  int num_misses;
+  int num_deletes;
+  int num_collisions;
+  int num_duplicates;
+} xtr_hash_stats;
+
+#define xtr_hash_stats_update(hash, metric) \
+  { hash->stats.metric++; }
+
+
+/**
+ * xtr_hash_item
+ *
+ * This structure holds a (key, data) element in the hash.
+ * 
+ * 'key' is the stored element identifier.
+ * 'data' points to the data pool where the data is stored.
+ * 'next' points to the next collision in the hash, or NULL if there aren't
+ */
+typedef struct xtr_hash_item {
+  UINT64 key;
+  void *data;
+  struct xtr_hash_item *next;
+} xtr_hash_item;
+
+
+/**
+ * xtr_hash_pool
+ * 
+ * This structure holds the memory pools for the hash. 
+ * Each pool is a dynamically allocated memory region that preallocates all the possible hash elements as a 
+ * linked list of items, and a data region to store the data associated with the keys.
+ * 
+ * 'item_pool' points to the memory pool for the hash items.
+ * 'data_pool' points to the memory pool for the data.
+ */
+typedef struct xtr_hash_pool {
+  xtr_hash_item *item_pool;
+  void *data_pool;
+} xtr_hash_pool;
+
 
 /**
  * xtr_hash_t
+ *
+ * This structure holds the hash table.
  * 
- * This structure represents a hash container with shared overflow 
- * and dynamic data storage.
- * 'head' points to the array indexed by the hash function to store elements.
- * 'collision' points to the array where collisions are stored when the 
- *             corresponding 'head' cells are already in use.
+ * 'num_buckets' is the size of the hash.
+ * 'buckets' points to the array indexed by the hash function to store elements.
+ * 'pool_size' is the maximum number of elements that the hash can hold.
  * 'data_size' is the size of the data stored along with the keys.
- * 'data_pool' points to a dynamically allocated memory region where
- *             the data of each cell (either from 'head' or 'collision')
- * 'next_free_collision_cell' points to the first free cell in the collision list.
+ * 'num_pools' is the number of memory pools allocated for the hash.
+ * 'pool_array' points to an array of memory pools.
+ * 'pool_first_free' points to the first free element available in the hash.
  * 'flags' can be set for different creation options.
- * 'lock' holds a mutex activated by flag XTR_HASH_LOCK for safe multithread access.
+ * 'lock' holds a mutex activated by flag XTR_HASH_LOCK for safe multithread access. 
  * 'stats' holds usage statistics for this hash.
  */
-typedef struct xtr_hash_t
-{
-	int              head_size;
-	xtr_hash_cell_t *head;
-	int              collision_size;
-	xtr_hash_cell_t *collision;
-	int              data_size;
-	void            *data_pool;
-	xtr_hash_cell_t *next_free_collision_cell;
-	int              flags;
-	pthread_rwlock_t lock;
-	xtr_hash_stats_t stats;
-} xtr_hash_t;
+typedef struct xtr_hash {
+  int num_buckets;
+  xtr_hash_item **buckets;
 
-// Applies the hash function to the given key
-#define XTR_HASH_FUNCTION(hash, key) (((uintptr_t)(key)) % hash->head_size)
+  int pool_size;
+  int data_size;
+  int num_pools;
+  xtr_hash_pool *pool_array;
+  xtr_hash_item *pool_first_free;
 
-// Return the corresponding cell for the given key (in the head array)
-#define XTR_HASH_GET_CELL_FOR_KEY(hash, key) &(hash->head[ XTR_HASH_FUNCTION(hash, key) ])
-
-// Return the corresponding cell for the given hash index (in the head array)
-#define XTR_HASH_GET_CELL_FOR_INDEX(hash, i) &(hash->head[ i ]) 
-
-// Check whether there's a key already stored in the given cell (in the head array)
-#define XTR_KEY_HASHED(cell) (cell->next != XTR_KEY_NOT_HASHED)
-
-/**
- * BYPASS_CELL
- *
- * Bypass 'current' cell in the collision list by making 'previous' point to 'next'.
- * Special case: 'current' pointing to itself means this is the last element in the collision list.
- *               In this case, 'previous' becomes the new last element.
- */
-#define BYPASS_CELL(previous, current) previous->next = (current->next == current ? previous : current->next)
-
-/** 
- * XTR_KEY_HASHED_WITH_COLLISION 
- *
- * Adds a new 'collision' to the given 'head' cell in LIFO order. 
- * To keep LIFO pointers update as follows:
- * - New 'collision' cell points to the last previous collision (if there was).
- * - Corresponding 'head' cell points to the newest 'collision'.
- */
-#define XTR_KEY_HASHED_WITH_COLLISION(head, collision) BYPASS_CELL(collision, head); head->next = collision;
-
-/**
- * XTR_KEY_HASHED_WITHOUT_COLLISION 
- *
- * Marks given 'head' array cell as storing 1 key without collisions (pointer to itself indicates no more collisions)
- */
-#define XTR_KEY_HASHED_WITHOUT_COLLISION(cell) cell->next = cell;
-
-// Check whether there are more collisions (pointer to itself indicates last collision; NULL either XTR_HASH_FULL or XTR_KEY_NOT_HASHED) 
-#define XTR_KEY_HAS_COLLISION(cell) ((cell->next != cell) && (cell->next != NULL))
-
-// Atomic increment of the specified statistic
-#define xtr_hash_stats_update(hash, metric)  __sync_fetch_and_add(&(hash->stats.metric), 1);
+  int flags;
+  pthread_rwlock_t lock;
+  xtr_hash_stats stats;
+} xtr_hash;
 
 
-/*** Prototypes ***/
-
-xtr_hash_t * xtr_hash_new (xtr_hash_size_t hash_size, int data_size, int flags);
-void xtr_hash_free(xtr_hash_t *hash);
-int xtr_hash_add (xtr_hash_t *hash, uintptr_t key, void *data);
-int xtr_hash_query (xtr_hash_t *hash, uintptr_t key, void *data);
-int xtr_hash_fetch (xtr_hash_t * hash, uintptr_t key, void *data);
-void xtr_hash_dump(xtr_hash_t *hash, void *pretty_print_func_ptr);
-
-void xtr_hash_stats_reset(xtr_hash_t *hash);
-void xtr_hash_stats_dump (xtr_hash_t *hash);
-
+// Public functions
+xtr_hash *xtr_hash_new(xtr_hash_size hash_size, int data_size, int flags);
+void xtr_hash_free(xtr_hash *hash);
+int xtr_hash_add(xtr_hash *hash, UINT64 key, void *data_in, void *data_out);
+int xtr_hash_remove(xtr_hash *hash, UINT64 key, void *data);
+int xtr_hash_search(xtr_hash *hash, UINT64 key, void *data);
+void xtr_hash_dump(xtr_hash *hash, void *pretty_print_func_ptr);
+void xtr_hash_stats_reset(xtr_hash *hash);
+void xtr_hash_stats_dump(xtr_hash *hash);

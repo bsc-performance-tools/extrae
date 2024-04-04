@@ -91,6 +91,11 @@ Chooses whether the instrumentation runs in :option:`detail` or in
 
 Specifies the threshold time to filter running bursts.
 
+.. envvar:: EXTRAE_MAX_MPI_HANDLES
+
+Specifies the threshold from which proxy handles for MPI_Request and MPI_Status objects will be allocated dynamically (set to 0 for all).
+Only available when instrumenting MPI applications. 
+
 .. envvar:: EXTRAE_MINIMUM_TIME
 
 Specifies the minimum amount of instrumentation time.

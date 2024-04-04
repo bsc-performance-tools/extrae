@@ -7,7 +7,6 @@ WRAPPERS_MPI_C_ONLY = \
  mpi_wrapper_coll_c.c mpi_wrapper_coll_c.h \
  mpi_wrapper_1sided_c.c mpi_wrapper_1sided_c.h \
  mpi_wrapper_io_c.c mpi_wrapper_io_c.h \
- persistent_requests.c persistent_requests.h \
  hash_table.c hash_table.h
 
 WRAPPERS_MPI_F_ONLY = \
@@ -16,7 +15,6 @@ WRAPPERS_MPI_F_ONLY = \
  mpi_wrapper_coll_f.c mpi_wrapper_coll_f.h \
  mpi_wrapper_1sided_f.c mpi_wrapper_1sided_f.h \
  mpi_wrapper_io_f.c mpi_wrapper_io_f.h \
- persistent_requests.c persistent_requests.h \
  hash_table.c hash_table.h
 
 WRAPPERS_MPI_ALL = \
@@ -29,7 +27,6 @@ WRAPPERS_MPI_ALL = \
  mpi_wrapper_coll_f.c mpi_wrapper_coll_f.h \
  mpi_wrapper_1sided_f.c mpi_wrapper_1sided_f.h \
  mpi_wrapper_io_f.c mpi_wrapper_io_f.h \
- persistent_requests.c persistent_requests.h \
  hash_table.c hash_table.h
 
 if HAVE_MPI

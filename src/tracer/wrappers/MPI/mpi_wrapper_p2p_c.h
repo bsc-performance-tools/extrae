@@ -53,7 +53,8 @@ int MPI_Send_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Ibsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
   int tag, MPI_Comm comm, MPI_Request * request);
 
-int MPI_Isend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request * request);
+int MPI_Isend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest, 
+  int tag, MPI_Comm comm, MPI_Request * request);
 
 int MPI_Issend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
   int tag, MPI_Comm comm, MPI_Request * request);

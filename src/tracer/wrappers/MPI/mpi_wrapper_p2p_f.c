@@ -108,7 +108,7 @@ void PMPI_BSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event  : BSEND_EV                          value  : EVT_BEGIN
@@ -148,7 +148,7 @@ void PMPI_SSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event  : SSEND_EV                          value  : EVT_BEGIN
@@ -187,7 +187,7 @@ void PMPI_RSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event  : RSEND_EV                   value  : EVT_BEGIN
@@ -226,7 +226,7 @@ void PMPI_Send_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event  : SEND_EV                           value  : EVT_BEGIN
@@ -267,7 +267,7 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event  : IBSEND_EV                         value  : EVT_BEGIN
@@ -278,7 +278,7 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IBSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_ibsend) (buf, count, datatype, dest, tag, comm, request, ierror);
-
+	
 	/*
 	 *   event  : IBSEND_EV                         value  : EVT_END
 	 *   target : receiver rank                     size   : bytes sent
@@ -308,7 +308,7 @@ void PMPI_ISend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event  : ISEND_EV                          value  : EVT_BEGIN
@@ -349,7 +349,7 @@ void PMPI_ISSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event : ISSEND_EV                     value : EVT_BEGIN
@@ -390,7 +390,7 @@ void PMPI_IRSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &receiver_world);
 
 	/*
 	 *   event  : IRSEND_EV                         value  : EVT_BEGIN
@@ -423,19 +423,20 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
                         MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, 
                         MPI_Fint *ierror)
 {
-	MPI_Datatype c_type       = PMPI_Type_f2c(*datatype);
+	MPI_Datatype c_datatype   = PMPI_Type_f2c(*datatype);
 	int          size         = 0; 
 	int          source_world = MPI_ANY_SOURCE;
 	int          c_tag        = *tag;
 	int          source_tag   = MPI_ANY_TAG;
 	MPI_Comm     c_comm       = PMPI_Comm_f2c(*comm);
-	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint    *f_status_ptr = NULL;
-	MPI_Status   c_status;
+	MPI_Fint     f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint    *f_proxy_status = NULL;
 
-	size = getMsgSizeFromCountAndDatatype (*count, c_type);
+	size = getMsgSizeFromCountAndDatatype (*count, c_datatype);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *source, &source_world, OP_TYPE_RECV);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *source, &source_world);
+
+	makeProxies_F (0, NULL, NULL, NULL, 1, status, f_local_status, &f_proxy_status);
 
 	/*
 	 *   event  : RECV_EV                           value  : EVT_BEGIN    
@@ -445,12 +446,10 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_RECV_EV, EVT_BEGIN, source_world, size, c_tag, c_comm, EMPTY);
 
-	f_status_ptr = (status == MPI_F_STATUS_IGNORE) ? f_status : status;
+	CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, f_proxy_status, ierror);
 
-	CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, f_status_ptr, ierror);
-
-	PMPI_Status_f2c (f_status_ptr, &c_status);
-	getCommDataFromStatus (&c_status, c_type, c_comm, MPI_GROUP_NULL, &size, &source_tag, &source_world);
+	getCommInfoFromStatus_F (f_proxy_status, c_datatype, c_comm, MPI_GROUP_NULL, &size, &source_tag, &source_world);
+	freeProxies(NULL, NULL, status, f_local_status, f_proxy_status);
 
 	/*
 	 *   event  : RECV_EV                           value  : EVT_END
@@ -482,7 +481,7 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *source, &source_world, OP_TYPE_RECV);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *source, &source_world);
 
 	/*
 	 *   event  : IRECV_EV                          value  : EVT_BEGIN
@@ -495,7 +494,7 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	CtoF77 (pmpi_irecv) (buf, count, datatype, source, tag, comm, request, ierror);
 
 	c_request = PMPI_Request_f2c(*request);
-	SaveRequest(c_request, c_comm);
+	saveRequest(c_request, c_comm);
 
 	/*
 	 *   event  : IRECV_EV                          value  : EVT_END
@@ -516,17 +515,18 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
                          MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
 {
-	MPI_Datatype c_type        = PMPI_Type_f2c(*datatype);
-	int          size          = 0;
-	int          source_world  = MPI_ANY_SOURCE;
-	int          source_tag    = MPI_ANY_TAG;
-	MPI_Comm     c_comm        = MPI_COMM_NULL;
-	MPI_Message  c_save_message     = PMPI_Message_f2c(*message); // Save input value as it changes inside the PMPI
-	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint    *f_status_ptr  = NULL;
-	MPI_Status   c_status;
+	MPI_Datatype c_datatype     = PMPI_Type_f2c(*datatype);
+	int          size           = 0;
+	int          source_world   = MPI_ANY_SOURCE;
+	int          source_tag     = MPI_ANY_TAG;
+	MPI_Comm     c_comm         = MPI_COMM_NULL;
+	MPI_Message  c_local_message = PMPI_Message_f2c(*message); // Save input value as it changes inside the PMPI
+	MPI_Fint     f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint    *f_proxy_status = NULL;
 
-	size = getMsgSizeFromCountAndDatatype (*count, c_type);
+	size = getMsgSizeFromCountAndDatatype (*count, c_datatype);
+
+	makeProxies_F (0, NULL, NULL, NULL, 1, status, f_local_status, &f_proxy_status);
 
 	/*
 	 *   event  : MRECV_EV                          value  : EVT_BEGIN    
@@ -536,14 +536,12 @@ void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_MRECV_EV, EVT_BEGIN, EMPTY, size, EMPTY, EMPTY, EMPTY);
 
-	f_status_ptr = (status == MPI_F_STATUS_IGNORE) ? f_status : status;
+	CtoF77 (pmpi_mrecv) (buf, count, datatype, message, f_proxy_status, ierror);
 
-	CtoF77 (pmpi_mrecv) (buf, count, datatype, message, f_status_ptr, ierror);
+	c_comm = processMessage (c_local_message, NULL);
 
-	c_comm = ProcessMessage (c_save_message, NULL);
-
-	PMPI_Status_f2c (f_status_ptr, &c_status);
-	getCommDataFromStatus (&c_status, c_type, c_comm, MPI_GROUP_NULL, &size, &source_tag, &source_world);
+	getCommInfoFromStatus_F (f_proxy_status, c_datatype, c_comm, MPI_GROUP_NULL, &size, &source_tag, &source_world);
+	freeProxies(NULL, NULL, status, f_local_status, f_proxy_status);
 
 	/*
 	 *   event  : MRECV_EV                          value  : EVT_END
@@ -565,11 +563,11 @@ void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 void PMPI_Imrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
                           MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierror)
 {
-	MPI_Datatype c_type         = PMPI_Type_f2c(*datatype);
-	int          size           = 0;
-	MPI_Comm     c_comm         = MPI_COMM_NULL;
-	MPI_Message  c_save_message = PMPI_Message_f2c(*message); // Save input value as it changes inside the PMPI
-        MPI_Request  c_request      = MPI_REQUEST_NULL;
+	MPI_Datatype c_type          = PMPI_Type_f2c(*datatype);
+	int          size            = 0;
+	MPI_Comm     c_comm          = MPI_COMM_NULL;
+	MPI_Message  c_local_message = PMPI_Message_f2c(*message); // Save input value as it changes inside the PMPI
+    MPI_Request  c_request       = MPI_REQUEST_NULL;
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
@@ -584,7 +582,7 @@ void PMPI_Imrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	CtoF77 (pmpi_imrecv) (buf, count, datatype, message, request, ierror);
 
 	c_request = PMPI_Request_f2c(*request);
-	c_comm = ProcessMessage(c_save_message, &c_request);
+	c_comm = processMessage(c_local_message, &c_request);
 
 	/*
 	 *   event  : IMRECV_EV                         value  : EVT_END
@@ -742,7 +740,7 @@ void PMPI_Mprobe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 
 	CtoF77 (pmpi_mprobe) (source, tag, comm, message, status, ierror);
 
-	SaveMessage (c_message, c_comm);
+	saveMessage (c_message, c_comm);
 
 	/*
 	 *   event  : MPROBE_EV                         value  : EVT_END
@@ -765,7 +763,7 @@ void Bursts_PMPI_Improbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *com
                                   MPI_Fint *ierror)
 {
 	MPI_Comm    c_comm    = PMPI_Comm_f2c(*comm);
-        MPI_Message c_message = PMPI_Message_f2c(*message);
+    MPI_Message c_message = PMPI_Message_f2c(*message);
 
 	/*
 	 *   event  : IMPROBE_EV                        value :  EVT_BEGIN
@@ -777,7 +775,7 @@ void Bursts_PMPI_Improbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *com
 
 	CtoF77 (pmpi_improbe) (source, tag, comm, flag, message, status, ierror);
 
-	SaveMessage (c_message, c_comm);
+	saveMessage (c_message, c_comm);
 
 	/*
 	 *   event  : IMPROBE_EV                        value  : EVT_END
@@ -796,7 +794,7 @@ void Normal_PMPI_Improbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *com
 	static iotimer_t mpi_improbe_elapsed_time     = 0;
 	iotimer_t        mpi_improbe_begin_time       = 0;
 	MPI_Comm         c_comm                       = PMPI_Comm_f2c(*comm);
-        MPI_Message      c_message                    = PMPI_Message_f2c(*message);
+    MPI_Message      c_message                    = PMPI_Message_f2c(*message);
 
 	mpi_improbe_begin_time = LAST_READ_TIME;
 
@@ -806,7 +804,7 @@ void Normal_PMPI_Improbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *com
 	{
 		// mpi_improbe was successful
 
-		SaveMessage (c_message, c_comm);
+		saveMessage (c_message, c_comm);
 
 		if (mpi_improbe_software_counter > 0)
 		{
@@ -858,11 +856,11 @@ void PMPI_Improbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
  ***  PMPI_Test_Wrapper
  ******************************************************************************/
 
-void Bursts_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
+void Bursts_PMPI_Test_Wrapper (MPI_Fint *user_request, MPI_Request *proxy_request, MPI_Fint *flag, MPI_Fint *proxy_status,
                                MPI_Fint *ierror)
 {
 	iotimer_t   mpi_test_end_time = 0;
-	MPI_Request c_request         = PMPI_Request_f2c (*request);
+	MPI_Request c_user_request    = PMPI_Request_f2c (*user_request);
 
 	/*
 	 *   event  : TEST_EV                    value  : EVT_BEGIN
@@ -870,17 +868,15 @@ void Bursts_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 	 *   tag    : ---                        commid : ---
 	 *   aux    : ---
 	 */
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, c_request, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, c_user_request, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	CtoF77 (pmpi_test) (request, flag, status, ierror);
+	CtoF77 (pmpi_test) (user_request, flag, proxy_status, ierror);
 
 	mpi_test_end_time = TIME;
 
-	if (*flag)
+	if (*ierror == MPI_SUCCESS && *flag)
 	{
-		MPI_Status c_status;
-		PMPI_Status_f2c (status, &c_status);
-		ProcessRequest (mpi_test_end_time, c_request, &c_status);
+		processRequest_F(mpi_test_end_time, *proxy_request, proxy_status);
 	}
 
 	/*
@@ -892,24 +888,21 @@ void Bursts_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 	TRACE_MPIEVENT (mpi_test_end_time, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
+void Normal_PMPI_Test_Wrapper (MPI_Fint *user_request, MPI_Request *proxy_request, MPI_Fint *flag, MPI_Fint *proxy_status,  
                                MPI_Fint *ierror)
 {
 	static int       mpi_test_software_counter = 0;
 	static iotimer_t mpi_test_elapsed_time     = 0;
 	iotimer_t        mpi_test_begin_time       = 0;
 	iotimer_t        mpi_test_end_time         = 0;
-	MPI_Request      c_request                 = PMPI_Request_f2c(*request);
 
 	mpi_test_begin_time = LAST_READ_TIME;
 
-	CtoF77 (pmpi_test) (request, flag, status, ierror);
+	CtoF77 (pmpi_test) (user_request, flag, proxy_status, ierror);
 
-	if (*flag)
+	if (*ierror == MPI_SUCCESS && *flag)
 	{
 		// mpi_test was successful 
-		MPI_Status c_status;
-		PMPI_Status_f2c (status, &c_status);
 
 		if (mpi_test_software_counter > 0)
 		{
@@ -922,7 +915,7 @@ void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 
 		mpi_test_end_time = TIME;
 
-		ProcessRequest (mpi_test_end_time, c_request, &c_status);		
+		processRequest_F (mpi_test_end_time, *proxy_request, proxy_status);		
 
 		TRACE_MPIEVENT (mpi_test_end_time, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -945,58 +938,46 @@ void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
                         MPI_Fint *ierror)
 {
-	MPI_Fint  f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint *f_status_ptr = NULL;
+	MPI_Request local_request, *proxy_request = NULL;
+	MPI_Fint  f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint *f_proxy_status = NULL;
 
-	f_status_ptr = (MPI_F_STATUS_IGNORE == status) ? f_status : status;
-
+	makeProxies_F (1, request, &local_request, &proxy_request, 1, status, f_local_status, &f_proxy_status);
+	
 	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
 	{
-		Bursts_PMPI_Test_Wrapper(request, flag, f_status_ptr, ierror);
+		Bursts_PMPI_Test_Wrapper(request, proxy_request, flag, f_proxy_status, ierror);
 	}
 	else
 	{
-		Normal_PMPI_Test_Wrapper(request, flag, f_status_ptr, ierror);
+		Normal_PMPI_Test_Wrapper(request, proxy_request, flag, f_proxy_status, ierror);
 	}
-}
 
-void copyRequests_F (int count, MPI_Fint *array_of_requests, MPI_Request *copy, char *where)
-{
-	int i = 0;
-
-	if (count > MAX_WAIT_REQUESTS)
-	{
-		fprintf (stderr, "PANIC! Number of requests in %s (%d) exceeds tha maximum supported (%d). Please increase the value of MAX_WAIT_REQUESTS and recompile Extrae.\n", where, count, MAX_WAIT_REQUESTS);
-	}
-	else
-	{
-		for (i = 0; i < count; i ++)
-		{
-			copy[i] = PMPI_Request_f2c(array_of_requests[i]);
-		}
-	}
+	freeProxies(&local_request, proxy_request, status, f_local_status, f_proxy_status);
 }
 
 /******************************************************************************
  ***  PMPI_TestAll_Wrapper
  ******************************************************************************/
 
-void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[], MPI_Fint *flag,
-                           MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror)
+void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests, MPI_Fint *flag,
+                           MPI_Fint *array_of_statuses, MPI_Fint *ierror)
 {
 	static int       mpi_testall_software_counter = 0;
 	static iotimer_t mpi_testall_elapsed_time     = 0;
 	iotimer_t        mpi_testall_begin_time       = 0;
 	iotimer_t        mpi_testall_end_time         = 0;
-	MPI_Fint         f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
-	MPI_Fint        *f_statuses_ptr               = (MPI_Fint *)(MPI_F_STATUSES_IGNORE == (MPI_Fint *)array_of_statuses) ? f_statuses : array_of_statuses;
-	MPI_Request      c_save_requests[MAX_WAIT_REQUESTS];
+	MPI_Request      local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request     *proxy_array_of_requests      = NULL;
+	MPI_Fint         f_local_array_of_statuses[MAX_MPI_HANDLES][MPI_F_STATUS_SIZE];
+	MPI_Fint        *f_proxy_array_of_statuses    = NULL;
 
 	mpi_testall_begin_time = LAST_READ_TIME;
 
-	copyRequests_F(*count, array_of_requests, c_save_requests, "mpi_testall");
+	makeProxies_F (*count, array_of_requests, local_array_of_requests, &proxy_array_of_requests, 
+	               *count, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
 
-	CtoF77 (pmpi_testall) (count, array_of_requests, flag, f_statuses_ptr, ierror);
+	CtoF77 (pmpi_testall) (count, array_of_requests, flag, f_proxy_array_of_statuses, ierror);
 
 	if (*ierror == MPI_SUCCESS && *flag)
 	{
@@ -1018,9 +999,7 @@ void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[], MPI_Fi
 
 		for (i = 0; i < *count; i ++)
 		{
-			MPI_Status c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i * MPI_STATUS_FIELD_INDEX], &c_status);
-			ProcessRequest (mpi_testall_end_time, c_save_requests[i], &c_status);
+			processRequest_F (mpi_testall_end_time, proxy_array_of_requests[i], &(f_proxy_array_of_statuses[i * MPI_F_STATUS_SIZE]));
 		}
 
 		TRACE_MPIEVENT (mpi_testall_end_time, MPI_TESTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1039,6 +1018,8 @@ void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[], MPI_Fi
 		mpi_testall_software_counter ++;
 		mpi_testall_elapsed_time += (TIME - mpi_testall_begin_time);
 	}
+
+	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 }
 
 
@@ -1046,7 +1027,7 @@ void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[], MPI_Fi
  ***  PMPI_TestAny_Wrapper
  ******************************************************************************/
 
-void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
+void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
                            MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, 
                            MPI_Fint *ierror)
 {
@@ -1054,23 +1035,21 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	static iotimer_t mpi_testany_elapsed_time     = 0;
 	iotimer_t        mpi_testany_begin_time       = 0;
 	iotimer_t        mpi_testany_end_time         = 0;
-	MPI_Fint         f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint        *f_status_ptr                 = NULL;
-	MPI_Request      c_save_requests[MAX_WAIT_REQUESTS];
-
+	MPI_Request      local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request     *proxy_array_of_requests      = NULL;
+	MPI_Fint         f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint        *f_proxy_status  	          = NULL;
+	
 	mpi_testany_begin_time = LAST_READ_TIME;
 
-        copyRequests_F(*count, array_of_requests, c_save_requests, "mpi_testany");
+	makeProxies_F(*count, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	              1, status, f_local_status, &f_proxy_status);
 
-	f_status_ptr = (MPI_F_STATUS_IGNORE == status)?f_status:status;
-
-	CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, f_status_ptr, ierror);
+	CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, f_proxy_status, ierror);
 
 	if (*index != MPI_UNDEFINED && *ierror == MPI_SUCCESS && *flag)
 	{
 		// mpi_testany was successful
-		MPI_Status c_status;
-		PMPI_Status_f2c (f_status_ptr, &c_status);
 
 		if (mpi_testany_software_counter > 0)
 		{
@@ -1083,9 +1062,7 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 
 		mpi_testany_end_time = TIME;
 
-		MPI_Request c_request = c_save_requests[*index-1];
-
-		ProcessRequest (mpi_testany_end_time, c_request, &c_status);
+		processRequest_F (mpi_testany_end_time, proxy_array_of_requests[*index-1], f_proxy_status);
 
 		TRACE_MPIEVENT (mpi_testany_end_time, MPI_TESTANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -1103,30 +1080,33 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 		mpi_testany_software_counter ++;
 		mpi_testany_elapsed_time += (TIME - mpi_testany_begin_time);
 	}
+
+	freeProxies(&local_array_of_requests, proxy_array_of_requests, status, f_local_status, f_proxy_status);
 }
 
 /*****************************************************************************
  ***  PMPI_TestSome_Wrapper
  ******************************************************************************/
 
-void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
-                            MPI_Fint *outcount, MPI_Fint array_of_indices[],
-                            MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
+void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint *array_of_requests,
+                            MPI_Fint *outcount, MPI_Fint *array_of_indices,
+                            MPI_Fint *array_of_statuses, MPI_Fint *ierror)
 {
 	static int       mpi_testsome_software_counter = 0;
 	static iotimer_t mpi_testsome_elapsed_time     = 0;
 	iotimer_t        mpi_testsome_begin_time       = 0;
 	iotimer_t        mpi_testsome_end_time         = 0;
-	MPI_Fint         f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
-	MPI_Fint        *f_statuses_ptr                = (MPI_F_STATUSES_IGNORE == (MPI_Fint *) array_of_statuses) ? f_statuses : array_of_statuses;
-	MPI_Request      c_save_requests[MAX_WAIT_REQUESTS];
+	MPI_Request      local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request     *proxy_array_of_requests       = NULL;
+	MPI_Fint         f_local_array_of_statuses[MAX_MPI_HANDLES][MPI_F_STATUS_SIZE];
+	MPI_Fint        *f_proxy_array_of_statuses     = NULL;
 
-        mpi_testsome_begin_time = LAST_READ_TIME;
+    mpi_testsome_begin_time = LAST_READ_TIME;
 
-        copyRequests_F(*incount, array_of_requests, c_save_requests, "mpi_testsome");
-
-	CtoF77(pmpi_testsome) (incount, array_of_requests, outcount, array_of_indices,
-	  f_statuses_ptr, ierror);
+	makeProxies_F (*incount, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	               *incount, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
+				   
+	CtoF77(pmpi_testsome) (incount, array_of_requests, outcount, array_of_indices, f_proxy_array_of_statuses, ierror);
 
 	if (*ierror == MPI_SUCCESS && *outcount > 0)
 	{
@@ -1147,11 +1127,7 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 
 		for (i = 0; i < *outcount; i++)
 		{
-			MPI_Request c_request = c_save_requests[array_of_indices[i]];
-			MPI_Status  c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i*MPI_STATUS_FIELD_INDEX], &c_status);
-
-			ProcessRequest (mpi_testsome_end_time, c_request, &c_status);
+			processRequest_F (mpi_testsome_end_time, proxy_array_of_requests[array_of_indices[i]], &(f_proxy_array_of_statuses[i * MPI_F_STATUS_SIZE]));
 		}
 
 		TRACE_MPIEVENT (mpi_testsome_end_time, MPI_TESTSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1170,6 +1146,8 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 		mpi_testsome_software_counter ++;
 		mpi_testsome_elapsed_time += (TIME - mpi_testsome_begin_time);
 	}
+
+	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 }
 
 
@@ -1179,10 +1157,11 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 
 void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 {
-	MPI_Request c_request;
-	MPI_Fint    f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint   *f_status_ptr      = NULL;
-	iotimer_t   mpi_wait_end_time = 0;
+	MPI_Request  local_request;
+	MPI_Request *proxy_request     = NULL;
+	MPI_Fint     f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint    *f_proxy_status    = NULL;
+	iotimer_t    mpi_wait_end_time = 0;
 
 	/*
 	 *   event  : WAIT_EV                    value  : EVT_BEGIN
@@ -1192,20 +1171,19 @@ void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	copyRequests_F (1, request, &c_request, "mpì_wait");
+	makeProxies_F (1, request, &local_request, &proxy_request, 
+	               1, status, f_local_status, &f_proxy_status);
 
-	f_status_ptr = (MPI_F_STATUS_IGNORE == status) ? f_status : status;
-
-	CtoF77 (pmpi_wait) (request, f_status_ptr, ierror);
+	CtoF77 (pmpi_wait) (request, f_proxy_status, ierror);
 
 	mpi_wait_end_time = TIME;
 
 	if (*ierror == MPI_SUCCESS)
 	{
-		MPI_Status c_status;
-		PMPI_Status_f2c (f_status_ptr, &c_status);
-		ProcessRequest (mpi_wait_end_time, c_request, &c_status);
+		processRequest_F (mpi_wait_end_time, *proxy_request, f_proxy_status);
 	}
+
+	freeProxies(&local_request, proxy_request, status, f_local_status, f_proxy_status);
 
 	/*
 	 *   event  : WAIT_EV                    value  : EVT_END
@@ -1220,13 +1198,14 @@ void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
  ***  PMPI_WaitAll_Wrapper
  ******************************************************************************/
 
-void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
-	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint * ierror)
+void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
+                           MPI_Fint *array_of_statuses, MPI_Fint * ierror)
 {
-	MPI_Request c_save_requests[MAX_WAIT_REQUESTS];
-	MPI_Fint    f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
-	MPI_Fint   *f_statuses_ptr       = (MPI_F_STATUSES_IGNORE == (MPI_Fint *)array_of_statuses) ? f_statuses : array_of_statuses;
-	iotimer_t   mpi_waitall_end_time = 0;
+	MPI_Request  local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request *proxy_array_of_requests = NULL;
+	MPI_Fint     f_local_array_of_statuses[MAX_MPI_HANDLES][MPI_F_STATUS_SIZE];
+	MPI_Fint    *f_proxy_array_of_statuses = NULL;
+	iotimer_t    mpi_waitall_end_time    = 0;
 
 	/*
 	 *   event  : WAITALL_EV                 value  : EVT_BEGIN
@@ -1236,9 +1215,10 @@ void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-        copyRequests_F(*count, array_of_requests, c_save_requests, "mpi_waitall");
+	makeProxies_F (*count, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	               *count, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
 
-	CtoF77 (pmpi_waitall) (count, array_of_requests, f_statuses_ptr, ierror);
+	CtoF77 (pmpi_waitall) (count, array_of_requests, f_proxy_array_of_statuses, ierror);
 
 	mpi_waitall_end_time = TIME;
 
@@ -1248,11 +1228,11 @@ void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 
 		for (i = 0; i < *count; i ++)
 		{
-			MPI_Status c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i * MPI_STATUS_FIELD_INDEX], &c_status);
-			ProcessRequest (mpi_waitall_end_time, c_save_requests[i], &c_status);
+			processRequest_F (mpi_waitall_end_time, proxy_array_of_requests[i], &(f_proxy_array_of_statuses[i * MPI_F_STATUS_SIZE]));
 		}
 	}
+
+	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 
 	/*
 	 *   event  : WAITATLL_EV                value  : EVT_END
@@ -1268,13 +1248,14 @@ void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
  ***  PMPI_WaitAny_Wrapper
  ******************************************************************************/
 
-void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
+void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 	MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierror)
 {
-	MPI_Request c_save_requests[MAX_WAIT_REQUESTS];
-	MPI_Fint    f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint   *f_status_ptr         = NULL;
-	iotimer_t   mpi_waitany_end_time = 0;
+	MPI_Request  local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request *proxy_array_of_requests = NULL;
+	MPI_Fint    f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint   *f_proxy_status           = NULL;
+	iotimer_t   mpi_waitany_end_time     = 0;
 
 	/*
 	 *   event  : WAITANY_EV                 value  : EVT_BEGIN
@@ -1284,44 +1265,43 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-        copyRequests_F(*count, array_of_requests, c_save_requests, "mpi_waitany");
+	makeProxies_F (*count, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	               1, status, f_local_status, &f_proxy_status);
 
-	f_status_ptr = (MPI_F_STATUS_IGNORE == status) ? f_status : status;
-
-	CtoF77 (pmpi_waitany) (count, array_of_requests, index, f_status_ptr, ierror);
+	CtoF77 (pmpi_waitany) (count, array_of_requests, index, f_proxy_status, ierror);
 
 	mpi_waitany_end_time = TIME;
 
 	if (*index != MPI_UNDEFINED && *ierror == MPI_SUCCESS)
 	{
-		MPI_Request c_request = c_save_requests[*index-1];
-		MPI_Status  c_status;
-		PMPI_Status_f2c (f_status_ptr, &c_status);
-
-		ProcessRequest (mpi_waitany_end_time, c_request, &c_status);
+		processRequest_F (mpi_waitany_end_time, proxy_array_of_requests[*index-1], f_proxy_status);
 	}
 
-        /*
-         *   event  : WAITANY_EV                 value  : EVT_END
-         *   target : ---                        size   : ---
-         *   tag    : ---                        commid : ---
-         *   aux    : ---
-         */
+	freeProxies(&local_array_of_requests, proxy_array_of_requests, status, f_local_status, f_proxy_status);
+
+    /*
+     *   event  : WAITANY_EV                 value  : EVT_END
+     *   target : ---                        size   : ---
+     *   tag    : ---                        commid : ---
+     *   aux    : ---
+     */
 	TRACE_MPIEVENT (mpi_waitany_end_time, MPI_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
+
 
 /*****************************************************************************
  ***  PMPI_WaitSome_Wrapper
  ******************************************************************************/
 
-void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
-	MPI_Fint *outcount, MPI_Fint array_of_indices[],
-	MPI_Fint array_of_statuses[][MPI_STATUS_FIELD_INDEX], MPI_Fint *ierror)
+void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint *array_of_requests,
+	MPI_Fint *outcount, MPI_Fint *array_of_indices,
+	MPI_Fint *array_of_statuses, MPI_Fint *ierror)
 {
-	MPI_Request c_save_requests[MAX_WAIT_REQUESTS];
-	MPI_Fint    f_statuses[MAX_WAIT_REQUESTS][MPI_STATUS_FIELD_INDEX];
-	MPI_Fint   *f_statuses_ptr        = (MPI_F_STATUSES_IGNORE == (MPI_Fint *)array_of_statuses) ? f_statuses : array_of_statuses;
-	iotimer_t   mpi_waitsome_end_time = 0;
+	MPI_Request local_array_of_requests[MAX_MPI_HANDLES];
+	MPI_Request *proxy_array_of_requests = NULL;
+	MPI_Fint    f_local_array_of_statuses[MAX_MPI_HANDLES][MPI_F_STATUS_SIZE];
+	MPI_Fint   *f_proxy_array_of_statuses = NULL;
+	iotimer_t   mpi_waitsome_end_time     = 0;
 
 	/*
 	 *   event  : WAITSOME_EV                value  : EVT_BEGIN
@@ -1331,9 +1311,10 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-        copyRequests_F(*incount, array_of_requests, c_save_requests, "mpi_waitsome");
+	makeProxies_F (*incount, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	               *incount, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
 
-	CtoF77(pmpi_waitsome) (incount, array_of_requests, outcount, array_of_indices, f_statuses_ptr, ierror);
+	CtoF77(pmpi_waitsome) (incount, array_of_requests, outcount, array_of_indices, f_proxy_array_of_statuses, ierror);
 
 	mpi_waitsome_end_time = TIME;
 
@@ -1343,12 +1324,11 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 
 		for (i = 0; i < *outcount; i++)
 		{
-			MPI_Request c_request = c_save_requests[array_of_indices[i]];
-			MPI_Status  c_status;
-			PMPI_Status_f2c (&f_statuses_ptr[i * MPI_STATUS_FIELD_INDEX], &c_status);
-			ProcessRequest (mpi_waitsome_end_time, c_request, &c_status);
+			processRequest_F (mpi_waitsome_end_time, proxy_array_of_requests[array_of_indices[i]], &(f_proxy_array_of_statuses[i * MPI_F_STATUS_SIZE]));
 		}
 	}
+
+	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 
 	/*
 	 *   event  : WAITSOME_EV                value  : EVT_END
@@ -1367,10 +1347,6 @@ void PMPI_Recv_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-	MPI_Datatype c_type = PMPI_Type_f2c (*datatype);
-	MPI_Comm     c_comm = PMPI_Comm_f2c (*comm);
-	MPI_Request  c_request;
-
 	/*
 	 *   event  : RECV_INIT_EV               value  : EVT_BEGIN
 	 *   target : ---                        size   : ----
@@ -1382,9 +1358,11 @@ void PMPI_Recv_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// First call pmpi_recv_init to initialize the persistent request
 	CtoF77 (pmpi_recv_init) (buf, count, datatype, source, tag, comm, request, ierror); 
 
-	// Save this persistent request
-	c_request = PMPI_Request_f2c (*request);
-	PR_NewRequest (MPI_IRECV_EV, *count, c_type, *source, *tag, c_comm, c_request, &PR_queue);
+	if (*ierror == MPI_SUCCESS)
+	{
+		// Save this persistent request
+		savePersistentRequest_F(request, datatype, comm, MPI_IRECV_EV, *count, *source, *tag);
+	}
 
 	/*
 	 *   event  : RECV_INIT_EV               value  : EVT_END
@@ -1398,7 +1376,6 @@ void PMPI_Recv_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 }
 
 
-
 /******************************************************************************
  ***  PMPI_Send_init_Wrapper
  ******************************************************************************/
@@ -1407,10 +1384,6 @@ void PMPI_Send_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-	MPI_Datatype c_type = PMPI_Type_f2c(*datatype);
-	MPI_Comm     c_comm = PMPI_Comm_f2c(*comm);
-	MPI_Request  c_request;
-
 	/*
 	 *   event  : SEND_INIT_EV               value  : EVT_BEGIN
 	 *   target : ---                        size   : ----
@@ -1422,9 +1395,11 @@ void PMPI_Send_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// First call pmpi_send_init to initialize the persistent request
 	CtoF77 (pmpi_send_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
-	// Save this persistent request
-	c_request = PMPI_Request_f2c (*request);
-	PR_NewRequest (MPI_ISEND_EV, *count, c_type, *dest, *tag, c_comm, c_request, &PR_queue);
+	if (*ierror == MPI_SUCCESS)
+	{
+		// Save this persistent request
+		savePersistentRequest_F(request, datatype, comm, MPI_ISEND_EV, *count, *dest, *tag);
+	}
 
 	/*
 	 *   event  : SEND_INIT_EV               value  : EVT_END
@@ -1438,7 +1413,6 @@ void PMPI_Send_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 }
 
 
-
 /******************************************************************************
  ***  PMPI_Bsend_init_Wrapper
  ******************************************************************************/
@@ -1447,10 +1421,6 @@ void PMPI_Bsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-	MPI_Datatype c_type = PMPI_Type_f2c(*datatype);
-	MPI_Comm     c_comm = PMPI_Comm_f2c(*comm);
-	MPI_Request  c_request;
-
 	/*
 	 *   event  : BSEND_INIT_EV              value  : EVT_BEGIN
 	 *   target : ---                        size   : ----
@@ -1462,9 +1432,11 @@ void PMPI_Bsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// First call pmpi_bsend init to initialize the persistent request
 	CtoF77 (pmpi_bsend_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
-	// Save this persistent request 
-	c_request = PMPI_Request_f2c (*request);
-	PR_NewRequest (MPI_IBSEND_EV, *count, c_type, *dest, *tag, c_comm, c_request, &PR_queue);
+	if (*ierror == MPI_SUCCESS)
+	{
+		// Save this persistent request 
+		savePersistentRequest_F(request, datatype, comm, MPI_IBSEND_EV, *count, *dest, *tag);
+	}
 
 	/*
 	 *   event  : BSEND_INIT_EV              value  : EVT_END
@@ -1486,10 +1458,6 @@ void PMPI_Rsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-	MPI_Datatype c_type = PMPI_Type_f2c(*datatype);
-	MPI_Comm     c_comm = PMPI_Comm_f2c(*comm);
-	MPI_Request  c_request;
-
 	/*
 	 *   event  : RSEND_INIT_EV              value  : EVT_BEGIN
 	 *   target : ---                        size   : ----
@@ -1501,9 +1469,11 @@ void PMPI_Rsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// First call pmpi_rsend_init to initialize the persistent request
 	CtoF77 (pmpi_rsend_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
-	// Save this persistent request
-	c_request = PMPI_Request_f2c (*request);
-	PR_NewRequest (MPI_IRSEND_EV, *count, c_type, *dest, *tag, c_comm, c_request, &PR_queue);
+	if (*ierror == MPI_SUCCESS)
+	{
+		// Save this persistent request
+		savePersistentRequest_F (request, datatype, comm, MPI_IRSEND_EV, *count, *dest, *tag);
+	}
 
 	/*
 	 *   event  : RSEND_INIT_EV              value  : EVT_END
@@ -1525,10 +1495,6 @@ void PMPI_Ssend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-	MPI_Datatype c_type = PMPI_Type_f2c(*datatype);
-	MPI_Comm     c_comm = PMPI_Comm_f2c(*comm);
-	MPI_Request  c_request;
-
 	/*
 	 *   event  : SSEND_INIT_EV              value  : EVT_BEGIN
 	 *   target : ---                        size   : ----
@@ -1541,8 +1507,10 @@ void PMPI_Ssend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	CtoF77 (pmpi_ssend_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
 	// Save this persistent request
-	c_request = PMPI_Request_f2c (*request);
-	PR_NewRequest (MPI_ISSEND_EV, *count, c_type, *dest, *tag, c_comm, c_request, &PR_queue);
+	if (*ierror == MPI_SUCCESS)
+	{
+		savePersistentRequest_F (request, datatype, comm, MPI_ISSEND_EV, *count, *dest, *tag);
+	}
 
 	/*
 	 *   event  : SSEND_INIT_EV              value  : EVT_END
@@ -1560,18 +1528,17 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) 
 {
-	MPI_Datatype c_sendtype   = PMPI_Type_f2c (*sendtype);
-	MPI_Datatype c_recvtype   = PMPI_Type_f2c (*recvtype);
-	MPI_Comm     c_comm       = PMPI_Comm_f2c (*comm);
-	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint    *f_status_ptr = NULL;
-	MPI_Status   c_status;
+	MPI_Datatype c_sendtype     = PMPI_Type_f2c (*sendtype);
+	MPI_Datatype c_recvtype     = PMPI_Type_f2c (*recvtype);
+	MPI_Comm     c_comm         = PMPI_Comm_f2c (*comm);
+	MPI_Fint     f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint    *f_proxy_status = NULL;
 	int SentSize = 0, ReceivedSize = 0;
 	int SenderRank = MPI_ANY_SOURCE, ReceiverRank = MPI_ANY_SOURCE, Tag = MPI_ANY_TAG;
 
 	SentSize = getMsgSizeFromCountAndDatatype (*sendcount, c_sendtype);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &ReceiverRank, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &ReceiverRank);
 
 	/*
 	 *   event  : SENDRECV_REPLACE_EV        value  : EVT_BEGIN
@@ -1581,14 +1548,15 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_SENDRECV_EV, EVT_BEGIN, ReceiverRank, SentSize, *sendtag, c_comm, EMPTY);
 
-	f_status_ptr = (MPI_F_STATUS_IGNORE == status) ? f_status : status;
+	makeProxies_F (0, NULL, NULL, NULL,
+	               1, status, f_local_status, &f_proxy_status);
 
 	CtoF77(pmpi_sendrecv) (sendbuf, sendcount, sendtype, dest, sendtag,
 	                       recvbuf, recvcount, recvtype, source, recvtag, 
-	                       comm, f_status_ptr, ierr);
+	                       comm, f_proxy_status, ierr);
 
-	PMPI_Status_f2c (f_status_ptr, &c_status);
-	getCommDataFromStatus (&c_status, c_recvtype, c_comm, MPI_GROUP_NULL, &ReceivedSize, &Tag, &SenderRank);
+	getCommInfoFromStatus_F (f_proxy_status, c_recvtype, c_comm, MPI_GROUP_NULL, &ReceivedSize, &Tag, &SenderRank);
+	freeProxies(NULL, NULL, status, f_local_status, f_proxy_status);
 
 	/*
 	 *   event  : SENDRECV_REPLACE_EV        value  : EVT_END
@@ -1602,21 +1570,20 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	updateStats_P2P(global_mpi_stats, SenderRank, ReceivedSize, SentSize);
 }
 
-void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *type,
+void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) 
 {
-	MPI_Datatype c_type       = PMPI_Type_f2c (*type);
-	MPI_Comm     c_comm       = PMPI_Comm_f2c (*comm);
-	MPI_Fint     f_status[MPI_STATUS_FIELD_INDEX];
-	MPI_Fint    *f_status_ptr = NULL;
-	MPI_Status   c_status;
+	MPI_Datatype c_datatype     = PMPI_Type_f2c (*datatype);
+	MPI_Comm     c_comm         = PMPI_Comm_f2c (*comm);
+	MPI_Fint     f_local_status[MPI_F_STATUS_SIZE];
+	MPI_Fint    *f_proxy_status = NULL;
 	int SentSize = 0, ReceivedSize = 0;
 	int SenderRank = MPI_ANY_SOURCE, ReceiverRank = MPI_ANY_SOURCE, Tag = MPI_ANY_TAG;
 
-	SentSize = getMsgSizeFromCountAndDatatype (*count, c_type);
+	SentSize = getMsgSizeFromCountAndDatatype (*count, c_datatype);
 
-	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &ReceiverRank, OP_TYPE_SEND);
+	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *dest, &ReceiverRank);
 
 	/*
 	 *   event  : SENDRECV_REPLACE_EV        value  : EVT_BEGIN
@@ -1626,12 +1593,13 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_SENDRECV_REPLACE_EV, EVT_BEGIN, ReceiverRank, SentSize, *sendtag, c_comm, EMPTY);
 
-	f_status_ptr = (MPI_F_STATUS_IGNORE == status) ? f_status : status;
+	makeProxies_F (0, NULL, NULL, NULL,
+	               1, status, f_local_status, &f_proxy_status);
 
-	CtoF77(pmpi_sendrecv_replace) (buf, count, type, dest, sendtag, source, recvtag, comm, f_status_ptr, ierr);
+	CtoF77(pmpi_sendrecv_replace) (buf, count, datatype, dest, sendtag, source, recvtag, comm, f_proxy_status, ierr);
 
-	PMPI_Status_f2c (f_status_ptr, &c_status);
-	getCommDataFromStatus (&c_status, c_type, c_comm, MPI_GROUP_NULL, &ReceivedSize, &Tag, &SenderRank);
+	getCommInfoFromStatus_F (f_proxy_status, c_datatype, c_comm, MPI_GROUP_NULL, &ReceivedSize, &Tag, &SenderRank);
+	freeProxies(NULL, NULL, status, f_local_status, f_proxy_status);
 
 	/*
 	 *   event  : SENDRECV_REPLACE_EV        value  : EVT_END
