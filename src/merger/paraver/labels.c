@@ -782,7 +782,14 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 					{
 						evt_value = (value_t*) xmalloc (sizeof (value_t));
 						evt_value->value = eventvalue;
-						strcpy(evt_value->label, value_description);
+
+						strncpy(evt_value->label, value_description, VALUE_LBL);
+                        if (strlen(value_description) > VALUE_LBL - 1)
+                        {
+                            fprintf(stderr, PACKAGE_NAME": Warning! Value description exceeds the maximum length of %d, the label will be truncated.\n", VALUE_LBL);
+                            evt_value->label[VALUE_LBL - 1] = '\0';
+                        }
+
 						Extrae_Vector_Append (&last_event_type_used->event_values, evt_value);
 						other_count++;
 					}
@@ -817,7 +824,14 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 					{
 						evt_type = (event_type_t*) xmalloc (sizeof (event_type_t));
 						evt_type->event_type.type = eventcode;
-						strcpy(evt_type->event_type.label, code_description);
+
+						strncpy(evt_type->event_type.label, code_description, EVENT_LBL);
+                        if (strlen(code_description) > EVENT_LBL - 1)
+                        {
+                            fprintf(stderr, PACKAGE_NAME": Warning! Event description exceeds the maximum length of %d, the label will be truncated.\n", TYPE_LBL);
+                            evt_type->event_type.label[EVENT_LBL - 1] = '\0';
+                        }
+
 						Extrae_Vector_Init(&evt_type->event_values);
    
 						Extrae_Vector_Append(&defined_user_event_types, evt_type);
