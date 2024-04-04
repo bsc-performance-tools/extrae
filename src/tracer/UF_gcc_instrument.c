@@ -124,6 +124,21 @@ void __cyg_profile_func_exit (void *this_fn, void *call_site)
 	}
 }
 
+
+/***
+  __pat_tp_func_entry __pat_tp_func_return
+  these routines are callback functions to instrument routines which have
+  been compiled with -h func_trace with Cray ftn compiler
+***/
+void __pat_tp_func_entry(const void *ea, const void *ra) {
+  __cyg_profile_func_enter((void *)ea, (void *)ra);
+
+}
+
+void __pat_tp_func_return(const void *ea, const void *ra) {
+  __cyg_profile_func_exit((void *)ea, (void *)ra);
+}
+
 static void AddUFtoInstrument (void *address)
 {
 	int i = HASH((long)address);
