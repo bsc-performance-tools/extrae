@@ -42,6 +42,19 @@ def is_even(number):
 
 
 def find_cpu_sockets():
+    # TODO: Maybe it would be easier to use 'lscpu -p=CPU,Core,Socket' to parse the first physical core representative of each socket. 
+    # Sample output from deep (with hyperthreading): 
+    # 0,0,0
+    # 1,1,0
+    # ... 
+    # 12,12,1
+    # 13,13,1
+    # ... 
+    # 24,0,0
+    # 25,1,0
+    # ... 
+    # 36,12,1
+    # 37,13,1
     cmd = 'lscpu'
     result = subprocess.run(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
     for line in (result.stdout.decode("utf-8").split('\n')):
