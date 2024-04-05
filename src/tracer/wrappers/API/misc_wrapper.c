@@ -450,10 +450,17 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 
 	/* Finally emit user communications */
 	for (i = 0; i < ptr->nCommunications ; i++)
+	{
+		if (ptr->Communications[i].partner == -1)
+		{
+			// Special value '-1' means the communication goes to the same process
+			ptr->Communications[i].partner = TASKID;
+		}
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
 		  (ptr->Communications[i].type==EXTRAE_USER_SEND)?USER_SEND_EV:USER_RECV_EV,
 		  ptr->Communications[i].partner, ptr->Communications[i].size,
 		  ptr->Communications[i].tag, ptr->Communications[i].id) 
+	}
 }
 
 /* ***************************************************************************

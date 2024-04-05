@@ -351,7 +351,8 @@ The structure ``extrae_UserCommunication`` contains the following fields:
 * :option:`partner`
   The partner of this communication (receive if this is a send or send if this
   is a receive). Partners (ranging from 0 to N-1) are considered across tasks
-  whereas all threads share a single communication queue.
+  whereas all threads share a single communication queue. Special value '-1'
+  means the partner is the same process (i.e. communication between threads). 
 * :option:`id`
   An identifier that is used to match communications between partners.
 
