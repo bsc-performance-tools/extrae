@@ -293,6 +293,13 @@ the same compiler as the program being instrumented, with the following command:
     captured addresses into valuable information such as function name, file
     name and line number.
 
+.. _func:extrae_user_function_at_level:
+
+* .. function:: unsigned long long Extrae_user_function_at_level (unsigned enter, unsigned lvl)
+
+   Same as ``Extrae_user_function`` but allows the specification of callstack
+   levels to skip.
+
 .. _func:extrae_flush:
 
 * .. function:: void Extrae_flush (void)

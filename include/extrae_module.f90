@@ -128,6 +128,11 @@
          integer*4, intent(in) :: enter
          end subroutine extrae_user_function
 
+         subroutine extrae_user_function_at_level (enter, lvl)
+         integer*4, intent(in) :: enter
+         integer*4, intent(in) :: lvl
+         end subroutine extrae_user_function_at_level
+
       end interface
 
       end module EXTRAE_MODULE

@@ -197,11 +197,23 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 		if (mpitrace_on) \
 		{ \
 			Backend_Enter_Instrumentation (); \
-			Extrae_user_function_Wrapper (*enter); \
+			Extrae_user_function_Wrapper (*enter, 0); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION);
+
+#define apifTRACE_USER_FUNCTION_AT_LEVEL(x) \
+  void CtoF77(x##_user_function_at_level) (unsigned *enter, unsigned *lvl) \
+  { \
+      if (mpitrace_on) \
+      { \
+          Backend_Enter_Instrumentation(); \
+          Extrae_user_function_Wrapper(*enter, *lvl); \
+          Backend_Leave_Instrumentation(); \
+      } \
+  }
+EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_AT_LEVEL);
 
 #define apifTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
 	void CtoF77(x##_function_from_address) (extrae_type_t *type, extrae_value_t *address) \
@@ -416,12 +428,26 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 		if (mpitrace_on) \
 		{ \
 			Backend_Enter_Instrumentation (); \
-			r = Extrae_user_function_Wrapper (enter); \
+			r = Extrae_user_function_Wrapper (enter, 0); \
 			Backend_Leave_Instrumentation (); \
 		} \
 		return r; \
 	}
-EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
+EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_AT_LEVEL);
+
+#define apiTRACE_USER_FUNCTION_AT_LEVEL(x) \
+  UINT64 x##_user_function_at_level (unsigned enter, unsigned lvl) \
+  { \
+      UINT64 r = 0; \
+      if (mpitrace_on) \
+      { \
+          Backend_Enter_Instrumentation(); \
+          r = Extrae_user_function_Wrapper(enter, lvl); \
+          Backend_Leave_Instrumentation(); \
+      } \
+      return r; \
+  }
+EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_AT_LEVEL);
 
 #define apiTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
 	void x##_function_from_address (extrae_type_t type, extrae_value_t *address) \
@@ -701,7 +727,20 @@ UINT64 Extrae_user_function (unsigned enter)
 	if (mpitrace_on)
 	{
 		Backend_Enter_Instrumentation ();
-		r = Extrae_user_function_Wrapper (enter);
+		r = Extrae_user_function_Wrapper (enter, 0);
+		Backend_Leave_Instrumentation ();
+	}
+	return r;
+}
+
+INTERFACE_ALIASES_C(_user_function_at_level, Extrae_user_function_at_level,(unsigned enter, unsigned lvl),UINT64)
+UINT64 Extrae_user_function_at_level (unsigned enter, unsigned lvl)
+{
+	UINT64 r = 0;
+	if (mpitrace_on)
+	{
+		Backend_Enter_Instrumentation ();
+		r = Extrae_user_function_Wrapper (enter, lvl);
 		Backend_Leave_Instrumentation ();
 	}
 	return r;
@@ -974,7 +1013,18 @@ void extrae_user_function (unsigned *enter)
 	if (mpitrace_on)
 	{
 		Backend_Enter_Instrumentation ();
-		Extrae_user_function_Wrapper (*enter);
+		Extrae_user_function_Wrapper (*enter, 0);
+		Backend_Leave_Instrumentation ();
+	}
+}
+
+INTERFACE_ALIASES_F(_user_function_at_level,_USER_FUNCTION_AT_LEVEL,extrae_user_function_at_level,(unsigned *enter, unsigned *lvl),void)
+void extrae_user_function_at_level (unsigned *enter, unsigned *lvl)
+{
+	if (mpitrace_on)
+	{
+		Backend_Enter_Instrumentation ();
+		Extrae_user_function_Wrapper (*enter, *lvl);
 		Backend_Leave_Instrumentation ();
 	}
 }

@@ -262,9 +262,9 @@ void Extrae_memusage_Wrapper (void)
 #endif
 }
 
-UINT64 Extrae_user_function_Wrapper (unsigned enter)
+UINT64 Extrae_user_function_Wrapper (unsigned enter, unsigned lvl)
 {
-	UINT64 ip = (enter)?Extrae_get_caller(4):EMPTY;
+	UINT64 ip = (enter)?Extrae_get_caller(4 + lvl):EMPTY;
 	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
 	return ip;
 }
