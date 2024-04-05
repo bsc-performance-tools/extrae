@@ -199,6 +199,11 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	HWC_sets[num_set].NumOverflows = 0;
 #endif
 
+	for (i = 0; i < MAX_HWC; i++)
+	{
+		HWC_sets[num_set].counters[i] = NO_COUNTER;
+	}
+
 	for (i = 0; i < ncounters; i++)
 	{
 		/* counter_last_position will hold the address of the end of the 
@@ -618,9 +623,55 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 						fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (task %d, thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, TASKID, threadid);
 						fprintf (stderr, "PAPI error %d: %s\n", rc, PAPI_strerror(rc));
 						HWC_sets[i].counters[j] = NO_COUNTER;
+
+						/* If a counter fails to enter the EventSet, we can't just mark it
+						 * as NO_COUNTER, because the next counter that enters the EventSet
+						 * will take this one's position, and then we'll have a shift
+						 * between the counters listed in HWC_sets, and the counters in the
+						 * EventSet and the values read at PAPI_read. 
+						 * Quick hack: Send the failing counter to the end of the
+						 * HWC_sets.counters array and shift the remaining to the left.
+						  
+						                     __ Shift starting from here till the end of the array to the left, replacing the counter that failed
+						                    |             __ As we shift to the left, we leave the last slot open, we need to mark it as NO_COUNTER
+						                    |            |
+						                    v            v
+						[ HWC1 | HWC2 |  X  | HWC4 | ... | NO_COUNTER ] 
+						                 ^
+						                 |_ First counter that fails to enter the EventSet 
+						 */
+
+						/* Move all counters to the right of 'j' to the left, and set the last to NO_COUNTER */
+						int k = 0;
+						for (k = j; k < MAX_HWC - 1; k++) {
+							
+							HWC_sets[i].counters[k] = HWC_sets[i].counters[k+1];
+						}
+						HWC_sets[i].counters[MAX_HWC-1] = NO_COUNTER; 
+						HWC_sets[i].num_counters --;
+						j --;
+						/* HWC_sets[i].counters[j] = NO_COUNTER; */
 						/* break; */
 					}
 				}
+			}
+
+			// This used to be in Backend_preInitialize for the main thread to emit the HWC_DEF_EV events,
+			// right before the call to HWC_Start_Counters that ends up here. 
+			// In the loop above we are still flagging NO_COUNTER's, thus the HWC_DEF_EV can't be emitted until now.
+			// This function also calls HWCBE_PAPI_Start_Set, which in turn emits
+			// other events that rely on having HWC_DEF_EV first, so this has to
+			// happen somewhere in the middle. 
+			// FIXME: The emission should happen from the common interface, not from
+			// the PAPI backend (missing for PMAPI).
+			if (threadid == 0)
+			{
+			  /* Write hardware counters set definitions (i.e. those that were
+			   * succesfully added into PAPI EventSets) into the .mpit files*/
+				int *HWCid;
+				HWC_Get_Set_Counters_Ids (i, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
+				TRACE_EVENT_AND_GIVEN_COUNTERS (LAST_READ_TIME, HWC_DEF_EV, i, MAX_HWC, HWCid);
+				xfree (HWCid);
 			}
 
 			/* Set the domain for these eventsets */

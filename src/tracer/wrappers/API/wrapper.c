@@ -1934,7 +1934,15 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 			}
 		}
 	
-		/* Write hardware counters set definitions (i.e. those given at config time) into the .mpit files*/
+
+#if 0
+		/* This can't be here because HWC_Start_Counters can still flag counters as NO_COUNTER if they can't be added in the EventSet.
+		 * HWC_Start_Counters can't be done earlier because already emits events that the merger needs HWC_DEF_EV first to process them. 
+		 * Trying to move this inside HWC_Start_Counters -> HWCBE_START_COUNTERS_THREAD -> HWCBE_PAPI_Init_thread, after flagging incompatible counters.
+		 * FIXME: Doing that, PMAPI does not emit the HWC_DEF_EV 
+		 */
+
+		/* Write hardware counters set definitions (i.e. those that were succesfully added into PAPI EventSets) into the .mpit files*/
 		for (set=0; set<HWC_Get_Num_Sets(); set++)
 		{
 			int *HWCid;
@@ -1943,9 +1951,11 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 			TRACE_EVENT_AND_GIVEN_COUNTERS (ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
 			xfree (HWCid);
 		}
-	
+#endif
+
 		/* Start reading counters */
 		HWC_Start_Counters (get_maximum_NumOfThreads(), ApplBegin_Time, forked);
+	
 #endif
 	}
 	else
