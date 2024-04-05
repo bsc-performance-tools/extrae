@@ -64,6 +64,7 @@ These are the instrumented MPI routines in the |TRACE| package:
 * MPI_Comm_rank
 * MPI_Comm_size
 * MPI_Comm_create
+* MPI_Comm_create_group
 * MPI_Comm_free
 * MPI_Comm_dup
 * MPI_Comm_dup_with_info

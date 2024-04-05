@@ -60,6 +60,10 @@ void DLB_MPI_Comm_create_F_enter (MPI_Fint *comm, MPI_Fint *group, MPI_Fint *new
 void DLB_MPI_Comm_create_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Comm_create_group_F_enter (MPI_Fint *comm, MPI_Fint *group, MPI_Fint *tag, MPI_Fint *newcomm, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Comm_create_group_F_leave (void)__attribute__((weak));
+
+
 void DLB_MPI_Comm_free_F_enter (MPI_Fint *comm, MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_Comm_free_F_leave (void)__attribute__((weak));
 
@@ -146,6 +150,10 @@ void DLB_MPI_Comm_size_leave (void)__attribute__((weak));
 
 void DLB_MPI_Comm_create_enter (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm)__attribute__((weak));
 void DLB_MPI_Comm_create_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Comm_create_group_enter (MPI_Comm comm, MPI_Group group, int tag, MPI_Comm *newcomm)__attribute__((weak));
+void DLB_MPI_Comm_create_group_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_Comm_free_enter (MPI_Comm *comm)__attribute__((weak));

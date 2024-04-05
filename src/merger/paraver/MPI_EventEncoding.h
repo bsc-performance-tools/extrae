@@ -275,7 +275,8 @@ typedef enum
   MPI_FILE_WRITE_ORDERED_END_VAL,
   MPI_FILE_WRITE_SHARED_VAL, /* 210 */
   MPI_COMM_DUP_WITH_INFO_VAL,
-  MPI_DIST_GRAPH_CREATE_ADJACENT_VAL
+  MPI_DIST_GRAPH_CREATE_ADJACENT_VAL,
+  MPI_COMM_CREATE_GROUP_VAL
 }
 MPIVal;
 
@@ -409,6 +410,7 @@ MPIVal;
 #define  MPI_COMM_RANK_LABEL               "MPI_Comm_rank"
 #define  MPI_COMM_SIZE_LABEL               "MPI_Comm_size"
 #define  MPI_COMM_CREATE_LABEL             "MPI_Comm_create"
+#define  MPI_COMM_CREATE_GROUP_LABEL       "MPI_Comm_create_group"
 #define  MPI_COMM_DUP_LABEL                "MPI_Comm_dup"
 #define  MPI_COMM_DUP_WITH_INFO_LABEL      "MPI_Comm_dup_with_info"
 #define  MPI_COMM_SPLIT_LABEL              "MPI_Comm_split"

@@ -1524,7 +1524,7 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 	CtoF77 (pmpi_comm_create) (comm, group, newcomm, ierror);
 
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
-	{	
+	{
 		MPI_Comm comm_id = PMPI_Comm_f2c(*newcomm);
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
@@ -1533,6 +1533,34 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 		EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
+}
+
+/******************************************************************************
+ ***  PMPI_Comm_Create_Group_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Create_Group_Wrapper(MPI_Fint *comm, MPI_Fint *group,
+  MPI_Fint *tag, MPI_Fint *newcomm, MPI_Fint *ierror)
+{
+    MPI_Fint cnull;
+
+    TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_CREATE_GROUP_EV, EVT_BEGIN, EMPTY,
+      EMPTY, EMPTY, EMPTY, EMPTY);
+
+    cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+    CtoF77 (pmpi_comm_create_group) (comm, group, tag, newcomm, ierror);
+
+    if (*newcomm != cnull && *ierror == MPI_SUCCESS)
+    {
+        MPI_Comm comm_id = PMPI_Comm_f2c(*newcomm);
+        Trace_MPI_Communicator(comm_id, LAST_READ_TIME, TRUE);
+    }
+
+    TRACE_MPIEVENT(TIME, MPI_COMM_CREATE_GROUP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
+      EMPTY, EMPTY);
+
+    updateStats_OTHER(global_mpi_stats);
 }
 
 /******************************************************************************
@@ -2427,7 +2455,33 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 }
 
 /******************************************************************************
- ***  MPI_Comm_create_C_Wrapper
+ ***  MPI_Comm_create_group_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_create_group_C_Wrapper(MPI_Comm comm, MPI_Group group, int tag,
+  MPI_Comm *newcomm)
+{
+    int ierror;
+
+    TRACE_MPIEVENT(LAST_READ_TIME, MPI_COMM_CREATE_GROUP_EV, EVT_BEGIN, EMPTY,
+      EMPTY, EMPTY, EMPTY, EMPTY);
+
+    ierror = PMPI_Comm_create_group(comm, group, tag, newcomm);
+    if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+    {
+        Trace_MPI_Communicator(*newcomm, LAST_READ_TIME, FALSE);
+    }
+
+    TRACE_MPIEVENT(TIME, MPI_COMM_CREATE_GROUP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
+      EMPTY, EMPTY);
+
+    updateStats_OTHER(global_mpi_stats);
+
+    return ierror;
+}
+
+/******************************************************************************
+ ***  MPI_Comm_free_C_Wrapper
  ******************************************************************************/
 
 int MPI_Comm_free_C_Wrapper (MPI_Comm *comm)
@@ -2437,7 +2491,7 @@ int MPI_Comm_free_C_Wrapper (MPI_Comm *comm)
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-	TRACE_MPIEVENT (TIME, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	TRACE_MPIEVENT (TIME, MPI_COMM_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);

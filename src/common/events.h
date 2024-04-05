@@ -354,6 +354,7 @@ enum {
 #define MPI_PROBE_EV                 50000065
 #define MPI_IPROBE_EV                50000066
 #define MPI_COMM_FREE_EV             50000067
+#define MPI_COMM_CREATE_GROUP_EV     50000080
 #define MPI_MPROBE_EV                50000087
 #define MPI_IMPROBE_EV               50000088
 #define MPI_MRECV_EV                 50000089

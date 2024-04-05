@@ -405,6 +405,37 @@ void NAME_ROUTINE_C2F(mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
 }
 
 /******************************************************************************
+ ***  MPI_Comm_Create_Group
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_comm_create_group__,mpi_comm_create_group_,MPI_COMM_CREATE_GROUP,mpi_comm_create_group,(MPI_Fint *comm, MPI_Fint *group, MPI_Fint *tag, MPI_Fint *newcomm, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_comm_create_group) (MPI_Fint *comm, MPI_Fint *group,
+  MPI_Fint *tag, MPI_Fint *newcomm, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
+  MPI_Fint *tag, MPI_Fint *newcomm, MPI_Fint *ierror)
+#endif
+{
+    DLB(DLB_MPI_Comm_create_group_F_enter, comm, group, tag, newcomm, ierror);
+
+    if (INSTRUMENT_THIS_MPI)
+    {
+        DEBUG_INTERFACE(ENTER)
+        Backend_Enter_Instrumentation ();
+        PMPI_Comm_Create_Group_Wrapper (comm, group, tag, newcomm, ierror);
+        Backend_Leave_Instrumentation ();
+        DEBUG_INTERFACE(LEAVE)
+    }
+    else
+    {
+        CtoF77 (pmpi_comm_create_group) (comm, group, tag, newcomm, ierror);
+    }
+
+    DLB(DLB_MPI_Comm_create_group_F_leave);
+}
+
+/******************************************************************************
  ***  MPI_Comm_Free
  ***  NOTE We cannot let freeing communicators
  ******************************************************************************/
@@ -1097,6 +1128,34 @@ int NAME_ROUTINE_C(MPI_Comm_create) (MPI_Comm comm, MPI_Group group,
 	DLB(DLB_MPI_Comm_create_leave);
 
 	return res;
+}
+
+/******************************************************************************
+ ***  MPI_Comm_create_group
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Comm_create_group) (MPI_Comm comm, MPI_Group group,
+  int tag, MPI_Comm *newcomm)
+{
+    int res;
+
+    DLB(DLB_MPI_Comm_create_group_enter, comm, group, tag, newcomm);
+
+    if (INSTRUMENT_THIS_MPI)
+    {
+        DEBUG_INTERFACE(ENTER)
+        Backend_Enter_Instrumentation ();
+        res = MPI_Comm_create_group_C_Wrapper (comm, group, tag, newcomm);
+        Backend_Leave_Instrumentation ();
+        DEBUG_INTERFACE(LEAVE)
+    }
+    else
+    {
+        res = PMPI_Comm_create_group (comm, group, tag, newcomm);
+    }
+
+    DLB(DLB_MPI_Comm_create_group_leave);
+
+    return res;
 }
 
 /******************************************************************************

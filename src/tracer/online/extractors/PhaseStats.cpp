@@ -179,6 +179,7 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
       case MPI_COMM_RANK_EV:
       case MPI_COMM_SIZE_EV:
       case MPI_COMM_CREATE_EV:
+      case MPI_COMM_CREATE_GROUP_EV:
       case MPI_COMM_FREE_EV:
       case MPI_COMM_DUP_EV:
       case MPI_COMM_DUP_WITH_INFO_EV:
