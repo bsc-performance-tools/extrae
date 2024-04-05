@@ -117,6 +117,7 @@ static void (*__kmpc_omp_task_complete_if0_real)(void*,int,void*) = NULL;
 static int (*__kmpc_omp_taskwait_real)(void*,int) = NULL;
 
 static void (*__kmpc_taskloop_real)(void*,int,void*,int,void*,void*,long,int,int,long,void*) = NULL;
+static void (*__kmpc_taskloop_5_real)(void*,int,void*,int,void*,void*,long,int,int,long,int,void*) = NULL;
 
 static void (*__kmpc_taskgroup_real)(void *, int) = NULL;
 static void (*__kmpc_end_taskgroup_real)(void *, int) = NULL;
@@ -1544,6 +1545,59 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 #endif
 }
 
+void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, void *ub, long st, int nogroup, int sched, long grainsize, int modifier, void *task_dup)
+{
+	int helper_id = 0;
+	void *real_task = NULL;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop_5 enter: @=%p args=(%p %d %p %d %p %p %ld %d %d %ld %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_taskloop_5_real, loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, modifier, task_dup);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
+#endif
+
+	RECHECK_INIT(__kmpc_taskloop_5_real);
+
+	/* Retrieve the real task pointer from the list that is maintained in the
+	 * instrumented function __kmpc_omp_task_alloc */
+	real_task = helper__kmpc_task_retrieve(task);
+
+	if (TRACE(__kmpc_taskloop_5_real) && (getTrace_OMPTaskloop()))
+	{
+		Extrae_OpenMP_TaskLoop_Entry ();
+
+		/* Assign a new helper for this taskloop */
+		pthread_mutex_lock(&hl__kmpc_taskloop_mtx);
+		helper_id = hl__kmpc_taskloop->next_id;
+	  hl__kmpc_taskloop->next_id = (hl__kmpc_taskloop->next_id + 1) % MAX_TASKLOOP_HELPERS;
+		pthread_mutex_unlock(&hl__kmpc_taskloop_mtx);
+
+		/* Modify the routine_entry_ptr field from the "kmp_task_t task", to point
+		 * to the corresponding helper function */
+		void **routine_entry_ptr = task + sizeof(void *);
+		*routine_entry_ptr = get_taskloop_helper_fn_ptr(helper_id);
+
+		/* Save a map of helper_id => real_task */
+		hl__kmpc_taskloop->real_task_map_by_helper[helper_id] = real_task;
+
+		/* Call the runtime */
+		__kmpc_taskloop_5_real(loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, modifier, task_dup);
+		Extrae_OpenMP_TaskLoop_Exit ();
+	}
+	else if (__kmpc_taskloop_5_real != NULL)
+	{
+		__kmpc_taskloop_5_real(loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, modifier, task_dup);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop_5: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop_5 exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
 void
 __kmpc_taskgroup(void *loc, int global_tid)
 {
@@ -1828,6 +1882,10 @@ static int intel_kmpc_get_hook_points (int rank)
 	/* Obtain @ for __kmpc_taskloop */
 	__kmpc_taskloop_real = (void(*)(void*,int,void*,int,void*,void*,long,int,int,long,void*)) dlsym (RTLD_NEXT, "__kmpc_taskloop");
 	INC_IF_NOT_NULL(__kmpc_taskloop_real, count);
+
+	/* Obtain @ for __kmpc_taskloop_5 */
+	__kmpc_taskloop_5_real = (void(*)(void*,int,void*,int,void*,void*,long,int,int,long,int,void*)) dlsym (RTLD_NEXT, "__kmpc_taskloop_5");
+	INC_IF_NOT_NULL(__kmpc_taskloop_5_real, count);
 
 	/* Obtain @ for __kmpc_taskgroup */
 	__kmpc_taskgroup_real = (void(*)(void *, int))
