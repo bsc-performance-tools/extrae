@@ -212,6 +212,8 @@ static int Get_State (unsigned int EvType)
 		case MPI_INEIGHBOR_ALLTOALLV_EV:
 		case MPI_NEIGHBOR_ALLTOALLW_EV:
 		case MPI_INEIGHBOR_ALLTOALLW_EV:
+        case MPI_EXSCAN_EV:
+        case MPI_IEXSCAN_EV:
 			state = STATE_BCAST;
 		break;
 		case MPI_WIN_FENCE_EV:
@@ -532,6 +534,8 @@ static unsigned int Get_GlobalOP_RecvSize (event_t *current, int is_root)
 		case MPI_ISCAN_EV:
 		case MPI_ALLREDUCE_EV:
 		case MPI_IALLREDUCE_EV:
+		case MPI_EXSCAN_EV:
+		case MPI_IEXSCAN_EV:
 			res = Get_EvSize(current);
 		break;
 		default:
@@ -1313,5 +1317,7 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_TIME_IN_IMPROBE_EV, MPI_Elapsed_Time_In_Event },
 	{ MPI_TIME_IN_REQUEST_GET_STATUS_EV, MPI_Elapsed_Time_In_Event },
 	{ MPI_TIME_IN_TEST_EV, MPI_Elapsed_Time_In_Event },
+	{ MPI_EXSCAN_EV, GlobalOP_event },
+	{ MPI_IEXSCAN_EV, GlobalOP_event },
 	{ NULL_EV, NULL }
 };

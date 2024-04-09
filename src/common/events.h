@@ -351,6 +351,7 @@ enum {
 #define MPI_CART_COORDS_EV           50000060
 #define MPI_REDUCESCAT_EV            50000062
 #define MPI_SCAN_EV                  50000063
+#define MPI_EXSCAN_EV                50000064
 #define MPI_PROBE_EV                 50000065
 #define MPI_IPROBE_EV                50000066
 #define MPI_COMM_FREE_EV             50000067
@@ -464,6 +465,7 @@ enum {
 #define MPI_WIN_FLUSH_ALL_EV         50000246
 #define MPI_WIN_FLUSH_LOCAL_EV       50000247
 #define MPI_WIN_FLUSH_LOCAL_ALL_EV   50000248
+#define MPI_IEXSCAN_EV               50000250
 
 // Software counters
 #define MPI_IPROBE_COUNTER_EV             50000300

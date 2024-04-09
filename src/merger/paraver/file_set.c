@@ -80,12 +80,26 @@
 #include "intercommunicators.h"
 
 #define EVENTS_FOR_NUM_GLOBAL_OPS(x) \
-     ((x) == MPI_BARRIER_EV  || (x) == MPI_BCAST_EV       || (x) == MPI_ALLREDUCE_EV       || \
-      (x) == MPI_ALLTOALL_EV || (x) == MPI_ALLTOALLV_EV   || (x) == MPI_SCAN_EV            || \
-      (x) == MPI_REDUCE_EV   || (x) == MPI_ALLGATHER_EV   || (x) == MPI_ALLGATHERV_EV      || \
-      (x) == MPI_GATHER_EV   || (x) == MPI_GATHERV_EV     || (x) == MPI_SCATTER_EV         || \
-      (x) == MPI_SCATTERV_EV || (x) == MPI_REDUCESCAT_EV  || (x) == MPI_REDUCE_SCATTER_BLOCK_EV || \
-      (x) == MPI_IREDUCE_SCATTER_BLOCK_EV || (x) == MPI_ALLTOALLW_EV || (x) == MPI_IALLTOALLW_EV)
+	((x) == MPI_BARRIER_EV               || \
+	 (x) == MPI_BCAST_EV                 || \
+	 (x) == MPI_ALLREDUCE_EV             || \
+	 (x) == MPI_ALLTOALL_EV              || \
+	 (x) == MPI_ALLTOALLV_EV             || \
+	 (x) == MPI_SCAN_EV                  || \
+	 (x) == MPI_REDUCE_EV                || \
+	 (x) == MPI_ALLGATHER_EV             || \
+	 (x) == MPI_ALLGATHERV_EV            || \
+	 (x) == MPI_GATHER_EV                || \
+	 (x) == MPI_GATHERV_EV               || \
+	 (x) == MPI_SCATTER_EV               || \
+	 (x) == MPI_SCATTERV_EV              || \
+	 (x) == MPI_REDUCESCAT_EV            || \
+	 (x) == MPI_REDUCE_SCATTER_BLOCK_EV  || \
+	 (x) == MPI_IREDUCE_SCATTER_BLOCK_EV || \
+	 (x) == MPI_ALLTOALLW_EV             || \
+	 (x) == MPI_IALLTOALLW_EV            || \
+	 (x) == MPI_EXSCAN_EV                || \
+	 (x) == MPI_IEXSCAN_EV)
 
 static int Is_FS_Rewound = TRUE;
 static int LimitOfEvents = 0;

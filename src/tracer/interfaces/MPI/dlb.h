@@ -1103,6 +1103,11 @@ void DLB_MPI_Scan_F_enter (void *sendbuf, void *recvbuf, MPI_Fint *count,
 void DLB_MPI_Scan_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Exscan_F_enter (void *sendbuf, void *recvbuf, MPI_Fint *count,
+	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Exscan_F_leave (void)__attribute__((weak));
+
+
 void DLB_MPI_Ireduce_F_enter (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *req, MPI_Fint *ierror)__attribute__((weak));
@@ -1180,6 +1185,11 @@ void DLB_MPI_Iscatterv_F_leave (void)__attribute__((weak));
 void DLB_MPI_Iscan_F_enter (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_Iscan_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Iexscan_F_enter (void *sendbuf, void *recvbuf, MPI_Fint *count,
+	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Iexscan_F_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_Reduce_scatter_block_F_enter (void *sendbuf, void *recvbuf,
@@ -1334,6 +1344,11 @@ void DLB_MPI_Scan_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
 void DLB_MPI_Scan_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Exscan_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
+	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Exscan_leave (void)__attribute__((weak));
+
+
 void DLB_MPI_Ireduce_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
 	MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm, MPI_Request *req)__attribute__((weak));
 void DLB_MPI_Ireduce_leave (void)__attribute__((weak));
@@ -1410,6 +1425,11 @@ void DLB_MPI_Iscatterv_leave (void)__attribute__((weak));
 void DLB_MPI_Iscan_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
 	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req)__attribute__((weak));
 void DLB_MPI_Iscan_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Iexscan_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
+	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req)__attribute__((weak));
+void DLB_MPI_Iexscan_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_Reduce_scatter_block_enter (MPI3_CONST void *sendbuf, void *recvbuf,

@@ -514,6 +514,34 @@ int NAME_ROUTINE_C(MPI_Scan) (MPI3_CONST void *sendbuf, void *recvbuf, int count
 	return res;
 }
 
+/******************************************************************************
+ ***  MPI_Exscan
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Exscan) (MPI3_CONST void *sendbuf, void *recvbuf, int count,
+	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
+{
+	int res;
+
+	DLB(DLB_MPI_Exscan_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (comm);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Exscan_C_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Exscan (sendbuf, recvbuf, count, datatype, op, comm);
+
+	DLB(DLB_MPI_Exscan_leave);
+
+	return res;
+}
+
 #if defined(MPI3)
 /******************************************************************************
  ***  MPI_Ireduce
@@ -942,6 +970,34 @@ int NAME_ROUTINE_C(MPI_Iscan) (MPI3_CONST void *sendbuf, void *recvbuf, int coun
 		res = PMPI_Iscan (sendbuf, recvbuf, count, datatype, op, comm, req);
 
 	DLB(DLB_MPI_Iscan_leave);
+
+	return res;
+}
+
+/******************************************************************************
+ ***  MPI_Iexscan
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Iexscan) (MPI3_CONST void *sendbuf, void *recvbuf, int count,
+	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req)
+{
+	int res;
+
+	DLB(DLB_MPI_Iexscan_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, req);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (comm);
+
+	if (INSTRUMENT_THIS_MPI)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Iexscan_C_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, req);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Iexscan (sendbuf, recvbuf, count, datatype, op, comm, req);
+
+	DLB(DLB_MPI_Iexscan_leave);
 
 	return res;
 }

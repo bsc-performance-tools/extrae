@@ -276,7 +276,9 @@ typedef enum
   MPI_FILE_WRITE_SHARED_VAL, /* 210 */
   MPI_COMM_DUP_WITH_INFO_VAL,
   MPI_DIST_GRAPH_CREATE_ADJACENT_VAL,
-  MPI_COMM_CREATE_GROUP_VAL
+  MPI_COMM_CREATE_GROUP_VAL,
+  MPI_EXSCAN_VAL,
+  MPI_IEXSCAN_VAL /* 215 */
 }
 MPIVal;
 
@@ -308,6 +310,7 @@ MPIVal;
 #define  MPI_SCAN_LABEL                     "MPI_Scan"
 #define  MPI_REDUCE_SCATTER_BLOCK_LABEL     "MPI_Reduce_scatter_block"
 #define  MPI_ALLTOALLW_LABEL		   	    "MPI_Alltoallw"
+#define  MPI_EXSCAN_LABEL                   "MPI_Exscan"
 
 #define  MPI_IREDUCE_LABEL                  "MPI_Ireduce"
 #define  MPI_IALLREDUCE_LABEL               "MPI_Iallreduce"
@@ -325,6 +328,7 @@ MPIVal;
 #define  MPI_ISCAN_LABEL                    "MPI_Iscan"
 #define  MPI_IREDUCE_SCATTER_BLOCK_LABEL    "MPI_Ireduce_scatter_block"
 #define  MPI_IALLTOALLW_LABEL		   	    "MPI_Ialltoallw"
+#define  MPI_IEXSCAN_LABEL                  "MPI_Iexscan"
 
 #define  MPI_NEIGHBOR_ALLGATHER_LABEL       "MPI_Neighbor_allgather"
 #define  MPI_INEIGHBOR_ALLGATHER_LABEL      "MPI_Ineighbor_allgather"

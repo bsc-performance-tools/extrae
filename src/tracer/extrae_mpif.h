@@ -381,6 +381,12 @@ void CtoF77 (mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_F
 
 void CtoF77 (mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
 
+void CtoF77 (mpi_exscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror);
+
+void CtoF77 (mpi_iexscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);
+
 
 #if defined(MPI_SUPPORTS_MPI_IO)
 void CtoF77 (mpi_file_open) (MPI_Fint *comm, char *filename, MPI_Fint *amode,
@@ -873,6 +879,12 @@ void CtoF77 (pmpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI
 void CtoF77 (pmpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr);
 
 void CtoF77 (pmpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_exscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_iexscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);
 
 
 #if (MPI_SUPPORTS_MPI_IO)
