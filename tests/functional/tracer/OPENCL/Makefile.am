@@ -11,6 +11,9 @@ check_PROGRAMS = \
 TESTS = \
  opencl-check.sh
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
   PAPI_LINKER_FLAGS = @PAPI_LDFLAGS@ @PAPI_RPATH@ @PAPI_LIBS@

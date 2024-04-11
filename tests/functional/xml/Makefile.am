@@ -18,6 +18,9 @@ EXTRA_DIST = \
 TESTS = \
     $(ALLTESTS)
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 check_PROGRAMS = \
 	check_Extrae_xml
 

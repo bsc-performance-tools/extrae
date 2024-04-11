@@ -50,3 +50,6 @@ TESTS = \
 if WANT_JAVA_WITH_ASPECTJ
 TESTS += ./extrae_JavaAspectJ.sh
 endif
+
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)

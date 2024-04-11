@@ -10,6 +10,9 @@ EXTRA_DIST = \
 TESTS = \
     $(allTESTS)
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 check_PROGRAMS = \
 	check_Extrae_getcaller_depth2 \
 	check_Extrae_user_function

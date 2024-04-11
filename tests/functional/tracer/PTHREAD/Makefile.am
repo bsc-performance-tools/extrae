@@ -16,5 +16,8 @@ TESTS += \
   pthread.sh
 endif
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 pthread_SOURCES = pthread.c
 pthread_CFLAGS = -g -pthread

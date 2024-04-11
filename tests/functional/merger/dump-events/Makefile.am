@@ -4,6 +4,9 @@ check_PROGRAMS = dump-events
 
 TESTS = dump-events.sh 
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 EXTRA_DIST = \
  dump-events.reference \
  dump-events.sh

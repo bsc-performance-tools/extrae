@@ -64,9 +64,14 @@ install-data-local: mkdirSHscripts CONFIGUREDscript
 
 install-data-hook: SHscripts
 	$(top_srcdir)/substitute $(SED) "export EXTRAE_ONLINE_SOURCES=$(abs_builddir)/extrae_online.sh" "export EXTRAE_ONLINE_SOURCES=$(DESTDIR)$(sysconfdir)/extrae_online.sh" $(VARS_SCRIPT)
+	$(top_srcdir)/substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(sysconfdir)/extrae.sh
+	$(top_srcdir)/substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(sysconfdir)/configured.sh
 
 uninstall-local:
 	rm $(DESTDIR)/$(sysconfdir)/extrae-vars.sh \
 	   $(DESTDIR)$(sysconfdir)/extrae.sh \
 	   $(DESTDIR)$(sysconfdir)/configured.sh
 	rmdir --ignore-fail-on-non-empty $(DESTDIR)/$(sysconfdir)
+
+clean:
+	rm $(top_srcdir)/etc/extrae-vars.sh

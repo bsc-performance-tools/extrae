@@ -69,6 +69,9 @@ if HAVE_MPI3
 TESTS += $(ALL_TESTS_MPI3)
 endif
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 pass_argument_MPIRUN_SOURCES = pass_argument_MPIRUN.c
 pass_argument_MPIRUN_CFLAGS = -DMPIRUN="\"$(MPIRUN)\""
 

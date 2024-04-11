@@ -17,6 +17,9 @@ TESTS = \
  test-dyninst.sh \
  test-dyninst-2.sh
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 pi_SOURCES = pi.c
 
 endif

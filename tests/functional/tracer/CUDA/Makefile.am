@@ -11,3 +11,6 @@ EXTRA_DIST = \
 TESTS = \
  test-cuda-simple.sh \
  test-cuda-stream.sh
+
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)

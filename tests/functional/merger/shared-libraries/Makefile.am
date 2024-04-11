@@ -12,6 +12,9 @@ TESTS += \
  test-shared-library-debug.sh
 endif
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 EXTRA_DIST = \
  test-shared-library-nodebug.sh \
  test-shared-library-debug.sh

@@ -14,6 +14,9 @@ TESTS = \
 # ompss-codelocation.sh \
 # ompss-codelocation-2.sh
 
+TESTS_ENVIRONMENT = \
+  EXTRAE_HOME=$(top_builddir)
+
 EXTRA_DIST = \
  auto-init-fini.sh \
  define_event_type_gen_pcf.sh \
