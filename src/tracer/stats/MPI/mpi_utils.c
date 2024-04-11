@@ -70,31 +70,6 @@ static unsigned MPI_P2P_EVENT_TYPES[NUM_MPI_P2P_EVENT_TYPES] = {
     MPI_IRSEND_EV
 };
 
-static unsigned MPI_COLLECTIVE_EVENT_TYPES[NUM_MPI_COLLECTIVE_EVENT_TYPES] = {
-    MPI_BARRIER_EV,
-    MPI_BCAST_EV,
-    MPI_IRECV_EV,
-    MPI_ALLTOALL_EV,
-    MPI_ALLTOALLV_EV,
-    MPI_ALLREDUCE_EV,
-    MPI_REDUCE_EV,
-    MPI_GATHER_EV,
-    MPI_GATHERV_EV,
-    MPI_SCATTER_EV,
-    MPI_SCATTERV_EV,
-    MPI_COMM_SPAWN_EV,
-    MPI_COMM_SPAWN_MULTIPLE_EV,
-    MPI_ALLGATHER_EV,
-    MPI_ALLGATHERV_EV,
-    MPI_REDUCESCAT_EV,
-    MPI_SCAN_EV,
-    MPI_REDUCE_SCATTER_BLOCK_EV,
-    MPI_ALLTOALLW_EV,
-    MPI_EXSCAN_EV,
-    MPI_IEXSCAN_EV
-};
-
-
 static unsigned MPI_OTHER_EVENT_TYPES[NUM_MPI_OTHER_EVENT_TYPES] = {
     MPI_INIT_EV,
     MPI_FINALIZE_EV,
@@ -148,13 +123,7 @@ static unsigned MPI_OTHER_EVENT_TYPES[NUM_MPI_OTHER_EVENT_TYPES] = {
 
 unsigned isMPI_Global(unsigned EvtType)
 {
-    int i;
-    for (i = 0; i < NUM_MPI_COLLECTIVE_EVENT_TYPES; i++)
-    {
-        if (EvtType == MPI_COLLECTIVE_EVENT_TYPES[i])
-            return TRUE;
-    }
-    return FALSE;
+	return IsMPICollective(EvtType);
 }
 
 unsigned isMPI_P2P(unsigned EvtType)

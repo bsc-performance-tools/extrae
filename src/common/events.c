@@ -369,34 +369,48 @@ unsigned IsMPICollective(unsigned EvType)
    {
       case MPI_BARRIER_EV:
       case MPI_BCAST_EV:
-      case MPI_ALLTOALL_EV:
-      case MPI_ALLTOALLV_EV:
-      case MPI_REDUCE_EV:
-      case MPI_ALLREDUCE_EV:
       case MPI_GATHER_EV:
       case MPI_GATHERV_EV:
-      case MPI_ALLGATHER_EV:
-      case MPI_ALLGATHERV_EV:
       case MPI_SCATTER_EV:
       case MPI_SCATTERV_EV:
+      case MPI_ALLGATHER_EV:
+      case MPI_ALLGATHERV_EV:
+      case MPI_ALLTOALL_EV:
+      case MPI_ALLTOALLV_EV:
+      case MPI_ALLTOALLW_EV:
+      case MPI_REDUCE_EV:
+      case MPI_ALLREDUCE_EV:
+      case MPI_REDUCE_SCATTER_BLOCK_EV:
       case MPI_REDUCESCAT_EV:
       case MPI_SCAN_EV:
-      case MPI_REDUCE_SCATTER_BLOCK_EV:
-      case MPI_IREDUCE_SCATTER_BLOCK_EV:
-      case MPI_ALLTOALLW_EV:
-      case MPI_IALLTOALLW_EV:
-      case MPI_NEIGHBOR_ALLGATHER_EV:
-      case MPI_INEIGHBOR_ALLGATHER_EV:
-      case MPI_NEIGHBOR_ALLGATHERV_EV:
-      case MPI_INEIGHBOR_ALLGATHERV_EV:
-      case MPI_NEIGHBOR_ALLTOALL_EV:
-      case MPI_INEIGHBOR_ALLTOALL_EV:
-      case MPI_NEIGHBOR_ALLTOALLV_EV:
-      case MPI_INEIGHBOR_ALLTOALLV_EV:
-      case MPI_NEIGHBOR_ALLTOALLW_EV:
-      case MPI_INEIGHBOR_ALLTOALLW_EV:
       case MPI_EXSCAN_EV:
+      case MPI_IBARRIER_EV:
+      case MPI_IBCAST_EV:
+      case MPI_IGATHER_EV:
+      case MPI_IGATHERV_EV:
+      case MPI_ISCATTER_EV:
+      case MPI_ISCATTERV_EV:
+      case MPI_IALLGATHER_EV:
+      case MPI_IALLGATHERV_EV:
+      case MPI_IALLTOALL_EV:
+      case MPI_IALLTOALLV_EV:
+      case MPI_IALLTOALLW_EV:
+      case MPI_IREDUCE_EV:
+      case MPI_IALLREDUCE_EV:
+      case MPI_IREDUCE_SCATTER_BLOCK_EV:
+      case MPI_IREDUCESCAT_EV:
+      case MPI_ISCAN_EV:
       case MPI_IEXSCAN_EV:
+      case MPI_NEIGHBOR_ALLGATHER_EV:
+      case MPI_NEIGHBOR_ALLGATHERV_EV:
+      case MPI_NEIGHBOR_ALLTOALL_EV:
+      case MPI_NEIGHBOR_ALLTOALLV_EV:
+      case MPI_NEIGHBOR_ALLTOALLW_EV:
+      case MPI_INEIGHBOR_ALLGATHER_EV:
+      case MPI_INEIGHBOR_ALLGATHERV_EV:
+      case MPI_INEIGHBOR_ALLTOALL_EV:
+      case MPI_INEIGHBOR_ALLTOALLV_EV:
+      case MPI_INEIGHBOR_ALLTOALLW_EV:
          return TRUE;
       default:
          return FALSE;

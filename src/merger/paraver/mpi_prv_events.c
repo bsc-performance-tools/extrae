@@ -544,53 +544,32 @@ void Enable_MPI_Soft_Counter (unsigned int EvType)
 		MPI_SoftCounters_used[REQUEST_GET_STATUS_CNT_INDEX] = TRUE;
 	else if (EvType == MPI_TIME_IN_REQUEST_GET_STATUS_EV)
 		MPI_SoftCounters_used[TIME_IN_REQUEST_GET_STATUS_INDEX] = TRUE;
-	else if (EvType == MPI_REDUCE_EV || EvType == MPI_ALLREDUCE_EV ||
-	         EvType == MPI_BARRIER_EV || EvType == MPI_BCAST_EV ||
-	         EvType == MPI_ALLTOALL_EV || EvType == MPI_ALLTOALLV_EV ||
-	         EvType == MPI_ALLGATHER_EV || EvType == MPI_ALLGATHERV_EV ||
-	         EvType == MPI_GATHER_EV || EvType == MPI_GATHERV_EV ||
-	         EvType == MPI_SCATTER_EV || EvType == MPI_SCATTERV_EV ||
-	         EvType == MPI_REDUCESCAT_EV || EvType == MPI_SCAN_EV ||
-	         EvType == MPI_IREDUCE_EV || EvType == MPI_IALLREDUCE_EV ||
-	         EvType == MPI_IBARRIER_EV || EvType == MPI_IBCAST_EV ||
-	         EvType == MPI_IALLTOALL_EV || EvType == MPI_IALLTOALLV_EV ||
-	         EvType == MPI_IALLGATHER_EV || EvType == MPI_IALLGATHERV_EV ||
-	         EvType == MPI_IGATHER_EV || EvType == MPI_IGATHERV_EV ||
-	         EvType == MPI_ISCATTER_EV || EvType == MPI_ISCATTERV_EV ||
-	         EvType == MPI_IREDUCESCAT_EV || EvType == MPI_ISCAN_EV || 
-	         EvType == MPI_REDUCE_SCATTER_BLOCK_EV || EvType == MPI_IREDUCE_SCATTER_BLOCK_EV || 
-	         EvType == MPI_ALLTOALLW_EV || EvType == MPI_IALLTOALLW_EV ||
-             EvType == MPI_NEIGHBOR_ALLGATHER_EV || EvType == MPI_INEIGHBOR_ALLGATHER_EV ||
-             EvType == MPI_NEIGHBOR_ALLGATHERV_EV || EvType == MPI_INEIGHBOR_ALLGATHERV_EV ||
-             EvType == MPI_NEIGHBOR_ALLTOALL_EV || EvType == MPI_INEIGHBOR_ALLTOALL_EV ||
-             EvType == MPI_NEIGHBOR_ALLTOALLV_EV || EvType == MPI_INEIGHBOR_ALLTOALLV_EV ||
-             EvType == MPI_NEIGHBOR_ALLTOALLW_EV || EvType == MPI_INEIGHBOR_ALLTOALLW_EV ||
-             EvType == MPI_EXSCAN_EV || EvType == MPI_IEXSCAN_EV)
+	else if (IsMPICollective(EvType))
 		MPI_SoftCounters_used[COLLECTIVE_INDEX] = TRUE;
-        else if (EvType == MPI_FILE_READ_EV                ||
-                 EvType == MPI_FILE_READ_ALL_EV            ||
-				 EvType == MPI_FILE_READ_ALL_BEGIN_EV      ||
-				 EvType == MPI_FILE_READ_ALL_END_EV        ||
-                 EvType == MPI_FILE_READ_AT_EV             ||
-                 EvType == MPI_FILE_READ_AT_ALL_EV         ||
-                 EvType == MPI_FILE_READ_AT_ALL_BEGIN_EV   ||
-                 EvType == MPI_FILE_READ_AT_ALL_END_EV     ||
-				 EvType == MPI_FILE_READ_ORDERED_EV        ||
-				 EvType == MPI_FILE_READ_ORDERED_BEGIN_EV  ||
-				 EvType == MPI_FILE_READ_ORDERED_END_EV    ||
-				 EvType == MPI_FILE_READ_SHARED_EV         ||
-                 EvType == MPI_FILE_WRITE_EV               ||
-                 EvType == MPI_FILE_WRITE_ALL_EV           ||
-				 EvType == MPI_FILE_WRITE_ALL_BEGIN_EV     ||
-				 EvType == MPI_FILE_WRITE_ALL_END_EV       ||
-                 EvType == MPI_FILE_WRITE_AT_EV            ||
-                 EvType == MPI_FILE_WRITE_AT_ALL_EV        ||
-                 EvType == MPI_FILE_WRITE_AT_ALL_BEGIN_EV  ||
-                 EvType == MPI_FILE_WRITE_AT_ALL_END_EV    ||
-				 EvType == MPI_FILE_WRITE_ORDERED_EV       ||
-				 EvType == MPI_FILE_WRITE_ORDERED_BEGIN_EV ||
-				 EvType == MPI_FILE_WRITE_ORDERED_END_EV   ||
-				 EvType == MPI_FILE_WRITE_SHARED_EV)
+	else if (EvType == MPI_FILE_READ_EV                ||
+	         EvType == MPI_FILE_READ_ALL_EV            ||
+	         EvType == MPI_FILE_READ_ALL_BEGIN_EV      ||
+	         EvType == MPI_FILE_READ_ALL_END_EV        ||
+	         EvType == MPI_FILE_READ_AT_EV             ||
+	         EvType == MPI_FILE_READ_AT_ALL_EV         ||
+	         EvType == MPI_FILE_READ_AT_ALL_BEGIN_EV   ||
+	         EvType == MPI_FILE_READ_AT_ALL_END_EV     ||
+	         EvType == MPI_FILE_READ_ORDERED_EV        ||
+	         EvType == MPI_FILE_READ_ORDERED_BEGIN_EV  ||
+	         EvType == MPI_FILE_READ_ORDERED_END_EV    ||
+	         EvType == MPI_FILE_READ_SHARED_EV         ||
+	         EvType == MPI_FILE_WRITE_EV               ||
+	         EvType == MPI_FILE_WRITE_ALL_EV           ||
+	         EvType == MPI_FILE_WRITE_ALL_BEGIN_EV     ||
+	         EvType == MPI_FILE_WRITE_ALL_END_EV       ||
+	         EvType == MPI_FILE_WRITE_AT_EV            ||
+	         EvType == MPI_FILE_WRITE_AT_ALL_EV        ||
+	         EvType == MPI_FILE_WRITE_AT_ALL_BEGIN_EV  ||
+	         EvType == MPI_FILE_WRITE_AT_ALL_END_EV    ||
+	         EvType == MPI_FILE_WRITE_ORDERED_EV       ||
+	         EvType == MPI_FILE_WRITE_ORDERED_BEGIN_EV ||
+	         EvType == MPI_FILE_WRITE_ORDERED_END_EV   ||
+	         EvType == MPI_FILE_WRITE_SHARED_EV)
 		MPI_SoftCounters_used[IO_INDEX] = TRUE;
 }
 
