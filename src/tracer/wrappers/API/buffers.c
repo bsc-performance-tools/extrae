@@ -52,6 +52,14 @@
 #ifdef HAVE_SYS_UIO_H
 # include <sys/uio.h>
 #endif
+#ifdef HAVE_SYS_MMAN_H
+# include <sys/mman.h>
+# define MAP_HUGE_2MB (21 << MAP_HUGE_SHIFT)
+# define MAP_HUGE_1GB (30 << MAP_HUGE_SHIFT)
+#endif
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
 
 #include "buffers.h"
 #include "utils.h"
@@ -73,6 +81,76 @@ static void DataBlocks_Add (DataBlocks_t *blocks, void *ini_address, void *end_a
 #endif
 static void DataBlocks_Free (DataBlocks_t *blocks);
 
+/* Definitions for huge pages allocation */
+
+// Assuming normal page sizes, this is system specific and may differ. Do a config check?
+#define PAGE_SIZE       (1 << 12) // Normal page, 4KiB
+#define HPAGE_SIZE      (1 << 21) // Huge page, 2MiB
+
+enum {
+	USE_NORMAL_PAGES = 0,
+	USE_TP_HUGE_PAGES,
+	USE_STD_HUGE_PAGES
+};
+
+#define HP_fail(...) do { fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE); } while (0)
+#define HP_warn(...) do { fprintf(stderr, __VA_ARGS__); } while (0)
+
+#if 0
+/**
+ * check_huge_page
+ *
+ * Checks if the page pointed at by `ptr` is huge. Assumes that `ptr` has already
+ * been allocated. Example taken from: <https://mazzo.li/posts/check-huge-page.html>
+ */
+#include <linux/kernel-page-flags.h>
+
+// See <https://www.kernel.org/doc/Documentation/vm/pagemap.txt> for format which these bitmasks refer to
+#define PAGEMAP_PRESENT(ent) (((ent) & (1ull << 63)) != 0)
+#define PAGEMAP_PFN(ent) ((ent) & ((1ull << 55) - 1))
+
+static void check_huge_page(void* ptr) 
+{
+  int pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
+  if (pagemap_fd < 0) {
+    HP_fail("could not open /proc/self/pagemap: %s\n", strerror(errno));
+  }
+  int kpageflags_fd = open("/proc/kpageflags", O_RDONLY);
+  if (kpageflags_fd < 0) {
+    HP_fail("could not open /proc/kpageflags: %s\n", strerror(errno));
+  }
+
+  // each entry is 8 bytes long
+  uint64_t ent;
+  if (pread(pagemap_fd, &ent, sizeof(ent), ((uintptr_t) ptr) / PAGE_SIZE * 8) != sizeof(ent)) {
+    HP_fail("could not read from pagemap\n");
+  }
+
+  if (!PAGEMAP_PRESENT(ent)) {
+    HP_fail("page not present in /proc/self/pagemap, did you allocate it?\n");
+  }
+  if (!PAGEMAP_PFN(ent)) {
+    HP_fail("page frame number not present, run this program as root\n");
+  }
+
+  uint64_t flags;
+  if (pread(kpageflags_fd, &flags, sizeof(flags), PAGEMAP_PFN(ent) << 3) != sizeof(flags)) {
+    HP_fail("could not read from kpageflags\n");
+  }
+
+  if (!(flags & (1ull << KPF_THP))) {
+    HP_fail("could not allocate huge page\n");
+  }
+
+  if (close(pagemap_fd) < 0) {
+    HP_fail("could not close /proc/self/pagemap: %s\n", strerror(errno));
+  }
+  if (close(kpageflags_fd) < 0) {
+    HP_fail("could not close /proc/kpageflags: %s\n", strerror(errno));
+  }
+}
+#endif
+
 Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 {
 	Buffer_t *buffer = NULL;
@@ -84,10 +162,87 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 #endif
 
 	buffer = xmalloc(sizeof(Buffer_t));
+
 	buffer->FillCount = 0;
 	buffer->MaxEvents = n_events;
 
-	buffer->FirstEvt = xmalloc(n_events * sizeof(event_t));
+	// Prioritize using transparent huge pages whenever possible
+	char *env_use_huge_pages = getenv("EXTRAE_BUFFER_USE_HUGE_PAGES");
+
+	int use_huge_pages = USE_TP_HUGE_PAGES;
+	if (env_use_huge_pages != NULL)
+	{
+		if ((strcmp(env_use_huge_pages, "no") == 0) || (strcmp(env_use_huge_pages, "normal") == 0))
+		{
+			use_huge_pages = USE_NORMAL_PAGES;
+		}
+		else if ((strcmp(env_use_huge_pages, "1GB") == 0) || (strcmp(env_use_huge_pages, "2MB") == 0))
+		{
+			use_huge_pages = USE_STD_HUGE_PAGES;
+		}
+	}
+
+	if (use_huge_pages == USE_TP_HUGE_PAGES)
+	{
+#if defined(HAVE_POSIX_MEMALIGN) && defined(HAVE_MADVISE)
+		void *buf = NULL;
+		int errnum = posix_memalign(&buf, HPAGE_SIZE, n_events * sizeof(event_t));
+		buffer->FirstEvt = buf;
+		if (errnum != 0) 
+		{
+			use_huge_pages = USE_NORMAL_PAGES;
+			HP_warn("new_Buffer: Allocation of transparent huge pages failed, will attempt to use normal pages: %s\n", strerror(errnum));
+		}
+		else
+		{
+			// posix_memalign succeeds
+			if (madvise(buf, n_events * sizeof(event_t), MADV_HUGEPAGE) != 0)
+			{
+				errnum = errno;
+				HP_warn("new_Buffer: madvise failed: %s\n", strerror(errnum));
+			}
+			// Allocate and check each page
+			void *current_page = buf;
+			void *end = current_page + (n_events * sizeof(event_t));
+			while (current_page < end)
+			{
+				// Allocate page
+				memset(current_page, 0, 1);
+				// Check the page is indeed huge
+				//check_huge_page(current_page);
+				current_page += HPAGE_SIZE;
+			}
+		}
+#else
+		use_huge_pages = USE_NORMAL_PAGES;
+#endif
+	}
+
+	if (use_huge_pages == USE_STD_HUGE_PAGES)
+	{
+#if defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H)
+		int map_flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_POPULATE;
+
+		if (strcmp(env_use_huge_pages, "1GB") == 0) map_flags |= MAP_HUGE_1GB;
+		else if (strcmp(env_use_huge_pages, "2MB") == 0) map_flags |= MAP_HUGE_2MB;
+
+		void *buf = mmap(NULL, n_events * sizeof(event_t), PROT_READ | PROT_WRITE, map_flags, -1, 0);
+		if (buf == (void *)-1) {
+			int errnum = errno;
+			use_huge_pages = USE_NORMAL_PAGES;
+			HP_warn("new_Buffer: Allocation of standard huge pages failed, will attempt to use normal pages: %s", strerror(errnum));
+		}
+		buffer->FirstEvt = buf;
+#else
+		use_huge_pages = USE_NORMAL_PAGES;
+#endif
+	}
+
+	if (use_huge_pages == USE_NORMAL_PAGES)
+	{
+		buffer->FirstEvt = xmalloc(n_events * sizeof(event_t));
+	}
+
 	buffer->LastEvt = buffer->FirstEvt + n_events;
 	buffer->HeadEvt = buffer->FirstEvt;
 	buffer->CurEvt = buffer->FirstEvt;

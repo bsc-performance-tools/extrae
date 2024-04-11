@@ -187,6 +187,9 @@ AM_CONDITIONAL(HAVE_NANOSLEEP, test "${have_nanosleep}" = "yes")
 # Check if sysconf is available
 AC_CHECK_FUNC(sysconf, [AC_DEFINE([HAVE_SYSCONF],[1],[Define if have sysconf])])
 
+# Check for functions required to use huge pages in tracing buffer allocation
+AC_CHECK_FUNCS(posix_memalign madvise mmap)
+
 ## Check if we have MPI
 AX_PROG_MPI
 
