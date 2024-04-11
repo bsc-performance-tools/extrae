@@ -403,6 +403,28 @@ AC_DEFUN([AX_CHECK_MPI_STATUS_SIZE],
    AX_FLAGS_SAVE()
    CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
 
+   dnl Check if MPI_F_STATUS_SIZE is already defined in mpi.h and usable
+   dnl This define appears in some MPI implementations (e.g. OpenMPI), but fails to compile when used in version 4.1.5
+   AC_LANG_SAVE()
+   AC_LANG([C])
+   AC_MSG_CHECKING([for MPI_F_STATUS_SIZE definition])
+   AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM(
+         [#include <mpi.h>],
+         [
+           int size = MPI_F_STATUS_SIZE;
+         ])
+      ],
+      [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([MPI_HAS_MPI_F_STATUS_SIZE], 1, [Does MPI_F_STATUS_SIZE exist in the given MPI implementation?])
+      ],
+      [
+        AC_MSG_RESULT([no])
+      ]
+   )
+   AC_LANG_RESTORE()
+
    if test "${IS_MIC_MACHINE}" = "yes" ; then
      MPI_STATUS_INTEGER_FIELDS_COUNT=5
    elif test "${IS_SPARC64_MACHINE}" = "yes" ; then

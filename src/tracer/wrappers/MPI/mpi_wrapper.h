@@ -40,7 +40,7 @@
 #include "mpi_stats.h"
 #include "hash_table.h"
 
-#if !defined(MPI_F_STATUS_SIZE)
+#if !defined(MPI_HAS_MPI_F_STATUS_SIZE)
 #warning MPI_F_STATUS_SIZE definition not found in mpi.h. Assuming our configure check for MPI_STATUS_INTEGER_FIELDS_COUNT.
 #define MPI_F_STATUS_SIZE MPI_STATUS_INTEGER_FIELDS_COUNT
 #endif
