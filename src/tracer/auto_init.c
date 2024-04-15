@@ -29,9 +29,7 @@
 #if HAVE_STRING_H
 # include <string.h>
 #endif
-
 #include <misc_interface.h>
-
 #include "auto_fini.h"
 
 static int Extrae_automatically_loaded = FALSE;
@@ -42,9 +40,13 @@ void Gateway_to_Extrae_auto_library_fini (void)
   Extrae_auto_library_fini();
 }
 
+pid_t pid_at_constructor;
+
 __attribute__((constructor))
 void Extrae_auto_library_init (void)
 {
+	pid_at_constructor = getpid();
+
 	int skip_auto_library_init = FALSE;
 	char *skip_envvar = getenv ("EXTRAE_SKIP_AUTO_LIBRARY_INITIALIZE");
 	if (skip_envvar != NULL)

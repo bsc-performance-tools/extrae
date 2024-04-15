@@ -29,12 +29,22 @@
 #if HAVE_STRING_H
 # include <string.h>
 #endif
-
 #include <misc_wrapper.h>
+#include "auto_fini.h"
 
 __attribute__((destructor))
 void Extrae_auto_library_fini (void)
 {
-	Extrae_fini_Wrapper ();
+	/*
+	 * In MN5 we observed that PMPI_Init calls fork and create processes that end before returning from the PMPI. 
+	 * The forked processes also enter our destructor and try to finalize trace files that don't exist and crash. 
+	 * The following check prevents the forked processes to enter the destructor.
+	 * BEWARE! If we add instrumentation for fork + exec, this will be problematic. We will probably need to track
+	 * the pid of the user's forks (disregarding MPI internals), and allow those to go through the destructor.
+	 */
+	if (pid_at_constructor == getpid())
+	{
+		Extrae_fini_Wrapper ();
+	}
 }
 

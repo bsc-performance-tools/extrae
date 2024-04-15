@@ -24,6 +24,12 @@
 #ifndef AUTO_LIBRARY_FINI_H_INCLUDED
 #define AUTO_LIBRARY_FINI_H_INCLUDED
 
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+extern pid_t pid_at_constructor; 
+
 void Extrae_auto_library_fini (void);
 
 #endif /* AUTO_LIBRARY_FINI_H_INCLUDED */
