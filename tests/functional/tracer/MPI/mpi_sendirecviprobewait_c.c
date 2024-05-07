@@ -22,6 +22,8 @@
 \*****************************************************************************/
 
 #include <mpi.h>
+#include <unistd.h>
+
 int main(int argc, char *argv[])
 {
 	int v, rank, size;

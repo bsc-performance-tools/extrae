@@ -90,6 +90,10 @@ void PMPI_Reduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
 void PMPI_Scan_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror);
 
+void PMPI_Exscan_Wrapper(void *sendbuf, void *recvbuf, MPI_Fint *count,
+                         MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+                         MPI_Fint *ierror);
+
 void PMPI_Reduce_Scatter_Block_Wrapper (void *sendbuf, void *recvbuf,
         MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror);
@@ -149,7 +153,13 @@ void PMPI_Ireduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
 	MPI_Fint *req, MPI_Fint *ierror);
 
 void PMPI_Iscan_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
-	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);
+	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req,
+	MPI_Fint *ierror);
+
+void PMPI_Iexscan_Wrapper(void *sendbuf, void *recvbuf, MPI_Fint *count,
+                           MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+                           MPI_Fint *req, MPI_Fint *ierror);
+
 
 void PMPI_Ireduce_Scatter_Block_Wrapper (void *sendbuf, void *recvbuf,
         MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);

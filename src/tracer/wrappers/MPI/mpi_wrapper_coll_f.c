@@ -947,6 +947,55 @@ void PMPI_Scan_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
         updateStats_COLLECTIVE(global_mpi_stats, *count * size, 0);
 }
 
+/******************************************************************************
+ ***  PMPI_Exscan_Wrapper
+ ******************************************************************************/
+
+void PMPI_Exscan_Wrapper(void *sendbuf, void *recvbuf, MPI_Fint *count,
+                         MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+                         MPI_Fint *ierror)
+{
+	int me, size, csize;
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
+
+	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
+	MPI_CHECK(*ierror, pmpi_comm_rank);
+
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, ierror);
+		MPI_CHECK(*ierror, pmpi_type_size);
+	}
+	else
+		size = 0;
+
+	CtoF77 (pmpi_comm_size) (comm, &csize, ierror);
+	MPI_CHECK(*ierror, pmpi_comm_size);
+
+	/*
+	*   type : EXSCAN_EV                    value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : data size
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_EXSCAN_EV, EVT_BEGIN, *op, *count * size, me, c, EMPTY);
+
+	CtoF77 (pmpi_exscan) (sendbuf, recvbuf, count, datatype, op, comm, ierror);
+
+	/*
+	*   event : EXSCAN_EV                    value : EVT_END
+	*   target : ---                         size  : size of the communicator
+	*   tag : ---                            comm  : communicator id
+	*   aux : global op counter
+	*/
+	TRACE_MPIEVENT(TIME, MPI_EXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, c, Extrae_MPI_getCurrentOpGlobal());
+
+	/* MPI Stats */
+	if (me != csize - 1)
+        updateStats_COLLECTIVE(global_mpi_stats, 0, *count * size);
+	if (me != 0)
+        updateStats_COLLECTIVE(global_mpi_stats, *count * size, 0);
+}
 
 #if defined(MPI3)
 
@@ -1806,6 +1855,56 @@ void PMPI_Iscan_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	*   aux : global op counter
 	*/
 	TRACE_MPIEVENT (TIME, MPI_ISCAN_EV, EVT_END, EMPTY, csize, EMPTY, c, Extrae_MPI_getCurrentOpGlobal());
+
+	/* MPI Stats */
+	if (me != csize - 1)
+        updateStats_COLLECTIVE(global_mpi_stats, 0, *count * size);
+	if (me != 0)
+        updateStats_COLLECTIVE(global_mpi_stats, *count * size, 0);
+}
+
+/******************************************************************************
+ ***  PMPI_Iscan_Wrapper
+ ******************************************************************************/
+
+void PMPI_Iexscan_Wrapper(void *sendbuf, void *recvbuf, MPI_Fint *count,
+                          MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+                          MPI_Fint *req, MPI_Fint *ierror)
+{
+	int me, size, csize;
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
+
+	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
+	MPI_CHECK(*ierror, pmpi_comm_rank);
+
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, ierror);
+		MPI_CHECK(*ierror, pmpi_type_size);
+	}
+	else
+		size = 0;
+
+	CtoF77 (pmpi_comm_size) (comm, &csize, ierror);
+	MPI_CHECK(*ierror, pmpi_comm_size);
+
+	/*
+	*   type : IEXSCAN_EV                   value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : data size
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IEXSCAN_EV, EVT_BEGIN, *op, *count * size, me, c, EMPTY);
+
+	CtoF77 (pmpi_iexscan) (sendbuf, recvbuf, count, datatype, op, comm, req, ierror);
+
+	/*
+	*   event : IEXSCAN_EV                   value : EVT_END
+	*   target : ---                         size  : size of the communicator
+	*   tag : ---                            comm  : communicator id
+	*   aux : global op counter
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IEXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, c, Extrae_MPI_getCurrentOpGlobal());
 
 	/* MPI Stats */
 	if (me != csize - 1)
