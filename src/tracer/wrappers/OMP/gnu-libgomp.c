@@ -487,7 +487,7 @@ static void callme_taskloop(void *data_trailer)
 
 	// Search for the magic number 0xdeadbeef to locate the helper
 	int i = sizeof(void *), arg_size = 0;
-	while (*(void **)(data_trailer + i) != 0xdeadbeef)
+	while (*(void **)(data_trailer + i) != (void *)0xdeadbeef)
 	{
 		i ++;
 	}
@@ -2425,7 +2425,7 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 		struct taskloop_helper_t taskloop_helper;
 		long helper_size = sizeof(struct taskloop_helper_t);
 
-		taskloop_helper.magicno = 0xdeadbeef; // Magic number to locate the helper in callme_taskloop
+		taskloop_helper.magicno = (void *)0xdeadbeef; // Magic number to locate the helper in callme_taskloop
 		taskloop_helper.fn = fn;
 
 		// Assign a unique id to this taskloop to track when it is scheduled and when executed 
@@ -2470,7 +2470,7 @@ void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long a
 		struct taskloop_helper_t taskloop_helper;
 		long helper_size = sizeof(struct taskloop_helper_t);
 
-		taskloop_helper.magicno = 0xdeadbeef; // Magic number to locate the helper in callme_taskloop
+		taskloop_helper.magicno = (void *)0xdeadbeef; // Magic number to locate the helper in callme_taskloop
 		taskloop_helper.fn = fn;
 
 		// Assign a unique id to this taskloop to track when it is scheduled and when executed 

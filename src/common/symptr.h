@@ -37,6 +37,7 @@
      fprintf (stderr, PACKAGE_NAME": Warning! %s instrumenation "   \
                       "requieres linking with shared library!\n",   \
                       func );                                       \
+     NULL;                                                          \
   })
 #endif /* PIC */
 

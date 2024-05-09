@@ -78,6 +78,9 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf, int *recvcounts,
 
 int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
   MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
+
+int MPI_Exscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
+  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
   
 int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf, int recvcount,
   MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
@@ -130,7 +133,10 @@ int MPI_Ireduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf, int *recvcounts
 
 int MPI_Iscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
   MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req);
-  
+
+int MPI_Iexscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
+  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req);
+
 int MPI_Ireduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf, int recvcount, 
   MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req);
 
