@@ -462,6 +462,30 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		}
 		break;
 
+		/* 135 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaEventRecord_v3020:
+		{
+			// if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			// 	Extrae_cudaEventRecord_Enter();
+			// else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			// 	Extrae_cudaEventRecord_Exit();
+
+			ret = 0;
+		}
+		break;
+
+		// /* 137 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaEventSynchronize_v3020:
+		{
+			// if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			// 	Extrae_cudaEventSynchronize_Enter();
+			// else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			// 	Extrae_cudaEventSynchronize_Exit();
+
+			ret = 0;
+		}
+		break;
+
 		/* 164 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020:
 		{
@@ -640,60 +664,61 @@ static void
 CUPTIAPI Extrae_CUPTI_callback(void *udata, CUpti_CallbackDomain domain,
     CUpti_CallbackId cbid, const CUpti_CallbackData *cbinfo)
 {
+	UNREFERENCED_PARAMETER(udata);
+	UNREFERENCED_PARAMETER(domain);
+	int ret = 0;
+
 	if (!mpitrace_on || !Extrae_get_trace_CUDA() || cbinfo == NULL)
 		return;
 
 	/*
 	 * Filter out all nested callbacks
 	 */
-	Extrae_CUDA_updateDepth(cbinfo);
+	if((cbinfo->callbackSite == CUPTI_API_ENTER))
+		Extrae_CUDA_updateDepth(cbinfo);
 
-	if (((cbinfo->callbackSite == CUPTI_API_ENTER) && (Extrae_CUDA_getDepth() > 1)) ||
-	    ((cbinfo->callbackSite == CUPTI_API_EXIT)  && (Extrae_CUDA_getDepth() > 0)))
+	if ( (Extrae_CUDA_getDepth() <= 1) )
 	{
-		return;
-	}
-
-	UNREFERENCED_PARAMETER(udata);
-	UNREFERENCED_PARAMETER(domain);
-
-	int ret = 0;
-	switch (domain)
-	{
-		case CUPTI_CB_DOMAIN_DRIVER_API:
-			ret = Extrae_DriverAPI_callback(cbid, cbinfo);
-			break;
-		case CUPTI_CB_DOMAIN_RUNTIME_API:
-			ret = Extrae_RuntimeAPI_callback(cbid, cbinfo);
-			break;
-		default:
-			ret = -1;
-#if LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS
-			fprintf(stderr, "CUDA call (domain = %d cbid = %d\n", domain, cbid);
-#endif
-	}
-
-	if (ret == 0)
-	{
-		if (cbinfo->callbackSite == CUPTI_API_ENTER)
+		switch (domain)
 		{
-#if LOG_UNTRACKED_CALLBACKS
-			const char *callbackName = "Untracked";
-			if (cuptiGetCallbackName_real != NULL)
+			case CUPTI_CB_DOMAIN_DRIVER_API:
+				ret = Extrae_DriverAPI_callback(cbid, cbinfo);
+				break;
+			case CUPTI_CB_DOMAIN_RUNTIME_API:
+				ret = Extrae_RuntimeAPI_callback(cbid, cbinfo);
+				break;
+			default:
+				ret = -1;
+	#if LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS
+				fprintf(stderr, "CUDA call (domain = %d cbid = %d\n", domain, cbid);
+	#endif
+		}
+
+		if (ret == 0)
+		{
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				cuptiGetCallbackName_real
-				  (domain, cbid, &callbackName);
-			}
-			fprintf(stderr, "%s CUDA call (domain = %d cbid = %d)\n", callbackName, domain, cbid);
-#endif
+	#if LOG_UNTRACKED_CALLBACKS
+				const char *callbackName = "Untracked";
+				if (cuptiGetCallbackName_real != NULL)
+				{
+					cuptiGetCallbackName_real
+						(domain, cbid, &callbackName);
+				}
+				fprintf(stderr, "%s CUDA call (domain = %d cbid = %d)\n", callbackName, domain, cbid);
+	#endif
 
-			TRACE_EVENT(LAST_READ_TIME, CUDA_UNTRACKED_EV, cbid);
-		}
-		else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-		{
-			TRACE_EVENT(TIME, CUDA_UNTRACKED_EV, EVT_END);
+				TRACE_EVENT(LAST_READ_TIME, CUDA_UNTRACKED_EV, cbid);
+			}
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				TRACE_EVENT(TIME, CUDA_UNTRACKED_EV, EVT_END);
+			}
 		}
 	}
+
+	if((cbinfo->callbackSite == CUPTI_API_EXIT))
+		Extrae_CUDA_updateDepth(cbinfo);
 }
 
 void Extrae_CUDA_init (int rank)
@@ -742,8 +767,6 @@ cuptiGetCallbackName_real = (CUptiResult(*)(CUpti_CallbackDomain, uint32_t, cons
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGLSetBufferObjectMapFlags_v3020); /* 68 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaWGLGetDevice_v3020); /* 71 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventCreateWithFlags_v3020); /* 134 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventRecord_v3020); /* 135 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventSynchronize_v3020); /* 137 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventElapsedTime_v3020); /* 139 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostRegister_v4000); /* 152 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSetCacheConfig_v3020); /* 169 */
