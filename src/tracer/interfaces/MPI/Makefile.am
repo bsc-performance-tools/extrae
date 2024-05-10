@@ -19,7 +19,7 @@ iface_MPI_INCLUDES =     \
    -I$(WRAPPERS_INC)/MPI \
    -I$(INTERFACES_INC)/API \
    -I$(top_srcdir)/include \
-   -I@MPI_INCLUDES@ @PAPI_CFLAGS@
+   @MPI_CFLAGS@ @PAPI_CFLAGS@
 
 noinst_LTLIBRARIES    = libiface_mpif.la libiface_mpi.la
 if SINGLE_MPI_LIBRARY

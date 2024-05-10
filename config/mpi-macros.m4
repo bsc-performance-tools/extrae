@@ -41,10 +41,12 @@ AC_DEFUN([AX_PROG_MPI],
    if test "${MPI_INSTALLED}" = "yes" ; then
 
       if test -d "${MPI_INCLUDES}/mpi" ; then
-         MPI_INCLUDES="${MPI_INCLUDES}/mpi"
-         MPI_CFLAGS="-I${MPI_INCLUDES}"
+         MPI_CFLAGS="${MPI_CFLAGS} -I${MPI_INCLUDES}/mpi"
+         MPI_CPPFLAGS="${MPI_CPPFLAGS} -I${MPI_INCLUDES}/mpi"
+         MPI_CXXFLAGS="${MPI_CXXFLAGS} -I${MPI_INCLUDES}/mpi"
          CFLAGS="${MPI_CFLAGS} ${CFLAGS}"
          CPPFLAGS="${MPI_CPPFLAGS} ${CPPFLAGS}"
+	 CXXFLAGS="${MPI_CXXFLAGS} ${CXXFLAGS}"
       fi
 
       dnl This check is for POE over linux -- libraries are installed in /opt/ibmhpc/ppe.poe/lib/libmpi{64}/libmpi_ibm.so
