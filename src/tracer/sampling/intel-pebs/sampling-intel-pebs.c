@@ -25,6 +25,13 @@
    For further reference see https://github.com/deater/perf_event_tests
    particularly sample_weight.c and sample_data_src.c */
 
+/* Counter codes for different processors available at:
+ * https://perfmon-events.intel.com/
+ *
+ * Example Skylake-X MEM_TRANS_RETIRED.LOAD_LATENCY (latency load event):
+ * - EventSel=CDH UMask=01H --> config=0x01cd
+ */
+
 #define _GNU_SOURCE 1
 
 #include "common.h"
@@ -128,13 +135,37 @@ static int processor_vendor=-2;
 #define PROCESSOR_ATOM_SILVERMONT	27
 #define PROCESSOR_BROADWELL		28
 #define PROCESSOR_HASWELL_EP		29
-#define PROCESSOR_KNIGHTS_LANDING       30
-#define PROCESSOR_SKYLAKE		31 // also CASCADELAKE
+#define PROCESSOR_SKYLAKE		30 // also CASCADELAKE
+#define PROCESSOR_KABYLAKE		32
+#define PROCESSOR_SKYLAKE_X		35
+#define PROCESSOR_SNOWRIDGE_X		36
+#define PROCESSOR_TIGERLAKE		37
+#define PROCESSOR_ALDERLAKE		38
+#define PROCESSOR_ALDERLAKEN		39
+#define PROCESSOR_ELKHARTLAKE		40
+#define PROCESSOR_EMERALDRAPIDS		41
+#define PROCESSOR_GOLDMONT		42
+#define PROCESSOR_GOLDMONTPLUS		43
+#define PROCESSOR_ICELAKE		44
+#define PROCESSOR_ICELAKE_X		45
+#define PROCESSOR_GRANDRIDGE		46
+#define PROCESSOR_LUNARLAKE		47
+#define PROCESSOR_METEORLAKE		48
+#define PROCESSOR_GRANITERAPIDS		49
+#define PROCESSOR_KNIGHTSLANDING	50
+#define PROCESSOR_ROCKETLAKE		51
+#define PROCESSOR_SAPPHIRERAPIDS	52
+#define PROCESSOR_SIERRAFOREST		53
+#define PROCESSOR_CASCADELAKE_X		54
+#define PROCESSOR_COMETLAKE		55
+#define PROCESSOR_CANNONLAKE		56
+#define PROCESSOR_LAKEFIELD		57
+#define PROCESSOR_RAPTORLAKE		58
 
 
 static int detect_processor_cpuinfo(void)
 {
-	int cpu_family=0,model=0;
+	int cpu_family=0,model=0,stepping=0;
 	char string[BUFSIZ];
 
 	FILE * procinfo_file = fopen("/proc/cpuinfo","r");
@@ -161,6 +192,10 @@ static int detect_processor_cpuinfo(void)
 		/* model */
 		if ((strstr(string,"model")) && (!strstr(string,"model name")))
 			sscanf(string,"%*s %*s %d",&model);
+
+		/* stepping */
+		if (strstr(string,"stepping"))
+			sscanf(string,"%*s %*s %d",&stepping);
 	}
 
 	fclose (procinfo_file);
@@ -208,8 +243,31 @@ static int detect_processor_cpuinfo(void)
 					processor_type=PROCESSOR_ATOM_CEDARVIEW;
 					break;
 				case 55:
+			        case 74:
 				case 77:
+			        case 93:
+			        case 76:
+			        case 90:
+			        case 117:
 					processor_type=PROCESSOR_ATOM_SILVERMONT;
+					break;
+			        case 92:
+			        case 95:
+				        processor_type=PROCESSOR_GOLDMONT;
+				        break;
+			        case 122:
+				        processor_type=PROCESSOR_GOLDMONTPLUS;
+				        break;
+			        case 150:
+			        case 156:
+				        processor_type=PROCESSOR_ELKHARTLAKE;
+				        break;
+			        case 134:
+				        processor_type=PROCESSOR_SNOWRIDGE_X;
+				        break;
+				case 87:
+			        case 133:
+					processor_type=PROCESSOR_KNIGHTSLANDING;
 					break;
 				case 26:
 				case 30:
@@ -249,13 +307,86 @@ static int detect_processor_cpuinfo(void)
 				case 61:
 				case 71:
 				case 79:
+			        case 86:
 					processor_type=PROCESSOR_BROADWELL;
 					break;
+			        case 78:
+			        case 94:
+				        processor_type=PROCESSOR_SKYLAKE;
+				        break;
 				case 85:
-					processor_type=PROCESSOR_SKYLAKE;
+					if (stepping<5)
+					{
+					    processor_type=PROCESSOR_SKYLAKE_X;
+					} else
+					{
+					    processor_type=PROCESSOR_CASCADELAKE_X;
+					}
+				        break;
+			        case 140:
+			        case 141:
+				        processor_type=PROCESSOR_TIGERLAKE;
+				        break;
+				case 142:
+				case 158:
+					processor_type=PROCESSOR_KABYLAKE;
 					break;
-				case 87:
-					processor_type=PROCESSOR_KNIGHTS_LANDING;
+				case 165:
+				case 166:
+					processor_type=PROCESSOR_COMETLAKE;
+					break;
+				case 102:
+					processor_type=PROCESSOR_CANNONLAKE;
+					break;
+				case 125:
+				case 126:
+				case 157:
+					processor_type=PROCESSOR_ICELAKE;
+					break;
+				case 106:
+				case 108:
+					processor_type=PROCESSOR_ICELAKE_X;
+					break;
+				case 138:
+					processor_type=PROCESSOR_LAKEFIELD;
+					break;
+				case 143:
+					processor_type=PROCESSOR_SAPPHIRERAPIDS;
+					break;
+				case 151:
+				case 154:
+				case 191:
+					processor_type=PROCESSOR_ALDERLAKE;
+					break;
+				case 190:
+					processor_type=PROCESSOR_ALDERLAKEN;
+					break;
+				case 183:
+				case 186:
+					processor_type=PROCESSOR_RAPTORLAKE;
+					break;
+				case 167:
+					processor_type=PROCESSOR_ROCKETLAKE;
+					break;
+				case 207:
+					processor_type=PROCESSOR_EMERALDRAPIDS;
+					break;
+				case 182:
+					processor_type=PROCESSOR_GRANDRIDGE;
+					break;
+				case 189:
+					processor_type=PROCESSOR_LUNARLAKE;
+					break;
+				case 170:
+				case 172:
+					processor_type=PROCESSOR_METEORLAKE;
+					break;
+				case 173:
+				case 174:
+					processor_type=PROCESSOR_GRANITERAPIDS;
+					break;
+				case 175:
+					processor_type=PROCESSOR_SIERRAFOREST;
 					break;
 				default:
 					processor_type=PROCESSOR_UNKNOWN;
@@ -304,9 +435,12 @@ static int get_latency_load_event(unsigned long long *config)
 		case PROCESSOR_HASWELL_EP:
 		case PROCESSOR_BROADWELL:
 		case PROCESSOR_SKYLAKE:
+		case PROCESSOR_SKYLAKE_X:
+		case PROCESSOR_CASCADELAKE_X:
+		case PROCESSOR_SAPPHIRERAPIDS:
 			*config=0x1cd; // MEM_TRANS_RETIRED.LOAD_LATENCY
 			break;
-		case PROCESSOR_KNIGHTS_LANDING:
+		case PROCESSOR_KNIGHTSLANDING:
 			*config=0x0404; /* Use 0x0204 for "MEM_UOPS_RETIRED:L2_HIT_LOADS; 0x0404 for "MEM_UOPS_RETIRED:L2_MISS_LOADS */
 			break;
 		default:
@@ -335,9 +469,12 @@ static int get_store_event (unsigned long long *config)
 			*config=0x82d0; // MEM_UOPS_RETIRED.ALL_STORES
 			break;
 		case PROCESSOR_SKYLAKE:
+		case PROCESSOR_SKYLAKE_X:
+		case PROCESSOR_CASCADELAKE_X:
+		case PROCESSOR_SAPPHIRERAPIDS:
 			*config=0x82d0; // MEM_INST_RETIRED.ALL_STORES
 			break;
-	        case PROCESSOR_KNIGHTS_LANDING:
+	        case PROCESSOR_KNIGHTSLANDING:
 		default:
 			*config=0x0;
 			processor_notfound=-1;
@@ -353,6 +490,9 @@ static int get_load_l3m_event (unsigned long long *config)
 	switch (detect_processor())
 	{
 		case PROCESSOR_SKYLAKE:
+		case PROCESSOR_SKYLAKE_X:
+		case PROCESSOR_CASCADELAKE_X:
+		case PROCESSOR_SAPPHIRERAPIDS:
 			*config= 0x20d1; // MEM_LOAD_RETIRED.L3_MISS
 			break;
 		default:
@@ -370,6 +510,8 @@ static int get_offcore_store_l3m_event(unsigned long long *config)
 	switch (detect_processor())
 	{
 		case PROCESSOR_SKYLAKE:
+		case PROCESSOR_SKYLAKE_X:
+		case PROCESSOR_CASCADELAKE_X:
 			*config = 0x3fbc000002; // OFFCORE_RESPONSE.DEMAND_RFO.L3_MISS.ANY_SNOOP
 			break;
 		default:
