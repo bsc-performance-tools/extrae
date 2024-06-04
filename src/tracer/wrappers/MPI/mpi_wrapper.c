@@ -3337,18 +3337,18 @@ static MPI_Status * substituteStatusIgnore_C(int count, MPI_Status *user_statuse
 {
         int i = 0;
 
-		// Check if the user is using MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE to use an array of our own
+	// Check if the user is using MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE to use an array of our own
         MPI_Status *proxy_statuses = ((user_statuses == ((count > 1) ? MPI_STATUSES_IGNORE : MPI_STATUS_IGNORE)) ? local_statuses : user_statuses);
 
-		// Check if we need to allocate memory for the status array
-		if (((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) && (proxy_statuses != user_statuses)) || (proxy_statuses == NULL))
-		{
-			proxy_statuses = (MPI_Status *) xmalloc (count * sizeof(MPI_Status));
-		}
+	// Check if we need to allocate memory for the status array
+	if (((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) && (proxy_statuses != user_statuses)) || (proxy_statuses == NULL))
+	{
+		proxy_statuses = (MPI_Status *) xmalloc (count * sizeof(MPI_Status));
+	}
 
-		/* 
-		 * Initialize the MPI_SOURCE field in the status array to MPI_UNDEFINED to later detect if the request corresponds to an Isend/Irecv
-		 */
+	/*
+	 * Initialize the MPI_SOURCE field in the status array to MPI_UNDEFINED to later detect if the request corresponds to an Isend/Irecv
+	 */
         for (i = 0; i < count; i ++)
         {
             proxy_statuses[i].MPI_SOURCE = MPI_UNDEFINED;
@@ -3401,9 +3401,9 @@ static MPI_Fint * substituteStatusIgnore_F(int count, MPI_Fint *user_statuses, M
  * @param local_requests Local array of MPI_Request handles of size MAX_MPI_HANDLES.
  * @param[out] proxy_requests Pointer to the copy of the user_requests array.
  * @param count_statuses Number of MPI_Status handles to be processed.
- * @param user_statuses Array of original MPI_Status handles received from the user (may be MPI_STATUSES_IGNORE)
+ * @param user_statuses Array of original MPI_Status handles received from the user (may be MPI_STATUS[ES]_IGNORE)
  * @param local_statuses Local array of MPI_Status handles of size MAX_MPI_HANDLES.
- * @param[out] proxy_statuses Pointer to the new status handles if users's are MPI_STATUSES_IGNORE, or to the original handles otherwise.
+ * @param[out] proxy_statuses Pointer to the new status handles if users's are MPI_STATUS[ES]_IGNORE, or to the original handles otherwise.
  */
 void makeProxies_C (int count_requests, MPI_Request *user_requests, MPI_Request *local_requests, MPI_Request **proxy_requests, int count_statuses, MPI_Status *user_statuses, MPI_Status *local_statuses, MPI_Status **proxy_statuses)
 {
@@ -3412,7 +3412,15 @@ void makeProxies_C (int count_requests, MPI_Request *user_requests, MPI_Request 
 		*proxy_requests = copyRequests_C(count_requests, user_requests, local_requests);
 	}
 
-	if ((count_statuses > 0) && (user_statuses != NULL) && (proxy_statuses != NULL))
+	/*
+	 * Don't check (user_statuses != NULL) because depending on the MPI implementation, MPI_STATUS[ES]_IGNORE may be NULL.
+	 * In this case, passing NULL to user_statuses is valid.
+	 *
+	 * Alternatively, we could extend this check to provide automatic MPI correctness fix.
+	 *                      |
+	 *                      v
+	 */
+	if ((count_statuses > 0) /* && (user_statuses != NULL) */ && (proxy_statuses != NULL))
 	{
 		*proxy_statuses = substituteStatusIgnore_C(count_statuses, user_statuses, local_statuses);
 	}
@@ -3428,7 +3436,12 @@ void makeProxies_F (int count_requests, MPI_Fint *user_requests, MPI_Request *lo
 		*proxy_requests = copyRequests_F(count_requests, user_requests, local_requests);
 	}
 
-	if ((count_statuses > 0) && (user_statuses != NULL) && (proxy_statuses != NULL))
+	/*
+	 * See comment in makeProxies_C
+	 *                       |
+	 *                       v
+	 */
+	if ((count_statuses > 0) /* && (user_statuses != NULL) */ && (proxy_statuses != NULL))
 	{
 		*proxy_statuses = substituteStatusIgnore_F(count_statuses, user_statuses, local_statuses);
 	}
