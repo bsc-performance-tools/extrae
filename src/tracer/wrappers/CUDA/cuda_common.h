@@ -131,6 +131,8 @@ extern unsigned cuda_events_block_size;
 #define XTR_CUDA_SET_EVENTS_BLOCK_SIZE(value) { cuda_events_block_size = value;}
 #define XTR_CUDA_EVENTS_BLOCK_SIZE cuda_events_block_size
 
+#define XTR_FLUSH_ALL_DEVICES -1
+#define XTR_FLUSH_ALL_STREAMS -1
 
 #define CUDA_SUCCESS 0
 
@@ -186,7 +188,7 @@ struct CUDAdevices_t
 void Extrae_CUDA_updateDepth_(int);
 int  Extrae_CUDA_getDepth();
 
-void Extrae_CUDA_flush_all_streams(int synchronize);
+void Extrae_CUDA_flush_streams (int device_id, int stream_id, int synchronize);
 void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);
 void Extrae_cudaConfigureCall_Exit (void);
 void Extrae_cudaLaunch_Enter (const char*, cudaStream_t);

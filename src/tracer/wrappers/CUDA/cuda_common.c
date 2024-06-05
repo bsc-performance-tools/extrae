@@ -39,6 +39,7 @@
 #include "trace_macros.h"
 #include "cuda_probe.h"
 #include "xalloc.h"
+#include "extrae_user_events.h"
 
 #if defined(__APPLE__)
 # define HOST_NAME_MAX 512
@@ -378,98 +379,96 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 
 }
 
-static void Extrae_CUDA_FlushStream (int devid, int streamid)
+static void flushGPUEvents (int devid, int streamid)
 {
 	int threadid = devices[devid].Stream[streamid].threadid;
 	int err;
 	unsigned i;
 	UINT64 last_time = 0;
-
-	/* Check whether we will fill the buffer soon (or now) */
-	if (Buffer_RemainingEvents(TracingBuffer[threadid]) <= 2*devices[devid].Stream[streamid].nevents)
-		Buffer_ExecuteFlushCallback (TracingBuffer[threadid]);
-
 	if(devices[devid].Stream[streamid].nevents > 0)
+	{
 		err = cudaEventSynchronize (devices[devid].Stream[streamid].event_info[devices[devid].Stream[streamid].nevents-1].ts_event);
 
-	/* Flush events into thread buffer */
-	for (i = 0; i < devices[devid].Stream[streamid].nevents; i++)
-	{
-		UINT64 utmp;
-		float ftmp;
-
-		/* Translate time from GPU to CPU using .device_reference_time and .host_reference_time
-		   from the RegisteredStreams_t structure */
-		CHECK_CU_ERROR(err, cudaEventSynchronize);
-
-		if (devices[devid].Stream[streamid].event_info[i].timetype == EXTRAE_CUDA_NEW_TIME)
+		/* Flush events into thread buffer */
+		for (i = 0; i < devices[devid].Stream[streamid].nevents; i++)
 		{
-			/* Computes the elapsed time between two events (in ms with a
-			 * resolution of around 0.5 microseconds) -- according to
-			 * https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
-			 */
-			err = cudaEventElapsedTime (&ftmp,
-			  devices[devid].Stream[streamid].device_reference_time,
-			  devices[devid].Stream[streamid].event_info[i].ts_event);
-			CHECK_CU_ERROR(err, cudaEventElapsedTime);
-			ftmp *= 1000000;
-			/* Time correction between CPU & GPU */
-			utmp = devices[devid].Stream[streamid].host_reference_time + (UINT64) (ftmp);
-		}
-		else
-			utmp = last_time;
+			UINT64 utmp;
+			float ftmp;
 
-		/* Emit events into the tracing buffer. */
-		THREAD_TRACE_MISCEVENT (threadid, utmp,
-		  CUDACALLGPU_EV,
-		    devices[devid].Stream[streamid].event_info[i].event,
-		    devices[devid].Stream[streamid].event_info[i].value);
+			/* Translate time from GPU to CPU using .device_reference_time and .host_reference_time
+				from the RegisteredStreams_t structure */
+			CHECK_CU_ERROR(err, cudaEventSynchronize);
 
-		if (devices[devid].Stream[streamid].event_info[i].event == CUDAKERNEL_GPU_VAL)
-		{
-			THREAD_TRACE_MISCEVENT(threadid, utmp, CUDAFUNC_EV, devices[devid].Stream[streamid].event_info[i].value, 0);
-		}
-
-		/* Emit communication records for memory transfer, kernel setup and
-		 * kernel execution
-		 */
-		if (devices[devid].Stream[streamid].event_info[i].event == CUDAMEMCPY_GPU_VAL ||
-		    devices[devid].Stream[streamid].event_info[i].event == CUDAMEMCPYASYNC_GPU_VAL)
-		{
-			if (devices[devid].Stream[streamid].event_info[i].value != EVT_END)
+			if (devices[devid].Stream[streamid].event_info[i].timetype == EXTRAE_CUDA_NEW_TIME)
 			{
-				THREAD_TRACE_MISCEVENT(threadid, utmp, CUDA_DYNAMIC_MEM_SIZE_EV,
-				  devices[devid].Stream[streamid].event_info[i].size, 0);
+				/* Computes the elapsed time between two events (in ms with a
+				* resolution of around 0.5 microseconds) -- according to
+				* https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
+				*/
+				err = cudaEventElapsedTime (&ftmp,
+					devices[devid].Stream[streamid].device_reference_time,
+					devices[devid].Stream[streamid].event_info[i].ts_event);
+				CHECK_CU_ERROR(err, cudaEventElapsedTime);
+				ftmp *= 1000000;
+				/* Time correction between CPU & GPU */
+				utmp = devices[devid].Stream[streamid].host_reference_time + (UINT64) (ftmp);
+			}
+			else
+				utmp = last_time;
+
+			/* Emit events into the tracing buffer. */
+			THREAD_TRACE_MISCEVENT (threadid, utmp,
+				CUDACALLGPU_EV,
+					devices[devid].Stream[streamid].event_info[i].event,
+					devices[devid].Stream[streamid].event_info[i].value);
+
+			if (devices[devid].Stream[streamid].event_info[i].event == CUDAKERNEL_GPU_VAL)
+			{
+				THREAD_TRACE_MISCEVENT(threadid, utmp, CUDAFUNC_EV, devices[devid].Stream[streamid].event_info[i].value, 0);
 			}
 
-			if (devices[devid].Stream[streamid].event_info[i].tag > 0)
+			/* Emit communication records for memory transfer, kernel setup and
+			* kernel execution
+			*/
+			if (devices[devid].Stream[streamid].event_info[i].event == CUDAMEMCPY_GPU_VAL ||
+					devices[devid].Stream[streamid].event_info[i].event == CUDAMEMCPYASYNC_GPU_VAL)
 			{
-				THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,
-				 (devices[devid].Stream[streamid].event_info[i].value==EVT_END)?USER_RECV_EV:USER_SEND_EV,
-				 TASKID,
-				 devices[devid].Stream[streamid].event_info[i].size,
-				 devices[devid].Stream[streamid].event_info[i].tag,
-				 devices[devid].Stream[streamid].event_info[i].tag);
-			}
-		}
-		else if (devices[devid].Stream[streamid].event_info[i].event == CUDAKERNEL_GPU_VAL &&
-		         devices[devid].Stream[streamid].event_info[i].value != EVT_END)
-		{
-			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,USER_RECV_EV,TASKID,0,
-			 devices[devid].Stream[streamid].event_info[i].tag,
-			 devices[devid].Stream[streamid].event_info[i].tag);
-		}
-		else if (devices[devid].Stream[streamid].event_info[i].event == CUDACONFIGKERNEL_GPU_VAL &&
-		         devices[devid].Stream[streamid].event_info[i].value != EVT_END)
-		{
-			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp, USER_RECV_EV, TASKID, 0,
-			 devices[devid].Stream[streamid].event_info[i].tag,
-			 devices[devid].Stream[streamid].event_info[i].tag);
-		}
+				if (devices[devid].Stream[streamid].event_info[i].value != EVT_END)
+				{
+					THREAD_TRACE_MISCEVENT(threadid, utmp, CUDA_DYNAMIC_MEM_SIZE_EV,
+						devices[devid].Stream[streamid].event_info[i].size, 0);
+				}
 
-		last_time = utmp;
+				if (devices[devid].Stream[streamid].event_info[i].tag > 0)
+				{
+					THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,
+					(devices[devid].Stream[streamid].event_info[i].value==EVT_END)?USER_RECV_EV:USER_SEND_EV,
+					TASKID,
+					devices[devid].Stream[streamid].event_info[i].size,
+					devices[devid].Stream[streamid].event_info[i].tag,
+					devices[devid].Stream[streamid].event_info[i].tag);
+				}
+			}
+			else if (devices[devid].Stream[streamid].event_info[i].event == CUDAKERNEL_GPU_VAL &&
+							devices[devid].Stream[streamid].event_info[i].value != EVT_END)
+			{
+				THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,USER_RECV_EV,TASKID,0,
+				devices[devid].Stream[streamid].event_info[i].tag,
+				devices[devid].Stream[streamid].event_info[i].tag);
+			}
+			else if (devices[devid].Stream[streamid].event_info[i].event == CUDACONFIGKERNEL_GPU_VAL &&
+							devices[devid].Stream[streamid].event_info[i].value != EVT_END)
+			{
+				THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp, USER_RECV_EV, TASKID, 0,
+				devices[devid].Stream[streamid].event_info[i].tag,
+				devices[devid].Stream[streamid].event_info[i].tag);
+			}
+
+			last_time = utmp;
+		}
+		devices[devid].Stream[streamid].nevents = 0;
 	}
-	devices[devid].Stream[streamid].nevents = 0;
+
 }
 
 /****************************************************************************/
@@ -625,11 +624,12 @@ void Extrae_cudaDeviceSynchronize_Enter (void)
 void Extrae_cudaDeviceSynchronize_Exit (void)
 {
 	int devid;
-	int i;
 
 	cudaGetDevice (&devid);
 
 	Probe_Cuda_ThreadBarrier_Exit ();
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS, TRUE);
+
 	Backend_Leave_Instrumentation ();
 }
 
@@ -653,25 +653,32 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 	cudaGetDevice (&devid);
 
 	Probe_Cuda_ThreadBarrier_Exit ();
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS, TRUE);
+
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_CUDA_flush_all_streams (int synchronize)
+void Extrae_CUDA_flush_streams ( int device_id, int stream_id, int synchronize )
 {
-	int i;
-	int devid;
+	int d = 0, s = 0;
 
-	for (devid = 0; devid < CUDAdevices; devid++)
+	THREAD_TRACE_MISCEVENT(THREADID, LAST_READ_TIME, FLUSH_EV, EVT_BEGIN, 0);
+	for ( d = (device_id == XTR_FLUSH_ALL_DEVICES ? 0: device_id);
+			  d < (device_id == XTR_FLUSH_ALL_DEVICES ? CUDAdevices: device_id+1);
+			  ++d )
 	{
-		if(devices[devid].initialized)
+		if ( devices[d].initialized )
 		{
-			for (i = 0; i < devices[devid].nstreams; i++)
+			for ( s = (stream_id == XTR_FLUSH_ALL_STREAMS ? 0: stream_id);
+						s < (stream_id == XTR_FLUSH_ALL_STREAMS ?  devices[d].nstreams: stream_id+1);
+						++s )
 			{
-				Extrae_CUDA_FlushStream (devid, i);
-				if (synchronize) Extrae_CUDA_SynchronizeStream (devid, i);
+				flushGPUEvents (d, s);
+				if ( synchronize ) Extrae_CUDA_SynchronizeStream (d, s); //will be removed with the eventelapsed refactor in cuda_fixes
 			}
 		}
 	}
+	THREAD_TRACE_MISCEVENT(THREADID, TIME, FLUSH_EV, EVT_END, 0);
 }
 
 void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
@@ -768,9 +775,10 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 		exit (-1);
 	}
 
-	Extrae_CUDA_FlushStream (devid, strid);
-	Extrae_CUDA_SynchronizeStream (devid, strid);
 	Probe_Cuda_StreamBarrier_Exit ();
+
+	Extrae_CUDA_flush_streams(devid, strid, TRUE);
+
 	Backend_Leave_Instrumentation ();
 }
 
@@ -850,13 +858,6 @@ void Extrae_cudaMemcpy_Exit (void)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
 		  CUDAMEMCPY_GPU_VAL, EVT_END, 0, Extrae_CUDA_saved_params[THREADID].punion.cm.size);
-	}
-
-	/* This is a safe point because cudaMemcpy is a synchronization point */
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_FlushStream (devid, i);
-		Extrae_CUDA_SynchronizeStream (devid, i);
 	}
 
 	Probe_Cuda_Memcpy_Exit ();
@@ -1017,8 +1018,8 @@ void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads)
 void Extrae_cudaDeviceReset_Enter (void)
 {
 	Backend_Enter_Instrumentation ();
-	Extrae_CUDA_flush_all_streams(FALSE);
 	Probe_Cuda_DeviceReset_Enter();
+	Extrae_CUDA_flush_streams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS, FALSE);
 }
 
 void Extrae_cudaDeviceReset_Exit (void)
@@ -1073,5 +1074,5 @@ void Extrae_cudaEventSynchronize_Exit()
 
 void Extrae_CUDA_fini (void)
 {
-	Extrae_CUDA_flush_all_streams (FALSE);
+	Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS, FALSE);
 }
