@@ -389,6 +389,9 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 	if (Buffer_RemainingEvents(TracingBuffer[threadid]) <= 2*devices[devid].Stream[streamid].nevents)
 		Buffer_ExecuteFlushCallback (TracingBuffer[threadid]);
 
+	if(devices[devid].Stream[streamid].nevents > 0)
+		err = cudaEventSynchronize (devices[devid].Stream[streamid].event_info[devices[devid].Stream[streamid].nevents-1].ts_event);
+
 	/* Flush events into thread buffer */
 	for (i = 0; i < devices[devid].Stream[streamid].nevents; i++)
 	{
@@ -397,7 +400,6 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 
 		/* Translate time from GPU to CPU using .device_reference_time and .host_reference_time
 		   from the RegisteredStreams_t structure */
-		err = cudaEventSynchronize (devices[devid].Stream[streamid].event_info[i].ts_event);
 		CHECK_CU_ERROR(err, cudaEventSynchronize);
 
 		if (devices[devid].Stream[streamid].event_info[i].timetype == EXTRAE_CUDA_NEW_TIME)
@@ -627,7 +629,6 @@ void Extrae_cudaDeviceSynchronize_Exit (void)
 
 	cudaGetDevice (&devid);
 
-
 	Probe_Cuda_ThreadBarrier_Exit ();
 	Backend_Leave_Instrumentation ();
 }
@@ -650,12 +651,6 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 	int i;
 
 	cudaGetDevice (&devid);
-
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_FlushStream (devid, i);
-		Extrae_CUDA_SynchronizeStream (devid, i);
-	}
 
 	Probe_Cuda_ThreadBarrier_Exit ();
 	Backend_Leave_Instrumentation ();
@@ -773,6 +768,11 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 		exit (-1);
 	}
 
+	Extrae_CUDA_FlushStream (devid, strid);
+	Extrae_CUDA_SynchronizeStream (devid, strid);
+	Probe_Cuda_StreamBarrier_Exit ();
+	Backend_Leave_Instrumentation ();
+}
 
 void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4)
 {
