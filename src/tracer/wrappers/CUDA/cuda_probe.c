@@ -282,3 +282,32 @@ void Probe_Cuda_StreamCreate_Exit (void)
 	if (mpitrace_on && Extrae_get_trace_CUDA())
 	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDASTREAMCREATE_VAL, EVT_END);
 }
+
+void Probe_Cuda_EventRecord_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAEVENTRECORD_VAL, EVT_BEGIN);
+}
+
+void Probe_Cuda_EventRecord_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAEVENTRECORD_VAL, EVT_END);
+}
+
+
+void Probe_Cuda_EventSynchronize_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAEVENTSYNCHRONIZE_VAL, EVT_BEGIN);
+}
+
+void Probe_Cuda_EventSynchronize_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAEVENTSYNCHRONIZE_VAL, EVT_END);
+}

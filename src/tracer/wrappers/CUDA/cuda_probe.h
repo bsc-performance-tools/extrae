@@ -53,6 +53,12 @@ void Probe_Cuda_StreamCreate_Exit(void);
 void Probe_Cuda_StreamDestroy_Entry (void);
 void Probe_Cuda_StreamDestroy_Exit(void);
 
+void Probe_Cuda_EventRecord_Entry (void);
+void Probe_Cuda_EventRecord_Exit (void);
+
+void Probe_Cuda_EventSynchronize_Entry (void);
+void Probe_Cuda_EventSynchronize_Exit (void);
+
 void Extrae_set_trace_CUDA (int b);
 int Extrae_get_trace_CUDA (void);
 

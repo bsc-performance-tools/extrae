@@ -73,6 +73,7 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 			break;
 		case CUDASTREAMBARRIER_VAL:
 		case CUDATHREADBARRIER_VAL:
+		case CUDAEVENTSYNCHRONIZE_VAL:
 			state = STATE_BARRIER;
 			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;

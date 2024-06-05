@@ -627,11 +627,6 @@ void Extrae_cudaDeviceSynchronize_Exit (void)
 
 	cudaGetDevice (&devid);
 
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_FlushStream (devid, i);
-		Extrae_CUDA_SynchronizeStream (devid, i);
-	}
 
 	Probe_Cuda_ThreadBarrier_Exit ();
 	Backend_Leave_Instrumentation ();
@@ -778,11 +773,6 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 		exit (-1);
 	}
 
-	Extrae_CUDA_FlushStream (devid, strid);
-	Extrae_CUDA_SynchronizeStream (devid, strid);
-	Probe_Cuda_StreamBarrier_Exit ();
-	Backend_Leave_Instrumentation ();
-}
 
 void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4)
 {
@@ -1055,6 +1045,30 @@ void Extrae_cudaThreadExit_Exit (void)
 	Extrae_CUDA_deInitialize (devid);
 	Probe_Cuda_ThreadExit_Exit();
 	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_cudaEventRecord_Enter()
+{
+	Backend_Enter_Instrumentation();
+	Probe_Cuda_EventRecord_Entry();
+}
+
+void Extrae_cudaEventRecord_Exit()
+{
+	Probe_Cuda_EventRecord_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void Extrae_cudaEventSynchronize_Enter()
+{
+	Backend_Enter_Instrumentation();
+	Probe_Cuda_EventSynchronize_Entry();
+}
+
+void Extrae_cudaEventSynchronize_Exit()
+{
+	Probe_Cuda_EventSynchronize_Exit();
+	Backend_Leave_Instrumentation();
 }
 
 void Extrae_CUDA_fini (void)

@@ -465,24 +465,24 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		/* 135 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaEventRecord_v3020:
 		{
-			// if (cbinfo->callbackSite == CUPTI_API_ENTER)
-			// 	Extrae_cudaEventRecord_Enter();
-			// else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-			// 	Extrae_cudaEventRecord_Exit();
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaEventRecord_Enter();
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaEventRecord_Exit();
 
-			ret = 0;
+			ret = 1;
 		}
 		break;
 
-		// /* 137 */
+		/* 137 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaEventSynchronize_v3020:
 		{
-			// if (cbinfo->callbackSite == CUPTI_API_ENTER)
-			// 	Extrae_cudaEventSynchronize_Enter();
-			// else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-			// 	Extrae_cudaEventSynchronize_Exit();
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaEventSynchronize_Enter();
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaEventSynchronize_Exit();
 
-			ret = 0;
+			ret = 1;
 		}
 		break;
 
