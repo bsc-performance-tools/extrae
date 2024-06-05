@@ -183,6 +183,11 @@
 #define TRACE_CPU_EVENTS_POI            ((xmlChar*) "poi")
 #define TRACE_CPU_EVENTS_OPENMP         ((xmlChar*) "openmp")
 
+
+#define TRACE_CUDA_EVENTS_BUFFER_SIZE    ((xmlChar*) "buffer-size")
+
+
+
 short int Parse_XML_File (int rank, int world_size, const char *filename);
 
 #endif

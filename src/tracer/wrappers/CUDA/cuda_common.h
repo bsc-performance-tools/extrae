@@ -124,7 +124,13 @@ cudaError_t cudaEventElapsedTime(float *, cudaEvent_t, cudaEvent_t);
 
 #endif /* HAVE_CUDA && !HAVE_CUPTI */
 
-#define MAX_CUDA_EVENTS 327680
+#define DEFAULT_CUDA_EVENTS_BLOCK_SIZE 1024
+
+extern unsigned cuda_events_block_size;
+
+#define XTR_CUDA_SET_EVENTS_BLOCK_SIZE(value) { cuda_events_block_size = value;}
+#define XTR_CUDA_EVENTS_BLOCK_SIZE cuda_events_block_size
+
 
 #define CUDA_SUCCESS 0
 
@@ -142,6 +148,17 @@ typedef enum {
 } Extrae_CUDA_Time_Type;
 
 /* Information per stream required during tracing */
+
+	typedef struct 
+	{
+		cudaEvent_t ts_event;
+		unsigned event;
+		unsigned long long value;
+		unsigned tag;
+		unsigned size;
+		Extrae_CUDA_Time_Type timetype;
+	}event_info_t;
+
 struct RegisteredStreams_t
 {
 	UINT64 host_reference_time;
@@ -149,13 +166,9 @@ struct RegisteredStreams_t
 	unsigned threadid; /* In Paraver sense */
 	cudaStream_t stream;
 
+	unsigned num_allocated_cuda_events;
 	unsigned nevents;
-	cudaEvent_t ts_events[MAX_CUDA_EVENTS];
-	unsigned events[MAX_CUDA_EVENTS];
-	unsigned long long values[MAX_CUDA_EVENTS];
-	unsigned tag[MAX_CUDA_EVENTS];
-	unsigned size[MAX_CUDA_EVENTS];
-	Extrae_CUDA_Time_Type timetype[MAX_CUDA_EVENTS];
+	event_info_t* event_info;
 };
 
 struct CUDAdevices_t

@@ -88,6 +88,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #if defined(CUDA_SUPPORT)
 # include "cuda_probe.h"
+# include "cuda_common.h"
 #endif
 #if defined(GASPI_SUPPORT)
 # include "gaspi_probe.h"
@@ -1039,6 +1040,22 @@ static void Parse_XML_PTHREAD (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 }
 #endif
 
+#if defined(CUDA_SUPPORT)
+/* Configure CUDA related parameters */
+static void Parse_XML_CUDA (int rank, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	xmlChar *maxCudaEvStr = xmlGetProp_env (rank, current_tag, TRACE_CUDA_EVENTS_BUFFER_SIZE);
+	if (maxCudaEvStr != NULL)
+	{
+		unsigned cu_events_block_size = atoi((char*)maxCudaEvStr);
+		if(cu_events_block_size > 0)
+			XTR_CUDA_SET_EVENTS_BLOCK_SIZE(cu_events_block_size);
+		mfprintf (stdout, PACKAGE_NAME": Number of allocated CUDA events per block is %u \n", XTR_CUDA_EVENTS_BLOCK_SIZE);
+	}
+}
+#endif
 
 /* Configure storage related parameters */
 static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
@@ -2021,6 +2038,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						{
 #if defined(CUDA_SUPPORT)
 							Extrae_set_trace_CUDA (TRUE);
+							Parse_XML_CUDA(rank, current_tag);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support CUDA.\n", TRACE_CUDA);
 #endif
