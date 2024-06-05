@@ -23,6 +23,8 @@
 
 #include <config.h>
 
+#include "gpu_event_info.h"
+
 #if HAVE_CUDA && !HAVE_CUPTI
 
 /**
@@ -144,22 +146,9 @@ extern unsigned cuda_events_block_size;
       exit(-1);                                                 \
     }
 
-typedef enum {
-	EXTRAE_CUDA_NEW_TIME,
-	EXTRAE_CUDA_PREVIOUS_TIME
-} Extrae_CUDA_Time_Type;
 
 /* Information per stream required during tracing */
 
-	typedef struct 
-	{
-		cudaEvent_t ts_event;
-		unsigned event;
-		unsigned long long value;
-		unsigned tag;
-		unsigned size;
-		Extrae_CUDA_Time_Type timetype;
-	}event_info_t;
 
 struct RegisteredStreams_t
 {
@@ -168,9 +157,7 @@ struct RegisteredStreams_t
 	unsigned threadid; /* In Paraver sense */
 	cudaStream_t stream;
 
-	unsigned num_allocated_cuda_events;
-	unsigned nevents;
-	event_info_t* event_info;
+	gpu_event_list_t event_info_list;
 };
 
 struct CUDAdevices_t

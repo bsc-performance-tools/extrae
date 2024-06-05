@@ -3,7 +3,8 @@ include $(top_srcdir)/PATHS
 # Wrappers for CUDA instrumentation
 WRAPPERS_CUDA = \
  cuda_probe.c cuda_probe.h \
- cuda_common.c cuda_common.h
+ cuda_common.c cuda_common.h \
+ gpu_event_info.c gpu_event_info.h
 
 if HAVE_CUDA 
 WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@
