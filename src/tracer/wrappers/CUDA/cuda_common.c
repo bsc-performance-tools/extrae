@@ -350,14 +350,6 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 
 	ptr = &devices[devid].Stream[streamid];
 
-	// XXX
-// 	if (evt_index < MAX_CUDA_EVENTS)
-// 	{
-//		add event to stream
-// 	}
-// 	else
-// 		fprintf (stderr, PACKAGE_NAME": Warning! Dropping events! Increase MAX_CUDA_EVENTS\n");
-
 	evt_index = ptr->nevents;
 
 	if (ptr->nevents >= devices[devid].Stream[streamid].num_allocated_cuda_events )
@@ -626,13 +618,6 @@ void Extrae_cudaDeviceSynchronize_Enter (void)
 
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
-
-	/* Emit one thread synchronize per stream (begin event) */
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, i,
-		  CUDATHREADBARRIER_GPU_VAL, EVT_BEGIN, 0, 0);
-	}
 }
 
 void Extrae_cudaDeviceSynchronize_Exit (void)
@@ -641,13 +626,6 @@ void Extrae_cudaDeviceSynchronize_Exit (void)
 	int i;
 
 	cudaGetDevice (&devid);
-
-	/* Emit one thread synchronize per stream (end event)*/
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, i,
-		  CUDATHREADBARRIER_GPU_VAL, EVT_END, 0, 0);
-	}
 
 	for (i = 0; i < devices[devid].nstreams; i++)
 	{
@@ -669,13 +647,6 @@ void Extrae_cudaThreadSynchronize_Enter (void)
 
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
-
-	/* Emit one thread synchronize per stream (begin event) */
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, i,
-		  CUDATHREADBARRIER_GPU_VAL, EVT_BEGIN, 0, 0);
-	}
 }
 
 void Extrae_cudaThreadSynchronize_Exit (void)
@@ -684,13 +655,6 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 	int i;
 
 	cudaGetDevice (&devid);
-
-	/* Emit one thread synchronize per stream (end event)*/
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, i,
-		  CUDATHREADBARRIER_GPU_VAL, EVT_END, 0, 0);
-	}
 
 	for (i = 0; i < devices[devid].nstreams; i++)
 	{
@@ -794,10 +758,6 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaStreamSynchronize\n");
 		exit (-1);
 	}
-
-	/* Emit one thread synchronize per stream (begin event) */
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-	  CUDASTREAMBARRIER_GPU_VAL, EVT_BEGIN, 0, 0);
 }
 
 void Extrae_cudaStreamSynchronize_Exit (void)
@@ -817,10 +777,6 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaStreamSynchronize\n");
 		exit (-1);
 	}
-
-	/* Emit one thread synchronize per stream (begin event) */
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-	  CUDASTREAMBARRIER_GPU_VAL, EVT_END, 0, 0);
 
 	Extrae_CUDA_FlushStream (devid, strid);
 	Extrae_CUDA_SynchronizeStream (devid, strid);
