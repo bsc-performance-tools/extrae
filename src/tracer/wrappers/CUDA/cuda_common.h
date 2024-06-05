@@ -153,11 +153,11 @@ extern unsigned cuda_events_block_size;
 struct RegisteredStreams_t
 {
 	UINT64 host_reference_time;
-	cudaEvent_t device_reference_time; /* accessed through cudaEvent_t */
+	gpu_event_t *device_reference_event;
 	unsigned threadid; /* In Paraver sense */
 	cudaStream_t stream;
 
-	gpu_event_list_t event_info_list;
+	gpu_event_list_t gpu_event_list;
 };
 
 struct CUDAdevices_t

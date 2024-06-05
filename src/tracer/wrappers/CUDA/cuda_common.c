@@ -132,11 +132,15 @@ static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
 	fprintf (stderr, "Extrae_CUDA_SynchronizeStream (devid=%d, streamid=%d, stream=%p)\n", devid, streamid, devices[devid].Stream[streamid].stream);
 #endif
 
-	err = cudaEventRecord (devices[devid].Stream[streamid].device_reference_time,
-		devices[devid].Stream[streamid].stream);
+	if(devices[devid].Stream[streamid].device_reference_event == NULL)
+	{
+		devices[devid].Stream[streamid].device_reference_event = gpuEventList_pop(&availableEvents);
+	}
+
+	err = cudaEventRecord (devices[devid].Stream[streamid].device_reference_event->ts_event, devices[devid].Stream[streamid].stream);
 	CHECK_CU_ERROR(err, cudaEventRecord);
 
-	err = cudaEventSynchronize (devices[devid].Stream[streamid].device_reference_time);
+	err = cudaEventSynchronize (devices[devid].Stream[streamid].device_reference_event->ts_event);
 	CHECK_CU_ERROR(err, cudaEventSynchronize);
 
 	devices[devid].Stream[streamid].host_reference_time = TIME;
@@ -214,15 +218,13 @@ void Extrae_CUDA_Initialize (int devid)
 
 		/* default device stream */
 		devices[devid].Stream[0].stream = (cudaStream_t) 0;
-		gpuEventList_init(&devices[devid].Stream[0].event_info_list);
-
-		gpuEventList_allocate_chunk(&availableEvents, XTR_CUDA_EVENTS_BLOCK_SIZE);
+		gpuEventList_init(&devices[devid].Stream[0].gpu_event_list, FALSE, XTR_CUDA_EVENTS_BLOCK_SIZE);
+		gpuEventList_init(&availableEvents, TRUE, XTR_CUDA_EVENTS_BLOCK_SIZE);
 
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-		err = cudaEventCreateWithFlags (&(devices[devid].Stream[0].device_reference_time), 0);
-		CHECK_CU_ERROR (err, cudaEventCreateWithFlags);
 
+		devices[devid].Stream[0].device_reference_event = NULL;
 		Extrae_CUDA_SynchronizeStream (devid, 0);
 
 		/*
@@ -292,10 +294,10 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 	Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads()+1);
 
 	devices[devid].Stream[i].host_reference_time = 0;
-	devices[devid].Stream[i].device_reference_time = NULL;
+	devices[devid].Stream[i].device_reference_event = NULL;
 	devices[devid].Stream[i].threadid = Backend_getNumberOfThreads()-1;
 	devices[devid].Stream[i].stream = stream;
-	gpuEventList_init(&devices[devid].Stream[i].event_info_list);
+	gpuEventList_init(&devices[devid].Stream[i].gpu_event_list, FALSE, XTR_CUDA_EVENTS_BLOCK_SIZE);
 
 #ifdef DEBUG
 	fprintf(stderr, "Extrae_CUDA_RegisterStream (devid=%d, stream=%p assigned to streamid => %d\n", devid, stream, i);
@@ -315,8 +317,7 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 
 	/* Create an event record and process it through the stream! */
 	/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-	err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].device_reference_time), CU_EVENT_DEFAULT);
-	CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
+	devices[devid].Stream[i].device_reference_event = NULL;
 	Extrae_CUDA_SynchronizeStream(devid, i);
 
 	/*
@@ -334,22 +335,18 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 	int err;
 	struct RegisteredStreams_t *registered_stream = &devices[devid].Stream[streamid];
 
-	gpu_event_t* event_info = gpuEventList_pop(&availableEvents);
-	if (event_info == NULL) {
-		gpuEventList_allocate_chunk(&availableEvents, XTR_CUDA_EVENTS_BLOCK_SIZE);
-		event_info = gpuEventList_pop(&availableEvents);
-	}
+	gpu_event_t* gpu_event = gpuEventList_pop(&availableEvents);
 
-	event_info->event = event;
-	event_info->value = value;
-	event_info->tag = tag;
-	event_info->size = size;
-	event_info->timetype = timetype;
+	gpu_event->event = event;
+	gpu_event->value = value;
+	gpu_event->tag = tag;
+	gpu_event->size = size;
+	gpu_event->timetype = timetype;
 
-	err = cudaEventRecord (event_info->ts_event, registered_stream->stream);
+	err = cudaEventRecord (gpu_event->ts_event, registered_stream->stream);
 	CHECK_CU_ERROR(err, cudaEventRecord);
 
-	gpuEventList_add(&registered_stream->event_info_list, event_info);
+	gpuEventList_add(&registered_stream->gpu_event_list, gpu_event);
 }
 
 static void traceGPUEvents(int threadid, UINT64 time, unsigned event, unsigned long long value, unsigned size, unsigned tag)
@@ -391,47 +388,61 @@ static void flushGPUEvents (int devid, int streamid)
 	int err;
 	UINT64 utmp, last_time = 0;
 	float ftmp;
-	gpu_event_t *event_info;
-	cudaEvent_t *reference_event_time;
+	gpu_event_t *gpu_event;
+	cudaEvent_t *reference_event;
+	UINT64 reference_time = 0;
 	struct RegisteredStreams_t *registered_stream = &devices[devid].Stream[streamid];
 
-	gpu_event_t *last_event_info = gpuEventList_peek_tail(&registered_stream->event_info_list);
+	gpu_event_t *last_gpu_event = gpuEventList_peek_tail(&registered_stream->gpu_event_list);
 
-	if(last_event_info != NULL)
+	if(last_gpu_event != NULL)
 	{
-		err = cudaEventSynchronize(last_event_info->ts_event);
+		err = cudaEventSynchronize(last_gpu_event->ts_event);
 		CHECK_CU_ERROR(err, cudaEventSynchronize);
-		reference_event_time = &registered_stream->device_reference_time;
+		reference_event = &registered_stream->device_reference_event->ts_event;
+		reference_time = registered_stream->host_reference_time;
 
 		/* Translate time from GPU to CPU using .device_reference_time and .host_reference_time
 				from the RegisteredStreams_t structure */
 
-		event_info = gpuEventList_pop(&registered_stream->event_info_list);
-		while(event_info != NULL)
+		gpu_event = gpuEventList_pop(&registered_stream->gpu_event_list);
+		while(gpu_event != NULL)
 		{
-			if (event_info->timetype == EXTRAE_CUDA_NEW_TIME)
+			if (gpu_event->timetype == EXTRAE_CUDA_NEW_TIME)
 			{
 				/* Computes the elapsed time between two events (in ms with a
 				* resolution of around 0.5 microseconds) -- according to
 				* https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
 				*/
-				err = cudaEventElapsedTime (&ftmp, *reference_event_time, event_info->ts_event);
+				err = cudaEventElapsedTime (&ftmp, *reference_event, gpu_event->ts_event);
 				CHECK_CU_ERROR(err, cudaEventElapsedTime);
 				ftmp *= 1000000;
 				/* Time correction between CPU & GPU */
-				utmp = registered_stream->host_reference_time + (UINT64) (ftmp);
+				utmp = reference_time + (UINT64) (ftmp);
+
+				reference_event = &gpu_event->ts_event;
+				reference_time = utmp;
 			}
 			else
 			{
 				utmp = last_time;
 			}
 
-			traceGPUEvents(threadid, utmp, event_info->event, event_info->value, event_info->size, event_info->tag);
+			traceGPUEvents(threadid, utmp, gpu_event->event, gpu_event->value, gpu_event->size, gpu_event->tag);
 
 			last_time = utmp;
 
-			gpuEventList_add(&availableEvents, event_info);
-			event_info = gpuEventList_pop(&registered_stream->event_info_list);
+			if(gpuEventList_isempty(&registered_stream->gpu_event_list))
+			{
+				gpuEventList_add(&availableEvents, registered_stream->device_reference_event);
+				registered_stream->device_reference_event = gpu_event;
+				gpu_event = NULL;
+			}
+			else
+			{
+				gpuEventList_add(&availableEvents, gpu_event);
+				gpu_event = gpuEventList_pop(&registered_stream->gpu_event_list);
+			}
 		}
 	}
 }
@@ -721,7 +732,7 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 void Extrae_cudaStreamSynchronize_Exit (void)
 {
 	int strid;
-	int devid; 
+	int devid;
 
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 

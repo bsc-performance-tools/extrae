@@ -6,23 +6,28 @@
 #include "xalloc.h"
 
 #define CHECK_CU_ERROR(err, cufunc)                             \
-  if (err != CUDA_SUCCESS)                                      \
-    {                                                           \
-      printf ("Error %d for CUDA Driver API function '%s'.\n",  \
-              err,  #cufunc);                                   \
-      exit(-1);                                                 \
-    }
+	if (err != CUDA_SUCCESS)                                      \
+		{                                                           \
+			printf ("Error %d for CUDA Driver API function '%s'.\n",  \
+							err,  #cufunc);                                   \
+			exit(-1);                                                 \
+		}
 
 
 /**
  * @brief Initializes an event list setting the first and last elements to NULL
  *
  * @param list A pointer to the `gpu_event_list_t` structure that represents the event list to initialize.
+ * @param autoexpand Boolean to allow the allocation of more elemnets if the list is empty.
+ * @param chunk_size size of the allocated memory chunk
+ * 
  */
-void gpuEventList_init(gpu_event_list_t *list)
+void gpuEventList_init(gpu_event_list_t *list, int autoexpand, size_t chunk_size)
 {
-    list->head = NULL;
-    list->tail = NULL;
+	list->head = NULL;
+	list->tail = NULL;
+	list->autoexpand = autoexpand;
+	list->chunk_size = chunk_size;
 }
 
 /**
@@ -39,17 +44,18 @@ void gpuEventList_init(gpu_event_list_t *list)
  */
 void gpuEventList_allocate_chunk(gpu_event_list_t *list, size_t size)
 {
-  int i, err;
-  gpu_event_t *event_info;
-  for (i = 0; i < size; i++)
-  {
-    event_info = xmalloc_and_zero(sizeof(gpu_event_t));
+	size_t i;
+	int err;
+	gpu_event_t *event_info;
+	for (i = 0; i < size; i++)
+	{
+		event_info = xmalloc_and_zero(sizeof(gpu_event_t));
 
-    err = cudaEventCreateWithFlags (&(event_info->ts_event), CU_EVENT_DEFAULT);
-    CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
+		err = cudaEventCreateWithFlags (&(event_info->ts_event), CU_EVENT_DEFAULT);
+		CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
 
-    gpuEventList_add(list, event_info);
-  }
+		gpuEventList_add(list, event_info);
+	}
 }
 
 /**
@@ -66,14 +72,14 @@ void gpuEventList_allocate_chunk(gpu_event_list_t *list, size_t size)
  */
 void gpuEventList_add(gpu_event_list_t *list, gpu_event_t *element)
 {
-  element->next = NULL;
+	element->next = NULL;
 
-  if (list->tail != NULL) {
-    list->tail->next = element;
-  } else {
-    list->head = element;
-  }
-  list->tail = element;
+	if (list->tail != NULL) {
+		list->tail->next = element;
+	} else {
+		list->head = element;
+	}
+	list->tail = element;
 }
 
 /**
@@ -91,13 +97,18 @@ void gpuEventList_add(gpu_event_list_t *list, gpu_event_t *element)
  */
 gpu_event_t *gpuEventList_pop(gpu_event_list_t *list)
 {
-  gpu_event_t *element = list->head;
-  if(element != NULL) {
-    list->head = element->next;
-    if(list->tail == element) list->tail = NULL;
-    element->next = NULL;
-  }
-  return element;
+	if(list->autoexpand && gpuEventList_isempty(list))
+	{
+		gpuEventList_allocate_chunk(list, list->chunk_size);
+	}
+
+	gpu_event_t *element = list->head;
+	if(element != NULL) {
+		list->head = element->next;
+		if(list->tail == element) list->tail = NULL;
+		element->next = NULL;
+	}
+	return element;
 }
 
 /**
@@ -114,7 +125,18 @@ gpu_event_t *gpuEventList_pop(gpu_event_list_t *list)
  */
 gpu_event_t *gpuEventList_peek_tail(gpu_event_list_t *list)
 {
-  return list->tail;
+	return list->tail;
+}
+
+/**
+ * @brief Checks if the event list is empty.
+ *
+ * @param list A pointer to the `EventInfoList` structure representing the event list.
+ * @return 1 if the list is empty, 0 otherwise.
+ */
+int gpuEventList_isempty(gpu_event_list_t *list)
+{
+	return list->head == NULL;
 }
 
 /**
@@ -127,18 +149,18 @@ gpu_event_t *gpuEventList_peek_tail(gpu_event_list_t *list)
  */
 void gpuEventList_free(gpu_event_list_t *list)
 {
-  if(list == NULL) return;
+	if(list == NULL) return;
 
-  gpu_event_t *current = list->head;
-  gpu_event_t *next;
-  while (current)
-  {
-    next = current->next;
-    cudaEventDestroy(current->ts_event);
-    xfree(current);
-    current = next;
-  }
+	gpu_event_t *current = list->head;
+	gpu_event_t *next;
+	while (current)
+	{
+		next = current->next;
+		cudaEventDestroy(current->ts_event);
+		xfree(current);
+		current = next;
+	}
 
-  list->head = NULL;
-  list->tail = NULL;
+	list->head = NULL;
+	list->tail = NULL;
 }
