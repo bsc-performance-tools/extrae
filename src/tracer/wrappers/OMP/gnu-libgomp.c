@@ -76,7 +76,81 @@ char *__GOMP_version = NULL;
   }                                                                    \
 }
 
-#if defined(PIC)
+
+#if defined(OS_RTEMS)
+
+extern void __real_GOMP_atomic_start (void) __attribute__((weak));
+extern void __real_GOMP_atomic_end (void) __attribute__((weak));
+extern void __real_GOMP_barrier (void) __attribute__((weak));
+extern void __real_GOMP_critical_start (void) __attribute__((weak));
+extern void __real_GOMP_critical_end (void) __attribute__((weak));
+extern void __real_GOMP_critical_name_start (void **pptr) __attribute__((weak));
+extern void __real_GOMP_critical_name_end (void **pptr) __attribute__((weak));
+extern int __real_GOMP_loop_static_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak)); 
+extern int __real_GOMP_loop_static_next (long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_dynamic_next (long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_guided_next (long *istart, long *iend) __attribute__((weak));
+extern void __real_GOMP_parallel_loop_runtime_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr) __attribute__((weak));
+extern int __real_GOMP_loop_runtime_next (long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_static_next (long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_dynamic_next (long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_guided_next (long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_ordered_runtime_next (long *istart, long *iend) __attribute__((weak));
+extern void __real_GOMP_parallel_loop_static_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size) __attribute__((weak));
+extern void __real_GOMP_parallel_loop_dynamic_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size) __attribute__((weak));
+extern void __real_GOMP_parallel_loop_guided_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size) __attribute__((weak));
+extern void __real_GOMP_loop_end (void) __attribute__((weak));
+extern void __real_GOMP_ordered_start (void) __attribute__((weak));
+extern void __real_GOMP_ordered_end (void) __attribute__((weak));
+extern void __real_GOMP_loop_end_nowait (void) __attribute__((weak));
+extern void __real_GOMP_parallel_start(void*,void*,unsigned) __attribute__((weak));
+extern void __real_GOMP_parallel_end (void) __attribute__((weak));
+extern void __real_GOMP_barrier (void) __attribute__((weak));
+extern void __real_GOMP_parallel (void*,void*,unsigned,unsigned int) __attribute__((weak));
+
+extern void __real_GOMP_parallel_sections_start (void*,void*,unsigned,unsigned) __attribute__((weak));
+extern unsigned __real_GOMP_sections_start (unsigned count) __attribute__((weak));
+extern unsigned __real_GOMP_sections_next (void) __attribute__((weak));
+extern void __real_GOMP_sections_end (void) __attribute__((weak));
+extern void __real_GOMP_sections_end_nowait (void) __attribute__((weak));
+extern unsigned __real_GOMP_single_start (void) __attribute__((weak));
+extern void __real_GOMP_taskwait (void) __attribute__((weak));
+
+///********************************************/
+///***** Added (or changed) in OpenMP 4.0 *****/
+///********************************************/
+extern void __real_GOMP_parallel_loop_static(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags) __attribute__((weak));
+extern void __real_GOMP_parallel_loop_dynamic(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags) __attribute__((weak));
+extern void __real_GOMP_parallel_loop_guided(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags) __attribute__((weak));
+extern void __real_GOMP_parallel_loop_runtime(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags) __attribute__((weak));
+extern void __real_GOMP_parallel_sections(void (*fn) (void *), void *data, unsigned num_threads, unsigned count, unsigned flags) __attribute__((weak));
+extern void __real_GOMP_taskgroup_start (void) __attribute__((weak));
+extern void __real_GOMP_taskgroup_end (void) __attribute__((weak));
+
+
+
+///********************************************/
+///***** Added (or changed) in OpenMP 4.5 *****/
+///********************************************/
+
+extern void __real_GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), long arg_size, long arg_align, int if_clause, unsigned flags, ...) __attribute__((weak));
+extern void __real_GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, long start, long end, long step) __attribute__((weak));
+extern int __real_GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_doacross_dynamic_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_doacross_guided_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend) __attribute__((weak));
+extern int __real_GOMP_loop_doacross_runtime_start (unsigned ncounts, long *counts, long *istart, long *iend) __attribute__((weak));
+extern void __real_GOMP_doacross_post (long *counts) __attribute__((weak));
+extern void __real_GOMP_doacross_wait (long first, ...) __attribute__((weak));
+#endif 
+
+#if defined(PIC) || defined(OS_RTEMS)
 
 /**************************************************************/
 /***** Added (or changed) in OpenMP 3.1 or prior versions *****/
@@ -515,7 +589,7 @@ static void callme_taskloop(void *data_trailer)
 /***** Added (or changed) in OpenMP 3.1 or prior versions *****/
 /**************************************************************/
 
-void GOMP_atomic_start (void)
+void LINK_WRAP(GOMP_atomic_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_atomic_start_real);
@@ -544,7 +618,7 @@ void GOMP_atomic_start (void)
 #endif
 }
 
-void GOMP_atomic_end (void)
+void LINK_WRAP(GOMP_atomic_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_atomic_end_real);
@@ -573,7 +647,7 @@ void GOMP_atomic_end (void)
 #endif
 }
 
-void GOMP_barrier (void)
+void LINK_WRAP(GOMP_barrier) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_barrier enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_barrier_real);
@@ -602,7 +676,7 @@ void GOMP_barrier (void)
 #endif
 }
 
-void GOMP_critical_start (void)
+void LINK_WRAP(GOMP_critical_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_critical_start_real);
@@ -631,7 +705,7 @@ void GOMP_critical_start (void)
 #endif
 }
 
-void GOMP_critical_end (void)
+void LINK_WRAP(GOMP_critical_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_critical_end_real);
@@ -660,7 +734,7 @@ void GOMP_critical_end (void)
 #endif
 }
 
-void GOMP_critical_name_start (void **pptr)
+void LINK_WRAP(GOMP_critical_name_start) (void **pptr)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_start enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_critical_name_start_real, pptr);
@@ -689,7 +763,7 @@ void GOMP_critical_name_start (void **pptr)
 #endif
 }
 
-void GOMP_critical_name_end (void **pptr)
+void LINK_WRAP(GOMP_critical_name_end) (void **pptr)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_end enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_critical_name_end_real, pptr);
@@ -718,7 +792,7 @@ void GOMP_critical_name_end (void **pptr)
 #endif
 }
 
-int GOMP_loop_static_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_static_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 
@@ -752,7 +826,7 @@ int GOMP_loop_static_start (long start, long end, long incr, long chunk_size, lo
 	return res;
 }
 
-int GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_dynamic_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -785,7 +859,7 @@ int GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, l
 	return res;
 }
 
-int GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_guided_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -818,7 +892,7 @@ int GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, lo
 	return res;
 }
 
-int GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_runtime_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -851,7 +925,7 @@ int GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, l
 	return res;
 }
 
-int GOMP_loop_static_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_static_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -883,7 +957,7 @@ int GOMP_loop_static_next (long *istart, long *iend)
 	return res;
 }
 
-int GOMP_loop_dynamic_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_dynamic_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -915,7 +989,7 @@ int GOMP_loop_dynamic_next (long *istart, long *iend)
 	return res;
 }
 
-int GOMP_loop_guided_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_guided_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -947,7 +1021,7 @@ int GOMP_loop_guided_next (long *istart, long *iend)
 	return res;
 }
 
-int GOMP_loop_runtime_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_runtime_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -979,7 +1053,7 @@ int GOMP_loop_runtime_next (long *istart, long *iend)
 	return res;
 }
 
-int GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_static_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1011,7 +1085,7 @@ int GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_
 	return res;
 }
 
-int GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_dynamic_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1043,7 +1117,7 @@ int GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk
 	return res;
 }
 
-int GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_guided_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1075,7 +1149,7 @@ int GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_
 	return res;
 }
 
-int GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_runtime_start) (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1107,7 +1181,7 @@ int GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk
 	return res;
 }
 
-int GOMP_loop_ordered_static_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_static_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1139,7 +1213,7 @@ int GOMP_loop_ordered_static_next (long *istart, long *iend)
 	return res;
 }
 
-int GOMP_loop_ordered_dynamic_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_dynamic_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1171,7 +1245,7 @@ int GOMP_loop_ordered_dynamic_next (long *istart, long *iend)
 	return res;
 }
 
-int GOMP_loop_ordered_guided_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_guided_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1203,7 +1277,7 @@ int GOMP_loop_ordered_guided_next (long *istart, long *iend)
 	return res;
 }
 
-int GOMP_loop_ordered_runtime_next (long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_ordered_runtime_next) (long *istart, long *iend)
 {
 	int res = 0;
 #if defined(DEBUG)
@@ -1236,7 +1310,7 @@ int GOMP_loop_ordered_runtime_next (long *istart, long *iend)
 }
 
 void
-GOMP_parallel_loop_static_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+LINK_WRAP(GOMP_parallel_loop_static_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1295,7 +1369,7 @@ GOMP_parallel_loop_static_start(void (*fn)(void *), void *data, unsigned num_thr
 }
 
 void
-GOMP_parallel_loop_dynamic_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+LINK_WRAP(GOMP_parallel_loop_dynamic_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1354,7 +1428,7 @@ GOMP_parallel_loop_dynamic_start(void (*fn)(void *), void *data, unsigned num_th
 }
 
 void
-GOMP_parallel_loop_guided_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+LINK_WRAP(GOMP_parallel_loop_guided_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1413,7 +1487,7 @@ GOMP_parallel_loop_guided_start(void (*fn)(void *), void *data, unsigned num_thr
 }
 
 void
-GOMP_parallel_loop_runtime_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr)
+LINK_WRAP(GOMP_parallel_loop_runtime_start) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1471,7 +1545,7 @@ GOMP_parallel_loop_runtime_start(void (*fn)(void *), void *data, unsigned num_th
 #endif
 }
 
-void GOMP_loop_end (void)
+void LINK_WRAP(GOMP_loop_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_loop_end_real);
@@ -1501,7 +1575,7 @@ void GOMP_loop_end (void)
 #endif
 }
 
-void GOMP_loop_end_nowait (void)
+void LINK_WRAP(GOMP_loop_end_nowait) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end_nowait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_loop_end_nowait_real);
@@ -1531,7 +1605,7 @@ void GOMP_loop_end_nowait (void)
 #endif
 }
 
-void GOMP_ordered_start (void)
+void LINK_WRAP(GOMP_ordered_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_ordered_start_real);
@@ -1560,7 +1634,7 @@ void GOMP_ordered_start (void)
 #endif
 }
 
-void GOMP_ordered_end (void)
+void LINK_WRAP(GOMP_ordered_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_ordered_end_real);
@@ -1590,7 +1664,7 @@ void GOMP_ordered_end (void)
 }
 
 void
-GOMP_parallel_start(void (*fn)(void *), void *data, unsigned num_threads)
+LINK_WRAP(GOMP_parallel_start) (void (*fn)(void *), void *data, unsigned num_threads)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1640,7 +1714,7 @@ GOMP_parallel_start(void (*fn)(void *), void *data, unsigned num_threads)
 }
 
 void
-GOMP_parallel_end(void)
+LINK_WRAP(GOMP_parallel_end)(void)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1683,7 +1757,7 @@ GOMP_parallel_end(void)
 }
 
 void
-GOMP_parallel_sections_start(void (*fn)(void *), void *data, unsigned num_threads, unsigned count)
+LINK_WRAP(GOMP_parallel_sections_start)(void (*fn)(void *), void *data, unsigned num_threads, unsigned count)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1730,7 +1804,7 @@ GOMP_parallel_sections_start(void (*fn)(void *), void *data, unsigned num_thread
 #endif
 }
 
-unsigned GOMP_sections_start (unsigned count)
+unsigned LINK_WRAP(GOMP_sections_start) (unsigned count)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
@@ -1762,7 +1836,7 @@ unsigned GOMP_sections_start (unsigned count)
 	return res;
 }
 
-unsigned GOMP_sections_next (void)
+unsigned LINK_WRAP(GOMP_sections_next) (void)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
@@ -1794,7 +1868,7 @@ unsigned GOMP_sections_next (void)
 	return res;
 }
 
-void GOMP_sections_end (void)
+void LINK_WRAP(GOMP_sections_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_sections_end_real);
@@ -1823,7 +1897,7 @@ void GOMP_sections_end (void)
 #endif
 }
 
-void GOMP_sections_end_nowait (void)
+void LINK_WRAP(GOMP_sections_end_nowait) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end_nowait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_sections_end_nowait_real);
@@ -1852,7 +1926,7 @@ void GOMP_sections_end_nowait (void)
 #endif
 }
 
-unsigned GOMP_single_start (void)
+unsigned LINK_WRAP(GOMP_single_start) (void)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
@@ -1884,7 +1958,7 @@ unsigned GOMP_single_start (void)
 	return res;
 }
 
-void GOMP_taskwait (void)
+void LINK_WRAP(GOMP_taskwait) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskwait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskwait_real);
@@ -1920,7 +1994,7 @@ void GOMP_taskwait (void)
 /********************************************/
 
 void
-GOMP_parallel(void (*fn)(void *), void *data, unsigned num_threads, unsigned int flags)
+LINK_WRAP(GOMP_parallel) (void (*fn)(void *), void *data, unsigned num_threads, unsigned int flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -1985,7 +2059,7 @@ GOMP_parallel(void (*fn)(void *), void *data, unsigned num_threads, unsigned int
 }
 
 void
-GOMP_parallel_loop_static(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_static) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2036,7 +2110,7 @@ GOMP_parallel_loop_static(void (*fn)(void *), void *data, unsigned num_threads, 
 }
 
 void
-GOMP_parallel_loop_dynamic(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_dynamic) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2086,7 +2160,7 @@ GOMP_parallel_loop_dynamic(void (*fn)(void *), void *data, unsigned num_threads,
 }
 
 void
-GOMP_parallel_loop_guided(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_guided) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2137,7 +2211,7 @@ GOMP_parallel_loop_guided(void (*fn)(void *), void *data, unsigned num_threads, 
 }
 
 void
-GOMP_parallel_loop_runtime(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags)
+LINK_WRAP(GOMP_parallel_loop_runtime) (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2188,7 +2262,7 @@ GOMP_parallel_loop_runtime(void (*fn)(void *), void *data, unsigned num_threads,
 }
 
 void
-GOMP_parallel_sections(void (*fn) (void *), void *data, unsigned num_threads, unsigned count, unsigned flags)
+LINK_WRAP(GOMP_parallel_sections) (void (*fn) (void *), void *data, unsigned num_threads, unsigned count, unsigned flags)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
@@ -2245,7 +2319,7 @@ GOMP_parallel_sections(void (*fn) (void *), void *data, unsigned num_threads, un
 }
 
 
-void GOMP_taskgroup_start (void)
+void LINK_WRAP(GOMP_taskgroup_start) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskgroup_start_real);
@@ -2275,7 +2349,7 @@ void GOMP_taskgroup_start (void)
 #endif
 }
 
-void GOMP_taskgroup_end (void)
+void LINK_WRAP(GOMP_taskgroup_end) (void)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskgroup_end_real);
@@ -2315,7 +2389,7 @@ void GOMP_taskgroup_end (void)
  * varargs, and we check the runtime version to decide with how many parameters
  * we will make the call to the real function.
  */
-void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), long arg_size, long arg_align, int if_clause, unsigned flags, ...)
+void LINK_WRAP(GOMP_task) (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), long arg_size, long arg_align, int if_clause, unsigned flags, ...)
 {
 	void **depend = NULL;
 	int priority = 0;
@@ -2411,7 +2485,7 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 }
 
 
-void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, long start, long end, long step)
+void LINK_WRAP(GOMP_taskloop) (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, long start, long end, long step)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_taskloop_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
@@ -2457,7 +2531,7 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 	}
 }
 
-void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, unsigned long long start, unsigned long long end, unsigned long long step)
+void LINK_WRAP(GOMP_taskloop_ull) (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, unsigned long long start, unsigned long long end, unsigned long long step)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %llu %llu %llu)\n", THREAD_LEVEL_VAR, GOMP_taskloop_ull_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
@@ -2505,7 +2579,7 @@ void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long a
 #endif
 }
 
-int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_doacross_static_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend) 
 {
 	int res;
 #if defined(DEBUG)
@@ -2539,7 +2613,7 @@ int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_
 	return res;
 }
 
-int GOMP_loop_doacross_dynamic_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_doacross_dynamic_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
 #if defined(DEBUG)
@@ -2573,7 +2647,7 @@ int GOMP_loop_doacross_dynamic_start (unsigned ncounts, long *counts, long chunk
 	return res;
 }
 
-int GOMP_loop_doacross_guided_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_doacross_guided_start) (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
 #if defined(DEBUG)
@@ -2607,7 +2681,7 @@ int GOMP_loop_doacross_guided_start (unsigned ncounts, long *counts, long chunk_
 	return res;
 }
 
-int GOMP_loop_doacross_runtime_start (unsigned ncounts, long *counts, long *istart, long *iend)
+int LINK_WRAP(GOMP_loop_doacross_runtime_start) (unsigned ncounts, long *counts, long *istart, long *iend)
 {
 	int res;
 #if defined(DEBUG)
@@ -2641,7 +2715,7 @@ int GOMP_loop_doacross_runtime_start (unsigned ncounts, long *counts, long *ista
 	return res;
 }
 
-void GOMP_doacross_post (long *counts)
+void LINK_WRAP(GOMP_doacross_post) (long *counts)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_doacross_post enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_doacross_post_real, counts);
@@ -2676,7 +2750,7 @@ void GOMP_doacross_post (long *counts)
  * 'genstubs-libgomp.sh' up to a maximum of DOACROSS_MAX_NESTING, defined in 
  * that script.
  */
-void GOMP_doacross_wait (long first, ...)
+void LINK_WRAP(GOMP_doacross_wait) (long first, ...)
 {
 	unsigned i = 0;
 	long args[MAX_DOACROSS_ARGS];
@@ -2774,18 +2848,22 @@ static int gnu_libgomp_get_hook_points (int rank)
 			fprintf(stderr, PACKAGE_NAME": ERROR! Unsupported GOMP version (%s). Valid versions are: 3.1, 4.0 and 4.5. Exiting ...\n", __GOMP_version);
 			exit (-1);
 		}
-	} else if (dlsym(RTLD_NEXT, "GOMP_taskloop") != NULL) {
+	}
+#if !defined (OS_RTEMS)
+    else if (dlsym(RTLD_NEXT, "GOMP_taskloop") != NULL) {
 		__GOMP_version = GOMP_API_4_5;
 	} else if (dlsym(RTLD_NEXT, "GOMP_taskgroup_start") != NULL) {
 		__GOMP_version = GOMP_API_4_0;
 	} else {
 		__GOMP_version = GOMP_API_3_1;
 	}
+#endif /* !OS_RTEMS */
 
 	if (TASKID == 0)
 	{
 		fprintf (stdout, PACKAGE_NAME": Detected GOMP version is %s\n", __GOMP_version);
 	}
+
 
   /**********************/
   /***** OpenMP 3.1 *****/
@@ -2793,199 +2871,199 @@ static int gnu_libgomp_get_hook_points (int rank)
 
 	/* Obtain @ for GOMP_atomic_start */
 	GOMP_atomic_start_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_start");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_atomic_start);
 	INC_IF_NOT_NULL(GOMP_atomic_start_real,count);
 
 	/* Obtain @ for GOMP_atomic_end */
 	GOMP_atomic_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_end");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_atomic_end);
 	INC_IF_NOT_NULL(GOMP_atomic_end_real,count);
 
 	/* Obtain @ for GOMP_barrier */
 	GOMP_barrier_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_barrier");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_barrier);
 	INC_IF_NOT_NULL(GOMP_barrier_real,count);
 
 	/* Obtain @ for GOMP_critical_enter */
 	GOMP_critical_start_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_critical_start");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_critical_start);
 	INC_IF_NOT_NULL(GOMP_critical_start_real,count);
 
 	/* Obtain @ for GOMP_critical_end */
 	GOMP_critical_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_critical_end");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_critical_end);
 	INC_IF_NOT_NULL(GOMP_critical_end_real,count);
 
 	/* Obtain @ for GOMP_critical_name_start */
 	GOMP_critical_name_start_real =
-		(void(*)(void**)) dlsym (RTLD_NEXT, "GOMP_critical_name_start");
+		(void(*)(void**)) GET_REAL_FUNCTION(GOMP_critical_name_start);
 	INC_IF_NOT_NULL(GOMP_critical_name_start_real,count);
 
 	/* Obtain @ for GOMP_critical_name_end */
 	GOMP_critical_name_end_real =
-		(void(*)(void**)) dlsym (RTLD_NEXT, "GOMP_critical_name_end");
+		(void(*)(void**)) GET_REAL_FUNCTION(GOMP_critical_name_end);
 	INC_IF_NOT_NULL(GOMP_critical_name_end_real,count);
 
 	/* Obtain @ for GOMP_loop_static_start */
 	GOMP_loop_static_start_real =
-		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_static_start");
+		(int(*)(long,long,long,long,long*,long*)) GET_REAL_FUNCTION(GOMP_loop_static_start);
 	INC_IF_NOT_NULL(GOMP_loop_static_start_real,count);
 
 	/* Obtain @ for GOMP_loop_dynamic_start */
 	GOMP_loop_dynamic_start_real =
-		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_start");
+		(int(*)(long,long,long,long,long*,long*)) GET_REAL_FUNCTION(GOMP_loop_dynamic_start);
 	INC_IF_NOT_NULL(GOMP_loop_dynamic_start_real,count);
 
 	/* Obtain @ for GOMP_loop_guided_start */
 	GOMP_loop_guided_start_real =
-		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_guided_start");
+		(int(*)(long,long,long,long,long*,long*)) GET_REAL_FUNCTION(GOMP_loop_guided_start);
 	INC_IF_NOT_NULL(GOMP_loop_guided_start_real,count);
 
 	/* Obtain @ for GOMP_loop_runtime_start */
 	GOMP_loop_runtime_start_real =
-		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_start");
+		(int(*)(long,long,long,long,long*,long*)) GET_REAL_FUNCTION(GOMP_loop_runtime_start);
 	INC_IF_NOT_NULL(GOMP_loop_runtime_start_real,count);
 
 	/* Obtain @ for GOMP_loop_static_next */
 	GOMP_loop_static_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_static_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_static_next);
 	INC_IF_NOT_NULL(GOMP_loop_static_next_real,count);
 
 	/* Obtain @ for GOMP_loop_dynamic_next */
 	GOMP_loop_dynamic_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_dynamic_next);
 	INC_IF_NOT_NULL(GOMP_loop_dynamic_next_real,count);
 
 	/* Obtain @ for GOMP_loop_guided_next */
 	GOMP_loop_guided_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_guided_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_guided_next);
 	INC_IF_NOT_NULL(GOMP_loop_guided_next_real,count);
 
 	/* Obtain @ for GOMP_loop_runtime_next */
 	GOMP_loop_runtime_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_runtime_next);
 	INC_IF_NOT_NULL(GOMP_loop_runtime_next_real,count);
 
 	/* Obtain @ for GOMP_loop_ordered_static_start */
 	GOMP_loop_ordered_static_start_real =
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_static_start");
+		(int(*)(long, long, long, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_ordered_static_start);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_static_start_real, count);
 
 	/* Obtain @ for GOMP_loop_ordered_dynamic_start */
 	GOMP_loop_ordered_dynamic_start_real =
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_dynamic_start");
+		(int(*)(long, long, long, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_ordered_dynamic_start);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_dynamic_start_real, count);
 
 	/* Obtain @ for GOMP_loop_ordered_guided_start */
 	GOMP_loop_ordered_guided_start_real =
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_guided_start");
+		(int(*)(long, long, long, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_ordered_guided_start);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_guided_start_real, count);
 
 	/* Obtain @ for GOMP_loop_ordered_runtime_start */
 	GOMP_loop_ordered_runtime_start_real =
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_runtime_start");
+		(int(*)(long, long, long, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_ordered_runtime_start);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_runtime_start_real, count);
 
 	/* Obtain @ for GOMP_loop_ordered_static_next */
 	GOMP_loop_ordered_static_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_static_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_ordered_static_next);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_static_next_real,count);
 
 	/* Obtain @ for GOMP_loop_ordered_dynamic_next */
 	GOMP_loop_ordered_dynamic_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_dynamic_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_ordered_dynamic_next);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_dynamic_next_real,count);
 
 	/* Obtain @ for GOMP_loop_ordered_guided_next */
 	GOMP_loop_ordered_guided_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_guided_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_ordered_guided_next);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_guided_next_real,count);
 
 	/* Obtain @ for GOMP_loop_runtime_next */
 	GOMP_loop_ordered_runtime_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_runtime_next");
+		(int(*)(long*,long*)) GET_REAL_FUNCTION(GOMP_loop_ordered_runtime_next);
 	INC_IF_NOT_NULL(GOMP_loop_ordered_runtime_next_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_static_start */
 	GOMP_parallel_loop_static_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_static_start");
+		(void(*)(void*,void*,unsigned, long, long, long, long)) GET_REAL_FUNCTION(GOMP_parallel_loop_static_start);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_static_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_dynamic_start */
 	GOMP_parallel_loop_dynamic_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_dynamic_start");
+		(void(*)(void*,void*,unsigned, long, long, long, long)) GET_REAL_FUNCTION(GOMP_parallel_loop_dynamic_start);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_dynamic_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_guided_start */
 	GOMP_parallel_loop_guided_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_guided_start");
+		(void(*)(void*,void*,unsigned, long, long, long, long)) GET_REAL_FUNCTION(GOMP_parallel_loop_guided_start);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_guided_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_runtime_start */
 	GOMP_parallel_loop_runtime_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_runtime_start");
+		(void(*)(void*,void*,unsigned, long, long, long)) GET_REAL_FUNCTION(GOMP_parallel_loop_runtime_start);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_runtime_start_real,count);
 
 	/* Obtain @ for GOMP_loop_end */
 	GOMP_loop_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_loop_end");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_loop_end);
 	INC_IF_NOT_NULL(GOMP_loop_end_real,count);
 
 	/* Obtain @ for GOMP_loop_end_nowait */
 	GOMP_loop_end_nowait_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_loop_end_nowait");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_loop_end_nowait);
 	INC_IF_NOT_NULL(GOMP_loop_end_nowait_real,count);
 
 	/* Obtain @ for GOMP_ordered_start */
-	GOMP_ordered_start_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_ordered_start");
+	GOMP_ordered_start_real = (void(*)(void)) GET_REAL_FUNCTION(GOMP_ordered_start);
 	INC_IF_NOT_NULL(GOMP_ordered_start_real,count);
 
 	/* Obtain @ for GOMP_ordered_end */
-	GOMP_ordered_end_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_ordered_end");
+	GOMP_ordered_end_real = (void(*)(void)) GET_REAL_FUNCTION(GOMP_ordered_end);
 	INC_IF_NOT_NULL(GOMP_ordered_end_real,count);
 
 	/* Obtain @ for GOMP_parallel_start */
 	GOMP_parallel_start_real =
-		(void(*)(void*,void*,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_start");
+		(void(*)(void*,void*,unsigned)) GET_REAL_FUNCTION(GOMP_parallel_start);
 	INC_IF_NOT_NULL(GOMP_parallel_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_end */
 	GOMP_parallel_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_parallel_end");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_parallel_end);
 	INC_IF_NOT_NULL(GOMP_parallel_end_real,count);
 
 	/* Obtain @ for GOMP_parallel_sections_start */
 	GOMP_parallel_sections_start_real = 
-		(void(*)(void*,void*,unsigned,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_sections_start");
+		(void(*)(void*,void*,unsigned,unsigned)) GET_REAL_FUNCTION(GOMP_parallel_sections_start);
 	INC_IF_NOT_NULL(GOMP_parallel_sections_start_real,count);
 
 	/* Obtain @ for GOMP_sections_start */
 	GOMP_sections_start_real =
-		(unsigned(*)(unsigned)) dlsym (RTLD_NEXT, "GOMP_sections_start");
+		(unsigned(*)(unsigned)) GET_REAL_FUNCTION(GOMP_sections_start);
 	INC_IF_NOT_NULL(GOMP_sections_start_real,count);
 
 	/* Obtain @ for GOMP_sections_next */
 	GOMP_sections_next_real =
-		(unsigned(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_next");
+		(unsigned(*)(void)) GET_REAL_FUNCTION(GOMP_sections_next);
 	INC_IF_NOT_NULL(GOMP_sections_next_real,count);
 
 	/* Obtain @ for GOMP_sections_end */
 	GOMP_sections_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_sections_end);
 	INC_IF_NOT_NULL(GOMP_sections_end_real,count);
 
 	/* Obtain @ for GOMP_sections_end_nowait */
 	GOMP_sections_end_nowait_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end_nowait");
+		(void(*)(void)) GET_REAL_FUNCTION(GOMP_sections_end_nowait);
 	INC_IF_NOT_NULL(GOMP_sections_end_nowait_real,count);
 
 	/* Obtain @ for GOMP_single_start */
 	GOMP_single_start_real =
-		(unsigned(*)(void)) dlsym (RTLD_NEXT, "GOMP_single_start");
+		(unsigned(*)(void)) GET_REAL_FUNCTION(GOMP_single_start);
 	INC_IF_NOT_NULL(GOMP_single_start_real,count);
 
 	/* Obtain @ for GOMP_taskwait */
-	GOMP_taskwait_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskwait");
+	GOMP_taskwait_real = (void(*)(void)) GET_REAL_FUNCTION(GOMP_taskwait);
 	INC_IF_NOT_NULL(GOMP_taskwait_real,count);
 
   /**********************/
@@ -2994,40 +3072,40 @@ static int gnu_libgomp_get_hook_points (int rank)
 
 	/* Obtain @ for GOMP_parallel */
 	GOMP_parallel_real =
-		(void(*)(void*,void*,unsigned,unsigned int)) dlsym(RTLD_NEXT, "GOMP_parallel");
+		(void(*)(void*,void*,unsigned,unsigned int)) GET_REAL_FUNCTION(GOMP_parallel);
 	INC_IF_NOT_NULL(GOMP_parallel_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_static */
 	GOMP_parallel_loop_static_real =
-	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned))dlsym (RTLD_NEXT, "GOMP_parallel_loop_static");
+	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned)) GET_REAL_FUNCTION(GOMP_parallel_loop_static);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_static_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_dynamic */
 	GOMP_parallel_loop_dynamic_real =
-	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned))dlsym (RTLD_NEXT, "GOMP_parallel_loop_dynamic");
+	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned)) GET_REAL_FUNCTION(GOMP_parallel_loop_dynamic);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_dynamic_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_guided */
 	GOMP_parallel_loop_guided_real =
-	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned))dlsym (RTLD_NEXT, "GOMP_parallel_loop_guided");
+	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned)) GET_REAL_FUNCTION(GOMP_parallel_loop_guided);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_guided_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_runtime */
 	GOMP_parallel_loop_runtime_real =
-	    (void(*)(void*, void*, unsigned, long, long, long, unsigned)) dlsym(RTLD_NEXT, "GOMP_parallel_loop_runtime");
+	    (void(*)(void*, void*, unsigned, long, long, long, unsigned)) GET_REAL_FUNCTION(GOMP_parallel_loop_runtime);
 	INC_IF_NOT_NULL(GOMP_parallel_loop_runtime_real,count);
 
 	/* Obtain @ for GOMP_parallel_sections */
 	GOMP_parallel_sections_real =
-	    (void(*)(void *, void *, unsigned, unsigned, unsigned)) dlsym(RTLD_NEXT, "GOMP_parallel_sections");
+	    (void(*)(void *, void *, unsigned, unsigned, unsigned)) GET_REAL_FUNCTION(GOMP_parallel_sections);
 	INC_IF_NOT_NULL(GOMP_parallel_sections_real,count);
 
 	/* Obtain @ for GOMP_taskgroup_start */
-	GOMP_taskgroup_start_real = (void(*)(void)) dlsym(RTLD_NEXT, "GOMP_taskgroup_start");
+	GOMP_taskgroup_start_real = (void(*)(void)) GET_REAL_FUNCTION(GOMP_taskgroup_start);
 	INC_IF_NOT_NULL(GOMP_taskgroup_start_real,count);
 
 	/* Obtain @ for GOMP_taskgroup_end */
-	GOMP_taskgroup_end_real = (void(*)(void)) dlsym(RTLD_NEXT, "GOMP_taskgroup_end");
+	GOMP_taskgroup_end_real = (void(*)(void)) GET_REAL_FUNCTION(GOMP_taskgroup_end);
 	INC_IF_NOT_NULL(GOMP_taskgroup_end_real,count);
 
   /**********************/
@@ -3036,12 +3114,12 @@ static int gnu_libgomp_get_hook_points (int rank)
 
 	/* Obtain @ for GOMP_task */
 	GOMP_task_real =
-		(void(*)(void*,void*,void*,long,long,int,unsigned,...)) dlsym (RTLD_NEXT, "GOMP_task");
+		(void(*)(void*,void*,void*,long,long,int,unsigned,...)) GET_REAL_FUNCTION(GOMP_task);
 	INC_IF_NOT_NULL(GOMP_task_real,count);
 
 	/* Obtain @ for GOMP_taskloop */
 	GOMP_taskloop_real =
-		(void(*)(void*,void*,void*,long,long,unsigned,unsigned long,int,long,long,long)) dlsym (RTLD_NEXT, "GOMP_taskloop");
+		(void(*)(void*,void*,void*,long,long,unsigned,unsigned long,int,long,long,long)) GET_REAL_FUNCTION(GOMP_taskloop);
 	INC_IF_NOT_NULL(GOMP_taskloop_real,count);
 
 	/* Obtain @ for GOMP_taskloop_ull */
@@ -3050,27 +3128,27 @@ static int gnu_libgomp_get_hook_points (int rank)
 	INC_IF_NOT_NULL(GOMP_taskloop_ull_real,count);
 
 	/* Obtain @ for GOMP_loop_doacross_static_start */
-	GOMP_loop_doacross_static_start_real = (int(*)(unsigned, long *, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_static_start");
+	GOMP_loop_doacross_static_start_real = (int(*)(unsigned, long *, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_static_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_static_start_real,count);
 
 	/* Obtain @ for GOMP_loop_doacross_dynamic_start */
-	GOMP_loop_doacross_dynamic_start_real = (int(*)(unsigned, long *, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_dynamic_start");
+	GOMP_loop_doacross_dynamic_start_real = (int(*)(unsigned, long *, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_dynamic_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_dynamic_start_real,count);
 
 	/* Obtain @ for GOMP_loop_doacross_guided_start */
-	GOMP_loop_doacross_guided_start_real = (int(*)(unsigned, long *, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_guided_start");
+	GOMP_loop_doacross_guided_start_real = (int(*)(unsigned, long *, long, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_guided_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_guided_start_real,count);
 
 	/* Obtain @ for GOMP_loop_doacross_runtime_start */
-	GOMP_loop_doacross_runtime_start_real = (int(*)(unsigned, long *, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_doacross_runtime_start");
+	GOMP_loop_doacross_runtime_start_real = (int(*)(unsigned, long *, long *, long *)) GET_REAL_FUNCTION(GOMP_loop_doacross_runtime_start);
 	INC_IF_NOT_NULL(GOMP_loop_doacross_runtime_start_real,count);
 
 	/* Obtain @ for GOMP_doacross_post */
-	GOMP_doacross_post_real = (void(*)(long *)) dlsym (RTLD_NEXT, "GOMP_doacross_post");
+	GOMP_doacross_post_real = (void(*)(long *)) GET_REAL_FUNCTION(GOMP_doacross_post);
 	INC_IF_NOT_NULL(GOMP_doacross_post_real,count);
 
 	/* Obtain @ for GOMP_doacross_wait */
-	GOMP_doacross_wait_real = (void(*)(long, ...)) dlsym (RTLD_NEXT, "GOMP_doacross_wait");
+	GOMP_doacross_wait_real = (void(*)(long, ...)) GET_REAL_FUNCTION(GOMP_doacross_wait);
 	INC_IF_NOT_NULL(GOMP_doacross_wait_real,count);
 
 	/* Any hook point? */

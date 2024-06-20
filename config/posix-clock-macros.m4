@@ -2,7 +2,7 @@
 # -------------------
 AC_DEFUN([AX_CHECK_POSIX_CLOCK],
 [
-   if test "${Architecture}" = "arm" -o "${Architecture}" = "arm64" ; then
+   if test "${Architecture}" = "arm" -o "${Architecture}" = "arm64" -o "${Architecture}" = "sparc"; then
       USE_POSIX_CLOCK="yes"
    else
       USE_POSIX_CLOCK="no"
