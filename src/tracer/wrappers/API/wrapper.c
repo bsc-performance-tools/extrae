@@ -1403,7 +1403,7 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 		Buffer_Free (TracingBuffer[thread_id]);
 
 	LastCPUEmissionTime[thread_id] = 0;
-	LastCPUEvent[thread_id] = 0;
+	LastCPUEvent[thread_id] = -1;
 	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, TRUE);
 	if (TracingBuffer[thread_id] == NULL)
 	{
