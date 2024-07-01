@@ -21,29 +21,41 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef __MISC_PRV_SEMANTICS_H__
-#define __MISC_PRV_SEMANTICS_H__
+#pragma once
 
-#include "record.h"
-#include "semantics.h"
-#include "file_set.h"
+/**
+ * runtime groups
+ */
+enum stats_group
+{
+  WRONG_STATS_GROUP = -1,
+  MPI_STATS_GROUP,
+  OMP_STATS_GROUP,
+  NUM_STATS_GROUPS
+};
 
-extern int MPI_Caller_Multiple_Levels_Traced;
-extern int *MPI_Caller_Labels_Used;
+/**
+ * Statistic object
+ * Every runtime statistic has to have this struct
+ * as a first field in its ownly define struct
+ * in order to allow the retrival of the fields
+ * listed here without the need of casting
+ * 
+ * An statistic object can be used for two purposes 
+ * first to store the acumulated statisics until any given time
+ * and second to store the differences(deltas) when subtracting
+ * two statistic objects of different timestamps
+ */
+typedef struct xtr_stats
+{
+  enum stats_group category; //stores the runtime type
+  void *data; //stores all the statistics of the runtime
+}xtr_stats_t;
 
-extern int Sample_Caller_Multiple_Levels_Traced;
-extern int *Sample_Caller_Labels_Used;
-
-extern int Rusage_Events_Found;
-extern int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
-
-extern int Memusage_Events_Found;
-extern int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
-
-extern int Syscall_Events_Found;
-extern int Syscall_Labels_Used[SYSCALL_EVENTS_COUNT];
-
-extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
-extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];
-
-#endif /* __MISC_PRV_SEMANTICS_H__ */
+/**
+ * Used to create a table with all the statistics ids of a runtime and their descriptions
+ */
+typedef struct stats_info{
+  int id;
+  char *description;
+}stats_info_t;

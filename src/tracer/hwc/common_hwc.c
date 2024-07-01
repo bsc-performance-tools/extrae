@@ -68,8 +68,8 @@ int *HWC_Thread_Initialized;
 
 /* XXX: These buffers should probably be external to this module, 
    and HWC_Accum should receive the buffer as an I/O parameter. */
-long long **Accumulated_HWC;
-int *Accumulated_HWC_Valid; /* Marks whether Accumulated_HWC has valid values */
+long long **Accumulated_HWC = NULL;
+int *Accumulated_HWC_Valid = NULL; /* Marks whether Accumulated_HWC has valid values */
 
 HWC_Set_Count_t *CommonHWCs = NULL; /* To keep track in how many sets each counter appears */
 int              AllHWCs    = 0;    /* Count of all the different counters from all sets   */
@@ -380,7 +380,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 		HWC_Thread_Initialized = (int *) xmalloc_and_zero (sizeof(int) * num_threads);
 
 		Accumulated_HWC_Valid = (int *)xmalloc_and_zero(sizeof(int) * num_threads);
-		Accumulated_HWC = (long long **)xmalloc(sizeof(long long *) * num_threads);
+		Accumulated_HWC = (long long **)xmalloc_and_zero(sizeof(long long *) * num_threads);
 
 		for (i = 0; i < num_threads; i++)
 		{

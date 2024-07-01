@@ -208,26 +208,6 @@ struct memusage_evt_t memusage_evt_labels[MEMUSAGE_EVENTS_COUNT] = {
    { MEMUSAGE_INUSE_EV, MEMUSAGE_INUSE_LBL }
 };
 
-struct mpi_stats_evt_t mpi_stats_evt_labels[MPI_STATS_EVENTS_COUNT] = {
-   /* Original stats */
-   { MPI_STATS_P2P_COUNT_EV, MPI_STATS_P2P_COUNT_LBL },
-   { MPI_STATS_P2P_BYTES_SENT_EV, MPI_STATS_P2P_BYTES_SENT_LBL },
-   { MPI_STATS_P2P_BYTES_RECV_EV, MPI_STATS_P2P_BYTES_RECV_LBL },
-   { MPI_STATS_GLOBAL_COUNT_EV, MPI_STATS_GLOBAL_COUNT_LBL },
-   { MPI_STATS_GLOBAL_BYTES_SENT_EV, MPI_STATS_GLOBAL_BYTES_SENT_LBL },
-   { MPI_STATS_GLOBAL_BYTES_RECV_EV, MPI_STATS_GLOBAL_BYTES_RECV_LBL },
-   { MPI_STATS_TIME_IN_MPI_EV, MPI_STATS_TIME_IN_MPI_LBL },
-   /* New stats */
-   { MPI_STATS_P2P_INCOMING_COUNT_EV, MPI_STATS_P2P_INCOMING_COUNT_LBL },
-   { MPI_STATS_P2P_OUTGOING_COUNT_EV, MPI_STATS_P2P_OUTGOING_COUNT_LBL },
-   { MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV, MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_LBL },
-   { MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV, MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_LBL },
-   { MPI_STATS_TIME_IN_OTHER_EV, MPI_STATS_TIME_IN_OTHER_LBL },
-   { MPI_STATS_TIME_IN_P2P_EV, MPI_STATS_TIME_IN_P2P_LBL },
-   { MPI_STATS_TIME_IN_GLOBAL_EV, MPI_STATS_TIME_IN_GLOBAL_LBL },
-   { MPI_STATS_OTHER_COUNT_EV, MPI_STATS_OTHER_COUNT_LBL } 
-};
-
 struct syscall_evt_t syscall_evt_labels[SYSCALL_EVENTS_COUNT] = {
    { SYSCALL_SCHED_YIELD_EV, SYSCALL_SCHED_YIELD_LBL }
 };
@@ -452,43 +432,13 @@ static void Write_memusage_Labels (FILE * pcf_fd)
    }
 }
 
-static char * MPI_Stats_Event_Label (int mpi_stats_evt)
-{
-   int i;
-
-   for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
-   {
-      if (mpi_stats_evt_labels[i].evt_type == mpi_stats_evt) {
-         return mpi_stats_evt_labels[i].label;
-      }
-   }
-   return "Unknown MPI stats event";
-}
-
-static void Write_MPI_Stats_Labels (FILE * pcf_fd)
-{
-   int i;
-
-   if (MPI_Stats_Events_Found)
-   {
-      fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-
-      for (i=0; i<MPI_STATS_EVENTS_COUNT; i++) {
-         if (MPI_Stats_Labels_Used[i]) {
-            fprintf(pcf_fd, "0    %d    %s\n", MPI_STATS_BASE+i, MPI_Stats_Event_Label(i));
-         }
-      }
-      LET_SPACES (pcf_fd);
-   }
-}
-
 static void Write_Trace_Mode_Labels (FILE * pcf_fd)
 {
 	fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 	fprintf (pcf_fd, "9    %d    %s\n", TRACING_MODE_EV, "Tracing mode:");
 	fprintf (pcf_fd, "%s\n", VALUES_LABEL);
 	fprintf (pcf_fd, "%d      %s\n", TRACE_MODE_DETAIL, "Detailed");
-	fprintf (pcf_fd, "%d      %s\n", TRACE_MODE_BURSTS, "CPU Bursts");
+	fprintf (pcf_fd, "%d      %s\n", TRACE_MODE_BURST, "CPU Bursts");
 	LET_SPACES (pcf_fd);
 }
 
@@ -1083,7 +1033,6 @@ int Labels_GeneratePCFfile (char *name, long long options)
 
 	Write_rusage_Labels (fd);
 	Write_memusage_Labels (fd);
-	Write_MPI_Stats_Labels (fd);
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
 	Write_Spectral_Labels (fd);

@@ -27,6 +27,7 @@
 #include "gomp_helpers.h"
 #include "gomp_probes.h"
 #include "trace_macros.h"
+#include "omp_stats.h"
 
 /**
  * Outlined routines
@@ -36,24 +37,28 @@ void xtr_probe_entry_GOMP_parallel_OL(struct parallel_helper_t *par_helper)
 {
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_REGION_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_start_OL(struct parallel_helper_t *par_helper)
 {
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_REGION_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_start_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_static_OL(struct parallel_helper_t *par_helper)
@@ -61,12 +66,14 @@ void xtr_probe_entry_GOMP_parallel_loop_static_OL(struct parallel_helper_t *par_
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_STATIC_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_static_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_static_start_OL(struct parallel_helper_t *par_helper)
@@ -74,12 +81,14 @@ void xtr_probe_entry_GOMP_parallel_loop_static_start_OL(struct parallel_helper_t
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_STATIC_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_static_start_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_dynamic_OL(struct parallel_helper_t *par_helper)
@@ -87,12 +96,14 @@ void xtr_probe_entry_GOMP_parallel_loop_dynamic_OL(struct parallel_helper_t *par
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_DYNAMIC_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_dynamic_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_dynamic_start_OL(struct parallel_helper_t *par_helper)
@@ -100,12 +111,14 @@ void xtr_probe_entry_GOMP_parallel_loop_dynamic_start_OL(struct parallel_helper_
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_DYNAMIC_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_dynamic_start_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_dynamic_OL(struct parallel_helper_t *par_helper)
@@ -113,12 +126,14 @@ void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_dynamic_OL(struct parallel_
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_DYNAMIC_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_nonmonotonic_dynamic_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_guided_OL(struct parallel_helper_t *par_helper)
@@ -126,12 +141,14 @@ void xtr_probe_entry_GOMP_parallel_loop_guided_OL(struct parallel_helper_t *par_
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_GUIDED_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_guided_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_guided_start_OL(struct parallel_helper_t *par_helper)
@@ -139,12 +156,14 @@ void xtr_probe_entry_GOMP_parallel_loop_guided_start_OL(struct parallel_helper_t
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_GUIDED_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_guided_start_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_guided_OL(struct parallel_helper_t *par_helper)
@@ -152,12 +171,14 @@ void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_guided_OL(struct parallel_h
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_GUIDED_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_nonmonotonic_guided_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_runtime_OL(struct parallel_helper_t *par_helper)
@@ -165,12 +186,14 @@ void xtr_probe_entry_GOMP_parallel_loop_runtime_OL(struct parallel_helper_t *par
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_runtime_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_runtime_start_OL(struct parallel_helper_t *par_helper)
@@ -178,12 +201,14 @@ void xtr_probe_entry_GOMP_parallel_loop_runtime_start_OL(struct parallel_helper_
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_runtime_start_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_maybe_nonmonotonic_runtime_OL(struct parallel_helper_t *par_helper)
@@ -191,12 +216,14 @@ void xtr_probe_entry_GOMP_parallel_loop_maybe_nonmonotonic_runtime_OL(struct par
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_maybe_nonmonotonic_runtime_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_runtime_OL(struct parallel_helper_t *par_helper)
@@ -204,42 +231,50 @@ void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_runtime_OL(struct parallel_
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_nonmonotonic_runtime_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_task_OL(struct task_helper_t *task_helper)
 {
 	Extrae_OpenMP_Task_Exec_Entry(NEW_OMP_TASK_EXEC_VAL, task_helper->fn, task_helper->id);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_task_OL()
 {
 	Extrae_OpenMP_Task_Exec_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_taskloop_OL(struct taskloop_helper_t *taskloop_helper)
 {
 	Extrae_OpenMP_Task_Exec_Entry(NEW_OMP_TASKLOOP_EXEC_VAL, taskloop_helper->fn, taskloop_helper->id);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_taskloop_OL()
 {
 	Extrae_OpenMP_Task_Exec_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_taskloop_ull_OL(struct taskloop_helper_t *taskloop_helper)
 {
 	Extrae_OpenMP_Task_Exec_Entry(NEW_OMP_TASKLOOP_EXEC_VAL, taskloop_helper->fn, taskloop_helper->id);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_taskloop_ull_OL()
 {
 	Extrae_OpenMP_Task_Exec_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_sections_OL(struct parallel_helper_t *par_helper)
@@ -247,12 +282,14 @@ void xtr_probe_entry_GOMP_parallel_sections_OL(struct parallel_helper_t *par_hel
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_SECTIONS_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_SECTION_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_sections_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_sections_start_OL(struct parallel_helper_t *par_helper)
@@ -260,24 +297,28 @@ void xtr_probe_entry_GOMP_parallel_sections_start_OL(struct parallel_helper_t *p
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_SECTIONS_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_SECTION_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_sections_start_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 void xtr_probe_entry_GOMP_teams_reg_OL(struct parallel_helper_t *par_helper)
 {
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_TEAMS_VAL);
 	Extrae_OpenMP_Outlined_Entry(par_helper->fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_exit_GOMP_teams_reg_OL()
 {
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 /**
@@ -288,12 +329,14 @@ void xtr_probe_entry_GOMP_barrier()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_BARRIER_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_BARRIER_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_barrier()
 {
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_BARRIER_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 /**
@@ -308,6 +351,7 @@ void xtr_probe_entry_GOMP_critical_start()
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_START_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_CRITICAL_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 
@@ -317,6 +361,7 @@ void xtr_probe_exit_GOMP_critical_start()
 	{
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_TAKEN_VAL);
 		Extrae_OpenMP_Call_Exit(GOMP_CRITICAL_START_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 
@@ -326,6 +371,7 @@ void xtr_probe_entry_GOMP_critical_end()
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_END_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 
@@ -336,6 +382,7 @@ void xtr_probe_exit_GOMP_critical_end()
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_RELEASED_VAL);
 		Extrae_OpenMP_Sync_Exit();
 		Extrae_OpenMP_Call_Exit(GOMP_CRITICAL_END_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 
@@ -346,6 +393,7 @@ void xtr_probe_entry_GOMP_critical_name_start(void **pptr)
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_NAME_START_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_CRITICAL_NAMED_VAL);
 		Extrae_OpenMP_Lock_Status(pptr, NEW_OMP_LOCK_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 
@@ -355,6 +403,7 @@ void xtr_probe_exit_GOMP_critical_name_start(void **pptr)
 	{
 		Extrae_OpenMP_Lock_Status(pptr, NEW_OMP_LOCK_TAKEN_VAL);
 		Extrae_OpenMP_Call_Exit(GOMP_CRITICAL_NAME_START_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 
@@ -364,6 +413,7 @@ void xtr_probe_entry_GOMP_critical_name_end(void **pptr)
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_NAME_END_VAL);
 		Extrae_OpenMP_Lock_Status(pptr, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 
@@ -374,6 +424,7 @@ void xtr_probe_exit_GOMP_critical_name_end(void **pptr)
 		Extrae_OpenMP_Lock_Status(pptr, NEW_OMP_LOCK_RELEASED_VAL);
 		Extrae_OpenMP_Sync_Exit();
 		Extrae_OpenMP_Call_Exit(GOMP_CRITICAL_NAME_END_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 
@@ -384,6 +435,7 @@ void xtr_probe_entry_GOMP_atomic_start()
 		Extrae_OpenMP_Call_Entry(GOMP_ATOMIC_START_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_ATOMIC_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 
@@ -393,6 +445,7 @@ void xtr_probe_exit_GOMP_atomic_start()
 	{
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_TAKEN_VAL);
 		Extrae_OpenMP_Call_Exit(GOMP_ATOMIC_START_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 
@@ -402,6 +455,7 @@ void xtr_probe_entry_GOMP_atomic_end()
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_ATOMIC_END_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 
@@ -412,6 +466,7 @@ void xtr_probe_exit_GOMP_atomic_end()
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_RELEASED_VAL);
 		Extrae_OpenMP_Sync_Exit();
 		Extrae_OpenMP_Call_Exit(GOMP_ATOMIC_END_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 
@@ -424,12 +479,14 @@ void xtr_probe_entry_GOMP_loop_static_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_STATIC_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_STATIC_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_static_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_STATIC_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_dynamic_start()
@@ -437,12 +494,14 @@ void xtr_probe_entry_GOMP_loop_dynamic_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_DYNAMIC_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_DYNAMIC_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_dynamic_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_DYNAMIC_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_guided_start()
@@ -450,12 +509,14 @@ void xtr_probe_entry_GOMP_loop_guided_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_GUIDED_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_GUIDED_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_guided_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_GUIDED_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_runtime_start()
@@ -463,12 +524,14 @@ void xtr_probe_entry_GOMP_loop_runtime_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_RUNTIME_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_runtime_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_RUNTIME_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_nonmonotonic_dynamic_start()
@@ -476,12 +539,14 @@ void xtr_probe_entry_GOMP_loop_nonmonotonic_dynamic_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_NONMONOTONIC_DYNAMIC_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_DYNAMIC_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_nonmonotonic_dynamic_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_NONMONOTONIC_DYNAMIC_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_nonmonotonic_guided_start()
@@ -489,12 +554,14 @@ void xtr_probe_entry_GOMP_loop_nonmonotonic_guided_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_NONMONOTONIC_GUIDED_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_GUIDED_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_nonmonotonic_guided_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_NONMONOTONIC_GUIDED_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_nonmonotonic_runtime_start()
@@ -502,12 +569,14 @@ void xtr_probe_entry_GOMP_loop_nonmonotonic_runtime_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_NONMONOTONIC_RUNTIME_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_nonmonotonic_runtime_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_NONMONOTONIC_RUNTIME_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_maybe_nonmonotonic_runtime_start()
@@ -515,12 +584,14 @@ void xtr_probe_entry_GOMP_loop_maybe_nonmonotonic_runtime_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_maybe_nonmonotonic_runtime_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_static_start()
@@ -528,12 +599,14 @@ void xtr_probe_entry_GOMP_loop_ordered_static_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_STATIC_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_ORDERED_STATIC_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_static_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_STATIC_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_dynamic_start()
@@ -541,12 +614,14 @@ void xtr_probe_entry_GOMP_loop_ordered_dynamic_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_DYNAMIC_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_ORDERED_DYNAMIC_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_dynamic_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_DYNAMIC_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_guided_start()
@@ -554,12 +629,14 @@ void xtr_probe_entry_GOMP_loop_ordered_guided_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_GUIDED_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_ORDERED_GUIDED_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_guided_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_GUIDED_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_runtime_start()
@@ -567,156 +644,182 @@ void xtr_probe_entry_GOMP_loop_ordered_runtime_start()
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_RUNTIME_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_ORDERED_RUNTIME_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_runtime_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_RUNTIME_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_static_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_STATIC_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_static_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_STATIC_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_dynamic_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_DYNAMIC_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_dynamic_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_DYNAMIC_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_guided_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_GUIDED_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_guided_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_GUIDED_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_runtime_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_RUNTIME_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_runtime_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_RUNTIME_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_nonmonotonic_dynamic_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_NONMONOTONIC_DYNAMIC_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_nonmonotonic_dynamic_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_NONMONOTONIC_DYNAMIC_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_nonmonotonic_guided_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_NONMONOTONIC_GUIDED_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_nonmonotonic_guided_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_NONMONOTONIC_GUIDED_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_nonmonotonic_runtime_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_NONMONOTONIC_RUNTIME_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_nonmonotonic_runtime_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_NONMONOTONIC_RUNTIME_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_maybe_nonmonotonic_runtime_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_maybe_nonmonotonic_runtime_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_static_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_STATIC_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_static_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_STATIC_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_dynamic_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_DYNAMIC_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_dynamic_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_DYNAMIC_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_guided_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_GUIDED_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_guided_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_GUIDED_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_ordered_runtime_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_ORDERED_RUNTIME_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_ordered_runtime_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_ORDERED_RUNTIME_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_doacross_static_start(unsigned ncounts)
@@ -725,12 +828,14 @@ void xtr_probe_entry_GOMP_loop_doacross_static_start(unsigned ncounts)
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_DOACROSS_STATIC_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DOACROSS_STATIC_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_doacross_static_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_DOACROSS_STATIC_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_doacross_dynamic_start(unsigned ncounts)
@@ -739,12 +844,14 @@ void xtr_probe_entry_GOMP_loop_doacross_dynamic_start(unsigned ncounts)
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_DOACROSS_DYNAMIC_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DOACROSS_DYNAMIC_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_doacross_dynamic_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_DOACROSS_DYNAMIC_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_doacross_guided_start(unsigned ncounts)
@@ -753,12 +860,14 @@ void xtr_probe_entry_GOMP_loop_doacross_guided_start(unsigned ncounts)
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_DOACROSS_GUIDED_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DOACROSS_GUIDED_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_doacross_guided_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_DOACROSS_GUIDED_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_doacross_runtime_start(unsigned ncounts)
@@ -767,18 +876,21 @@ void xtr_probe_entry_GOMP_loop_doacross_runtime_start(unsigned ncounts)
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_DOACROSS_RUNTIME_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DOACROSS_RUNTIME_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_doacross_runtime_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_DOACROSS_RUNTIME_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_static_start()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_STATIC_START_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_static_start(const void *outlined_fn)
@@ -787,12 +899,14 @@ void xtr_probe_exit_GOMP_parallel_loop_static_start(const void *outlined_fn)
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_STATIC_VAL);
 	Extrae_OpenMP_Outlined_Entry(outlined_fn);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_dynamic_start()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_DYNAMIC_START_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_dynamic_start(const void *outlined_fn)
@@ -801,12 +915,14 @@ void xtr_probe_exit_GOMP_parallel_loop_dynamic_start(const void *outlined_fn)
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_DYNAMIC_VAL);
 	Extrae_OpenMP_Outlined_Entry(outlined_fn);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_guided_start()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_GUIDED_START_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_guided_start(const void *outlined_fn)
@@ -815,12 +931,14 @@ void xtr_probe_exit_GOMP_parallel_loop_guided_start(const void *outlined_fn)
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_GUIDED_VAL);
 	Extrae_OpenMP_Outlined_Entry(outlined_fn);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_runtime_start()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_RUNTIME_START_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_runtime_start(const void *outlined_fn)
@@ -829,108 +947,126 @@ void xtr_probe_exit_GOMP_parallel_loop_runtime_start(const void *outlined_fn)
 	Extrae_OpenMP_Parallel_Entry(NEW_OMP_PARALLEL_LOOP_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_DO_RUNTIME_VAL);
 	Extrae_OpenMP_Outlined_Entry(outlined_fn);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_static()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_STATIC_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_static()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_STATIC_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_dynamic()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_DYNAMIC_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_dynamic()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_DYNAMIC_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_guided()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_GUIDED_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_guided()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_GUIDED_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_runtime()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_RUNTIME_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_runtime()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_RUNTIME_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_dynamic()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_NONMONOTONIC_DYNAMIC_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_nonmonotonic_dynamic()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_NONMONOTONIC_DYNAMIC_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_guided()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_NONMONOTONIC_GUIDED_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_nonmonotonic_guided()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_NONMONOTONIC_GUIDED_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_nonmonotonic_runtime()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_NONMONOTONIC_RUNTIME_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_nonmonotonic_runtime()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_NONMONOTONIC_RUNTIME_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_loop_maybe_nonmonotonic_runtime()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_LOOP_MAYBE_NONMONOTONIC_RUNTIME_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_LOOP_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_loop_maybe_nonmonotonic_runtime()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_LOOP_MAYBE_NONMONOTONIC_RUNTIME_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_end()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_END_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_JOIN_WAIT_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_end()
@@ -938,12 +1074,14 @@ void xtr_probe_exit_GOMP_loop_end()
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Worksharing_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_END_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 void xtr_probe_entry_GOMP_loop_end_nowait()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_END_NOWAIT_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_JOIN_NOWAIT_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_end_nowait() 
@@ -951,6 +1089,7 @@ void xtr_probe_exit_GOMP_loop_end_nowait()
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Worksharing_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_LOOP_END_NOWAIT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 /**
@@ -964,6 +1103,7 @@ void xtr_probe_entry_GOMP_ordered_start()
 		Extrae_OpenMP_Call_Entry(GOMP_ORDERED_START_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_ORDERED_VAL);
 		Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_WAIT_START_VAL);
+		xtr_stats_OMP_update_overhead_entry();
 	}
 }
 
@@ -973,6 +1113,7 @@ void xtr_probe_exit_GOMP_ordered_start()
 	{
 		Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_WAIT_OVER_VAL);
 		Extrae_OpenMP_Call_Exit(GOMP_ORDERED_START_VAL);
+		xtr_stats_OMP_update_overhead_exit();
 	}
 }
 
@@ -982,6 +1123,7 @@ void xtr_probe_entry_GOMP_ordered_end()
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_ORDERED_END_VAL);
 		Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_POST_START_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 
@@ -992,6 +1134,7 @@ void xtr_probe_exit_GOMP_ordered_end()
 		Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_POST_READY_VAL);
 		Extrae_OpenMP_Sync_Exit();
 		Extrae_OpenMP_Call_Exit(GOMP_ORDERED_END_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 
@@ -1004,6 +1147,7 @@ void xtr_probe_entry_GOMP_doacross_post()
 	Extrae_OpenMP_Call_Entry(GOMP_DOACROSS_POST_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_POST_VAL);
 	Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_POST_START_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_doacross_post()
@@ -1011,6 +1155,7 @@ void xtr_probe_exit_GOMP_doacross_post()
 	Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_POST_READY_VAL);
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_DOACROSS_POST_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 void xtr_probe_entry_GOMP_doacross_wait()
@@ -1018,6 +1163,7 @@ void xtr_probe_entry_GOMP_doacross_wait()
 	Extrae_OpenMP_Call_Entry(GOMP_DOACROSS_WAIT_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_WAIT_VAL);
 	Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_WAIT_START_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_doacross_wait()
@@ -1025,6 +1171,7 @@ void xtr_probe_exit_GOMP_doacross_wait()
 	Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_WAIT_OVER_VAL);
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_DOACROSS_WAIT_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 /**
@@ -1035,6 +1182,7 @@ void xtr_probe_entry_GOMP_parallel_start()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_START_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_REGION_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 
@@ -1049,6 +1197,7 @@ void xtr_probe_exit_GOMP_parallel_start(const void *outlined_fn)
 	 * so the master thread must emit this event directly 
 	 */
 	Extrae_OpenMP_Outlined_Entry(outlined_fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 /* GCC4 ONLY */
@@ -1057,6 +1206,7 @@ void xtr_probe_entry_GOMP_parallel_end()
 	Extrae_OpenMP_Outlined_Exit();
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_END_VAL);
 	Extrae_OpenMP_Parallel_Exit();
+	xtr_stats_OMP_update_par_OL_exit();
 }
 
 /* GCC4 ONLY */
@@ -1064,18 +1214,21 @@ void xtr_probe_exit_GOMP_parallel_end()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_END_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_REGION_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel()
 {
 	Extrae_OpenMP_Forking_Exit(NEW_OMP_FORK_END_VAL);
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 /**
@@ -1086,12 +1239,14 @@ void xtr_probe_entry_GOMP_task(struct task_helper_t *task_helper)
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASK_VAL);
 	Extrae_OpenMP_Task_Inst_Entry(task_helper->fn, task_helper->id);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_task()
 {
 	Extrae_OpenMP_Task_Inst_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_TASK_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 /**
@@ -1102,36 +1257,42 @@ void xtr_probe_entry_GOMP_taskloop(struct taskloop_helper_t *taskloop_helper, in
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKLOOP_VAL);
 	Extrae_OpenMP_Taskloop_Entry(taskloop_helper->fn, taskloop_helper->id, num_tasks);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_taskloop()
 {
 	Extrae_OpenMP_Taskloop_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_TASKLOOP_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_taskloop_ull(struct taskloop_helper_t *taskloop_helper, int num_tasks)
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKLOOP_VAL);
 	Extrae_OpenMP_Taskloop_Entry(taskloop_helper->fn, taskloop_helper->id, num_tasks);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_taskloop_ull()
 {
 	Extrae_OpenMP_Taskloop_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_TASKLOOP_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_taskwait()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKWAIT_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_TASKWAIT_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_taskwait()
 {
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_TASKWAIT_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 /**
@@ -1143,18 +1304,21 @@ void xtr_probe_entry_GOMP_taskgroup_start()
 	Extrae_OpenMP_Call_Entry(GOMP_TASKGROUP_START_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_TASKGROUP_VAL);
 	Extrae_OpenMP_Taskgroup(NEW_OMP_TASKGROUP_OPENING_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_taskgroup_start()
 {
 	Extrae_OpenMP_Taskgroup(NEW_OMP_TASKGROUP_ENTERING_VAL);
 	Extrae_OpenMP_Call_Exit(GOMP_TASKGROUP_START_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 void xtr_probe_entry_GOMP_taskgroup_end()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKGROUP_END_VAL);
 	Extrae_OpenMP_Taskgroup(NEW_OMP_TASKGROUP_WAITING_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_taskgroup_end()
@@ -1162,6 +1326,7 @@ void xtr_probe_exit_GOMP_taskgroup_end()
 	Extrae_OpenMP_Taskgroup(NEW_OMP_TASKGROUP_END_VAL);
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_TASKGROUP_END_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 /**
@@ -1173,30 +1338,35 @@ void xtr_probe_entry_GOMP_sections_start()
 	Extrae_OpenMP_Call_Entry(GOMP_SECTIONS_START_VAL);
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_SECTION_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_sections_start()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_SECTIONS_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_sections_next()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_SECTIONS_NEXT_VAL);
 	Extrae_OpenMP_Chunk_Entry();
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_sections_next()
 {
 	Extrae_OpenMP_Chunk_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_SECTIONS_NEXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_parallel_sections_start()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_SECTIONS_START_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_SECTIONS_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_sections_start(const void *outlined_fn)
@@ -1210,24 +1380,28 @@ void xtr_probe_exit_GOMP_parallel_sections_start(const void *outlined_fn)
 	 * so the master thread must emit this event directly 
 	 */
 	Extrae_OpenMP_Outlined_Entry(outlined_fn);
+	xtr_stats_OMP_update_par_OL_entry();
 }
 
 void xtr_probe_entry_GOMP_parallel_sections()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_PARALLEL_SECTIONS_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_PARALLEL_SECTIONS_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_parallel_sections()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_SECTIONS_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 void xtr_probe_entry_GOMP_sections_end()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_SECTIONS_END_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_JOIN_WAIT_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_sections_end()
@@ -1235,12 +1409,14 @@ void xtr_probe_exit_GOMP_sections_end()
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Worksharing_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_SECTIONS_END_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
 }
 
 void xtr_probe_entry_GOMP_sections_end_nowait()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_SECTIONS_END_NOWAIT_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_JOIN_NOWAIT_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_sections_end_nowait()
@@ -1248,6 +1424,7 @@ void xtr_probe_exit_GOMP_sections_end_nowait()
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Worksharing_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_SECTIONS_END_NOWAIT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 /*
@@ -1264,12 +1441,14 @@ void xtr_probe_entry_GOMP_single_start()
 	 * corresponding GOMP_*_end call.
 	 */
 	Extrae_OpenMP_Worksharing_Entry(NEW_OMP_WSH_SINGLE_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_single_start()
 {
 	Extrae_OpenMP_Worksharing_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_SINGLE_START_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 /**
@@ -1280,12 +1459,14 @@ void xtr_probe_entry_GOMP_teams_reg()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TEAMS_REG_VAL);
 	Extrae_OpenMP_Forking_Entry(NEW_OMP_TEAMS_FORK_VAL);
+	xtr_stats_OMP_update_overhead_entry();
 }
 
 void xtr_probe_exit_GOMP_teams_reg()
 {
 	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_TEAMS_REG_VAL);
+	xtr_stats_OMP_update_overhead_exit();
 }
 
 /**
@@ -1297,7 +1478,7 @@ void xtr_probe_exit_omp_set_num_threads(int num_threads)
 	Backend_ChangeNumberOfThreads(num_threads);
 }
 
-void xtr_probe_exit_omp_set_num_threads_( void * ) __attribute__ ((alias( "xtr_probe_exit_omp_set_num_threads" )));
+void xtr_probe_exit_omp_set_num_threads_( int ) __attribute__ ((alias( "xtr_probe_exit_omp_set_num_threads" )));
 
 /**
  * omp_set_lock
@@ -1311,6 +1492,7 @@ void xtr_probe_entry_omp_set_lock(void *lock)
 		Extrae_OpenMP_Call_Entry(GOMP_SET_LOCK_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_CRITICAL_NAMED_VAL);
 		Extrae_OpenMP_Lock_Status(lock, NEW_OMP_LOCK_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 void xtr_probe_entry_omp_set_lock_( void * ) __attribute__ ((alias( "xtr_probe_entry_omp_set_lock" )));
@@ -1321,6 +1503,7 @@ void xtr_probe_exit_omp_set_lock(void *lock)
 	{
 		Extrae_OpenMP_Lock_Status(lock, NEW_OMP_LOCK_TAKEN_VAL);
 		Extrae_OpenMP_Call_Exit(GOMP_SET_LOCK_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 void xtr_probe_exit_omp_set_lock_( void * ) __attribute__ ((alias( "xtr_probe_exit_omp_set_lock" )));
@@ -1331,6 +1514,7 @@ void xtr_probe_entry_omp_unset_lock(void *lock)
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_UNSET_LOCK_VAL);
 		Extrae_OpenMP_Lock_Status(lock, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
+		xtr_stats_update_OMP_synchronization_entry();
 	}
 }
 void xtr_probe_entry_omp_unset_lock_( void * ) __attribute__ ((alias( "xtr_probe_entry_omp_unset_lock" )));
@@ -1342,6 +1526,7 @@ void xtr_probe_exit_omp_unset_lock(void *lock)
 		Extrae_OpenMP_Lock_Status(lock, NEW_OMP_LOCK_RELEASED_VAL);
 		Extrae_OpenMP_Sync_Exit();
 		Extrae_OpenMP_Call_Exit(GOMP_UNSET_LOCK_VAL);
+		xtr_stats_OMP_update_synchronization_exit();
 	}
 }
 void xtr_probe_exit_omp_unset_lock_( void * ) __attribute__ ((alias( "xtr_probe_exit_omp_unset_lock" )));

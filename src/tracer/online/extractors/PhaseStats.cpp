@@ -37,7 +37,7 @@ using std::make_pair;
 
 PhaseStats::PhaseStats(int num_tasks)
 {
-  MPI_Stats = mpi_stats_init( num_tasks );
+  // MPI_Stats = mpi_stats_init( num_tasks );
 
 #if USE_HARDWARE_COUNTERS && defined(BACKEND)
   HWC_Stats.clear();
@@ -62,7 +62,7 @@ PhaseStats::PhaseStats(int num_tasks)
 
 PhaseStats::~PhaseStats()
 {
-  mpi_stats_free( MPI_Stats );
+  // mpi_stats_free( MPI_Stats );
 }
 
 void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
@@ -74,178 +74,177 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
 
   if ((MPIBeginEv != NULL) && (MPIEndEv != NULL))
   {
-    EvType = Get_EvEvent(MPIBeginEv);
-    switch(EvType)
-    {
-      /* Peer-to-peer */
-      case MPI_BSEND_EV:
-      case MPI_SSEND_EV:
-      case MPI_RSEND_EV:
-      case MPI_SEND_EV:
-      case MPI_IBSEND_EV:
-      case MPI_ISEND_EV:
-      case MPI_ISSEND_EV:
-      case MPI_IRSEND_EV:
-        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), 0, Get_EvSize(MPIEndEv) );
-        break;
-      case MPI_RECV_EV:
-        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
-        break;
-      case MPI_SENDRECV_EV:
-      case MPI_SENDRECV_REPLACE_EV:
-        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIBeginEv), 0, Get_EvSize(MPIBeginEv) );
-        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
-        break;
+    // EvType = Get_EvEvent(MPIBeginEv);
+    // switch(EvType)
+    // {
+    //   /* Peer-to-peer */
+    //   case MPI_BSEND_EV:
+    //   case MPI_SSEND_EV:
+    //   case MPI_RSEND_EV:
+    //   case MPI_SEND_EV:
+    //   case MPI_IBSEND_EV:
+    //   case MPI_ISEND_EV:
+    //   case MPI_ISSEND_EV:
+    //   case MPI_IRSEND_EV:
+    //     updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), 0, Get_EvSize(MPIEndEv) );
+    //     break;
+    //   case MPI_RECV_EV:
+    //     updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
+    //     break;
+    //   case MPI_SENDRECV_EV:
+    //   case MPI_SENDRECV_REPLACE_EV:
+    //     updateStats_P2P( MPI_Stats, Get_EvTarget(MPIBeginEv), 0, Get_EvSize(MPIBeginEv) );
+    //     updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
+    //     break;
       
-      /* Collectives */
-      case MPI_REDUCE_EV:
-        me   = Get_EvTag(MPIBeginEv);
-        root = Get_EvAux(MPIBeginEv);
-        if (me == root)
-          updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), 0);
-        else
-          updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv));
-        break;
+    //   /* Collectives */
+    //   case MPI_REDUCE_EV:
+    //     me   = Get_EvTag(MPIBeginEv);
+    //     root = Get_EvAux(MPIBeginEv);
+    //     if (me == root)
+    //       updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), 0);
+    //     else
+    //       updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv));
+    //     break;
   
-      case MPI_ALLREDUCE_EV:
-        updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), Get_EvSize(MPIBeginEv) );
-        break;
+    //   case MPI_ALLREDUCE_EV:
+    //     updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), Get_EvSize(MPIBeginEv) );
+    //     break;
   
-      case MPI_BARRIER_EV:
-        updateStats_COLLECTIVE( MPI_Stats, 0, 0 );
-        break;
+    //   case MPI_BARRIER_EV:
+    //     updateStats_COLLECTIVE( MPI_Stats, 0, 0 );
+    //     break;
       
-      case MPI_BCAST_EV:
-        me   = Get_EvTag(MPIBeginEv);
-        root = Get_EvTarget(MPIBeginEv);
-        if (me == root)
-          updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv));
-        else
-          updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), 0);
-        break;
+    //   case MPI_BCAST_EV:
+    //     me   = Get_EvTag(MPIBeginEv);
+    //     root = Get_EvTarget(MPIBeginEv);
+    //     if (me == root)
+    //       updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv));
+    //     else
+    //       updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), 0);
+    //     break;
     
-      case MPI_ALLTOALL_EV:
-      case MPI_ALLTOALLV_EV:
-      case MPI_IALLTOALLW_EV:
-        updateStats_COLLECTIVE( MPI_Stats, Get_EvTarget(MPIBeginEv), Get_EvSize(MPIBeginEv) );
-        break;
+    //   case MPI_ALLTOALL_EV:
+    //   case MPI_ALLTOALLV_EV:
+    //   case MPI_IALLTOALLW_EV:
+    //     updateStats_COLLECTIVE( MPI_Stats, Get_EvTarget(MPIBeginEv), Get_EvSize(MPIBeginEv) );
+    //     break;
   
-      case MPI_ALLGATHER_EV:
-      case MPI_ALLGATHERV_EV:
-        updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), Get_EvSize(MPIBeginEv) );
-        break;
+    //   case MPI_ALLGATHER_EV:
+    //   case MPI_ALLGATHERV_EV:
+    //     updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), Get_EvSize(MPIBeginEv) );
+    //     break;
 
-      case MPI_GATHER_EV:
-      case MPI_GATHERV_EV:
-        me   = Get_EvTag(MPIBeginEv);
-        root = Get_EvTarget(MPIBeginEv);
-        if (me == root)
-          updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), 0);
-        else
-          updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv) );
-        break;
+    //   case MPI_GATHER_EV:
+    //   case MPI_GATHERV_EV:
+    //     me   = Get_EvTag(MPIBeginEv);
+    //     root = Get_EvTarget(MPIBeginEv);
+    //     if (me == root)
+    //       updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), 0);
+    //     else
+    //       updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv) );
+    //     break;
   
-      case MPI_SCATTER_EV:
-      case MPI_SCATTERV_EV:
-        me   = Get_EvTag(MPIBeginEv);
-        root = Get_EvTarget(MPIBeginEv);
-        if (me == root)
-          updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv) );
-        else
-          updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), 0 );
-        break;
+    //   case MPI_SCATTER_EV:
+    //   case MPI_SCATTERV_EV:
+    //     me   = Get_EvTag(MPIBeginEv);
+    //     root = Get_EvTarget(MPIBeginEv);
+    //     if (me == root)
+    //       updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv) );
+    //     else
+    //       updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), 0 );
+    //     break;
   
-      case MPI_REDUCESCAT_EV: 
-        me   = Get_EvTag(MPIBeginEv);
-        if (me == 0)
-          updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), Get_EvSize(MPIBeginEv) );
-        else
-          updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), Get_EvSize(MPIBeginEv) );
-        break;
+    //   case MPI_REDUCESCAT_EV: 
+    //     me   = Get_EvTag(MPIBeginEv);
+    //     if (me == 0)
+    //       updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), Get_EvSize(MPIBeginEv) );
+    //     else
+    //       updateStats_COLLECTIVE( MPI_Stats, Get_EvAux(MPIBeginEv), Get_EvSize(MPIBeginEv) );
+    //     break;
   
-      case MPI_SCAN_EV:
-        me    = Get_EvTag(MPIBeginEv);
-        csize = Get_EvSize(MPIEndEv);
-        if (me == csize - 1)
-          updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv) );
-        else
-          updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), 0 );
-        break;
+    //   case MPI_SCAN_EV:
+    //     me    = Get_EvTag(MPIBeginEv);
+    //     csize = Get_EvSize(MPIEndEv);
+    //     if (me == csize - 1)
+    //       updateStats_COLLECTIVE( MPI_Stats, 0, Get_EvSize(MPIBeginEv) );
+    //     else
+    //       updateStats_COLLECTIVE( MPI_Stats, Get_EvSize(MPIBeginEv), 0 );
+    //     break;
   
-      /* Others */
-      case MPI_INIT_EV:
-      case MPI_PROBE_EV:
-      case MPI_CANCEL_EV:
-      case MPI_COMM_RANK_EV:
-      case MPI_COMM_SIZE_EV:
-      case MPI_COMM_CREATE_EV:
-      case MPI_COMM_CREATE_GROUP_EV:
-      case MPI_COMM_FREE_EV:
-      case MPI_COMM_DUP_EV:
-      case MPI_COMM_DUP_WITH_INFO_EV:
-      case MPI_COMM_SPLIT_EV:
-      case MPI_COMM_SPLIT_TYPE_EV:
-      case MPI_COMM_SPAWN_EV:
-      case MPI_REQUEST_FREE_EV:
-      case MPI_RECV_INIT_EV:
-      case MPI_SEND_INIT_EV:
-      case MPI_BSEND_INIT_EV:
-      case MPI_RSEND_INIT_EV:
-      case MPI_SSEND_INIT_EV:
-      case MPI_CART_SUB_EV:
-      case MPI_CART_CREATE_EV:
-      case MPI_FILE_OPEN_EV:
-      case MPI_FILE_CLOSE_EV:
-      case MPI_FILE_READ_EV:
-      case MPI_FILE_READ_ALL_EV:
-      case MPI_FILE_READ_ALL_BEGIN_EV:
-      case MPI_FILE_READ_ALL_END_EV:
-      case MPI_FILE_READ_AT_EV:
-      case MPI_FILE_READ_AT_ALL_EV:
-      case MPI_FILE_READ_AT_ALL_BEGIN_EV:
-      case MPI_FILE_READ_AT_ALL_END_EV:
-      case MPI_FILE_READ_ORDERED_EV:
-      case MPI_FILE_READ_ORDERED_BEGIN_EV:
-      case MPI_FILE_READ_ORDERED_END_EV:
-      case MPI_FILE_READ_SHARED_EV:
-      case MPI_FILE_WRITE_EV:
-      case MPI_FILE_WRITE_ALL_EV:
-      case MPI_FILE_WRITE_ALL_BEGIN_EV:
-      case MPI_FILE_WRITE_ALL_END_EV:
-      case MPI_FILE_WRITE_AT_EV:
-      case MPI_FILE_WRITE_AT_ALL_EV:
-      case MPI_FILE_WRITE_AT_ALL_BEGIN_EV:
-      case MPI_FILE_WRITE_AT_ALL_END_EV:
-      case MPI_FILE_WRITE_ORDERED_EV:
-      case MPI_FILE_WRITE_ORDERED_BEGIN_EV:
-      case MPI_FILE_WRITE_ORDERED_END_EV:
-      case MPI_FILE_WRITE_SHARED_EV:
-      case MPI_GET_EV:
-      case MPI_PUT_EV:
-      case MPI_FINALIZE_EV:
-        updateStats_OTHER( MPI_Stats );
-      break;
-    }
-    /* Update the time in MPI */
-    mpi_stats_update_elapsed_time( MPI_Stats, EvType, Get_EvTime(MPIEndEv) - Get_EvTime(MPIBeginEv) );
+    //   /* Others */
+    //   case MPI_INIT_EV:
+    //   case MPI_PROBE_EV:
+    //   case MPI_CANCEL_EV:
+    //   case MPI_COMM_RANK_EV:
+    //   case MPI_COMM_SIZE_EV:
+    //   case MPI_COMM_CREATE_EV:
+    //   case MPI_COMM_FREE_EV:
+    //   case MPI_COMM_DUP_EV:
+    //   case MPI_COMM_DUP_WITH_INFO_EV:
+    //   case MPI_COMM_SPLIT_EV:
+    //   case MPI_COMM_SPLIT_TYPE_EV:
+    //   case MPI_COMM_SPAWN_EV:
+    //   case MPI_REQUEST_FREE_EV:
+    //   case MPI_RECV_INIT_EV:
+    //   case MPI_SEND_INIT_EV:
+    //   case MPI_BSEND_INIT_EV:
+    //   case MPI_RSEND_INIT_EV:
+    //   case MPI_SSEND_INIT_EV:
+    //   case MPI_CART_SUB_EV:
+    //   case MPI_CART_CREATE_EV:
+    //   case MPI_FILE_OPEN_EV:
+    //   case MPI_FILE_CLOSE_EV:
+    //   case MPI_FILE_READ_EV:
+    //   case MPI_FILE_READ_ALL_EV:
+    //   case MPI_FILE_READ_ALL_BEGIN_EV:
+    //   case MPI_FILE_READ_ALL_END_EV:
+    //   case MPI_FILE_READ_AT_EV:
+    //   case MPI_FILE_READ_AT_ALL_EV:
+    //   case MPI_FILE_READ_AT_ALL_BEGIN_EV:
+    //   case MPI_FILE_READ_AT_ALL_END_EV:
+    //   case MPI_FILE_READ_ORDERED_EV:
+    //   case MPI_FILE_READ_ORDERED_BEGIN_EV:
+    //   case MPI_FILE_READ_ORDERED_END_EV:
+    //   case MPI_FILE_READ_SHARED_EV:
+    //   case MPI_FILE_WRITE_EV:
+    //   case MPI_FILE_WRITE_ALL_EV:
+    //   case MPI_FILE_WRITE_ALL_BEGIN_EV:
+    //   case MPI_FILE_WRITE_ALL_END_EV:
+    //   case MPI_FILE_WRITE_AT_EV:
+    //   case MPI_FILE_WRITE_AT_ALL_EV:
+    //   case MPI_FILE_WRITE_AT_ALL_BEGIN_EV:
+    //   case MPI_FILE_WRITE_AT_ALL_END_EV:
+    //   case MPI_FILE_WRITE_ORDERED_EV:
+    //   case MPI_FILE_WRITE_ORDERED_BEGIN_EV:
+    //   case MPI_FILE_WRITE_ORDERED_END_EV:
+    //   case MPI_FILE_WRITE_SHARED_EV:
+    //   case MPI_GET_EV:
+    //   case MPI_PUT_EV:
+    //   case MPI_FINALIZE_EV:
+    //     updateStats_OTHER( MPI_Stats );
+    //   break;
+    // }
+    // /* Update the time in MPI */
+    // mpi_stats_update_elapsed_time( MPI_Stats, EvType, Get_EvTime(MPIEndEv) - Get_EvTime(MPIBeginEv) );
   }
 }
 
 void PhaseStats::UpdateMPI(event_t *SingleMPIEv)
 {
-  unsigned int EvType = Get_EvEvent(SingleMPIEv);
-  switch(EvType)
-  {
-    case MPI_IRECVED_EV: /* TEST*, WAIT* */
-      updateStats_P2P( MPI_Stats, Get_EvTarget(SingleMPIEv), Get_EvSize(SingleMPIEv), 0 );
-      break;
+  // unsigned int EvType = Get_EvEvent(SingleMPIEv);
+  // switch(EvType)
+  // {
+  //   case MPI_IRECVED_EV: /* TEST*, WAIT* */
+  //     updateStats_P2P( MPI_Stats, Get_EvTarget(SingleMPIEv), Get_EvSize(SingleMPIEv), 0 );
+  //     break;
 
-    case MPI_PERSIST_REQ_EV:
-      unsigned int type = Get_EvValue(SingleMPIEv);
-      if (type == MPI_ISEND_EV)
-        updateStats_P2P( MPI_Stats, Get_EvTarget(SingleMPIEv), 0, Get_EvSize(SingleMPIEv) );
-      break;
-  }
+  //   case MPI_PERSIST_REQ_EV:
+  //     unsigned int type = Get_EvValue(SingleMPIEv);
+  //     if (type == MPI_ISEND_EV)
+  //       updateStats_P2P( MPI_Stats, Get_EvTarget(SingleMPIEv), 0, Get_EvSize(SingleMPIEv) );
+  //     break;
+  // }
 }
 
 
@@ -279,7 +278,7 @@ void PhaseStats::UpdateHWC(event_t *Ev)
 
 void PhaseStats::Reset()
 {
-  mpi_stats_reset( MPI_Stats );
+  // xtr_stats_MPI_reset( MPI_Stats );
 
 #if USE_HARDWARE_COUNTERS && defined(BACKEND)
   HWC_Stats.clear();
@@ -290,7 +289,7 @@ void PhaseStats::Reset()
 void PhaseStats::Concatenate(PhaseStats *NextPhase)
 {
 
-  mpi_stats_sum( this->GetMPIStats(), NextPhase->GetMPIStats() );
+  // mpi_stats_sum( this->GetMPIStats(), NextPhase->GetMPIStats() );
 
 #if USE_HARDWARE_COUNTERS && defined(BACKEND)
   map< timestamp_t, hwc_set_val_pair_t >::iterator it;
@@ -316,10 +315,10 @@ void PhaseStats::Concatenate(PhaseStats *NextPhase)
 #endif
 }
 
-mpi_stats_t * PhaseStats::GetMPIStats()
-{
-  return MPI_Stats;
-}
+// mpi_stats_t * PhaseStats::GetMPIStats()
+// {
+//   return MPI_Stats;
+// }
 
 #if defined(BACKEND)
 #if USE_HARDWARE_COUNTERS
@@ -473,40 +472,40 @@ int PhaseStats::GetFirstSet()
 
 void PhaseStats::DumpZeros( unsigned long long timestamp )
 {
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_COUNT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_SENT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_RECV_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_COUNT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_SENT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_RECV_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_MPI_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_COUNT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_COUNT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_OTHER_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_P2P_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_GLOBAL_EV, 0 );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_OTHER_COUNT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_COUNT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_SENT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_RECV_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_COUNT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_SENT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_RECV_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_MPI_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_COUNT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_COUNT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_OTHER_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_P2P_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_GLOBAL_EV, 0 );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_OTHER_COUNT_EV, 0 );
 }
 
 void PhaseStats::DumpToTrace( unsigned long long timestamp, bool dump_hwcs )
 {
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_COUNT_EV, MPI_Stats->P2P_Communications );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_SENT_EV, MPI_Stats->P2P_Bytes_Sent );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_RECV_EV, MPI_Stats->P2P_Bytes_Recv );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_COUNT_EV, MPI_Stats->COLLECTIVE_Communications );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_SENT_EV, MPI_Stats->COLLECTIVE_Bytes_Sent );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_RECV_EV, MPI_Stats->COLLECTIVE_Bytes_Recv );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_MPI_EV, MPI_Stats->Elapsed_Time_In_MPI );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_COUNT_EV, MPI_Stats->P2P_Communications_In );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_COUNT_EV, MPI_Stats->P2P_Communications_Out );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->P2P_Partner_In) );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->P2P_Partner_Out) );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_OTHER_EV, MPI_Stats->Elapsed_Time_In_MPI - MPI_Stats->Elapsed_Time_In_P2P_MPI - MPI_Stats->Elapsed_Time_In_COLLECTIVE_MPI );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_P2P_EV, MPI_Stats->Elapsed_Time_In_P2P_MPI );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_GLOBAL_EV, MPI_Stats->Elapsed_Time_In_COLLECTIVE_MPI );
-  TRACE_ONLINE_EVENT( timestamp, MPI_STATS_OTHER_COUNT_EV, MPI_Stats->MPI_Others_count );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_COUNT_EV, MPI_Stats->P2P_Communications );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_SENT_EV, MPI_Stats->P2P_Bytes_Sent );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_RECV_EV, MPI_Stats->P2P_Bytes_Recv );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_COUNT_EV, MPI_Stats->COLLECTIVE_Communications );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_SENT_EV, MPI_Stats->COLLECTIVE_Bytes_Sent );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_RECV_EV, MPI_Stats->COLLECTIVE_Bytes_Recv );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_MPI_EV, MPI_Stats->Elapsed_Time_In_MPI );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_COUNT_EV, MPI_Stats->P2P_Communications_In );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_COUNT_EV, MPI_Stats->P2P_Communications_Out );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->P2P_Partner_In) );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->P2P_Partner_Out) );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_OTHER_EV, MPI_Stats->Elapsed_Time_In_MPI - MPI_Stats->Elapsed_Time_In_P2P_MPI - MPI_Stats->Elapsed_Time_In_COLLECTIVE_MPI );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_P2P_EV, MPI_Stats->Elapsed_Time_In_P2P_MPI );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_GLOBAL_EV, MPI_Stats->Elapsed_Time_In_COLLECTIVE_MPI );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_OTHER_COUNT_EV, MPI_Stats->MPI_Others_count );
 
 #if USE_HARDWARE_COUNTERS
   if (dump_hwcs)

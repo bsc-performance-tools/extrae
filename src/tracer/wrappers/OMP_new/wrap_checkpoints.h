@@ -46,13 +46,19 @@
 
 #define ENTERING_RUNTIME()                          \
 {                                                   \
-    Extrae_OpenMP_Counters();                       \
+    if (CURRENT_TRACE_MODE(THREADID) != TRACE_MODE_BURST) \
+    { \
+      Extrae_OpenMP_Counters();                       \
+    } \
 }
 
 #define EXITING_RUNTIME()                           \
 {                                                   \
     TIME;                                           \
-    Extrae_OpenMP_Counters();                       \
+    if (CURRENT_TRACE_MODE(THREADID) != TRACE_MODE_BURST) \
+    { \
+      Extrae_OpenMP_Counters();                       \
+    } \
 }
 
 #define EXITING_INSTRUMENTATION()                   \

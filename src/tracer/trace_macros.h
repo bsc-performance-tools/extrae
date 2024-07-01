@@ -44,8 +44,7 @@
     (evttype) == MPI_SEND_EV  || (evttype) == MPI_IRECVED_EV || (evttype) == MPI_RECV_EV)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
     (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL && ((long)evttarget) != MPI_UNDEFINED) 
-# define COMM_STATS_WRAPPER(x) \
-    Extrae_MPI_stats_Wrapper (x);
+
 #else
 # define TRACING_BITMAP_VALID_EVTYPE(evttype)     (TRUE)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget) (TRUE)
@@ -149,64 +148,43 @@
 #define TRACE_MISCEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam) TRACE_MISCEVENT(evttime,evttype,evtvalue,evtparam)
 #endif
 
-#if defined(DCARRERA_HADOOP)
-# define TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams) \
-{ \
-	if (tracejant && TracingBitmap[TASKID]) \
-	{ \
-		unsigned i, thread_id=THREADID; \
-		event_t evts[count]; \
-\
-		for (i=0; i<count; i++) \
-		{ \
-			evts[i].time = evttime; \
-			evts[i].event = evttypes[i]; \
-			evts[i].value = evtvalues[i]; \
-			evts[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
-			HARDWARE_COUNTERS_READ(thread_id, evts[i], FALSE); \
-		} \
-		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count); \
-	} \
+# define TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams)        \
+{                                                                             \
+	if (tracejant && TracingBitmap[TASKID])                                     \
+	{                                                                           \
+		unsigned _i, thread_id=THREADID;                                          \
+		event_t evts[count];                                                      \
+                                                                              \
+		for (_i=0; _i<count; _i++)                                                \
+		{                                                                         \
+			evts[_i].time = evttime;                                                \
+			evts[_i].event = evttypes[_i];                                          \
+			evts[_i].value = evtvalues[_i];                                         \
+			evts[_i].param.misc_param.param = (unsigned long long) (evtparams[_i]); \
+			HARDWARE_COUNTERS_READ(thread_id, evts[_i], FALSE);                     \
+		}                                                                         \
+		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);       \
+	}                                                                           \
 }
-#else
-# define TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams)              \
-{                                                                                  \
-	if (tracejant && TracingBitmap[TASKID])                                          \
-	{                                                                                \
-		unsigned i, thread_id=THREADID;                                                \
-		event_t evts[count];                                                    \
-                                                                                   \
-		for (i=0; i<count; i++)                                                        \
-		{                                                                              \
-			evts[i].time = evttime;                                               \
-			evts[i].event = evttypes[i];                                          \
-			evts[i].value = evtvalues[i];                                         \
-			evts[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
-			HARDWARE_COUNTERS_READ(thread_id, evts[i], FALSE);                    \
-		}                                                                              \
-		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);     \
-	}                                                                                \
-}
-#endif
 
 #if USE_HARDWARE_COUNTERS
-#define TRACE_N_MISCEVENTANDCOUNTERS(evttime,count,evttypes,evtvalues,evtparams)   \
-{                                                                                  \
-	if (tracejant && TracingBitmap[TASKID] && count > 0)                             \
-	{                                                                                \
-		unsigned i, thread_id=THREADID;                                                \
-		event_t evts[count];                                                    \
-                                                                                   \
-		for (i=0; i<count; i++)                                                        \
-		{                                                                              \
-			evts[i].time = evttime;                                               \
-			evts[i].event = evttypes[i];                                          \
-			evts[i].value = evtvalues[i];                                         \
-			evts[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
-			HARDWARE_COUNTERS_READ(thread_id, evts[i], i==0);                     \
-		}                                                                              \
-		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);     \
-	}                                                                                \
+#define TRACE_N_MISCEVENTANDCOUNTERS(evttime,count,evttypes,evtvalues,evtparams) \
+{                                                                                \
+	if (tracejant && TracingBitmap[TASKID] && count > 0)                           \
+	{                                                                              \
+		unsigned _i, thread_id=THREADID;                                             \
+		event_t evts[count];                                                         \
+                                                                                 \
+		for (_i=0; _i<count; _i++)                                                   \
+		{                                                                            \
+			evts[_i].time = evttime;                                                   \
+			evts[_i].event = evttypes[_i];                                             \
+			evts[_i].value = evtvalues[_i];                                            \
+			evts[_i].param.misc_param.param = (unsigned long long) (evtparams[_i]);    \
+			HARDWARE_COUNTERS_READ(thread_id, evts[_i], _i==0);                        \
+		}                                                                            \
+		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);          \
+	}                                                                              \
 }
 #else
 #define TRACE_N_MISCEVENTANDCOUNTERS(evttime,count,evttypes,evtvalues,evtparams) \
@@ -243,8 +221,27 @@
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);       \
 	}                                                                 \
 }
+
+#define TRACE_EVENTAND_ACCUMULATEDCOUNTERS(evttime,evttype,evtvalue) \
+{ \
+	event_t evt;                                                      \
+	int thread_id = THREADID;                                         \
+	if (tracejant && TracingBitmap[TASKID] )                          \
+	{                                                                 \
+		COPY_ACCUMULATED_COUNTERS_HERE(thread_id, evt);                 \
+		evt.time = evttime;                                             \
+		evt.event = evttype;                                            \
+		evt.value = evtvalue;                                           \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);       \
+	} \
+}
 #else
 #define TRACE_EVENTANDCOUNTERS(evttime,evttype,evtvalue,hwc_filter) \
+	{ \
+		TRACE_EVENT(evttime,evttype,evtvalue); \
+	}
+
+#define TRACE_EVENTAND_ACCUMULATEDCOUNTERS(evttime,evttype,evtvalue) \
 	{ \
 		TRACE_EVENT(evttime,evttype,evtvalue); \
 	}
@@ -284,17 +281,53 @@
 #define TRACE_EVENT_AND_GIVEN_COUNTERS(evttime, evttype, evtvalue, nc, counters)\
 {                                                             \
 	event_t evt;                                                \
-	int i, thread_id = THREADID;                                \
+	int _i, thread_id = THREADID;                               \
 	if (tracejant && TracingBitmap[TASKID])                     \
 	{                                                           \
 		evt.time = evttime;                                       \
 		evt.event = evttype;                                      \
 		evt.value = evtvalue;                                     \
-		for (i=0; i<nc; i++)                                      \
-			evt.HWCValues[i] = (counters[i]==NO_COUNTER)?NO_COUNTER:((INT64)counters[i])&0xFFFFFFFF; \
+		for (_i=0; _i<nc; _i++)                                   \
+			evt.HWCValues[_i] = (counters[_i]==NO_COUNTER)?NO_COUNTER:((INT64)counters[_i])&0xFFFFFFFF; \
 		MARK_SET_READ(thread_id, evt, FALSE);                     \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 	}                                                           \
+}
+
+#define TRACE_N_EVENTS(evttime, count, evttypes, evtvalues)             \
+{                                                                       \
+  if (tracejant && TracingBitmap[TASKID] )                              \
+  {                                                                     \
+    unsigned _i, thread_id = THREADID;                                  \
+    event_t evts[count];                                                \
+                                                                        \
+    for (_i=0; _i<count; _i++)                                          \
+    {                                                                   \
+      evts[_i].time = evttime;                                          \
+      evts[_i].event = evttypes[_i];                                    \
+      evts[_i].value = evtvalues[_i];                                   \
+      HARDWARE_COUNTERS_READ (thread_id, evts[_i], FALSE);              \
+    }                                                                   \
+    BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count); \
+  }                                                                     \
+}
+
+#define THREAD_TRACE_N_EVENTS(thread_id, evttime, count, evttypes, evtvalues) \
+{                                                                             \
+  if (tracejant && TracingBitmap[TASKID] )                                    \
+  {                                                                           \
+    int _i;                                                                   \
+    event_t evts[count];                                                      \
+                                                                              \
+    for (_i=0; _i<count; _i++)                                                \
+    {                                                                         \
+      evts[_i].time = evttime;                                                \
+      evts[_i].event = evttypes[_i];                                          \
+      evts[_i].value = evtvalues[_i];                                         \
+      HARDWARE_COUNTERS_READ (thread_id, evts[_i], FALSE);                    \
+    }                                                                         \
+    BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);       \
+  }                                                                           \
 }
 
 #define TRACE_USER_COMMUNICATION_EVENT(evttime,evttype,evtpartner,evtsize,evttag,id) \
@@ -318,19 +351,19 @@
 #define THREAD_TRACE_SAME_N_USER_COMMUNICATION_EVENT(thread,evttime,count,evttype,evtpartner,evtsize,evttag,id) \
 { \
 	event_t evts[count]; \
-	unsigned i; \
+	unsigned _i; \
 	if (tracejant) \
 	{ \
-		for (i=0; i<count; i++) \
+		for (_i=0; _i<count; _i++) \
 		{ \
-			evts[i].time = (evttime); \
-			evts[i].event = (evttype); \
-			evts[i].value = 0; \
-			evts[i].param.mpi_param.target = (long) (evtpartner); \
-			evts[i].param.mpi_param.size = (evtsize); \
-			evts[i].param.mpi_param.tag = (evttag); \
-			evts[i].param.mpi_param.aux = (id); \
-			HARDWARE_COUNTERS_READ(thread, evts[i], FALSE);  \
+			evts[_i].time = (evttime); \
+			evts[_i].event = (evttype); \
+			evts[_i].value = 0; \
+			evts[_i].param.mpi_param.target = (long) (evtpartner); \
+			evts[_i].param.mpi_param.size = (evtsize); \
+			evts[_i].param.mpi_param.tag = (evttag); \
+			evts[_i].param.mpi_param.aux = (id); \
+			HARDWARE_COUNTERS_READ(thread, evts[_i], FALSE);  \
 		} \
 		BUFFER_INSERT_N(thread, TRACING_BUFFER(thread), evts, count); \
 	} \

@@ -76,7 +76,7 @@ void NEW_Enable_OMP_Operation (int type)
     new_inuse[NEW_OMP_ORDERED_INDEX] = TRUE;
   else if (type == NEW_OMP_TASKGROUP_EV)
     new_inuse[NEW_OMP_TASKGROUP_INDEX] = TRUE;
-  else if (type == NEW_OMP_OUTLINED_ADDRESS_EV)
+  else if ((type == NEW_OMP_OUTLINED_ADDRESS_EV) || (type == NEW_OMP_ADDRESS_EV))
     new_inuse[NEW_OMP_OUTLINED_INDEX] = TRUE;
   else if (type == NEW_OMP_TASKING_EV)
     new_inuse[NEW_OMP_TASKING_INDEX] = TRUE;

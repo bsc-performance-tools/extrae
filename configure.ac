@@ -6,8 +6,8 @@
 #########################
 
 m4_define([extrae_major], [4])
-m4_define([extrae_minor], [1])
-m4_define([extrae_micro], [7])
+m4_define([extrae_minor], [2])
+m4_define([extrae_micro], [0])
 
 m4_define([extrae_version], [extrae_major.extrae_minor.extrae_micro])
 
@@ -560,6 +560,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/OPENACC/Makefile \
   src/tracer/wrappers/GASPI/Makefile \
   src/tracer/stats/Makefile \
+  src/tracer/burst-mode/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \
   src/tracer/sampling/common/Makefile \
@@ -715,6 +716,7 @@ AC_SUBST( [MERGER_INC], ['$(top_srcdir)/src/merger'] )
 AC_SUBST( [CLOCKS_INC], ['$(TRACER_INC)/clocks'] )
 AC_SUBST( [HWC_INC], ['$(TRACER_INC)/hwc'] )
 AC_SUBST( [STATS_INC], ['$(TRACER_INC)/stats'] )
+AC_SUBST( [BURST_INC], ['$(TRACER_INC)/burst-mode'] )
 AC_SUBST( [WRAPPERS_INC], ['$(TRACER_INC)/wrappers'] )
 AC_SUBST( [INTERFACES_INC], ['$(TRACER_INC)/interfaces'] )
 AC_SUBST( [PROBES_INC], ['$(TRACER_INC)/probes'] )
@@ -730,6 +732,7 @@ AC_SUBST( [MERGER_LIB], ['$(top_builddir)/src/merger'] )
 AC_SUBST( [CLOCKS_LIB], ['$(TRACER_LIB)/clocks'] )
 AC_SUBST( [HWC_LIB], ['$(TRACER_LIB)/hwc'] )
 AC_SUBST( [STATS_LIB], ['$(TRACER_LIB)/stats'] )
+AC_SUBST( [BURST_LIB], ['$(TRACER_LIB)/burst-mode'] )
 AC_SUBST( [WRAPPERS_LIB], ['$(TRACER_LIB)/wrappers'] )
 AC_SUBST( [INTERFACES_LIB], ['$(TRACER_LIB)/interfaces'] )
 AC_SUBST( [PROBES_LIB], ['$(TRACER_LIB)/probes'] )

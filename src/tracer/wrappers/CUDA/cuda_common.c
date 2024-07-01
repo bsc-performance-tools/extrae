@@ -524,11 +524,8 @@ void Extrae_cudaLaunch_Enter (const char *p1, cudaStream_t stream)
 
 	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
 
-	if (stream != NULL)
-	{
-		int strid = Extrae_CUDA_SearchStream (devid, stream);
-		_cudaLaunch_stream = strid;
-	}
+	int strid = Extrae_CUDA_SearchStream (devid, stream);
+	_cudaLaunch_stream = strid;
 
 	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream,
 	  CUDAKERNEL_GPU_VAL, (UINT64)p1, tag, tag);

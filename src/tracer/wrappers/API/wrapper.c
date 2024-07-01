@@ -164,6 +164,15 @@
 #include "syscall_probe.h"
 #include "syscall_wrapper.h"
 #include "taskid.h"
+#include "threadid.h"
+
+
+#if defined(HAVE_BURST)
+# include "burst_mode.h"
+# include "stats_module.h"
+#endif
+
+// #include "omp_stats.h"
 
 // #define DEBUG
 
@@ -701,7 +710,7 @@ static int read_environment_variables (int me)
 		}
 		else if (strcasecmp(str, "bursts") == 0)
 		{
-			TMODE_setInitial (TRACE_MODE_BURSTS);
+			TMODE_setInitial (TRACE_MODE_BURST);
 		}
 	}
 
@@ -731,7 +740,7 @@ static int read_environment_variables (int me)
 	/* Minimum CPU Burst duration? */
 	if ((str = getenv("EXTRAE_BURST_THRESHOLD")) != NULL) 
 	{
-		TMODE_setBurstsThreshold (__Extrae_Utils_getTimeFromStr (str, "EXTRAE_BURST_THRESHOLD", me));
+		TMODE_setBurstThreshold (__Extrae_Utils_getTimeFromStr (str, "EXTRAE_BURST_THRESHOLD", me));
 	}
 
 #if defined(MPI_SUPPORT)
@@ -740,11 +749,11 @@ static int read_environment_variables (int me)
 	{
 		if (strcmp(str, "1") == 0)
 		{
-			TMODE_setBurstsStatistics (ENABLED);
+			TMODE_setBurstStatistics (TM_BURST_MPI_STATISTICS, ENABLED);
 		}
 		else
 		{
-			TMODE_setBurstsStatistics (DISABLED);
+			TMODE_setBurstStatistics (TM_BURST_MPI_STATISTICS, DISABLED);
 		}
 	}
 #endif
@@ -1394,7 +1403,7 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 		Buffer_Free (TracingBuffer[thread_id]);
 
 	LastCPUEmissionTime[thread_id] = 0;
-	LastCPUEvent[thread_id] = 0;
+	LastCPUEvent[thread_id] = -1;
 	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, TRUE);
 	if (TracingBuffer[thread_id] == NULL)
 	{
@@ -1898,13 +1907,13 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 #endif
 		TRACE_EVENT (ApplBegin_Time, CPU_EVENT_INTERVAL_EV, MinimumCPUEventTime);
 
-	/* Initialize Tracing Mode related variables */
-	if (forked)
-		Trace_Mode_CleanUp();
+		/* Initialize Tracing Mode related variables */
+		if (forked)
+			Trace_Mode_CleanUp();
 
-	Trace_Mode_Initialize (get_maximum_NumOfThreads());
+		Trace_Mode_Initialize (get_maximum_NumOfThreads());
 
-	Trace_Mode_Change (0, ApplBegin_Time);
+		Trace_Mode_Change (0, ApplBegin_Time);
 
 #if USE_HARDWARE_COUNTERS
 		/* Write hardware counter definitions into the .sym file */
@@ -2018,7 +2027,16 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 	
 			/* Reallocate trace mode */
 			Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads);
-	
+
+#if defined(HAVE_BURST)
+			if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)
+			{
+				xtr_burst_realloc(get_maximum_NumOfThreads(), new_num_threads);
+				xtr_stats_change_nthreads( get_maximum_NumOfThreads(), new_num_threads);
+			}
+#endif
+
+
 #if USE_HARDWARE_COUNTERS
 			/* Reallocate and start reading counters for these threads */
 			HWC_Restart_Counters (get_maximum_NumOfThreads(), new_num_threads);
@@ -2219,6 +2237,10 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	/* Enable sampling capabilities */
 	Extrae_setSamplingEnabled (TRUE);
 
+#if defined(HAVE_BURST)
+	xtr_burst_init();
+#endif
+
 	/* We leave... so, we're no longer in instrumentation from this point */
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 		Backend_setInInstrumentation (u, FALSE);
@@ -2389,7 +2411,6 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 #if !defined(IS_BG_MACHINE)
 		Extrae_AnnotateTopology (TRUE, FlushEv_End.time);
 #endif
-
 		check_size = !hasMinimumTracingTime || (hasMinimumTracingTime && (TIME > MinimumTracingTime+initTracingTime));
 		if (file_size > 0 && check_size)
 		{
@@ -2444,6 +2465,10 @@ void Backend_Finalize (void)
 	unsigned thread;
 	int online_mode = 0;
 
+#if defined(HAVE_BURST)
+	xtr_burst_finalize();
+#endif
+
 #if defined(ENABLE_PEBS_SAMPLING)
 	Extrae_IntelPEBS_stopSampling();
 #endif
@@ -2489,11 +2514,10 @@ void Backend_Finalize (void)
 			TIME; // Forces a tick of the clock; if the trace doesn't have any event, the following would appear with the initialization events otherwise as they use LAST_READ_TIME
 			Extrae_getrusage_Wrapper ();
 			Extrae_memusage_Wrapper ();
-		}
-
 #if !defined(IS_BG_MACHINE)
-			Extrae_AnnotateTopology (TRUE, TIME);
+			Extrae_AnnotateTopology (TRUE, LAST_READ_TIME); // Thd 0 only because pthreads already emit this when exiting their function, and OpenMP threads don't go through Backend_Finalize. Can't make the master read the cpu for worker threads that are already idle. 
 #endif
+		}
 
 		/* Write files back to disk , 1st part will include flushing events*/
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
@@ -2737,6 +2761,8 @@ void Backend_Leave_Instrumentation (void)
 	if (!mpitrace_on)
 		return;
 
+	// Exit probe already executed, some OpenMP probes already forced the emission of this.
+	// LAST_READ_TIME same time as exit probe, if already forced, won't do it again because time hasn't progressed.
 	xtr_AnnotateCPU(thread, LAST_READ_TIME, FALSE);
 
 	/* Change trace mode? (issue from API) */

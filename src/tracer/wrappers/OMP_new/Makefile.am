@@ -21,7 +21,7 @@ EXTRA_OPENMP_CFLAGS =
 
 # GNU GOMP instrumentation
 if WANT_OPENMP_GNU
-WRAPPERS_OPENMP += gnu_libgomp.c gnu_libgomp.h gomp_helpers.c gomp_helpers.h gomp_wrappers.c gomp_probes.c gomp_probes.h 
+WRAPPERS_OPENMP += gnu_libgomp.c gnu_libgomp.h gomp_helpers.c gomp_helpers.h gomp_wrappers.c gomp_probes.c gomp_probes.h gomp_probes_burst.c gomp_probes_burst.h
 EXTRA_OPENMP_CFLAGS += -DGNU_OPENMP
 endif # WANT_OPENMP_GNU
 
@@ -35,5 +35,8 @@ libwrap_openmp_la_CFLAGS = \
  -I$(WRAPPERS_INC)/API \
  -I$(top_srcdir) \
  -I$(top_srcdir)/include \
- -I$(COMMON_INC)
+ -I$(COMMON_INC) \
+ -I$(STATS_INC) \
+ -I$(STATS_INC)/OMP \
+ -I$(BURST_INC)
 libwrap_openmp_la_SOURCES = $(WRAPPERS_OPENMP)

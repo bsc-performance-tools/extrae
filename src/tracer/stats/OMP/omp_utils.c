@@ -21,18 +21,77 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef MPI_UTILS_DEFINED
-#define MPI_UTILS_DEFINED
+#include "omp_utils.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <config.h>
+#define MAX_STACK_SIZE 8
 
-#include "events.h"
-#include "common.h"
+/* -1 IS AN SPECIAL RETURN VALUE, THAT INDICATES THE STACK IS EMPTY, IT CANNOT BE STORED IN IT 
+    THIS IS AN STACK OF UNSIGED INTEGERS */
 
-#define NUM_MPI_P2P_EVENT_TYPES 41
-#define NUM_MPI_OTHER_EVENT_TYPES 48
+// Data structure to represent a stack
+struct stack
+{
+    int maxsize;  // capacity of the stack
+    int top;
+    unsigned int *items;
+};
+ 
+struct stack* newStack( void )
+{
+    struct stack *pt = (struct stack*)malloc(sizeof(struct stack));
+ 
+    pt->maxsize = MAX_STACK_SIZE;
+    pt->top = -1;
+    pt->items = (unsigned int*)malloc(sizeof(unsigned int) * MAX_STACK_SIZE);
+ 
+    return pt;
+}
 
-unsigned isMPI_Global(unsigned EvtType);
-unsigned isMPI_P2P(unsigned EvtType);
-unsigned isMPI_Others(unsigned EvtType);
-#endif /* End of MPI_UTILS_DEFINED */
+void deleteStack(struct stack *pt) {
+  free(pt->items);
+  free(pt);
+}
+
+int size(struct stack *pt) {
+    return pt->top + 1;
+}
+ 
+int isEmpty(struct stack *pt) {
+    return pt->top == -1;
+}
+ 
+int isFull(struct stack *pt) {
+    return pt->top == pt->maxsize - 1;
+}
+
+void push(struct stack *pt, unsigned int x)
+{
+  if (isFull(pt))
+  {
+    pt->items = realloc(pt->items, pt->maxsize * 2);
+  }
+
+  pt->items[++pt->top] = x;
+}
+ 
+// Utility function to return the top element of the stack
+unsigned int peek(struct stack *pt)
+{
+    // check for an empty stack
+    if (!isEmpty(pt)) {
+        return pt->items[pt->top];
+    }
+
+  return -1;
+}
+
+unsigned int pop(struct stack *pt)
+{
+    if (!isEmpty(pt))
+    {
+      return pt->items[pt->top--];
+    }
+  return -1;
+}

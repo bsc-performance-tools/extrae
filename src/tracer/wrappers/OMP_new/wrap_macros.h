@@ -120,6 +120,9 @@
 #define ENTRY_PROBE(symbol) xtr_probe_entry_ ## symbol
 #define EXIT_PROBE(symbol)  xtr_probe_exit_ ## symbol
 
+#define ENTRY_PROBE_BURST(symbol) xtr_probe_entry_ ## symbol ## _bursts
+#define EXIT_PROBE_BURST(symbol) xtr_probe_exit_ ## symbol ## _bursts
+
 // To pass configurable blocks of code 
 #define CODE(...)                    __VA_ARGS__
 #define PROLOGUE(...)                __VA_ARGS__
@@ -275,7 +278,14 @@ if ((EXTRAE_ON()) && (condition))                                             \
   if (ENTRY_PROBE(symbol))                                                    \
   {                                                                           \
     /* Call entry probe */                                                    \
-    INVOKE_PROBE(ENTRY_PROBE(symbol), ARGS(entry_probe_args));                \
+    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)                    \
+    {                                                                         \
+      INVOKE_PROBE(ENTRY_PROBE_BURST(symbol), ARGS(entry_probe_args));        \
+    }                                                                         \
+    else                                                                      \
+    {                                                                         \
+      INVOKE_PROBE(ENTRY_PROBE(symbol), ARGS(entry_probe_args));              \
+    }                                                                         \
   }                                                                           \
   /* Call the runtime and capture the return value */                         \
   code_before_real_symbol                                                     \
@@ -286,7 +296,14 @@ if ((EXTRAE_ON()) && (condition))                                             \
   if (EXIT_PROBE(symbol))                                                     \
   {                                                                           \
     /* Call exit probe */                                                     \
-    INVOKE_PROBE(EXIT_PROBE(symbol), ARGS(exit_probe_args));                  \
+    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)                    \
+    {                                                                         \
+      INVOKE_PROBE(EXIT_PROBE_BURST(symbol), ARGS(exit_probe_args));          \
+    }                                                                         \
+    else                                                                      \
+    {                                                                         \
+      INVOKE_PROBE(EXIT_PROBE(symbol), ARGS(exit_probe_args));                \
+    }                                                                         \
   }                                                                           \
   code_after_exit_probe                                                       \
   EXITING_INSTRUMENTATION();                                                  \
@@ -309,7 +326,14 @@ if ((EXTRAE_ON()) && (condition))                                             \
   if (ENTRY_PROBE(symbol))                                                    \
   {                                                                           \
     /* Call entry probe */                                                    \
-    INVOKE_PROBE_WITH_VARARGS(ENTRY_PROBE(symbol), ARGS(entry_probe_args));   \
+    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)                          \
+    {                                                                               \
+      INVOKE_PROBE_WITH_VARARGS(ENTRY_PROBE_BURST(symbol), ARGS(entry_probe_args)); \
+    }                                                                               \
+    else                                                                            \
+    {                                                                               \
+      INVOKE_PROBE_WITH_VARARGS(ENTRY_PROBE(symbol), ARGS(entry_probe_args));       \
+    }                                                                               \
   }                                                                           \
   /* Call the runtime and capture the return value */                         \
   code_before_real_symbol                                                     \
@@ -320,7 +344,14 @@ if ((EXTRAE_ON()) && (condition))                                             \
   if (EXIT_PROBE(symbol))                                                     \
   {                                                                           \
     /* Call exit probe */                                                     \
-    INVOKE_PROBE_WITH_VARARGS(EXIT_PROBE(symbol), ARGS(exit_probe_args));     \
+    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)                          \
+    {                                                                               \
+      INVOKE_PROBE_WITH_VARARGS(EXIT_PROBE_BURST(symbol), ARGS(exit_probe_args));   \
+    }                                                                               \
+    else                                                                            \
+    {                                                                               \
+      INVOKE_PROBE_WITH_VARARGS(EXIT_PROBE(symbol), ARGS(exit_probe_args));         \
+    }                                                                               \
   }                                                                           \
   code_after_exit_probe                                                       \
   EXITING_INSTRUMENTATION();                                                  \

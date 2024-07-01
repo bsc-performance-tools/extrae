@@ -21,29 +21,26 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef __MISC_PRV_SEMANTICS_H__
-#define __MISC_PRV_SEMANTICS_H__
+#ifndef BURST_MOD_DEFINED
+#define BURST_MOD_DEFINED
 
-#include "record.h"
-#include "semantics.h"
-#include "file_set.h"
+#include "stats_module.h"
 
-extern int MPI_Caller_Multiple_Levels_Traced;
-extern int *MPI_Caller_Labels_Used;
+typedef void (*func_ptr_t) (void);
 
-extern int Sample_Caller_Multiple_Levels_Traced;
-extern int *Sample_Caller_Labels_Used;
+void xtr_burst_init ( void );
 
-extern int Rusage_Events_Found;
-extern int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
+void xtr_burst_finalize (void);
 
-extern int Memusage_Events_Found;
-extern int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
+void xtr_burst_begin ( void );
 
-extern int Syscall_Events_Found;
-extern int Syscall_Labels_Used[SYSCALL_EVENTS_COUNT];
+int xtr_burst_end ( void );
 
-extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
-extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];
+void xtr_burst_parallel_OL_entry (void * function_address) __attribute__((weak));
 
-#endif /* __MISC_PRV_SEMANTICS_H__ */
+void xtr_burst_parallel_OL_exit ( void ) __attribute__((weak));
+
+void xtr_burst_realloc (int old_num_threads, int new_num_threads);
+
+
+#endif /* End of BURST_MOD_DEFINED */

@@ -72,6 +72,7 @@
 #endif
 
 #include "misc_wrapper.h"
+#include "mpi_stats.h"
 
 #define MPI_CHECK(mpi_error, routine) \
 	if (mpi_error != MPI_SUCCESS) \
@@ -89,12 +90,14 @@ int MPI_Win_create_C_Wrapper (void *base, MPI_Aint size, int disp_unit,
 	MPI_Info info, MPI_Comm comm, MPI_Win *win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_create (base, size, disp_unit, info, comm, win);	
-	TRACE_MPIEVENT(TIME, MPI_WIN_CREATE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_CREATE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	
 	return res;
 }
@@ -102,72 +105,84 @@ int MPI_Win_create_C_Wrapper (void *base, MPI_Aint size, int disp_unit,
 int MPI_Win_fence_C_Wrapper (int assert, MPI_Win win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_FENCE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_FENCE_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_fence (assert, win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_FENCE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_FENCE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
 int MPI_Win_start_C_Wrapper (MPI_Group group, int assert, MPI_Win win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_START_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_START_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_start (group, assert, win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_START_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_START_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
 int MPI_Win_post_C_Wrapper (MPI_Group group, int assert, MPI_Win win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_POST_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_POST_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_post (group, assert, win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_POST_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_POST_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
 int MPI_Win_free_C_Wrapper (MPI_Win *win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_free (win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_FREE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_FREE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
 int MPI_Win_complete_C_Wrapper (MPI_Win win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_COMPLETE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_COMPLETE_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_complete (win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_COMPLETE_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_COMPLETE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
 int MPI_Win_wait_C_Wrapper (MPI_Win win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_wait (win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_WAIT_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_WAIT_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
@@ -184,12 +199,14 @@ int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	ierror = PMPI_Type_size(target_datatype, &target_datatype_size);
 	MPI_CHECK(ierror, PMPI_Type_size);
 
-TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, target_rank, origin_datatype_size * origin_count, EMPTY, target_disp * target_datatype_size, origin_addr);
+	iotimer_t begin_time = LAST_READ_TIME;
+TRACE_MPIEVENT(begin_time, MPI_GET_EV, EVT_BEGIN, target_rank, origin_datatype_size * origin_count, EMPTY, target_disp * target_datatype_size, origin_addr);
 	ierror = PMPI_Get (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
-	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -199,7 +216,6 @@ int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	MPI_Win win)
 {
 	int ierror;
-
 	int origin_datatype_size, target_datatype_size;
 
 	ierror = PMPI_Type_size(origin_datatype, &origin_datatype_size);
@@ -208,12 +224,14 @@ int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	ierror = PMPI_Type_size(target_datatype, &target_datatype_size);
 	MPI_CHECK(ierror, PMPI_Type_size);
 
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, target_rank, target_datatype_size * target_count, EMPTY, target_disp * target_datatype_size, origin_addr);
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_PUT_EV, EVT_BEGIN, target_rank, target_datatype_size * target_count, EMPTY, target_disp * target_datatype_size, origin_addr);
 	ierror = PMPI_Put (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
-	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -221,24 +239,28 @@ int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 int MPI_Win_lock_C_Wrapper (int lock_type, int rank, int assert, MPI_Win win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_LOCK_EV, EVT_BEGIN, rank, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_LOCK_EV, EVT_BEGIN, rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_lock (lock_type, rank, assert, win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_LOCK_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_LOCK_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
 int MPI_Win_unlock_C_Wrapper (int rank, MPI_Win win)
 {
 	int res;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_UNLOCK_EV, EVT_BEGIN, rank, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_WIN_UNLOCK_EV, EVT_BEGIN, rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_unlock (rank, win);
-	TRACE_MPIEVENT(TIME, MPI_WIN_UNLOCK_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_WIN_UNLOCK_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	updateStats_OTHER(global_mpi_stats);
 	return res;
 }
 
@@ -259,11 +281,13 @@ int MPI_Get_accumulate_C_Wrapper (void *origin_addr, int origin_count, MPI_Datat
 	ierror = PMPI_Type_size(target_datatype, &target_datatype_size);
 	MPI_CHECK(ierror, PMPI_Type_size);
 	
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_ACCUMULATE_EV, EVT_BEGIN, target_rank, ((origin_datatype_size * origin_count) + (target_datatype_size * target_count)), EMPTY, target_datatype_size * target_disp, origin_addr);
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT(begin_time, MPI_GET_ACCUMULATE_EV, EVT_BEGIN, target_rank, ((origin_datatype_size * origin_count) + (target_datatype_size * target_count)), EMPTY, target_datatype_size * target_disp, origin_addr);
 	ierror = PMPI_Get_accumulate (origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win);
-	TRACE_MPIEVENT(TIME, MPI_GET_ACCUMULATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT(current_time, MPI_GET_ACCUMULATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -280,14 +304,16 @@ int MPI_Fetch_and_op_C_Wrapper (void *origin_addr, void *result_addr,
 	ierror = PMPI_Type_size(datatype, &datatype_size);
 	MPI_CHECK(ierror, PMPI_Type_size);
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FETCH_AND_OP_EV, EVT_BEGIN, target_rank,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT (begin_time, MPI_FETCH_AND_OP_EV, EVT_BEGIN, target_rank,
 	  (datatype_size * target_disp), EMPTY, EMPTY, origin_addr);
 	ierror = PMPI_Fetch_and_op (origin_addr, result_addr, datatype, target_rank,
 	  target_disp, op, win);
-	TRACE_MPIEVENT (TIME, MPI_FETCH_AND_OP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_FETCH_AND_OP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
 	  EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -302,14 +328,16 @@ int MPI_Compare_and_swap_C_Wrapper (void *origin_addr, void *compare_addr,
 	ierror = PMPI_Type_size(datatype, &datatype_size);
 	MPI_CHECK(ierror, PMPI_Type_size);
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMPARE_AND_SWAP_EV, EVT_BEGIN, target_rank,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT (begin_time, MPI_COMPARE_AND_SWAP_EV, EVT_BEGIN, target_rank,
 	  (datatype_size * target_disp), EMPTY, EMPTY, origin_addr);
 	ierror = PMPI_Compare_and_swap (origin_addr, compare_addr, result_addr,
 	  datatype, target_rank, target_disp, win);
-	TRACE_MPIEVENT (TIME, MPI_COMPARE_AND_SWAP_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_COMPARE_AND_SWAP_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -317,14 +345,16 @@ int MPI_Compare_and_swap_C_Wrapper (void *origin_addr, void *compare_addr,
 int MPI_Win_flush_C_Wrapper (int rank, MPI_Win win)
 {
 	int ierror;
+	iotimer_t begin_time = LAST_READ_TIME;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_EV, EVT_BEGIN, rank, EMPTY,
+	TRACE_MPIEVENT (begin_time, MPI_WIN_FLUSH_EV, EVT_BEGIN, rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_Win_flush (rank, win);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -332,14 +362,16 @@ int MPI_Win_flush_C_Wrapper (int rank, MPI_Win win)
 int MPI_Win_flush_all_C_Wrapper (MPI_Win win)
 {
 	int ierror;
+	iotimer_t begin_time = LAST_READ_TIME;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
+	TRACE_MPIEVENT (begin_time, MPI_WIN_FLUSH_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_Win_flush_all (win);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_ALL_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_ALL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -347,14 +379,17 @@ int MPI_Win_flush_all_C_Wrapper (MPI_Win win)
 int MPI_Win_flush_local_C_Wrapper (int rank, MPI_Win win)
 {
 	int ierror;
+	iotimer_t begin_time = LAST_READ_TIME;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_EV, EVT_BEGIN, rank, EMPTY,
+	TRACE_MPIEVENT (begin_time, MPI_WIN_FLUSH_LOCAL_EV, EVT_BEGIN, rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_Win_flush_local (rank, win);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+
+	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_LOCAL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }
@@ -362,14 +397,16 @@ int MPI_Win_flush_local_C_Wrapper (int rank, MPI_Win win)
 int MPI_Win_flush_local_all_C_Wrapper (MPI_Win win)
 {
 	int ierror;
+	iotimer_t begin_time = LAST_READ_TIME;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
+	TRACE_MPIEVENT (begin_time, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_Win_flush_local_all (win);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_END, EMPTY, EMPTY,
+	iotimer_t current_time = TIME;
+	xtr_stats_MPI_update_other(begin_time, current_time);
+	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
 
 	return ierror;
 }

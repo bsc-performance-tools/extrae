@@ -72,6 +72,8 @@
 #endif
 
 #include "misc_wrapper.h"
+#include "mpi_stats.h"
+
 
 #define MPI_CHECK(mpi_error, routine) \
 	if (mpi_error != MPI_SUCCESS) \
@@ -112,7 +114,8 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : rank                           commid: communicator Id
 	*   aux : root rank
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_REDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
 
 	ret = PMPI_Reduce (sendbuf, recvbuf, count, datatype, op, root, comm);
 
@@ -122,13 +125,19 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            commid: communicator Id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_REDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-		updateStats_COLLECTIVE(global_mpi_stats, size, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0);
+	}
 	else
-		updateStats_COLLECTIVE(global_mpi_stats, 0, size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_REDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -163,7 +172,8 @@ int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : rank                           commid: communicator Id
 	*   aux : ---
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
 
 	ret = PMPI_Allreduce (sendbuf, recvbuf, count, datatype, op, comm);
 
@@ -173,10 +183,12 @@ int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            commid: communicator Id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, size, size);
+	xtr_stats_MPI_update_collective(begin_time, current_time, size, size);
+
+	TRACE_MPIEVENT (current_time, MPI_ALLREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -189,6 +201,7 @@ int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 int MPI_Barrier_C_Wrapper (MPI_Comm comm)
 {
   int me, ret, csize;
+	iotimer_t begin_time, end_time;
 
 	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
@@ -203,13 +216,14 @@ int MPI_Barrier_C_Wrapper (MPI_Comm comm)
    *   aux : ---
    */
 
+	begin_time = LAST_READ_TIME;
 #if defined(IS_BGL_MACHINE)
   if (!BGL_disable_barrier_inside)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, MPI_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
+  	TRACE_MPIEVENT (begin_time, MPI_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
   }
 #else
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
 #endif
 
   ret = PMPI_Barrier (comm);
@@ -221,17 +235,19 @@ int MPI_Barrier_C_Wrapper (MPI_Comm comm)
    *   aux : global op counter
    */
 
+  end_time = TIME;
+
+  /* MPI Stats */
+  xtr_stats_MPI_update_collective(begin_time, end_time, 0, 0);
+
 #if defined(IS_BGL_MACHINE)
   if (!BGL_disable_barrier_inside)
   {
-    TRACE_MPIEVENT (TIME, MPI_BARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+  	TRACE_MPIEVENT (end_time, MPI_BARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
   }
 #else
-  TRACE_MPIEVENT (TIME, MPI_BARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+  TRACE_MPIEVENT (end_time, MPI_BARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 #endif
-
-  /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, 0, 0);
 
   return ret;
 }
@@ -270,7 +286,8 @@ int MPI_BCast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int roo
 	BGL_disable_barrier_inside = 1;
 #endif
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_BCAST_EV, EVT_BEGIN, root, size, me, comm, EMPTY);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_BCAST_EV, EVT_BEGIN, root, size, me, comm, EMPTY);
 
 	ret = PMPI_Bcast (buffer, count, datatype, root, comm);
 
@@ -280,17 +297,23 @@ int MPI_BCast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int roo
 	*   tag : ---                           commid : communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
+
+	/* MPI Stats */
+	if (me == root)
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size);
+	}
+	else
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_BCAST_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 0;
 #endif
-
-	/* MPI Stats */
-	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, size);
-	else
-        updateStats_COLLECTIVE(global_mpi_stats, size, 0);
 
 	return ret;
 }
@@ -330,7 +353,8 @@ int MPI_Alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : rank                           commid: communicator id
 	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALL_EV, EVT_BEGIN, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_ALLTOALL_EV, EVT_BEGIN, EMPTY,
 	  sendcount * sendsize, me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount,
@@ -342,11 +366,12 @@ int MPI_Alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : ---                            commid: communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-        updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -396,7 +421,8 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : rank                           commid: communicator id
 	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALLV_EV, EVT_BEGIN, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_ALLTOALLV_EV, EVT_BEGIN, EMPTY,
 	  sendsize * sendc, me, comm, recvsize * recvc);
 
 	ret = PMPI_Alltoallv (sendbuf, sendcounts, sdispls, sendtype,
@@ -408,11 +434,12 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : ---                            commid: communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendc * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -452,7 +479,8 @@ int MPI_Allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
 	  me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Allgather (sendbuf, sendcount, sendtype,
@@ -464,11 +492,12 @@ int MPI_Allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -512,7 +541,8 @@ int MPI_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
 	  me, comm, recvsize * recvc);
 
 	ret = PMPI_Allgatherv (sendbuf, sendcount, sendtype,
@@ -524,10 +554,12 @@ int MPI_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendcount * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -567,14 +599,15 @@ int MPI_Gather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+  TRACE_MPIEVENT (begin_time, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, recvcount * recvsize * csize);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+  TRACE_MPIEVENT (begin_time, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, 0);
 	}
 
@@ -587,13 +620,19 @@ int MPI_Gather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, 0);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendcount * sendsize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_GATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -635,18 +674,19 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
 		if (recvcounts != NULL)
 			for (proc = 0; proc < csize; proc++)
 				recvc += recvcounts[proc];
 
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+  TRACE_MPIEVENT (begin_time, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, recvsize * recvc);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+	  TRACE_MPIEVENT (begin_time, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, 0);
 	}
 
@@ -659,13 +699,19 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, 0);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendcount * sendsize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_GATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -705,14 +751,15 @@ int MPI_Scatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_SCATTER_EV, EVT_BEGIN, root,
+  TRACE_MPIEVENT (begin_time, MPI_SCATTER_EV, EVT_BEGIN, root,
 		  sendcount * sendsize * csize, me, comm, recvcount * recvsize);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_SCATTER_EV, EVT_BEGIN, root, 0, me, comm,
+  TRACE_MPIEVENT (begin_time, MPI_SCATTER_EV, EVT_BEGIN, root, 0, me, comm,
 		  recvcount * recvsize);
 	}
 
@@ -725,13 +772,19 @@ int MPI_Scatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendcount * sendsize * csize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize * csize);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_SCATTER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -773,18 +826,19 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
 		if (sendcounts != NULL)
 			for (proc = 0; proc < csize; proc++)
 				sendc += sendcounts[proc];
 
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_SCATTERV_EV, EVT_BEGIN, root, sendsize * sendc,
+  TRACE_MPIEVENT (begin_time, MPI_SCATTERV_EV, EVT_BEGIN, root, sendsize * sendc,
 		  me, comm, recvcount * recvsize);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_SCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
+  TRACE_MPIEVENT (begin_time, MPI_SCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
 		  recvcount * recvsize);
 	}
 
@@ -796,13 +850,19 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendc * sendsize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendc * sendsize);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_SCATTERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -841,7 +901,8 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : Bytes received per process after the scatter phase
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REDUCESCAT_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcounts[me] * size);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_REDUCESCAT_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcounts[me] * size);
 
 	ierror = PMPI_Reduce_scatter (sendbuf, recvbuf, recvcounts, datatype,
 	  op, comm);
@@ -852,13 +913,19 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == 0)
-        updateStats_COLLECTIVE(global_mpi_stats, sendcount * size, sendcount * size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, sendcount * size, sendcount * size);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, recvcounts[me] * size, sendcount * size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcounts[me] * size, sendcount * size);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_REDUCESCAT_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -892,7 +959,8 @@ int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : ---
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
 	ierror = PMPI_Scan (sendbuf, recvbuf, count, datatype, op, comm);
@@ -903,15 +971,20 @@ int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, 
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 
 	if (me != csize - 1)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, count * size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size);
+	}
 	if (me != 0)
-        updateStats_COLLECTIVE(global_mpi_stats, count * size, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_SCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -944,7 +1017,8 @@ int MPI_Exscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : ---
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_EXSCAN_EV, EVT_BEGIN, op, count * size, me, comm,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT (begin_time, MPI_EXSCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
 	ierror = PMPI_Exscan (sendbuf, recvbuf, count, datatype, op, comm);
@@ -955,15 +1029,17 @@ int MPI_Exscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_EXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, 
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 
 	if (me != csize - 1)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, count * size);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size);
+
 	if (me != 0)
-        updateStats_COLLECTIVE(global_mpi_stats, count * size, 0);
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0);
+
+	TRACE_MPIEVENT (current_time, MPI_EXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -999,7 +1075,8 @@ int MPI_Ireduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : rank                           commid: communicator Id
 	*   aux : root rank
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IREDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IREDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
 
 	ret = PMPI_Ireduce (sendbuf, recvbuf, count, datatype, op, root, comm, req);
 
@@ -1009,13 +1086,19 @@ int MPI_Ireduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            commid: communicator Id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-		updateStats_COLLECTIVE(global_mpi_stats, size, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0);
+	}
 	else
-		updateStats_COLLECTIVE(global_mpi_stats, 0, size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_IREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1050,7 +1133,8 @@ int MPI_Iallreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : rank                           commid: communicator Id
 	*   aux : ---
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLREDUCE_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IALLREDUCE_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
 
 	ret = PMPI_Iallreduce (sendbuf, recvbuf, count, datatype, op, comm, req);
 
@@ -1060,10 +1144,12 @@ int MPI_Iallreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            commid: communicator Id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IALLREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, size, size);
+	xtr_stats_MPI_update_collective(begin_time, current_time, size, size);
+
+	TRACE_MPIEVENT (current_time, MPI_IALLREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1093,10 +1179,12 @@ int MPI_Ibarrier_C_Wrapper (MPI_Comm comm, MPI_Request *req)
 #if defined(IS_BGL_MACHINE)
   if (!BGL_disable_barrier_inside)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, MPI_IBARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
+    iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IBARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
   }
 #else
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_IBARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IBARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, EMPTY);
 #endif
 
   ret = PMPI_Ibarrier (comm, req);
@@ -1108,17 +1196,19 @@ int MPI_Ibarrier_C_Wrapper (MPI_Comm comm, MPI_Request *req)
    *   aux : global op counter
    */
 
+  iotimer_t current_time = TIME;
+
+  /* MPI Stats */
+  xtr_stats_MPI_update_collective(begin_time, current_time, 0, 0);
+
 #if defined(IS_BGL_MACHINE)
   if (!BGL_disable_barrier_inside)
   {
-    TRACE_MPIEVENT (TIME, MPI_IBARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+    TRACE_MPIEVENT (current_time, MPI_IBARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
   }
 #else
-  TRACE_MPIEVENT (TIME, MPI_IBARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+  TRACE_MPIEVENT (current_time, MPI_IBARRIER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 #endif
-
-  /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, 0, 0);
 
   return ret;
 }
@@ -1157,7 +1247,8 @@ int MPI_Ibcast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int ro
 	BGL_disable_barrier_inside = 1;
 #endif
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IBCAST_EV, EVT_BEGIN, root, size, me, comm, EMPTY);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IBCAST_EV, EVT_BEGIN, root, size, me, comm, EMPTY);
 
 	ret = PMPI_Ibcast (buffer, count, datatype, root, comm, req);
 
@@ -1167,17 +1258,23 @@ int MPI_Ibcast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int ro
 	*   tag : ---                           commid : communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IBCAST_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
+
+	/* MPI Stats */
+	if (me == root)
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size);
+	}
+	else
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_IBCAST_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 0;
 #endif
-
-	/* MPI Stats */
-	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, size);
-	else
-        updateStats_COLLECTIVE(global_mpi_stats, size, 0);
 
 	return ret;
 }
@@ -1217,7 +1314,8 @@ int MPI_Ialltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	*   tag : rank                           commid: communicator id
 	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALL_EV, EVT_BEGIN, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IALLTOALL_EV, EVT_BEGIN, EMPTY,
 	  sendcount * sendsize, me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Ialltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount,
@@ -1229,11 +1327,12 @@ int MPI_Ialltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	*   tag : ---                            commid: communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_IALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1283,7 +1382,8 @@ int MPI_Ialltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : rank                           commid: communicator id
 	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALLV_EV, EVT_BEGIN, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IALLTOALLV_EV, EVT_BEGIN, EMPTY,
 	  sendsize * sendc, me, comm, recvsize * recvc);
 
 	ret = PMPI_Ialltoallv (sendbuf, sendcounts, sdispls, sendtype,
@@ -1295,11 +1395,12 @@ int MPI_Ialltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : ---                            commid: communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendc * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_IALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1339,7 +1440,8 @@ int MPI_Iallgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
 	  me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Iallgather (sendbuf, sendcount, sendtype,
@@ -1351,11 +1453,12 @@ int MPI_Iallgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, sendcount * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_IALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1400,7 +1503,8 @@ int MPI_Iallgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendty
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
 	  me, comm, recvsize * recvc);
 
 	ret = PMPI_Iallgatherv (sendbuf, sendcount, sendtype,
@@ -1412,10 +1516,12 @@ int MPI_Iallgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendty
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendcount * sendsize);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize);
+
+	TRACE_MPIEVENT (current_time, MPI_IALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1456,14 +1562,15 @@ int MPI_Igather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_IGATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+  	TRACE_MPIEVENT (begin_time, MPI_IGATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, recvcount * recvsize * csize);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_IGATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+	  TRACE_MPIEVENT (begin_time, MPI_IGATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, 0);
 	}
 
@@ -1476,13 +1583,19 @@ int MPI_Igather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * csize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, 0);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendcount * sendsize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_IGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1524,18 +1637,19 @@ int MPI_Igatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
 		if (recvcounts != NULL)
 			for (proc = 0; proc < csize; proc++)
 				recvc += recvcounts[proc];
 
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_IGATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+  	TRACE_MPIEVENT (begin_time, MPI_IGATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, recvsize * recvc);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_IGATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+  	TRACE_MPIEVENT (begin_time, MPI_IGATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
 		  me, comm, 0);
 	}
 
@@ -1548,13 +1662,19 @@ int MPI_Igatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, 0);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendcount * sendsize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_IGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1595,14 +1715,15 @@ int MPI_Iscatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_ISCATTER_EV, EVT_BEGIN, root,
+  	TRACE_MPIEVENT (begin_time, MPI_ISCATTER_EV, EVT_BEGIN, root,
 		  sendcount * sendsize * csize, me, comm, recvcount * recvsize);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_ISCATTER_EV, EVT_BEGIN, root, 0, me, comm,
+	  TRACE_MPIEVENT (begin_time, MPI_ISCATTER_EV, EVT_BEGIN, root, 0, me, comm,
 		  recvcount * recvsize);
 	}
 
@@ -1615,13 +1736,19 @@ int MPI_Iscatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ISCATTER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendcount * sendsize * csize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize * csize);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_ISCATTER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1663,18 +1790,19 @@ int MPI_Iscatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	*   tag : rank                           commid: communicator identifier
 	*   aux : bytes received
 	*/
+	iotimer_t begin_time = LAST_READ_TIME;
 	if (me == root)
 	{
 		if (sendcounts != NULL)
 			for (proc = 0; proc < csize; proc++)
 				sendc += sendcounts[proc];
 
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_ISCATTERV_EV, EVT_BEGIN, root, sendsize * sendc,
+  TRACE_MPIEVENT (begin_time, MPI_ISCATTERV_EV, EVT_BEGIN, root, sendsize * sendc,
 		  me, comm, recvcount * recvsize);
 	}
 	else
 	{
-		TRACE_MPIEVENT (LAST_READ_TIME, MPI_ISCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
+  TRACE_MPIEVENT (begin_time, MPI_ISCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
 		  recvcount * recvsize);
 	}
 
@@ -1686,13 +1814,19 @@ int MPI_Iscatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	*   tag : ---                            commid: communicator identifier
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ISCATTERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == root)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, sendc * sendsize);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendc * sendsize);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_ISCATTERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -1732,7 +1866,8 @@ int MPI_Ireduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : Bytes received per process after the scatter phase
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IREDUCESCAT_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcounts[me] * size);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IREDUCESCAT_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcounts[me] * size);
 
 	ierror = PMPI_Ireduce_scatter (sendbuf, recvbuf, recvcounts, datatype,
 	  op, comm, req);
@@ -1743,13 +1878,19 @@ int MPI_Ireduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IREDUCESCAT_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 	if (me == 0)
-        updateStats_COLLECTIVE(global_mpi_stats, sendcount * size, sendcount * size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, sendcount * size, sendcount * size);
+	}
 	else
-        updateStats_COLLECTIVE(global_mpi_stats, recvcounts[me] * size, sendcount * size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcounts[me] * size, sendcount * size);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_IREDUCESCAT_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -1783,7 +1924,8 @@ int MPI_Iscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : ---
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ISCAN_EV, EVT_BEGIN, op, count * size, me, comm,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_ISCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
 	ierror = PMPI_Iscan (sendbuf, recvbuf, count, datatype, op, comm, req);
@@ -1794,15 +1936,20 @@ int MPI_Iscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ISCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, 
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 
 	if (me != csize - 1)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, count * size);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size);
+	}
 	if (me != 0)
-        updateStats_COLLECTIVE(global_mpi_stats, count * size, 0);
+	{
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0);
+	}
+
+	TRACE_MPIEVENT (current_time, MPI_ISCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -1835,7 +1982,8 @@ int MPI_Iexscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : ---
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IEXSCAN_EV, EVT_BEGIN, op, count * size, me, comm,
+	iotimer_t begin_time = LAST_READ_TIME;
+	TRACE_MPIEVENT (begin_time, MPI_IEXSCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
 	ierror = PMPI_Iexscan (sendbuf, recvbuf, count, datatype, op, comm, req);
@@ -1846,15 +1994,17 @@ int MPI_Iexscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IEXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, 
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
 
 	if (me != csize - 1)
-        updateStats_COLLECTIVE(global_mpi_stats, 0, count * size);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size);
+
 	if (me != 0)
-        updateStats_COLLECTIVE(global_mpi_stats, count * size, 0);
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0);
+
+	TRACE_MPIEVENT (current_time, MPI_IEXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -1888,7 +2038,8 @@ int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : Bytes received per process after the scatter phase
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
 
 	ierror = PMPI_Reduce_scatter_block (sendbuf, recvbuf, recvcount, datatype,
 	  op, comm);
@@ -1899,10 +2050,12 @@ int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvcount * size, sendcount * size);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * size, sendcount * size);
+
+	TRACE_MPIEVENT (current_time, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -1937,7 +2090,8 @@ int MPI_Ireduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : whoami (comm rank)            comm : communicator id
 	*   aux : Bytes received per process after the scatter phase
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IREDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IREDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
 
 	ierror = PMPI_Ireduce_scatter_block (sendbuf, recvbuf, recvcount, datatype,
 	  op, comm, req);
@@ -1948,10 +2102,12 @@ int MPI_Ireduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
 	*   tag : ---                            comm : communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IREDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	updateStats_COLLECTIVE(global_mpi_stats, recvcount * size, sendcount * size);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * size, sendcount * size);
+
+	TRACE_MPIEVENT (current_time, MPI_IREDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ierror;
 }
@@ -1997,7 +2153,8 @@ int MPI_Alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : rank                           commid: communicator id
 	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALLW_EV, EVT_BEGIN, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_ALLTOALLW_EV, EVT_BEGIN, EMPTY,
 	  sendbytes, me, comm, recvbytes);
 
 	ret = PMPI_Alltoallw (sendbuf, sendcounts, sdispls, sendtypes,
@@ -2009,11 +2166,12 @@ int MPI_Alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : ---                            commid: communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes);
+
+	TRACE_MPIEVENT (current_time, MPI_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -2058,7 +2216,8 @@ int MPI_Ialltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : rank                           commid: communicator id
 	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALLW_EV, EVT_BEGIN, EMPTY,
+	iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_IALLTOALLW_EV, EVT_BEGIN, EMPTY,
 	  sendbytes, me, comm, recvbytes);
 
 	ret = PMPI_Ialltoallw (sendbuf, sendcounts, sdispls, sendtypes,
@@ -2070,11 +2229,12 @@ int MPI_Ialltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	*   tag : ---                            commid: communicator id
 	*   aux : global op counter
 	*/
-	TRACE_MPIEVENT (TIME, MPI_IALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-	  Extrae_MPI_getCurrentOpGlobal());
+	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-    updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes);
+
+	TRACE_MPIEVENT (current_time, MPI_IALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
 	return ret;
 }
@@ -2147,7 +2307,8 @@ int MPI_Graph_create_C_Wrapper (MPI_Comm comm_old, int nnodes, int *index, int *
 {
   int ierror;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_GRAPH_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_GRAPH_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Graph_create (comm_old, nnodes, index, edges, reorder, comm_graph);
 
@@ -2156,9 +2317,10 @@ int MPI_Graph_create_C_Wrapper (MPI_Comm comm_old, int nnodes, int *index, int *
     Trace_MPI_Communicator (*comm_graph, LAST_READ_TIME, FALSE);
   }
 
-  TRACE_MPIEVENT (TIME, MPI_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+  xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -2171,7 +2333,8 @@ int MPI_Dist_graph_create_C_Wrapper (MPI_Comm comm_old, int n, int *sources, int
 {
   int ierror;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_DIST_GRAPH_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_DIST_GRAPH_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Dist_graph_create (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph);
 
@@ -2180,9 +2343,10 @@ int MPI_Dist_graph_create_C_Wrapper (MPI_Comm comm_old, int n, int *sources, int
     Trace_MPI_Communicator (*comm_dist_graph, LAST_READ_TIME, FALSE);
   }
 
-  TRACE_MPIEVENT (TIME, MPI_DIST_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+  xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_DIST_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -2197,7 +2361,8 @@ int MPI_Dist_graph_create_adjacent_C_Wrapper (MPI_Comm comm_old, int indegree, c
 {
   int ierror;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Dist_graph_create_adjacent (comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph);
 
@@ -2206,9 +2371,10 @@ int MPI_Dist_graph_create_adjacent_C_Wrapper (MPI_Comm comm_old, int indegree, c
     Trace_MPI_Communicator (*comm_dist_graph, LAST_READ_TIME, FALSE);
   }
 
-  TRACE_MPIEVENT (TIME, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  iotimer_t current_time = TIME;
+  xtr_stats_MPI_update_other(begin_time, current_time);
+  TRACE_MPIEVENT (current_time, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -2245,7 +2411,8 @@ int MPI_Neighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
   ret = PMPI_Neighbor_allgather (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
@@ -2256,11 +2423,12 @@ int MPI_Neighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2296,7 +2464,8 @@ int MPI_Ineighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_INEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
   ret = PMPI_Ineighbor_allgather (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request);
@@ -2307,11 +2476,12 @@ int MPI_Ineighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2355,7 +2525,8 @@ int MPI_Neighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvsize * recvc);
 
   ret = PMPI_Neighbor_allgatherv (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm);
@@ -2366,11 +2537,12 @@ int MPI_Neighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendcount * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2414,7 +2586,8 @@ int MPI_Ineighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Dataty
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_INEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvsize * recvc);
 
   ret = PMPI_Ineighbor_allgatherv (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request);
@@ -2425,11 +2598,12 @@ int MPI_Ineighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Dataty
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendcount * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2465,7 +2639,8 @@ int MPI_Neighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype 
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
   ret = PMPI_Neighbor_alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
@@ -2476,11 +2651,12 @@ int MPI_Neighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype 
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2516,7 +2692,8 @@ int MPI_Ineighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_INEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
   ret = PMPI_Ineighbor_alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request);
@@ -2527,11 +2704,12 @@ int MPI_Ineighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvcount * recvsize * indegree, sendcount * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2582,7 +2760,8 @@ int MPI_Neighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdisp
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
     me, comm, recvsize * recvc);
 
   ret = PMPI_Neighbor_alltoallv (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm);
@@ -2593,11 +2772,12 @@ int MPI_Neighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdisp
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-  Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendc * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2648,7 +2828,8 @@ int MPI_Ineighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdis
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_INEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
     me, comm, recvsize * recvc);
 
   ret = PMPI_Ineighbor_alltoallv (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request);
@@ -2659,11 +2840,12 @@ int MPI_Ineighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdis
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-  Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendc * sendsize);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize);
+
+  TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2719,7 +2901,8 @@ int MPI_Neighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint *
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
     me, comm, recvbytes);
 
   ret = PMPI_Neighbor_alltoallw (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm);
@@ -2730,11 +2913,12 @@ int MPI_Neighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint *
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes);
+
+  TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }
@@ -2790,7 +2974,8 @@ int MPI_Ineighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint 
    *   tag    : rank                        commid : communicator identifier
    *   aux    : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
+  iotimer_t begin_time = LAST_READ_TIME;
+  TRACE_MPIEVENT (begin_time, MPI_INEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
     me, comm, recvbytes);
 
   ret = PMPI_Ineighbor_alltoallw (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request);
@@ -2801,11 +2986,12 @@ int MPI_Ineighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint 
    *   tag    : ---                         commid : communicator identifier
    *   aux    : global op counter
    */
-  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm,
-    Extrae_MPI_getCurrentOpGlobal());
+  iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes);
+
+  TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
   return ret;
 }

@@ -43,6 +43,8 @@ void Extrae_OpenMP_Ordered (unsigned int ordered_state);
 void Extrae_OpenMP_Taskgroup (unsigned int taskgroup_state);
 void Extrae_OpenMP_Outlined_Entry (const void *outlined_fn);
 void Extrae_OpenMP_Outlined_Exit (void);
+void Extrae_OpenMP_Outlined_Entry_At (UINT64 time, const void *outlined_fn);
+void Extrae_OpenMP_Outlined_Exit_At ( UINT64 time );
 void Extrae_OpenMP_Task_Inst_Entry (const void *task, long long task_id);
 void Extrae_OpenMP_Task_Inst_Exit (void);
 void Extrae_OpenMP_Task_Exec_Entry (int task_or_taskloop, const void *task, long long task_id);

@@ -845,6 +845,10 @@ static int OMP_Address_Event (
       trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_TASK_EXEC_NAME_EV, EvValue);
       trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_TASK_EXEC_LINE_EV, EvValue);
       break;
+    case NEW_OMP_ADDRESS_EV:
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_OUTLINED_NAME_EV, EvValue);
+      trace_paraver_event (cpu, ptask, task, thread, current_time, NEW_OMP_OUTLINED_LINE_EV, EvValue);
+      break;
     default:
       break;
   }
@@ -898,6 +902,7 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ NEW_OMP_TASKING_EV, OMP_Punctual_Event},
 	{ NEW_OMP_TASK_INST_ID_EV, OMP_Punctual_Event},
 	{ NEW_OMP_TASK_EXEC_ID_EV, OMP_Punctual_Event},
+	{ NEW_OMP_ADDRESS_EV, OMP_Address_Event},
 	{ NEW_OMP_OUTLINED_ADDRESS_EV, OMP_Address_Event},
 	{ NEW_OMP_TASK_INST_ADDRESS_EV, OMP_Address_Event},
 	{ NEW_OMP_TASK_EXEC_ADDRESS_EV, OMP_Address_Event},

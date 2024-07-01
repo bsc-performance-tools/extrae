@@ -244,7 +244,7 @@ void Initialize_Trace_Mode_States (unsigned cpu, unsigned ptask, unsigned task,
 	/* Push STATE_STOPPED to find it on top of the stack at the APPL_EV EVT_END */
 	/* Push_State (STATE_STOPPED, ptask, task, thread); Firstly set at Initialize_States */
 
-	if (mode == TRACE_MODE_BURSTS)
+	if (mode == TRACE_MODE_BURST)
 	{
 		/* We want the state to appear as IDLE Outside CPU Bursts */
 		Push_State (STATE_IDLE, ptask, task, thread);

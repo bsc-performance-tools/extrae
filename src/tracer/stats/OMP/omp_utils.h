@@ -21,29 +21,23 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef __MISC_PRV_SEMANTICS_H__
-#define __MISC_PRV_SEMANTICS_H__
+#ifndef OMP_UTILS_DEFINED
+#define OMP_UTILS_DEFINED
 
-#include "record.h"
-#include "semantics.h"
-#include "file_set.h"
+struct stack* newStack( void );
 
-extern int MPI_Caller_Multiple_Levels_Traced;
-extern int *MPI_Caller_Labels_Used;
+void deleteStack(struct stack *pt);
 
-extern int Sample_Caller_Multiple_Levels_Traced;
-extern int *Sample_Caller_Labels_Used;
+int size(struct stack *pt);
 
-extern int Rusage_Events_Found;
-extern int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
+int isEmpty(struct stack *pt);
 
-extern int Memusage_Events_Found;
-extern int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
+int isFull(struct stack *pt);
 
-extern int Syscall_Events_Found;
-extern int Syscall_Labels_Used[SYSCALL_EVENTS_COUNT];
+void push(struct stack *pt, unsigned int x);
 
-extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
-extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];
+unsigned int peek(struct stack *pt);
 
-#endif /* __MISC_PRV_SEMANTICS_H__ */
+unsigned int pop(struct stack *pt);
+
+#endif /* End of OMP_UTILS_DEFINED */

@@ -495,52 +495,43 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 }
 
 /* Configure Bursts related parameters */
-static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+static void Parse_XML_Bursts (int rank, xmlNodePtr current_tag)
 {
-	xmlNodePtr tag;
+	xmlChar *threshold = xmlGetProp_env (rank, current_tag, TRACE_THRESHOLD);
+	xmlChar *omp_summarization = xmlGetProp_env (rank, current_tag, TRACE_OMP_SUMMARIZATION);
+	xmlChar *omp_statistics = xmlGetProp_env (rank, current_tag, TRACE_OMP_STATISTICS);
+	xmlChar *mpi_statistics = xmlGetProp_env (rank, current_tag, TRACE_MPI_STATISTICS);
 
-	/* Parse all TAGs, and annotate them to use them later */
-	tag = current_tag->xmlChildrenNode;
-	while (tag != NULL)
+	if(threshold != NULL )
 	{
-		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
-		{
-		}
-		/* Which is the threshold for the Bursts? */
-		else if (!xmlStrcasecmp (tag->name, TRACE_THRESHOLD))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-			{
-				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
-				if (str != NULL)
-				{
-					TMODE_setBurstsThreshold (__Extrae_Utils_getTimeFromStr ((const char*) str,
-					  (const char *) TRACE_THRESHOLD,
-					  rank));
-				}
-				XML_FREE(str);
-			}
-			XML_FREE(enabled);
-		}
-		else if (!xmlStrcasecmp (tag->name, TRACE_MPI_STATISTICS))
-		{
-#if defined(MPI_SUPPORT)
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
-			XML_FREE(enabled);
-#else
-			mfprintf (stderr, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support MPI.\n", TRACE_MPI_STATISTICS, TRACE_BURSTS);
-#endif
-		}
-		else
-		{
-			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <%s> level\n", tag->name, TRACE_BURSTS);
-		}
-
-		tag = tag->next;
+		unsigned long long threshold_value = __Extrae_Utils_getTimeFromStr ((const char*)threshold,
+			(const char *)TRACE_THRESHOLD, rank);
+		TMODE_setBurstThreshold ( threshold_value );
 	}
+
+	if(omp_summarization != NULL )
+	{
+		TMODE_setBurstOMPSummarization ( !xmlStrcasecmp (omp_summarization, xmlYES) );
+	}
+
+	if(omp_statistics != NULL )
+	{
+		TMODE_setBurstStatistics ( TM_BURST_OMP_STATISTICS, !xmlStrcasecmp (omp_statistics, xmlYES) );
+	}
+
+	if(mpi_statistics != NULL )
+	{
+#if defined(MPI_SUPPORT)
+		TMODE_setBurstStatistics ( TM_BURST_MPI_STATISTICS, !xmlStrcasecmp (mpi_statistics, xmlYES) );
+#else
+		mfprintf (stderr, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support MPI.\n",TRACE_MPI_STATISTICS, TRACE_BURSTS);
+#endif
+	}
+
+	XML_FREE(threshold);
+	XML_FREE(omp_summarization);
+	XML_FREE(omp_statistics);
+	XML_FREE(mpi_statistics);
 }
 
 
@@ -1955,7 +1946,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						else if (!xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURSTS) ||
 						  !xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURST))
 						{
-							TMODE_setInitial (TRACE_MODE_BURSTS);
+							TMODE_setInitial (TRACE_MODE_BURST);
 						}
 						else
 						{
@@ -2109,7 +2100,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
-							Parse_XML_Bursts (rank, xmldoc, current_tag);
+							Parse_XML_Bursts (rank, current_tag);
 						}
 						XML_FREE(enabled);
 					}

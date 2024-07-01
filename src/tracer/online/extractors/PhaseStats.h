@@ -26,7 +26,7 @@
 
 #include <map>
 #include <vector>
-#include "mpi_stats.h"
+// #include "mpi_stats.h"
 #include "record.h"
 #include "common.h"
 
@@ -44,7 +44,7 @@ class PhaseStats
     void UpdateMPI(event_t *SingleMPIEv);
     void Reset();
     void Concatenate(PhaseStats *OtherStats);
-    mpi_stats_t * GetMPIStats();
+    // mpi_stats_t * GetMPIStats();
 
 #if defined(BACKEND)
     void DumpToTrace( unsigned long long timestamp, bool dump_hwcs);
@@ -64,7 +64,7 @@ void Dump();
 
 
   private:
-    mpi_stats_t *MPI_Stats; 
+    // mpi_stats_t *MPI_Stats; 
 
 #if USE_HARDWARE_COUNTERS && defined(BACKEND)
     typedef unsigned long long           timestamp_t;

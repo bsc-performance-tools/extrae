@@ -72,8 +72,6 @@ int Rusage_Events_Found = FALSE;
 int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
 int Memusage_Events_Found = FALSE;
 int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
-int MPI_Stats_Events_Found = FALSE;
-int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 int Syscall_Events_Found = FALSE;
 int Syscall_Labels_Used[SYSCALL_EVENTS_COUNT];
 
@@ -577,9 +575,9 @@ static int Memusage_Event (
 }
 
 /******************************************************************************
- ***  MPI_Stats_Event
+ ***  Stats_Event
  ******************************************************************************/
-static int MPI_Stats_Event (
+static int Stats_Event (
    event_t * current_event,
    unsigned long long current_time,
    unsigned int cpu,
@@ -593,25 +591,13 @@ static int MPI_Stats_Event (
 	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
-	EvValue = Get_EvMiscParam (current_event); /* Param is the event value. */
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
 
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_STATS_BASE+EvType, EvValue);
-
-	if (!MPI_Stats_Events_Found)
-	{
-		MPI_Stats_Events_Found = TRUE;
-		for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
-		{
-			MPI_Stats_Labels_Used[i] = FALSE;
-		}
-	}
-	MPI_Stats_Labels_Used[EvType] = TRUE;
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
 	return 0;
 }
-
 
 /******************************************************************************
  ***  InitTracing_Event
@@ -1018,9 +1004,9 @@ static int CPU_Burst_Event (
 
 	Switch_State (STATE_RUNNING, (EvValue == EVT_BEGIN), ptask, task, thread);
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
-
-	/* DEBUG -- we don't trace this event in CPU Burst mode. This is just for debugging purposes
-	trace_paraver_event (cpu, ptask, task, thread, current_time, CPU_BURST_EV, EvValue); */
+// 
+	/* DEBUG -- we don't trace this event in CPU Burst mode. This is just for debugging purposes */
+	// trace_paraver_event (cpu, ptask, task, thread, current_time, CPU_BURST_EV, EvValue);
 
 	return 0;
 }
@@ -1099,7 +1085,7 @@ static int Online_Event (event_t * current_event,
       }
       if (EvValue == BURST_MODE)
       {
-        Initialize_Trace_Mode_States( cpu, ptask, task, thread, TRACE_MODE_BURSTS );
+        Initialize_Trace_Mode_States( cpu, ptask, task, thread, TRACE_MODE_BURST );
       }
       if (EvValue == PHASE_PROFILE)
       {
@@ -1127,24 +1113,6 @@ static int Online_Event (event_t * current_event,
       Switch_State( STATE_ONLINE_ANALYSIS, (EvValue == ONLINE_PAUSE_APP), ptask, task, thread);
       trace_paraver_state (cpu, ptask, task, thread, current_time);
       trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-      break;
-
-    case MPI_STATS_P2P_COUNT_EV:
-    case MPI_STATS_P2P_BYTES_SENT_EV:
-    case MPI_STATS_P2P_BYTES_RECV_EV:
-    case MPI_STATS_GLOBAL_COUNT_EV:
-    case MPI_STATS_GLOBAL_BYTES_SENT_EV:
-    case MPI_STATS_GLOBAL_BYTES_RECV_EV:
-    case MPI_STATS_TIME_IN_MPI_EV:
-    case MPI_STATS_P2P_INCOMING_COUNT_EV:
-    case MPI_STATS_P2P_OUTGOING_COUNT_EV:
-    case MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV:
-    case MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV:
-    case MPI_STATS_TIME_IN_OTHER_EV:
-    case MPI_STATS_TIME_IN_P2P_EV:
-    case MPI_STATS_TIME_IN_GLOBAL_EV:
-    case MPI_STATS_OTHER_COUNT_EV:
-      MPI_Stats_Event( current_event, current_time, cpu, ptask, task, thread, fset );
       break;
 
     case CPU_BURST_EV:
@@ -1766,7 +1734,6 @@ static int SystemCall_Event (event_t * event,
 	return 0;
 }                                                                               
 
-
 /*****************************************************************************/
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
@@ -1804,7 +1771,6 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ CPU_BURST_EV, CPU_Burst_Event },
 	{ RUSAGE_EV, GetRusage_Event },
 	{ MEMUSAGE_EV, Memusage_Event },
-	{ MPI_STATS_EV, MPI_Stats_Event },
 	{ USRFUNC_EV, USRFunction_Event },
 	{ TRACING_MODE_EV, Tracing_Mode_Event },
 	{ ONLINE_EV, Online_Event },
@@ -1846,12 +1812,15 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ KMPC_FREE_EV, DynamicMemory_Event },
 	{ KMPC_REALLOC_EV, DynamicMemory_Event },
 	{ KMPC_ALIGNED_MALLOC_EV, DynamicMemory_Event },
+
 	{ NULL_EV, NULL }
 };
 
 RangeEv_Handler_t PRV_MISC_Range_Handlers[] = {
 	{ CALLER_EV, CALLER_EV + MAX_CALLERS, MPI_Caller_Event },
 	{ SAMPLING_EV, SAMPLING_EV + MAX_CALLERS, Sampling_Caller_Event },
+	{ MPI_BURST_STATS_BASE, MPI_BURST_STATS_BASE + MAX_CALLERS, Stats_Event },
+	{ OMP_BURST_STATS_BASE, OMP_BURST_STATS_BASE + MAX_CALLERS, Stats_Event },
 	{ NULL_EV, NULL_EV, NULL }
 };
 
