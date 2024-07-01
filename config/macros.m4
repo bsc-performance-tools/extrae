@@ -779,6 +779,8 @@ AC_DEFUN([AX_PROG_BINUTILS],
          elif test -r "${binutils_home_dir}/lib/libbfd.a" -a \
                       "${binutils_require_shared}" = "no" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib"
+	 elif test -r "${binutils_home_dir}/libbfd.so" ; then
+            BFD_LIBSDIR="${binutils_home_dir}"
          else
             dnl Try something more automatic using find command
             libbfd_lib=""
@@ -814,6 +816,8 @@ AC_DEFUN([AX_PROG_BINUTILS],
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
+	elif test -r "${binutils_home_dir}/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}"
          else
             dnl Try something more automatic using find command
             libiberty_lib=""
