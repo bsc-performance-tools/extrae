@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAX_WRAPPERS=256
+MAX_WRAPPERS=512
 MAX_WRAPPERS_PER_FILE=64
 INTERMEDIATE_PATH="intel-kmpc-11-intermediate"
 INTERMEDIATE_WRAPPERS_BASENAME="intel-kmpc-11-intermediate-part"
