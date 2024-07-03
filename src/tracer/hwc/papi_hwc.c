@@ -615,7 +615,7 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 						char EventName[PAPI_MAX_STR_LEN];
 
 						PAPI_event_code_to_name (HWC_sets[i].counters[j], EventName);
-						fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (task %d, thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, TASKID, threadid);
+						fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (task %d, thread %d) because PAPI_add_event returned %d\n", EventName, HWC_sets[i].counters[j], i+1, TASKID, threadid, rc);
 						HWC_sets[i].counters[j] = NO_COUNTER;
 						/* break; */
 					}
