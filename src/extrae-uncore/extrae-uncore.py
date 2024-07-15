@@ -107,7 +107,7 @@ def parse_uncore_counters(counters_list):
                     # Get the names of the devices that can read this counter
                     device = device_counter_noqual.split('::')[0]
 
-                    if "skx_unc" in device:
+                    if "skx_unc" or "spr_unc" in device:
                         # Find the group label for this device (e.g. skx_unc_imc0 -> imc)
                         regex = r"_unc_([A-Za-z]+)\d+"
                         device_class = re.search(regex, device).group(1)
