@@ -318,6 +318,38 @@ if i_am_master_process():
                 print(counter+":")
                 print(ExternalCounters[counter])
 
+        # Calculate the number of sets necessary to read required counters
+        # We're currently assigning uncore counters to sets assuming there's no incompatibilities (see FIXME-papi-best-set)
+        # TODO: Allow this argument to be parameterizable
+        max_counters_per_set = 8
+        num_counters = len(ExternalCounters.keys())
+        num_readers = (num_counters + max_counters_per_set - 1) // max_counters_per_set
+
+        # Adjust the number of sets if we need to balance readers per socket
+        if (is_odd(num_readers) and is_even(len(CPUSockets)) and AutoBalanceReadersPerSocket):
+            num_readers += 1
+
+        # Compute in counters_per_set array the number of counters assigned per set
+        remaining_counters = num_counters
+        remaining_sets = num_readers
+        counters_per_set = []
+        while remaining_sets > 0:
+            counters_to_current_set = (remaining_counters + remaining_sets - 1) // remaining_sets
+            remaining_counters -= counters_to_current_set
+            remaining_sets -= 1
+            counters_per_set.append(counters_to_current_set)
+
+        Sets = []
+        head = 0
+        for i in range(0, num_readers):
+            tail = head + counters_per_set[i] 
+            current_set = sorted(ExternalCounters.keys())[head:tail]
+            head += counters_per_set[i]
+            Sets.append(current_set)
+
+        """
+        # Formerly the assignment was done with papi_best_set to determine compatible sets 
+        # FIXME-papi-best-set: we've identified the assignment results are not deterministic! Same input, 4 sets, 5 sets, random errors adding counters...
         cmd = Extrae_home + '/bin/papi_best_set ' + \
             ','.join(sorted(ExternalCounters.keys()))
         result = subprocess.run(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
@@ -368,6 +400,7 @@ if i_am_master_process():
                         ("cannot be added in an eventset" in line)):
                     print("Extrae: ERROR: The extra set of counters needed to balance readers per socket is not compatible. Please check your configuration.")
                     sys.exit(-1)
+        """
 
         # Write the XML config for each reader
         for i in range(num_readers):
@@ -465,6 +498,7 @@ if not Dryrun:
                           './extrae_uncore' + suffix + '.xml')
                 os.putenv('LD_PRELOAD', Preload_uncore)
                 uncore_launch_cmd = Extrae_home + "/bin/uncore-service-seq"
+                #print("uncore_launch_cmd: " + uncore_launch_cmd)
                 os.execvp(uncore_launch_cmd, [uncore_launch_cmd])
             else:
                 uncore_pids.append(pid)
@@ -491,6 +525,7 @@ if not Dryrun:
         else:
             # Stop uncore service processes manually (non-MPI environment only)
             for pid in uncore_pids:
+                #print("Throwing signal SIGQUIT to pid " + str(pid))
                 os.kill(pid, signal.SIGQUIT)
             for i in range(num_readers):
                 suffix = ('-'+str(i+1) if i > 0 else '')
