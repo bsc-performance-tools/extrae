@@ -226,6 +226,8 @@ parser.add_argument('--balance', action='store_true',
                     help='Balance uncore readers per socket')
 parser.add_argument('--dry-run', action='store_true',
                     help='Calculates how many extra processes you will need to measure uncore counters')
+parser.add_argument('--no-detect', metavar='FILE', action='store', type=str,
+                    help='Disables automatic detection of uncore counters and uses the provided list instead')
 parser.add_argument('xml_config_file', help='Extrae XML configuration file')
 parser.add_argument('preload_tracing_library',
                     help='Extrae tracing library that will be loaded with LD_PRELOAD')
@@ -233,6 +235,10 @@ parser.add_argument('preload_tracing_library',
 args, unknown_args = parser.parse_known_args()
 AutoBalanceReadersPerSocket = args.balance
 Dryrun = args.dry_run
+NoDetect = args.no_detect
+if NoDetect and not os.path.isfile(NoDetect):
+    print("ERROR: Uncore list file provided '" + NoDetect + "' not found!")
+    sys.exit(-1)
 Extrae_config_file = args.xml_config_file
 Preload_app = "@sub_LIBDIR@/" + args.preload_tracing_library
 Tracing_MPI = ("mpi" in os.path.basename(Preload_app))
@@ -318,89 +324,104 @@ if i_am_master_process():
                 print(counter+":")
                 print(ExternalCounters[counter])
 
-        # Calculate the number of sets necessary to read required counters
-        # We're currently assigning uncore counters to sets assuming there's no incompatibilities (see FIXME-papi-best-set)
-        # TODO: Allow this argument to be parameterizable
-        max_counters_per_set = 8
-        num_counters = len(ExternalCounters.keys())
-        num_readers = (num_counters + max_counters_per_set - 1) // max_counters_per_set
 
-        # Adjust the number of sets if we need to balance readers per socket
-        if (is_odd(num_readers) and is_even(len(CPUSockets)) and AutoBalanceReadersPerSocket):
-            num_readers += 1
-
-        # Compute in counters_per_set array the number of counters assigned per set
-        remaining_counters = num_counters
-        remaining_sets = num_readers
-        counters_per_set = []
-        while remaining_sets > 0:
-            counters_to_current_set = (remaining_counters + remaining_sets - 1) // remaining_sets
-            remaining_counters -= counters_to_current_set
-            remaining_sets -= 1
-            counters_per_set.append(counters_to_current_set)
-
+        # Select the uncore counters to read and determine how many reader processes are needed 
         Sets = []
-        head = 0
-        for i in range(0, num_readers):
-            tail = head + counters_per_set[i] 
-            current_set = sorted(ExternalCounters.keys())[head:tail]
-            head += counters_per_set[i]
-            Sets.append(current_set)
+        num_readers = 0
 
-        """
-        # Formerly the assignment was done with papi_best_set to determine compatible sets 
-        # FIXME-papi-best-set: we've identified the assignment results are not deterministic! Same input, 4 sets, 5 sets, random errors adding counters...
-        cmd = Extrae_home + '/bin/papi_best_set ' + \
-            ','.join(sorted(ExternalCounters.keys()))
-        result = subprocess.run(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
-        current_set = ""
-        parsing_set = False
-        Sets = []
-        total_counters = 0
-        for line in (result.stdout.decode("utf-8").split('\n')):
-            # print(line)
-            if line.startswith("<set"):
-                parsing_set = True
-                continue
+        if (NoDetect):
+            # Use the counter list provided by the user
+            with open(NoDetect) as f_in:
+                for l in [line.rstrip() for line in f_in if line.strip()]:
+                    clean_line = l.translate(str.maketrans('', '', ' \t\n'))
+                    Sets.append(clean_line.split(','))
+                num_readers = len(Sets)
 
-            if line.startswith("</set"):
-                parsing_set = False
-                Sets.append((''.join(current_set.split('\n'))).split(','))
-                current_set = ""
-                total_counters += len(Sets[-1])
-                continue
+        else:
+            # Calculate the number of sets necessary to read required counters
+            # We're currently assigning uncore counters to sets assuming there's no incompatibilities (see FIXME-papi-best-set)
+            # TODO: Allow this argument to be parameterizable
+            max_counters_per_set = 8
+            num_counters = len(ExternalCounters.keys())
+            num_readers = (num_counters + max_counters_per_set - 1) // max_counters_per_set
+        
+            # Adjust the number of sets if we need to balance readers per socket
+            if (is_odd(num_readers) and is_even(len(CPUSockets)) and AutoBalanceReadersPerSocket):
+                num_readers += 1
 
-            if parsing_set:
-                current_set += line.strip()
+            # Compute in counters_per_set array the number of counters assigned per set
+            remaining_counters = num_counters
+            remaining_sets = num_readers
+            counters_per_set = []
+            while remaining_sets > 0:
+                counters_to_current_set = (remaining_counters + remaining_sets - 1) // remaining_sets
+                remaining_counters -= counters_to_current_set
+                remaining_sets -= 1
+                counters_per_set.append(counters_to_current_set)
 
-        num_readers = len(Sets)
+            head = 0
+            for i in range(0, num_readers):
+                tail = head + counters_per_set[i] 
+                current_set = sorted(ExternalCounters.keys())[head:tail]
+                head += counters_per_set[i]
+                Sets.append(current_set)
 
-        # Check if we need to balance readers per socket
-        if (is_odd(num_readers) and is_even(len(CPUSockets)) and AutoBalanceReadersPerSocket):
-            print("Extrae: WARNING: You have an even number of sockets, but require an odd number of uncore readers, and auto-balancing is enabled. This will use an extra reader to balance socket occupancy.")
-
-            num_readers += 1
-            max_counters_per_reader = math.ceil(total_counters / num_readers)
-
-            extra_set_counters = []
-
-            for i in range(num_readers-1):
-                extra_set_counters += Sets[i][max_counters_per_reader:]
-                Sets[i] = Sets[i][:max_counters_per_reader]
-
-            Sets.append(extra_set_counters)
-
-            # Do a new run of papi_best_set checking if the counters moved to the extra set are compatible between them
+            """
+            # Formerly the assignment was done with papi_best_set to determine compatible sets 
+            # FIXME-papi-best-set: we've identified the assignment results are not deterministic! Same input, 4 sets, 5 sets, random errors adding counters...
             cmd = Extrae_home + '/bin/papi_best_set ' + \
-                ','.join(sorted(extra_set_counters))
+                ','.join(sorted(ExternalCounters.keys()))
+            print("papi_best_set cmd 1: " + cmd, flush=True)
             result = subprocess.run(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
+            current_set = ""
+            parsing_set = False
+            Sets = []
+            total_counters = 0
             for line in (result.stdout.decode("utf-8").split('\n')):
                 # print(line)
-                if (("counter set" in line and line.split()[3] > "1") or
-                        ("cannot be added in an eventset" in line)):
-                    print("Extrae: ERROR: The extra set of counters needed to balance readers per socket is not compatible. Please check your configuration.")
-                    sys.exit(-1)
-        """
+                if line.startswith("<set"):
+                    parsing_set = True
+                    continue
+
+                if line.startswith("</set"):
+                    parsing_set = False
+                    Sets.append((''.join(current_set.split('\n'))).split(','))
+                    current_set = ""
+                    total_counters += len(Sets[-1])
+                    continue
+
+                if parsing_set:
+                    current_set += line.strip()
+
+            num_readers = len(Sets)
+
+            # Check if we need to balance readers per socket
+            if (is_odd(num_readers) and is_even(len(CPUSockets)) and AutoBalanceReadersPerSocket):
+                print("Extrae: WARNING: You have an even number of sockets, but require an odd number of uncore readers, and auto-balancing is enabled. This will use an extra reader to balance socket occupancy.")
+
+                num_readers += 1
+                max_counters_per_reader = math.ceil(total_counters / num_readers)
+
+                extra_set_counters = []
+
+                for i in range(num_readers-1):
+                    extra_set_counters += Sets[i][max_counters_per_reader:]
+                    Sets[i] = Sets[i][:max_counters_per_reader]
+
+                Sets.append(extra_set_counters)
+
+                # Do a new run of papi_best_set checking if the counters moved to the extra set are compatible between them
+                cmd = Extrae_home + '/bin/papi_best_set ' + \
+                    ','.join(sorted(extra_set_counters))
+                print("papi_best_set cmd 2: " + cmd, flush=True)
+                result = subprocess.run(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
+                for line in (result.stdout.decode("utf-8").split('\n')):
+                    # print(line)
+                    if (("counter set" in line and line.split()[3] > "1") or
+                            ("cannot be added in an eventset" in line)):
+                        print("Extrae: ERROR: The extra set of counters needed to balance readers per socket is not compatible. Please check your configuration.")
+                        sys.exit(-1)
+            """
 
         # Write the XML config for each reader
         for i in range(num_readers):
