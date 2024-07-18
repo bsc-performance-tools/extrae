@@ -1956,15 +1956,17 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 
 					if (traceinitialmode != NULL)
 					{
-						if (!xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_DETAIL))
+						if (!xmlStrcasecmp (traceinitialmode, TRACE_DETAIL))
 						{
 							TMODE_setInitial (TRACE_MODE_DETAIL);
 						}
-						else if (!xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURSTS) ||
-						  !xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURST))
+#if defined(HAVE_BURST)
+						else if (!xmlStrcasecmp (traceinitialmode, TRACE_BURSTS) ||
+						  !xmlStrcasecmp (traceinitialmode, TRACE_BURST))
 						{
 							TMODE_setInitial (TRACE_MODE_BURST);
 						}
+#endif
 						else
 						{
 							mfprintf (stdout, PACKAGE_NAME": Warning! Invalid value '%s' for property <%s> in tag <%s>.\n", traceinitialmode, TRACE_INITIAL_MODE, TRACE_TAG);
@@ -2113,6 +2115,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */
+#if defined(HAVE_BURST)
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_BURSTS))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
@@ -2122,6 +2125,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						}
 						XML_FREE(enabled);
 					}
+#endif
 					/* OpenMP related configuration */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_OMP))
 					{
