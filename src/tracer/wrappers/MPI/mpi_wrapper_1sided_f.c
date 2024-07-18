@@ -74,7 +74,6 @@
 #endif
 
 #include "misc_wrapper.h"
-#include "mpi_stats.h"
 
 
 #define MPI_CHECK(mpi_error, routine) \
@@ -98,7 +97,7 @@ void MPI_Win_create_Fortran_Wrapper (void *base, void* size, void* disp_unit,
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_create)(base, size, disp_unit, info, comm, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_CREATE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -111,7 +110,7 @@ void MPI_Win_fence_Fortran_Wrapper (MPI_Fint* assert, void* win, void *ierror)
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_fence)(assert, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_FENCE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -124,7 +123,7 @@ void MPI_Win_start_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, vo
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_start)(group, assert, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_START_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -137,7 +136,7 @@ void MPI_Win_post_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, voi
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_post)(group, assert, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_POST_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -150,7 +149,7 @@ void MPI_Win_free_Fortran_Wrapper (void *win, MPI_Fint *ierror)
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_free)(win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_FREE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -163,7 +162,7 @@ void MPI_Win_complete_Fortran_Wrapper (void *win, MPI_Fint *ierror)
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_complete)(win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_COMPLETE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -176,7 +175,7 @@ void MPI_Win_wait_Fortran_Wrapper (void *win, MPI_Fint *ierror)
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_wait)(win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_WAIT_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -198,7 +197,7 @@ void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
 	CtoF77(pmpi_get) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -219,7 +218,7 @@ void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
 	CtoF77(pmpi_put) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -232,7 +231,7 @@ void MPI_Win_lock_Fortran_Wrapper (MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_lock)(lock_type, rank, assert, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_LOCK_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -246,7 +245,7 @@ void MPI_Win_unlock_Fortran_Wrapper (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ie
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_unlock)(rank, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_WIN_UNLOCK_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -270,7 +269,7 @@ void MPI_Get_accumulate_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_cou
   TRACE_MPIEVENT (begin_time, MPI_GET_ACCUMULATE_EV, EVT_BEGIN, *target_rank, origin_datatype_size * (*origin_count) + target_datatype_size * (*target_count), EMPTY, target_datatype_size * (*target_disp), origin_addr);
 	CtoF77(pmpi_get_accumulate) (origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_GET_ACCUMULATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -292,7 +291,7 @@ void MPI_Fetch_and_op_Fortran_Wrapper (void *origin_addr, void *result_addr,
 	CtoF77(pmpi_fetch_and_op) (origin_addr, result_addr, datatype, target_rank,
 	  target_disp, op, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_FETCH_AND_OP_EV, EVT_END, EMPTY, EMPTY, EMPTY,
 	  EMPTY, EMPTY);
 
@@ -313,7 +312,7 @@ void MPI_Compare_and_swap_Fortran_Wrapper (void *origin_addr, void *compare_addr
 	CtoF77(pmpi_compare_and_swap) (origin_addr, compare_addr, result_addr,
 	  datatype, target_rank, target_disp, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_COMPARE_AND_SWAP_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -326,7 +325,7 @@ void MPI_Win_flush_Fortran_Wrapper (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ier
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush) (rank, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -339,7 +338,7 @@ void MPI_Win_flush_all_Fortran_Wrapper (MPI_Fint *win, MPI_Fint *ierror)
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush_all) (win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_ALL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -352,7 +351,7 @@ void MPI_Win_flush_local_Fortran_Wrapper (MPI_Fint *rank, MPI_Fint *win, MPI_Fin
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush_local) (rank, win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_LOCAL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
@@ -365,7 +364,7 @@ void MPI_Win_flush_local_all_Fortran_Wrapper (MPI_Fint *win, MPI_Fint *ierror)
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush_local_all) (win, ierror);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 

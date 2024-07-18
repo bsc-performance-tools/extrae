@@ -80,7 +80,6 @@ MPI_Fint * MPI_F_STATUSES_IGNORE = 0;
 #endif
 
 #include "misc_wrapper.h"
-#include "mpi_stats.h"
 
 #define MPI_CHECK(mpi_error, routine) \
 	if (mpi_error != MPI_SUCCESS) \
@@ -131,7 +130,7 @@ void PMPI_BSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_BSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -174,7 +173,7 @@ void PMPI_SSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_SSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -216,7 +215,7 @@ void PMPI_RSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_RSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -258,7 +257,7 @@ void PMPI_Send_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_SEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -302,7 +301,7 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_IBSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -346,7 +345,7 @@ void PMPI_ISend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_ISEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -390,7 +389,7 @@ void PMPI_ISSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats 
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_ISSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -434,7 +433,7 @@ void PMPI_IRSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
 	TRACE_MPIEVENT (current_time, MPI_IRSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
 }
@@ -486,7 +485,7 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, source_world, size, 0);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, source_world, size, 0);
 
 	TRACE_MPIEVENT (current_time, MPI_RECV_EV, EVT_END, source_world, size, source_tag, c_comm, EMPTY);
 }
@@ -583,7 +582,7 @@ void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	iotimer_t current_time = TIME;
 
 	// MPI stats 
-	xtr_stats_MPI_update_P2P(begin_time, current_time, source_world, size, 0);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, source_world, size, 0);
 
 	TRACE_MPIEVENT (current_time, MPI_MRECV_EV, EVT_END, source_world, size, source_tag, c_comm, EMPTY);
 }
@@ -658,7 +657,7 @@ void PMPI_Probe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	 *   aux    : ---
 	 */
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_PROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c_comm, EMPTY);
 
 	// MPI stats
@@ -787,7 +786,7 @@ void PMPI_Mprobe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	 *   aux    : ---
 	 */
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_MPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c_comm, EMPTY);
 
 }
@@ -1419,7 +1418,7 @@ void PMPI_Recv_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_RECV_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -1458,7 +1457,7 @@ void PMPI_Send_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_SEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -1497,7 +1496,7 @@ void PMPI_Bsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_BSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -1536,7 +1535,7 @@ void PMPI_Rsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_RSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -1575,7 +1574,7 @@ void PMPI_Ssend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_SSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
@@ -1625,7 +1624,7 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, SenderRank, ReceivedSize, SentSize);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, SenderRank, ReceivedSize, SentSize);
 
 	TRACE_MPIEVENT (current_time, MPI_SENDRECV_EV, EVT_END, SenderRank, ReceivedSize, Tag, c_comm, EMPTY);
 }
@@ -1671,7 +1670,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	iotimer_t current_time = TIME;
 
 	// MPI stats
-	xtr_stats_MPI_update_P2P(begin_time, current_time, SenderRank, ReceivedSize, SentSize);
+	_xtr_stats_MPI_update_P2P(begin_time, current_time, SenderRank, ReceivedSize, SentSize);
 
 	TRACE_MPIEVENT (current_time, MPI_SENDRECV_REPLACE_EV, EVT_END, SenderRank, ReceivedSize, Tag, c_comm, EMPTY);
 }

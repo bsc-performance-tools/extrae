@@ -72,7 +72,6 @@
 #endif
 
 #include "misc_wrapper.h"
-#include "mpi_stats.h"
 
 
 
@@ -97,7 +96,7 @@ int MPI_File_open_C_Wrapper (MPI_Comm comm, char * filename, int amode, MPI_Info
 	TRACE_MPIEVENT (begin_time, MPI_FILE_OPEN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); 
 	ierror = PMPI_File_open (comm, filename, amode, info, fh);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 
@@ -112,7 +111,7 @@ int MPI_File_close_C_Wrapper (MPI_File *fh)
 	TRACE_MPIEVENT (begin_time, MPI_FILE_CLOSE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_close (fh);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_CLOSE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 
@@ -130,7 +129,7 @@ int MPI_File_read_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype da
 	TRACE_MPIEVENT (begin_time, MPI_FILE_READ_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read (fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 
@@ -148,7 +147,7 @@ int MPI_File_read_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatyp
 	TRACE_MPIEVENT (begin_time, MPI_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_all (fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_ALL_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 
@@ -169,7 +168,7 @@ MPI_File_read_all_begin_C_Wrapper(MPI_File fh, void * buf, int count,
 	    count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_all_begin(fh, buf, count, datatype);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_ALL_BEGIN_EV, EVT_END, EMPTY,
 	    count * size, EMPTY, EMPTY, EMPTY);
 
@@ -187,7 +186,7 @@ MPI_File_read_all_end_C_Wrapper(MPI_File fh, void * buf, MPI_Status *status)
 	    EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_all_end(fh, buf, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_ALL_END_EV, EVT_END, EMPTY, EMPTY, EMPTY,
 	    EMPTY, EMPTY);
 
@@ -206,7 +205,7 @@ int MPI_File_read_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int 
 	TRACE_MPIEVENT (begin_time, MPI_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_at (fh, offset, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_AT_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 
@@ -227,7 +226,7 @@ MPI_File_read_at_all_C_Wrapper(MPI_File fh, MPI_Offset offset, void * buf,
 	    count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_AT_ALL_EV, EVT_END, EMPTY,
 	    count * size, EMPTY, EMPTY, EMPTY);
 
@@ -249,7 +248,7 @@ MPI_File_read_at_all_begin_C_Wrapper(MPI_File fh, MPI_Offset offset, void * buf,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_at_all_begin(fh, offset, buf, count, datatype);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_AT_ALL_BEGIN_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -267,7 +266,7 @@ MPI_File_read_at_all_end_C_Wrapper(MPI_File fh, void * buf, MPI_Status *status)
 	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_at_all_end(fh, buf, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_AT_ALL_END_EV, EVT_END,
 	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -289,7 +288,7 @@ MPI_File_read_ordered_C_Wrapper(MPI_File fh, void *buf, int count,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_ordered(fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_ORDERED_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -311,7 +310,7 @@ MPI_File_read_ordered_begin_C_Wrapper(MPI_File fh, void *buf, int count,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_ordered_begin(fh, buf, count, datatype);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_ORDERED_BEGIN_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -329,7 +328,7 @@ MPI_File_read_ordered_end_C_Wrapper(MPI_File fh, void *buf, MPI_Status *status)
 	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_ordered_end(fh, buf, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_ORDERED_END_EV, EVT_END,
 	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -351,7 +350,7 @@ MPI_File_read_shared_C_Wrapper(MPI_File fh, void *buf, int count,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_shared(fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_READ_SHARED_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -370,7 +369,7 @@ int MPI_File_write_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype d
 	TRACE_MPIEVENT (begin_time, MPI_FILE_WRITE_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write (fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 
@@ -388,7 +387,7 @@ int MPI_File_write_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Dataty
 	TRACE_MPIEVENT (begin_time, MPI_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_all (fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_ALL_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 
@@ -409,7 +408,7 @@ int MPI_File_write_all_begin_C_Wrapper(MPI_File fh, const void *buf, int count, 
 	ierror = PMPI_File_write_all_begin(fh, buf, count, datatype);
 
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_ALL_BEGIN_EV, EVT_END,
 	  EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -428,7 +427,7 @@ int MPI_File_write_all_end_C_Wrapper(MPI_File fh, const void *buf, MPI_Status *s
 	ierror = PMPI_File_write_all_end(fh, buf, status);
 
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_ALL_END_EV, EVT_END, EMPTY,
 	  EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -447,7 +446,7 @@ int MPI_File_write_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int
 	TRACE_MPIEVENT (begin_time, MPI_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_at (fh, offset, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_AT_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 
@@ -468,7 +467,7 @@ MPI_File_write_at_all_C_Wrapper(MPI_File fh, MPI_Offset offset, void * buf,
 	    count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY,
 	    count * size, EMPTY, EMPTY, EMPTY);
 
@@ -490,7 +489,7 @@ MPI_File_write_at_all_begin_C_Wrapper(MPI_File fh, MPI_Offset offset, void * buf
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_at_all_begin(fh, offset, buf, count, datatype);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_AT_ALL_BEGIN_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -508,7 +507,7 @@ MPI_File_write_at_all_end_C_Wrapper(MPI_File fh, void * buf, MPI_Status* status)
 	    EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_at_all_end(fh, buf, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_AT_ALL_END_EV, EVT_END, EMPTY,
 	    EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -530,7 +529,7 @@ MPI_File_write_ordered_C_Wrapper(MPI_File fh, void *buf, int count,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_ordered(fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_ORDERED_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -552,7 +551,7 @@ MPI_File_write_ordered_begin_C_Wrapper(MPI_File fh, void *buf, int count,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_ordered_begin(fh, buf, count, datatype);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_ORDERED_BEGIN_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
@@ -570,7 +569,7 @@ MPI_File_write_ordered_end_C_Wrapper(MPI_File fh, void *buf, MPI_Status *status)
 	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_ordered_end(fh, buf, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_ORDERED_END_EV, EVT_END,
 	    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -592,7 +591,7 @@ MPI_File_write_shared_C_Wrapper(MPI_File fh, void *buf, int count,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_shared(fh, buf, count, datatype, status);
 	iotimer_t current_time = TIME;
-	xtr_stats_MPI_update_other(begin_time, current_time);
+	_xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_WRITE_SHARED_EV, EVT_END,
 	    EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
