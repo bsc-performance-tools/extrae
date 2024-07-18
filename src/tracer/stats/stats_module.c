@@ -187,17 +187,13 @@ void xtr_stats_reset(xtr_stats_t **stats_obj)
  */
 xtr_stats_t **xtr_stats_dup(xtr_stats_t **stats_obj)
 {
-	xtr_stats_t **new_obj = xmalloc(sizeof(xtr_stats_t *) * NUM_STATS_GROUPS);
+	xtr_stats_t **new_obj = xmalloc_and_zero(sizeof(xtr_stats_t *) * NUM_STATS_GROUPS);
 
 	for (int i=0; i<NUM_STATS_GROUPS; ++i)
 	{
 		if (stats_obj[i] != NULL)
 		{
 			new_obj[stats_obj[i]->category] = virtual_table[stats_obj[i]->category].dup(stats_obj[i]);
-		}
-		else
-		{
-			new_obj[stats_obj[i]->category] = NULL;
 		}
 	}
 
