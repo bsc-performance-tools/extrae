@@ -1,4 +1,5 @@
 SUBDIRS = \
  dump-events \
- shared-libraries
+ shared-libraries \
+ value-range
 
