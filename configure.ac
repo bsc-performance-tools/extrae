@@ -122,7 +122,7 @@ AC_PROG_FC(${wanted_F_Compilers})
 
 AM_CONDITIONAL(HAVE_FC, test "$FC" != "")
 
-if test "${IS_SPARC64_MACHINE}" != "yes" ; then
+if test "${IS_SPARC64_MACHINE}" != "yes" -a test "${IS_GR740_MACHINE}" != "yes" ; then
 	AC_FC_WRAPPERS
 fi
 AX_JAVA
@@ -475,10 +475,13 @@ AC_CHECK_SIZEOF(ssize_t,${size_t_size})
 AC_CHECK_SIZEOF(size_t,${size_t_size})
 AC_CHECK_SIZEOF(void*,${voidp_size})
 
+# GR740 has a non-functional mallinfo structure
+if test "${IS_GR740_MACHINE}" != "yes" ; then
 AC_CHECK_MEMBER(struct mallinfo.arena,
    [AC_DEFINE([HAVE_MALLINFO], [1], [Whether the system supports mallinfo structure])],
    [],
    [#include <malloc.h>])
+fi
 
 AC_CHECK_MEMBER(union perf_mem_data_src.val,
 	[AC_DEFINE([HAVE_PERF_MEM_DATA_SRC], [1], [Whether the system includes perf_mem_data_src/val])],
