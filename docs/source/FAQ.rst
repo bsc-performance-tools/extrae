@@ -299,6 +299,39 @@ Execution FAQ
     :option:`--enable-posix-clock`` and on many systems this implies the
     inclusion of additional libraries (namely, :option:`-lrt`)
 
+.. admonition:: Question:
+
+   |TRACE| asks to run `genstubs-kmpc-11.sh` increasing the value of `MAX_WRAPPERS`.
+
+  Answer:
+    Get the sources from `GitHub`_ and modify the file
+    ``src/tracer/wrappers/OMP/genstubs-kmpc-11.sh`` changing `MAX_WRAPPERS` to the
+    desired number.  After modifying with above changes, run the file
+    ``./genstubs-kmpc-11.sh`` which will generate files that are necesary to
+    recompile |TRACE|.  To recompile |TRACE|, check how |TRACE| is configured by
+    running ``${EXTRAE_HOME}/etc/configured.sh``. This will show the compiler, the
+    flags associated with |TRACE| and various paths to different libraries.  If
+    everything looks correct, proceed with the recompilation of |TRACE| by
+    running `configure`, `make` and `make install`.
+
+    .. _GitHub: https://github.com/bsc-performance-tools/extrae  
+
+.. admonition:: Question:
+
+   |TRACE| asks to run `genstubs-libgomp.sh` increasing the value of `DOACROSS_MAX_NESTING`.
+
+  Answer:
+    Get the sources from `GitHub`_ and modify the file
+    ``src/tracer/wrappers/OMP/genstubs-libgomp.sh`` changing `DOACROSS_MAX_NESTING`
+    to the desired number.  After modifying with above changes, run the file
+    ``./genstubs-libgomp.sh`` which will generate files that are necesary to
+    recompile |TRACE|.  To recompile |TRACE|, check how |TRACE| is configured by
+    running ``${EXTRAE_HOME}/etc/configured.sh``. This will show the compiler, the
+    flags associated with |TRACE| and various paths to different libraries.  If
+    everything looks correct, proceed with the recompilation of |TRACE| by
+    running `configure`, `make` and `make install`
+  
+    .. _GitHub: https://github.com/bsc-performance-tools/extrae
 
 .. _sec:FAQcounters:
 

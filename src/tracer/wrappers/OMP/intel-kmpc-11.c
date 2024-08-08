@@ -1105,7 +1105,8 @@ void __kmpc_fork_call (void *loc, int argc, void *microtask, ...)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
 		                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
-				 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+				 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n"
+				 PACKAGE_NAME":        Check Extrae FAQ Webpage (https://tools.bsc.es/sites/default/files/documentation/html/extrae/FAQ.html#execution-faq) for more details",
 		                 kmpc_parallel_sched_name, argc);
 		exit (-1);                                                                  
 
@@ -1121,7 +1122,8 @@ void __kmpc_fork_call (void *loc, int argc, void *microtask, ...)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
 		 	                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
-											 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+					 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n"
+					 PACKAGE_NAME":        Check Extrae FAQ Webpage (https://tools.bsc.es/sites/default/files/documentation/html/extrae/FAQ.html#execution-faq) for more details",
 			                 kmpc_parallel_wrap_name, argc);
 			exit (-1);                                                                  
 		}
@@ -1195,7 +1197,8 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 	{
     fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
 		                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
-										 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+				 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n"
+				 PACKAGE_NAME":        Check Extrae FAQ Webpage (https://tools.bsc.es/sites/default/files/documentation/html/extrae/FAQ.html#execution-faq) for more details",
 		                 kmpc_parallel_sched_name, argc);
 		exit (-1);                                                                  
 	}
@@ -1211,7 +1214,8 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
 		 	                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
-											 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+					 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n"
+					 PACKAGE_NAME":        Check Extrae FAQ Webpage (https://tools.bsc.es/sites/default/files/documentation/html/extrae/FAQ.html#execution-faq) for more details",
 			                 kmpc_parallel_wrap_name, argc);
 			exit (-1);                                                                  
 		}

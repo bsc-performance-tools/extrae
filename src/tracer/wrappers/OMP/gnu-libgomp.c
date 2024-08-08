@@ -2706,7 +2706,8 @@ void GOMP_doacross_wait (long first, ...)
 		{
 			#include "gnu-libgomp-intermediate/libgomp-doacross-intermediate-switch.c"
 			default:
-				fprintf (stderr, PACKAGE_NAME": ERROR! Unhandled GOMP_doacross_wait call with %d arguments! Re-run the script 'genstubs-libgomp.sh' increasing the value of DOACROSS_MAX_NESTING. Quitting!\n", ncounts);
+				fprintf (stderr, PACKAGE_NAME": ERROR! Unhandled GOMP_doacross_wait call with %d arguments! Re-run the script 'genstubs-libgomp.sh' increasing the value of DOACROSS_MAX_NESTING. Quitting!\n"
+						PACKAGE_NAME":        Check Extrae FAQ Webpage (https://tools.bsc.es/sites/default/files/documentation/html/extrae/FAQ.html#execution-faq) for more details", ncounts);
 				exit(-1);
 				break;
 		}	
@@ -2726,7 +2727,8 @@ void GOMP_doacross_wait (long first, ...)
 		{
 			#include "gnu-libgomp-intermediate/libgomp-doacross-intermediate-switch.c"
 			default:
-				fprintf (stderr, PACKAGE_NAME": ERROR! Unhandled GOMP_doacross_wait call with %d arguments! Re-run the script 'genstubs-libgomp.sh' increasing the value of DOACROSS_MAX_NESTING. Quitting!\n", ncounts);
+				fprintf (stderr, PACKAGE_NAME": ERROR! Unhandled GOMP_doacross_wait call with %d arguments! Re-run the script 'genstubs-libgomp.sh' increasing the value of DOACROSS_MAX_NESTING. Quitting!\n"
+						PACKAGE_NAME":        Check Extrae FAQ Webpage (https://tools.bsc.es/sites/default/files/documentation/html/extrae/FAQ.html#execution-faq) for more details", ncounts);
 				exit(-1);
 				break;
 		}
