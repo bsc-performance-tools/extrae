@@ -1,6 +1,27 @@
 #!/bin/bash
 
-MAX_WRAPPERS=512
+usage()
+{
+   echo "Small script to generate wrapper for more variadic paramters when intercepting KMPC runtime symbols"
+   echo
+   echo "How to use: ./$(basename "$0") MAX_WRAPPERS"
+   echo 
+   echo "MAX_WRAPPERS: number of arguments for which wrapper functions will be generated"
+}
+
+if [ $(dirname "$0") != "." ]
+then
+	echo "This script is located in $(dirname "$0") and should be called from there like ./$(basename "$0")"
+	exit 1
+fi
+
+if [ "$#" -ne 1 ]
+then
+  usage
+  exit 1
+fi
+
+MAX_WRAPPERS=$1
 MAX_WRAPPERS_PER_FILE=64
 INTERMEDIATE_PATH="intel-kmpc-11-intermediate"
 INTERMEDIATE_WRAPPERS_BASENAME="intel-kmpc-11-intermediate-part"
