@@ -31,6 +31,8 @@ AC_DEFUN([AX_CUPTI],
   AC_REQUIRE([AX_CUDA])
 
   if test "${CUDA_INSTALLED}" = "yes"; then
+    CFLAGS="${CUDA_CFLAGS} ${CFLAGS}"
+
     AC_ARG_WITH(cupti,
       AC_HELP_STRING(
         [--with-cupti],
@@ -53,7 +55,6 @@ AC_DEFUN([AX_CUPTI],
 # is compiled with a newer one.
   AC_MSG_CHECKING([for cudaConfigureCall_v3020_params definition])
   if test "${CUPTI_INSTALLED}" = "yes"; then
-    CFLAGS="$CFLAGS $CUDA_CFLAGS"
     AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM(
         [#include <cupti.h>],
@@ -73,7 +74,6 @@ AC_DEFUN([AX_CUPTI],
 
   AC_MSG_CHECKING([for cudaLaunch_v3020_params definition])
   if test "${CUPTI_INSTALLED}" = "yes"; then
-    CFLAGS="$CFLAGS $CUDA_CFLAGS"
     AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM(
         [#include <cupti.h>],
@@ -93,7 +93,6 @@ AC_DEFUN([AX_CUPTI],
 
   AC_MSG_CHECKING([for cudaStreamDestroy_v3020_params definition])
   if test "${CUPTI_INSTALLED}" = "yes"; then
-    CFLAGS="$CFLAGS $CUDA_CFLAGS"
     AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM(
         [#include <cupti.h>],
