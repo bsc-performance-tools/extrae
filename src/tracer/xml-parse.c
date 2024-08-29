@@ -2116,7 +2116,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 					}
 					/* Bursts related configuration */
 #if defined(HAVE_BURST)
-					else if (!xmlStrcasecmp (current_tag->name, TRACE_BURSTS))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_BURSTS) || !xmlStrcasecmp (current_tag->name, TRACE_BURST))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
