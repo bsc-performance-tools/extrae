@@ -610,7 +610,7 @@ static int Other_MPI_Event (event_t * current_event,
 	Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
 
 	/* XXX: Workaround to set the state to NOT_TRACING after the MPI_Init when using circular buffer.
-     * We should definitely do this another way round. 
+	 * We should definitely do this another way round. 
 	 */ 
 	if ((EvType == MPI_INIT_EV) && (EvValue == EVT_END))
 	{
@@ -621,7 +621,19 @@ static int Other_MPI_Event (event_t * current_event,
 		}
 	}
 
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	/* >>> shutdown-states >>>
+	 * This patch prevents MPI_INIT_EV to change the state if the tracing has been disabled
+	 * before through a call to Extrae_shutdown. This is necessary because we can't skip
+	 * tracing this event due to various initialization needs.
+	 */
+	task_t *task_info = GET_TASK_INFO(ptask, task);
+	if ((EvType != MPI_INIT_EV) ||
+	    ((EvType == MPI_INIT_EV) && (!task_info->tracing_disabled)))
+	{
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
+	}
+	/* <<< shutdown-states <<< */
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
 	if (EvType == MPI_INIT_EV && EvValue == EVT_BEGIN)
