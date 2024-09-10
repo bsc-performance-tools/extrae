@@ -107,7 +107,7 @@
 		exit (1); \
 	}
 
-static unsigned Extrae_MPI_NumTasks (void)
+unsigned Extrae_MPI_NumTasks (void)
 {
 	static int run = FALSE;
 	static int mysize;

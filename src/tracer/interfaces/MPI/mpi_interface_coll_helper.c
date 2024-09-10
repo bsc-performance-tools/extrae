@@ -46,9 +46,15 @@ void Extrae_MPI_ProcessCollectiveCommunicator (MPI_Comm c)
 
 	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
 	{
+#if 0 
+		// Do not use PMPI_Comm_compare, its cost grows quadratically when increasing the number of ranks and does not scale!
 		PMPI_Comm_compare (MPI_COMM_WORLD, c, &res);
-
 		if (res == MPI_IDENT || res == MPI_CONGRUENT)
+#else
+		int comm_size = 0;
+		PMPI_Comm_size(c, &comm_size);
+		if ((comm_size > 0) && (comm_size == (int)Extrae_MPI_NumTasks()))
+#endif
 		{
 			MPI_CurrentOpGlobal = ++MPI_NumOpsGlobals;
 
