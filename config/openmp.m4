@@ -7,7 +7,7 @@ AC_DEFUN([AX_CHECK_OPENMP],
 	AC_ARG_ENABLE(openmp,
 	   AC_HELP_STRING(
 	      [--enable-openmp],
-	      [Enable support for tracing OpenMP -Intel, IBM and GNU runtimes- (enabled by default)]
+	      [Enable support for tracing OpenMP -Intel, LLVM, IBM and GNU runtimes- (enabled by default)]
 	   ),
 	   [enable_openmp="${enableval}"],
 	   [enable_openmp="yes"]
@@ -26,8 +26,11 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		   [enable_openmp_gnu="yes"]
 		)
 	
-		# Enable Intel support
-		if test "${Architecture}" = "ia32"; then
+		# Enable Intel/LLVM support
+		if test "${Architecture}" = "ia32" -o \
+            "${Architecture}" = "arm" -o \
+            "${Architecture}" = "powerpc" -o \
+            "${Architecture}" = "riscv"; then
 			enable_openmp_intel_default="yes"
 		else
 			enable_openmp_intel_default="no"
@@ -35,7 +38,7 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		AC_ARG_ENABLE(openmp-intel,
 		   AC_HELP_STRING(
 		      [--enable-openmp-intel],
-		      [Enable support for tracing OpenMP Intel (enabled by default on Intel systems)]
+		      [Enable support for tracing OpenMP Intel/LLVM (enabled by default on Intel, ARM, PowerPC and RISC-V systems)]
 		   ),
 		   [enable_openmp_intel="${enableval}"],
 		   [enable_openmp_intel="${enable_openmp_intel_default}"]
