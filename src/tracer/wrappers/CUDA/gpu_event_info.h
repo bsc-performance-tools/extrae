@@ -1,9 +1,8 @@
 #pragma once
 
-# include <cuda_runtime_api.h>
-# include <cupti.h>
-# include <cupti_events.h>
 #include <stddef.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
 
 typedef enum {
 	EXTRAE_CUDA_NEW_TIME,

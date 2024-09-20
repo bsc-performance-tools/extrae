@@ -65,7 +65,7 @@ static cudaError_t (*real_cudaThreadExit)(void) = NULL;
 static cudaError_t (*real_cudaMalloc)(void **, size_t) = NULL;
 static cudaError_t (*real_cudaMallocPitch)(void **, size_t *, size_t, size_t) = NULL;
 static cudaError_t (*real_cudaFree)(void *) = NULL;
-static cudaError_t (*real_cudaMallocArray)(cudaArray_t *, const cudaChannelFormatDesc *, size_t, size_t, unsigned int) = NULL;
+static cudaError_t (*real_cudaMallocArray)(cudaArray_t *, const struct cudaChannelFormatDesc *, size_t, size_t, unsigned int) = NULL;
 static cudaError_t (*real_cudaFreeArray)(cudaArray_t) = NULL;
 static cudaError_t (*real_cudaMallocHost)(void **, size_t) = NULL;
 static cudaError_t (*real_cudaFreeHost)(void *) = NULL;
@@ -114,7 +114,7 @@ void Extrae_CUDA_init (int rank)
 	real_cudaMalloc = (cudaError_t(*)(void **, size_t))dlsym(RTLD_NEXT, "cudaMalloc");
 	real_cudaMallocPitch = (cudaError_t(*)(void **, size_t *, size_t, size_t))dlsym(RTLD_NEXT, "cudaMallocPitch");
 	real_cudaFree = (cudaError_t(*)(void *))dlsym(RTLD_NEXT, "cudaFree");
-	real_cudaMallocArray = (cudaError_t(*)(cudaArray_t *, const cudaChannelFormatDesc *, size_t, size_t, unsigned int))dlsym(RTLD_NEXT, "cudaMallocArray");
+	real_cudaMallocArray = (cudaError_t(*)(cudaArray_t *, const struct cudaChannelFormatDesc *, size_t, size_t, unsigned int))dlsym(RTLD_NEXT, "cudaMallocArray");
 	real_cudaFreeArray = (cudaError_t(*)(cudaArray_t))dlsym(RTLD_NEXT, "cudaFreeArray");
 	real_cudaMallocHost = (cudaError_t(*)(void **, size_t))dlsym(RTLD_NEXT, "cudaMallocHost");
 	real_cudaFreeHost = (cudaError_t(*)(void *))dlsym(RTLD_NEXT, "cudaFreeHost");
@@ -597,7 +597,7 @@ cudaFree(void *devPtr)
 }
 
 cudaError_t
-cudaMallocArray(cudaArray_t *array, const cudaChannelFormatDesc *desc,
+cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc,
   size_t width, size_t height, unsigned int flags)
 {
 	cudaError_t res;
