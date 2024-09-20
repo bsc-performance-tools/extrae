@@ -594,6 +594,7 @@ void Extrae_cudaDeviceSynchronize_Enter (void)
 
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS, TRUE);
 }
 
 void Extrae_cudaDeviceSynchronize_Exit (void)
@@ -603,8 +604,6 @@ void Extrae_cudaDeviceSynchronize_Exit (void)
 	cudaGetDevice (&devid);
 
 	Probe_Cuda_ThreadBarrier_Exit ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS, TRUE);
-
 	Backend_Leave_Instrumentation ();
 }
 
@@ -634,7 +633,6 @@ void Extrae_CUDA_flush_streams ( int device_id, int stream_id, int synchronize )
 {
 	int d = 0, s = 0;
 
-	THREAD_TRACE_MISCEVENT(THREADID, LAST_READ_TIME, FLUSH_EV, EVT_BEGIN, 0);
 	for ( d = (device_id == XTR_FLUSH_ALL_DEVICES ? 0: device_id);
 			  d < (device_id == XTR_FLUSH_ALL_DEVICES ? CUDAdevices: device_id+1);
 			  ++d )
@@ -650,7 +648,6 @@ void Extrae_CUDA_flush_streams ( int device_id, int stream_id, int synchronize )
 			}
 		}
 	}
-	THREAD_TRACE_MISCEVENT(THREADID, TIME, FLUSH_EV, EVT_END, 0);
 }
 
 void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
@@ -722,6 +719,8 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
 
+	Extrae_CUDA_flush_streams(devid, strid, TRUE);
+
 	if (strid == -1)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaStreamSynchronize\n");
@@ -748,8 +747,6 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 	}
 
 	Probe_Cuda_StreamBarrier_Exit ();
-
-	Extrae_CUDA_flush_streams(devid, strid, TRUE);
 
 	Backend_Leave_Instrumentation ();
 }
