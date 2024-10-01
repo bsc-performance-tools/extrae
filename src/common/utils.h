@@ -60,5 +60,6 @@ int xtr_random(void);
 #endif
 
 #define STRINGIFY(s) #s
+#define TOSTRING(x) STRINGIFY(x)
 
 #endif /* __UTILS_H__ */

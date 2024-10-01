@@ -24,6 +24,7 @@
 #ifndef _SAMPLING_H_INCLUDED_
 #define _SAMPLING_H_INCLUDED_
 
+#if !defined(OS_RTEMS)
 enum
 {
 	SAMPLING_TIMING_REAL,
@@ -38,5 +39,9 @@ void Extrae_SamplingHandler (void* address);
 void Extrae_SamplingHandler_PAPI (void *address);
 
 void unsetTimeSampling (void);
+#else
+void setTimeSampling (int sampling_p);
+void unsetTimeSampling (void);
 
+#endif
 #endif

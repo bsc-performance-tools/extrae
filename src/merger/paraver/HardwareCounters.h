@@ -122,6 +122,10 @@ int check_if_uncore_in_PFM(char *event_name);
 #elif defined(PMAPI_COUNTERS)
 # define GET_PARAVER_CODE_FOR_HWC(x, name) (HWC_BASE_PMAPI + x)
 # define LEGACY_HWC_COUNTER_TYPE(x) (HWC_BASE_PMAPI + x)
+#elif defined(L4STAT)
+# define HWC_L4STAT_BASE HWC_BASE_PAPI_PRESET
+# define LEGACY_HWC_COUNTER_TYPE(x) HWC_L4STAT_BASE + ((x & 0x000000FF))
+# define GET_PARAVER_CODE_FOR_HWC(x, name) LEGACY_HWC_COUNTER_TYPE(x)
 #endif
 
 void HardwareCounters_AssignGlobalID (int ptask, int local_id, char *definition);
