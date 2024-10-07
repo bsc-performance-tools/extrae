@@ -31,6 +31,7 @@
 #include "burst_mode.h"
 #include "clock.h"
 #include "common.h"
+#include "events.h"
 #include "io_probe.h"
 #include "malloc_probe.h"
 #include "mode.h"
@@ -40,6 +41,7 @@
 #include "threadid.h"
 #include "trace_hwc.h"
 #include "trace_macros.h"
+#include "trace_mode.h"
 #include "xalloc.h"
 
 
