@@ -59,9 +59,9 @@ if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += libmpitracecf.la
 endif
 if WANT_OPENMP
-  lib_LTLIBRARIES += libompitrace.la libompitracef.la libnewompitrace.la
+  lib_LTLIBRARIES += libompitrace.la libompitracef.la libnewompitrace.la libnewompitracef.la
 if SINGLE_MPI_LIBRARY
-  lib_LTLIBRARIES += libompitracecf.la
+  lib_LTLIBRARIES += libompitracecf.la libnewompitracecf.la
 endif
 endif
 if HAVE_CUDA
@@ -320,9 +320,11 @@ libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
 libomptrace_la_SOURCES = $(core_SRCS)
 libnewomptrace_la_SOURCES = $(core_SRCS)
 libnewompitrace_la_SOURCES = $(core_SRCS)
+libnewompitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_SOURCES = $(libmpitracecf_la_SOURCES)
+  libnewompitracecf_la_SOURCES = $(libmpitracecf_la_SOURCES)
 endif
 
 # SMPSS & SMPSS + MPI
@@ -543,9 +545,11 @@ libompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS
 libomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_OPENMP_LIBS) $(SEQUENTIAL_MERGE_LIB)
 libnewomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(NEW_ADDITIONAL_OPENMP_LIBS) $(SEQUENTIAL_MERGE_LIB)
 libnewompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(NEW_ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
+libnewompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F) $(NEW_ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
+  libnewompitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF) $(NEW_ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
 endif
 
 libsmpssmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(PARALLEL_MERGE_LIB)
@@ -730,9 +734,11 @@ libompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SU
 libomptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 libnewomptrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 libnewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
+libnewompitracef_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
+  libnewompitracecf_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 endif
 
 libsmpssmpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DSMPSS_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
@@ -820,6 +826,7 @@ lib_dyn_mpitracef_la_LIBADD  += $(mpi_burst_MODULES)
 lib_dyn_mpitracecf_la_LIBADD += $(mpi_burst_MODULES)
 
 libnewompitrace_la_LIBADD    += $(newompi_burst_MODULES)
+libnewompitracef_la_LIBADD    += $(newompi_burst_MODULES)
 
 libmpitrace_la_CFLAGS        += $(burst_CFLAGS)
 libmpitracef_la_CFLAGS       += $(burst_CFLAGS)
@@ -832,15 +839,21 @@ lib_dyn_mpitracef_la_CFLAGS  += $(burst_CFLAGS)
 lib_dyn_mpitracecf_la_CFLAGS += $(burst_CFLAGS)
 
 libnewompitrace_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+libnewompitracef_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
 
 if SINGLE_MPI_LIBRARY
-  libmpitracecf_la_LIBADD    += $(mpi_burst_MODULES)
-  libptmpitracecf_la_LIBADD  += $(mpi_burst_MODULES)
-  libompitracecf_la_LIBADD   += $(mpi_burst_MODULES)
+  libmpitracecf_la_LIBADD     += $(mpi_burst_MODULES)
+  libptmpitracecf_la_LIBADD   += $(mpi_burst_MODULES)
+  libompitracecf_la_LIBADD    += $(mpi_burst_MODULES)
 
-  libmpitracecf_la_CFLAGS    += $(burst_CFLAGS)
-  libptmpitracecf_la_CFLAGS  += $(burst_CFLAGS)
-  libompitracecf_la_CFLAGS   += $(burst_CFLAGS)
+  libnewompitracecf_la_LIBADD += $(newompi_burst_MODULES)
+
+  libmpitracecf_la_CFLAGS     += $(burst_CFLAGS)
+  libptmpitracecf_la_CFLAGS   += $(burst_CFLAGS)
+  libompitracecf_la_CFLAGS    += $(burst_CFLAGS)
+
+  libnewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+
 endif
 
 endif
@@ -937,9 +950,11 @@ libnewomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -dynamic
 libompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
 libnewompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -dynamic
+libnewompitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -dynamic
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS)
+  libnewompitracecf_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -dynamic
 endif
 
 libsmpsstrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
