@@ -24,6 +24,11 @@
 #ifndef PROBE_JAVA_H_INCLUDED
 #define PROBE_JAVA_H_INCLUDED
 
+void Extrae_Java_Thread_start(void);
+void Extrae_Java_Thread_end(void);
+void Extrae_Java_Wait_start(void);
+void Extrae_Java_Wait_end(void);
+
 void Extrae_Java_GarbageCollector_begin(void);
 void Extrae_Java_GarbageCollector_end(void);
 

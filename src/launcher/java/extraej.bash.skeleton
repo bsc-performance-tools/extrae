@@ -161,9 +161,12 @@ parse_parameters () {
 			keep_instrumented_files="yes"
 		elif [[ "${1}" = "-v" ]]; then
 			verbose="yes"
-		elif [[ "${1}" = "-reuse" ]] ; then
+		elif [[ "${1}" = "-reuse" ]]; then
 			shift
 			reuse_dir=${1}
+		elif [[ "${1}" = "-jar" ]]; then
+			shift
+            jartarget=${1}
 		elif [[ "${1}" = "--" ]]; then
 			application_separator_found="yes"
 			break
@@ -185,7 +188,8 @@ execute_java () {
 	# Check whether Extrae supported JVMTI
 	if [[ ! -r ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ]]; then
 		if [[ "${verbose}" = "yes" ]]; then
-			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} ${@}"
+			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\
+                ${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} ${@}"
 		fi
 
 		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
@@ -196,7 +200,8 @@ execute_java () {
 		local agent=${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}
 
 		if [[ "${verbose}" = "yes" ]]; then
-			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}"
+			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\
+                ${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}"
 		fi
 
 		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
@@ -217,6 +222,7 @@ extrae_function_list_enabled=""
 MemberArray=()
 keep_instrumented_files="no"
 verbose="no"
+jartarget=""
 reuse_dir=""
 application_separator_found="no"
 
@@ -225,21 +231,25 @@ application_separator_found="no"
 JAVA=@sub_JAVA@
 AJC=@sub_AJC@
 ASPECTWEAVER_JAR=@sub_ASPECTWEAVER_JAR@
+ASPECTJRT_JAR=@sub_ASPECTJRT_JAR@
+
 
 # Check existance for config file pointed by EXTRAE_CONFIG_FILE
 
 if [[ "${#}" -eq 0 ]]; then
 	echo "Usage for Extrae/Java-based instrumenter:"
 	echo ""
-	echo "  "`basename ${0}`" {options} -- <JavaMethod>"
+	echo "  "`basename ${0}`" {options} -- <JavaClass>"
 	echo ""
 	echo "  where options:"
 	echo "    -v           Makes execution verbose"
-    echo "    -keep        Runs and saves the instrumented package for a future use"
-    echo "    -reuse <dir> Tells "`basename ${0}`" to reuse a previously instrumented package saved through -keep"
+	echo "    -keep        Runs and saves the instrumented package for a future use"
+	echo "    -reuse <dir> Tells "`basename ${0}`" to reuse a previously instrumented package saved through -keep"
+	echo "    -jar         Runs the target as a jar file"
 	echo
-	echo " Example:"
+	echo " Examples:"
 	echo "  \$\{EXTRAE_HOME\}/bin/"`basename ${0}`" -v -keep -- PiExample"
+	echo "  \$\{EXTRAE_HOME\}/bin/"`basename ${0}`" -v -jar PiExample.jar -- PiExample"
 	echo
 	echo " Note: Remember to indicate the configuration file through the EXTRAE_CONFIG_FILE environment variable"
 	die ""
@@ -271,6 +281,10 @@ do
 	shift
 done
 
+if [[ "${jartarget}" != "" ]]; then
+        CLASSPATH=${jartarget}:${CLASSPATH}
+fi
+
 # Do we support AspectJ?
 if [[ -x "${AJC}" ]]; then
 
@@ -284,21 +298,28 @@ if [[ -x "${AJC}" ]]; then
 			tmpdir=`mktemp -d extraej.XXXXXX`
 
 			generate_aspects
+
+            if [[ "${jartarget}" != "" ]]; then
+                inpath=${jartarget}
+            else
+                inpath=.
+            fi
 		
 			if [[ "${verbose}" = "yes" ]]; then
-				echo "Executing: CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} ${AJC} -inpath . -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
+				echo "Executing: CLASSPATH=${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
+                    ${AJC} -inpath ${inpath} -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
 			fi
 		
-			CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
+			CLASSPATH=${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
 			${AJC} \
-			 -inpath . \
+			 -inpath ${inpath} \
 			 -sourceroots ${tmpdir}/aspects \
 			 -d ${tmpdir}/instrumented
 			if [[ "${?}" -ne 0 ]]; then
 				die "Error! ${AJC} failed"
 			fi
 
-			execute_java ${tmpdir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
+			execute_java ${tmpdir}/instrumented:${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${CLASSPATH} \
 				${EXTRAEJ_LIBPTTRACE_PATH} \
 				"$@"
 		else
@@ -320,7 +341,7 @@ if [[ -x "${AJC}" ]]; then
 		fi
 
 		# Let's execute the code with Extrae support
-		execute_java ${reuse_dir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
+		execute_java ${reuse_dir}/instrumented:${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${CLASSPATH} \
 			${EXTRAEJ_LIBPTTRACE_PATH} \
 			"$@"
 	fi
