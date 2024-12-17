@@ -229,3 +229,12 @@ void Extrae_OpenMP_Taskloop_Exit (void)
 	TRACE_OMPEVENT(LAST_READ_TIME, NEW_OMP_TASK_INST_ADDRESS_EV, EVT_END, EMPTY);
 }
 
+void Extrae_OpenMP_Target_Entry (unsigned target_construct)
+{
+	TRACE_OMPEVENT(LAST_READ_TIME, NEW_OMP_TARGET_EV, target_construct, EMPTY);
+}
+
+void Extrae_OpenMP_Target_Exit ()
+{
+	TRACE_OMPEVENT(LAST_READ_TIME, NEW_OMP_TARGET_EV, NEW_OMP_TARGET_END_VAL, EMPTY);
+}

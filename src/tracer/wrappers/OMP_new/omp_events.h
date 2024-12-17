@@ -51,3 +51,5 @@ void Extrae_OpenMP_Task_Exec_Entry (int task_or_taskloop, const void *task, long
 void Extrae_OpenMP_Task_Exec_Exit (void);
 void Extrae_OpenMP_Taskloop_Entry (const void *task, long long taskloop_id, int num_tasks);
 void Extrae_OpenMP_Taskloop_Exit (void);
+void Extrae_OpenMP_Target_Entry (unsigned);
+void Extrae_OpenMP_Target_Exit (void);

@@ -213,6 +213,13 @@ void (*REAL_SYMBOL_PTR(GOMP_parallel)) (void *, void *, unsigned, unsigned) = NU
 
 void (*REAL_SYMBOL_PTR(GOMP_parallel_sections)) (void *, void *, unsigned, unsigned, unsigned) = NULL;
 
+/* libgomp/target.c */
+
+void (*REAL_SYMBOL_PTR(GOMP_target)) (int, void *, void *, size_t, void **, size_t *, unsigned char *) = NULL;
+void (*REAL_SYMBOL_PTR(GOMP_target_data)) (int, void *, size_t, void **, size_t *, unsigned char *) = NULL;
+void (*REAL_SYMBOL_PTR(GOMP_target_end_data)) (void) = NULL;
+void (*REAL_SYMBOL_PTR(GOMP_target_update)) (int, void *, size_t, void **, size_t *, unsigned char *) = NULL;
+
 
 /*********************************/
 /***** Available since GCC 6.0 ***/
@@ -242,6 +249,18 @@ void (*REAL_SYMBOL_PTR(GOMP_doacross_wait)) (long, ...) = NULL;
 /* libgomp/taskloop.c */
 
 void (*REAL_SYMBOL_PTR(GOMP_taskloop)) (void *, void *, void *, long, long, unsigned, unsigned long, int, long, long, long) = NULL;
+
+
+/*********************************/
+/***** Available since GCC 6.1 ***/
+/*********************************/
+
+/* libgomp/target.c */
+
+void (*REAL_SYMBOL_PTR(GOMP_target_ext)) (int, void *, size_t, void **, size_t *, unsigned short *, unsigned int, void **, void **) = NULL;
+void (*REAL_SYMBOL_PTR(GOMP_target_data_ext)) (int, size_t, void **, size_t *, unsigned short *) = NULL;
+void (*REAL_SYMBOL_PTR(GOMP_target_update_ext)) (int, size_t, void **, size_t *, unsigned short *, unsigned int, void **) = NULL;
+void (*REAL_SYMBOL_PTR(GOMP_target_enter_exit_data)) (int, size_t, void **, size_t *, unsigned short *, unsigned int, void **) = NULL;
 
 
 /*********************************/
@@ -444,6 +463,17 @@ static int xtr_GOMP_load_hooks (void)
 	/* libgomp/teams.c */
 
 	OMP_HOOK_INIT(GOMP_teams_reg, nhooks);
+
+	/* libgomp/target.c */
+
+	OMP_HOOK_INIT(GOMP_target, nhooks);
+	OMP_HOOK_INIT(GOMP_target_data, nhooks);
+	OMP_HOOK_INIT(GOMP_target_end_data, nhooks);
+	OMP_HOOK_INIT(GOMP_target_update, nhooks);
+	OMP_HOOK_INIT(GOMP_target_enter_exit_data, nhooks);
+	OMP_HOOK_INIT(GOMP_target_ext, nhooks);
+	OMP_HOOK_INIT(GOMP_target_data_ext, nhooks);
+	OMP_HOOK_INIT(GOMP_target_update_ext, nhooks);
 
 	if (nhooks <= 0) 
 	{

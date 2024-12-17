@@ -38,7 +38,7 @@ if WANT_PTHREAD
   lib_LTLIBRARIES += libptcudatrace.la
 endif
 if WANT_OPENMP
-  lib_LTLIBRARIES += libcudaomptrace.la
+  lib_LTLIBRARIES += libcudaomptrace.la libcudanewomptrace.la
 endif
 endif
 
@@ -131,10 +131,9 @@ endif
 if HAVE_MPI
 if WANT_OPENMP
 if HAVE_CUDA
-  lib_LTLIBRARIES += libcudaompitrace.la libcudaompitracef.la
-  lib_LTLIBRARIES += libcudanewompitrace.la
+  lib_LTLIBRARIES += libcudaompitrace.la libcudaompitracef.la libcudanewompitrace.la libcudanewompitracef.la
 if SINGLE_MPI_LIBRARY
-  lib_LTLIBRARIES += libcudaompitracecf.la
+  lib_LTLIBRARIES += libcudaompitracecf.la libcudanewompitracecf.la
 endif
 endif
 endif
@@ -281,6 +280,7 @@ libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
 libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
 libcudampitracef_la_SOURCES = $(libcudampitrace_la_SOURCES) extrae_mpif.h
 libcudaomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
+libcudanewomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
 libptcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
 libptcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
 libptcudampitracef_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) extrae_mpif.h
@@ -302,9 +302,11 @@ endif
 libcudaompitrace_la_SOURCES = $(core_SRCS)
 libcudaompitracef_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
 libcudanewompitrace_la_SOURCES = $(core_SRCS)
+libcudanewompitracef_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
   libcudaompitracecf_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
+  libcudanewompitracecf_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
 endif
 
 # MPItrace & Sequential trace
@@ -503,6 +505,7 @@ libcudatrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_CUDA_LIBS
 libcudampitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 libcudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 libcudaomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
+libcudanewomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(NEW_ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(SEQUENTIAL_MERGE_LIB)
 libptcudatrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_PTHREAD_LIBS) $(ADDITIONAL_CUDA_LIBS) $(SEQUENTIAL_MERGE_LIB)
 libptcudampitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_PTHREAD_LIBS) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 libptcudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_PTHREAD_LIBS) $(ADDITIONAL_MPI_LIBS_F) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
@@ -534,9 +537,11 @@ endif
 libcudaompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 libcudaompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F) $(ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 libcudanewompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(NEW_ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
+libcudanewompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F) $(NEW_ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 
 if SINGLE_MPI_LIBRARY
   libcudaompitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF) $(ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
+  libcudanewompitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF) $(NEW_ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 endif
 
 libseqtrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
@@ -689,6 +694,7 @@ libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MER
 libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 libcudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 libcudaomptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
+libcudanewomptrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 libptcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT -DPTHREAD_SUPPORT $(WRAPPERS_CUDA_CFLAGS) $(PTHREAD_CFLAGS)
 libptcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT -DPTHREAD_SUPPORT $(WRAPPERS_CUDA_CFLAGS) $(PTHREAD_CFLAGS)
 libptcudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT -DPTHREAD_SUPPORT $(WRAPPERS_CUDA_CFLAGS) $(PTHREAD_CFLAGS)
@@ -719,9 +725,12 @@ endif
 
 libcudaompitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DOMP_SUPPORT
 libcudaompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DOMP_SUPPORT
+libcudanewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DNEW_OMP_SUPPORT
+libcudanewompitracef_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DNEW_OMP_SUPPORT
 
 if SINGLE_MPI_LIBRARY
   libcudaompitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DOMP_SUPPORT
+  libcudanewompitracecf_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DNEW_OMP_SUPPORT
 endif
 
 libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
@@ -836,6 +845,11 @@ libnewompitrace_la_LIBADD      += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libs
 libnewompitracef_la_LIBADD     += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
 libcudanewompitrace_la_LIBADD  += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
 
+if HAVE_CUDA
+libcudanewompitrace_la_LIBADD   += $(newompi_burst_MODULES)
+libcudanewompitracef_la_LIBADD  += $(newompi_burst_MODULES)
+endif
+
 libmpitrace_la_CFLAGS        += $(burst_CFLAGS)
 libmpitracef_la_CFLAGS       += $(burst_CFLAGS)
 libptmpitrace_la_CFLAGS      += $(burst_CFLAGS)
@@ -848,6 +862,11 @@ lib_dyn_mpitracecf_la_CFLAGS += $(burst_CFLAGS)
 
 libnewompitrace_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
 libnewompitracef_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+
+if HAVE_CUDA
+  libcudanewompitrace_la_CFLAGS   += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
+  libcudanewompitracef_la_CFLAGS  += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
+endif
 
 if SINGLE_MPI_LIBRARY
   libmpitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
@@ -862,6 +881,17 @@ if SINGLE_MPI_LIBRARY
 
   libnewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
 
+if HAVE_CUDA
+    libcudanewompitracecf_la_LIBADD += $(newompi_burst_MODULES)
+endif
+
+  libmpitracecf_la_CFLAGS    += $(burst_CFLAGS)
+  libptmpitracecf_la_CFLAGS  += $(burst_CFLAGS)
+  libompitracecf_la_CFLAGS   += $(burst_CFLAGS)
+
+if HAVE_CUDA
+    libcudanewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+endif
 endif
 
 endif
@@ -930,6 +960,7 @@ libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDF
 libcudampitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 libcudampitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 libcudaomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudanewomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 libptcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(PTHREAD_LIBS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 libptcudampitrace_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) $(PTHREAD_LIBS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 libptcudampitracef_la_LDFLAGS = $(libptmpitracef_la_LDFLAGS) $(PTHREAD_LIBS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
@@ -940,10 +971,12 @@ endif
 
 libcudaompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 libcudaompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudanewompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudanewompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudanewompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 
 if SINGLE_MPI_LIBRARY
   libcudaompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+  libcudanewompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 endif
 
 libocltrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @OPENCL_LDFLAGS_RPATH@ @OPENCL_LIBS@

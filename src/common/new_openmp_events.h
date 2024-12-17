@@ -16,6 +16,7 @@ enum
   NEW_OMP_ORDERED_EV,                 // Phases of ORDERED & DOACROSS synchronizations
   NEW_OMP_TASKGROUP_EV,               // Phases of a TASKGROUP synchronization
   NEW_OMP_TASKING_EV,                 // TASK and TASKLOOP constructs
+  NEW_OMP_TARGET_EV,                  // Target constructs
 
   NEW_OMP_ADDRESS_EV,                 // Address of outlined function without state change
   NEW_OMP_OUTLINED_ADDRESS_EV,        // Address of outlined function with state change. TODO: split into NEW_OMP_ADDRESS_EV and NEW_OMP_OUTLINED_EV
@@ -35,6 +36,7 @@ enum
 
 
 // Values for NEW_OMP_CALL_EV
+// All captured runtime calls (wrappers)
 enum
 {
   /* GOMP */
@@ -108,6 +110,14 @@ enum
   GOMP_LOOP_NONMONOTONIC_RUNTIME_NEXT_VAL,
   GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_NEXT_VAL,
   GOMP_TEAMS_REG_VAL,
+  GOMP_TARGET_VAL,
+  GOMP_TARGET_DATA_VAL,
+  GOMP_TARGET_END_DATA_VAL,
+  GOMP_TARGET_UPDATE_VAL,
+  GOMP_TARGET_ENTER_EXIT_DATA_VAL,
+  GOMP_TARGET_EXT_VAL,
+  GOMP_TARGET_DATA_EXT_VAL,
+  GOMP_TARGET_UPDATE_EXT_VAL,
   GOMP_SET_LOCK_VAL,
   GOMP_UNSET_LOCK_VAL,
 
@@ -136,6 +146,9 @@ enum
   // NEW_OMP_WORKSHARING_EV
     NEW_OMP_WSH_END_VAL = 0,            // Worksharing region finished
     NEW_OMP_WSH_NEXT_CHUNK_END_VAL = 0, // Work request completed
+
+  // NEW_OMP_TARGET_EV
+     NEW_OMP_TARGET_END_VAL = 0,
 
   /* All other constructs can't share values to allow a single StackedVal view */
 
@@ -201,6 +214,13 @@ enum
     NEW_OMP_TASK_INST_VAL,              // Task instantiation
     NEW_OMP_TASK_EXEC_VAL,              // Task execution
     NEW_OMP_TASKLOOP_INST_VAL,          // Taskloop instantiation
-    NEW_OMP_TASKLOOP_EXEC_VAL           // Taskloop execution
+    NEW_OMP_TASKLOOP_EXEC_VAL,          // Taskloop execution
+
+  // NEW_OMP_TARGET_EV
+    NEW_OMP_TARGET_VAL,                 // #pragma omp target
+    NEW_OMP_TARGET_DATA_VAL,            // #pragma omp target data
+    NEW_OMP_TARGET_ENTER_DATA_VAL,      // #pragma omp target enter data
+    NEW_OMP_TARGET_EXIT_DATA_VAL,       // #pragma omp target exit data
+    NEW_OMP_TARGET_UPDATE_VAL           // #pragma omp target update
 };
 
