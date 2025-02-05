@@ -132,6 +132,7 @@ if HAVE_MPI
 if WANT_OPENMP
 if HAVE_CUDA
   lib_LTLIBRARIES += libcudaompitrace.la libcudaompitracef.la
+  lib_LTLIBRARIES += libcudanewompitrace.la
 if SINGLE_MPI_LIBRARY
   lib_LTLIBRARIES += libcudaompitracecf.la
 endif
@@ -293,6 +294,7 @@ endif
 # CUDA trace & MPItrace & OpenMP
 libcudaompitrace_la_SOURCES = $(core_SRCS)
 libcudaompitracef_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
+libcudanewompitrace_la_SOURCES = $(core_SRCS)
 
 if SINGLE_MPI_LIBRARY
   libcudaompitracecf_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
@@ -524,6 +526,7 @@ endif
 
 libcudaompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 libcudaompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F) $(ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
+libcudanewompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(NEW_ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 
 if SINGLE_MPI_LIBRARY
   libcudaompitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF) $(ADDITIONAL_OPENMP_LIBS) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
@@ -735,6 +738,7 @@ libomptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT $(SEQUENTI
 libnewomptrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 libnewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 libnewompitracef_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
+libcudanewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
@@ -827,6 +831,7 @@ lib_dyn_mpitracecf_la_LIBADD += $(mpi_burst_MODULES)
 
 libnewompitrace_la_LIBADD    += $(newompi_burst_MODULES)
 libnewompitracef_la_LIBADD    += $(newompi_burst_MODULES)
+libcudanewompitrace_la_LIBADD    += $(newompi_burst_MODULES)
 
 libmpitrace_la_CFLAGS        += $(burst_CFLAGS)
 libmpitracef_la_CFLAGS       += $(burst_CFLAGS)
@@ -932,6 +937,7 @@ endif
 
 libcudaompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 libcudaompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudanewompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
 
 if SINGLE_MPI_LIBRARY
   libcudaompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
