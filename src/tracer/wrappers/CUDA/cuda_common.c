@@ -245,8 +245,12 @@ static int Extrae_CUDA_SearchStream (int devid, cudaStream_t stream)
 	/* Starting from CUDA 7, CU_STREAM_LEGACY is a new stream handle that uses 
 	   an implicit stream with legacy synchronization behavior, just as the 
 	   behaviour of stream 0 (default).
+
+		 CU_STREAM_PER_THREAD is assigned to the tid 0. This is allow apps that used it
+		 to generate a trace but this could lead to overlapped kernel events if 
+		 several threads of the same parallel use CU_STREAM_PER_THREAD concurrently.
 	 */
-	if (stream == CU_STREAM_LEGACY) return 0;	
+	if (stream == CU_STREAM_LEGACY || stream == CU_STREAM_PER_THREAD) return 0;
 
 	for (i = 0; i < devices[devid].nstreams; i++)
 		if (devices[devid].Stream[i].stream == stream)
