@@ -46,6 +46,12 @@
 # define HOST_NAME_MAX 512
 #endif
 
+/**
+ * Variable to control the initialization and allow the flushing of
+ * events at the exit point.
+ */
+int cudaInitialized = 0;
+
 gpu_event_list_t availableEvents;
 
 /* Structures that will hold the parameters needed for the exit parts of the
@@ -235,6 +241,16 @@ void Extrae_CUDA_Initialize (int devid)
 		THREAD_TRACE_MISCEVENT(devices[devid].Stream[0].threadid, devices[devid].Stream[0].host_reference_time, TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
 
 		devices[devid].initialized = TRUE;
+
+		/**
+		* Last flush of stream events.
+		* This initialization occurs in the callback of a CUDA call from the app,
+		* therefore this atexit corresponds to the exit point of the main from the app traced.
+		* Moving this to CUPTI initialization is not equivalent since that initialization
+		* is called from the Extrae constructor, and therefore that atexit corresponds to our library exit point.
+		*/
+		atexit(Extrae_CUDA_finalize);
+		cudaInitialized = 1;
 	}
 }
 
@@ -266,6 +282,8 @@ static void Extrae_CUDA_unRegisterStream (int devid, cudaStream_t stream)
 #ifdef DEBUG
 	fprintf (stderr, "Extrae_CUDA_unRegisterStream (devid=%d, stream=%p unassigned from streamid => %d/%d\n", devid, stream, stid, devices[devid].nstreams);
 #endif
+
+	Extrae_CUDA_flush_streams(devid, stid, FALSE);
 
 	int nstreams = devices[devid].nstreams - 1;
 
@@ -636,6 +654,11 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 void Extrae_CUDA_flush_streams ( int device_id, int stream_id, int synchronize )
 {
 	int d = 0, s = 0;
+
+	if ( devices == NULL )
+	{
+		return;
+	}
 
 	for ( d = (device_id == XTR_FLUSH_ALL_DEVICES ? 0: device_id);
 			  d < (device_id == XTR_FLUSH_ALL_DEVICES ? CUDAdevices: device_id+1);
@@ -1044,8 +1067,21 @@ void Extrae_cudaEventSynchronize_Exit()
 	Backend_Leave_Instrumentation();
 }
 
-void Extrae_CUDA_fini (void)
+void Extrae_CUDA_finalize (void)
 {
-	Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS, FALSE);
-	gpuEventList_free(&availableEvents);
+	if (EXTRAE_INITIALIZED() && cudaInitialized == 1 )
+	{
+		Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS, FALSE);
+
+		for(int i = 0; i <CUDAdevices ; ++i){
+			Extrae_CUDA_deInitialize (i);
+		}
+		xfree(devices);
+
+		devices = NULL;
+		CUDAdevices = 0;
+
+		gpuEventList_free(&availableEvents);
+		cudaInitialized = 0;
+	}
 }

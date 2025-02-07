@@ -2474,7 +2474,7 @@ void Backend_Finalize (void)
 #endif
 
 #if defined(CUDA_SUPPORT)
-	Extrae_CUDA_fini ();
+	Extrae_CUDA_finalize ();
 #endif
 
 #if defined(OPENCL_SUPPORT)

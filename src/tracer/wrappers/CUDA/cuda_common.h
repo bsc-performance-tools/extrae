@@ -112,7 +112,7 @@ void Extrae_cudaThreadExit_Exit (void);
 
 void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads);
 
-void Extrae_CUDA_fini (void);
+void Extrae_CUDA_finalize (void);
 
 void Extrae_CUDA_Initialize(int);
 void Extrae_CUDA_deInitialize(int);
