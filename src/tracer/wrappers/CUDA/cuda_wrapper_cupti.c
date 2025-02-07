@@ -767,6 +767,7 @@ cuptiGetCallbackName_real = (CUptiResult(*)(CUpti_CallbackDomain, uint32_t, cons
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGLSetBufferObjectMapFlags_v3020); /* 68 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaWGLGetDevice_v3020); /* 71 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventCreateWithFlags_v3020); /* 134 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventDestroy_v3020); /* 136 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventElapsedTime_v3020); /* 139 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostRegister_v4000); /* 152 */
 	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSetCacheConfig_v3020); /* 169 */
