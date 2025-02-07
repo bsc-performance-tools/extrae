@@ -283,7 +283,7 @@ static void Extrae_CUDA_unRegisterStream (int devid, cudaStream_t stream)
 	fprintf (stderr, "Extrae_CUDA_unRegisterStream (devid=%d, stream=%p unassigned from streamid => %d/%d\n", devid, stream, stid, devices[devid].nstreams);
 #endif
 
-	Extrae_CUDA_flush_streams(devid, stid, FALSE);
+	Extrae_CUDA_flush_streams(devid, stid);
 
 	int nstreams = devices[devid].nstreams - 1;
 
@@ -458,6 +458,7 @@ static void flushGPUEvents (int devid, int streamid)
 			{
 				gpuEventList_add(&availableEvents, registered_stream->device_reference_event);
 				registered_stream->device_reference_event = gpu_event;
+				registered_stream->host_reference_time = last_time;
 				gpu_event = NULL;
 			}
 			else
@@ -616,7 +617,7 @@ void Extrae_cudaDeviceSynchronize_Enter (void)
 
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS, TRUE);
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
 }
 
 void Extrae_cudaDeviceSynchronize_Exit (void)
@@ -647,11 +648,11 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 	cudaGetDevice (&devid);
 
 	Probe_Cuda_ThreadBarrier_Exit ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS, TRUE);
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_CUDA_flush_streams ( int device_id, int stream_id, int synchronize )
+void Extrae_CUDA_flush_streams ( int device_id, int stream_id )
 {
 	int d = 0, s = 0;
 
@@ -671,7 +672,6 @@ void Extrae_CUDA_flush_streams ( int device_id, int stream_id, int synchronize )
 						++s )
 			{
 				flushGPUEvents (d, s);
-				if ( synchronize ) Extrae_CUDA_SynchronizeStream (d, s); //will be removed with the eventelapsed refactor in cuda_fixes
 			}
 		}
 	}
@@ -746,7 +746,7 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
 
-	Extrae_CUDA_flush_streams(devid, strid, TRUE);
+	Extrae_CUDA_flush_streams(devid, strid);
 
 	if (strid == -1)
 	{
@@ -1014,7 +1014,7 @@ void Extrae_cudaDeviceReset_Enter (void)
 {
 	Backend_Enter_Instrumentation ();
 	Probe_Cuda_DeviceReset_Enter();
-	Extrae_CUDA_flush_streams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS, FALSE);
+	Extrae_CUDA_flush_streams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 }
 
 void Extrae_cudaDeviceReset_Exit (void)
@@ -1071,7 +1071,7 @@ void Extrae_CUDA_finalize (void)
 {
 	if (EXTRAE_INITIALIZED() && cudaInitialized == 1 )
 	{
-		Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS, FALSE);
+		Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 
 		for(int i = 0; i <CUDAdevices ; ++i){
 			Extrae_CUDA_deInitialize (i);

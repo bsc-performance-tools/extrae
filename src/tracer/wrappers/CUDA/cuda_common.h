@@ -74,7 +74,7 @@ struct CUDAdevices_t
 void Extrae_CUDA_updateDepth_(int);
 int  Extrae_CUDA_getDepth();
 
-void Extrae_CUDA_flush_streams (int device_id, int stream_id, int synchronize);
+void Extrae_CUDA_flush_streams (int device_id, int stream_id);
 void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);
 void Extrae_cudaConfigureCall_Exit (void);
 void Extrae_cudaLaunch_Enter (const char*, cudaStream_t);
