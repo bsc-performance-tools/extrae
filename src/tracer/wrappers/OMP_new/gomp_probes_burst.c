@@ -1273,11 +1273,9 @@ void xtr_probe_exit_omp_unset_lock__bursts( void * lock)
   }
 }
 
-
 void xtr_probe_exit_omp_set_num_threads_bursts(int num_threads)
 {
   Backend_ChangeNumberOfThreads(num_threads);
 }
-// void xtr_probe_exit_omp_set_num_threads_( int ) __attribute__ ((alias( "xtr_probe_exit_omp_set_num_threads" )));
 
 void xtr_probe_exit_omp_set_num_threads__bursts( int ) __attribute__ ((alias( "xtr_probe_exit_omp_set_num_threads_bursts" )));

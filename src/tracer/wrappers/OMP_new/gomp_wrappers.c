@@ -2279,7 +2279,7 @@ XTR_WRAP_GOMP_TEAMS(GOMP_teams_reg,
  * See XTR_WRAP_OMP_SET_NUM_THREADS for details. 
  */
 XTR_WRAP_OMP_SET_NUM_THREADS(omp_set_num_threads);
-XTR_WRAP_OMP_SET_NUM_THREADS(omp_set_num_threads_);
+XTR_WRAP_OMP_SET_NUM_THREADS_F(omp_set_num_threads_);
 
 /** 
  * omp_set_lock

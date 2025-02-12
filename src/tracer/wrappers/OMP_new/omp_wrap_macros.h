@@ -689,3 +689,11 @@ XTR_WRAP(symbol, GOMP, PROTOTYPE(int num_threads), NO_RETURN,                   
          ENTRY_PROBE_ARGS(), REAL_SYMBOL_ARGS(num_threads), EXIT_PROBE_ARGS(num_threads), \
          EMPTY_EPILOGUE,                                                                  \
          DEBUG_ARGS("num_threads=%d", num_threads));
+
+#define XTR_WRAP_OMP_SET_NUM_THREADS_F(symbol)                                            \
+XTR_WRAP(symbol, GOMP, PROTOTYPE(int *num_threads), NO_RETURN,                            \
+         EMPTY_PROLOGUE,                                                                  \
+         OMP_SET_NUM_THREADS_TRACING_LOGIC,                                               \
+         ENTRY_PROBE_ARGS(), REAL_SYMBOL_ARGS(num_threads), EXIT_PROBE_ARGS(*num_threads), \
+         EMPTY_EPILOGUE,                                                                  \
+         DEBUG_ARGS("num_threads=%d", *num_threads));

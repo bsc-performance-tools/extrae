@@ -105,7 +105,7 @@ void (*REAL_SYMBOL_PTR(omp_set_num_threads)) (int) = NULL;
 
 /* Fortran-mangled function */
 
-void (*REAL_SYMBOL_PTR(omp_set_num_threads_)) (int) = NULL;
+void (*REAL_SYMBOL_PTR(omp_set_num_threads_)) (int *) = NULL;
 
 /* libgomp/lock.c */
 
