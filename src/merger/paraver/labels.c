@@ -353,14 +353,14 @@ static void HWC_PARAVER_Labels (FILE *pcfFD)
 
 		for (i = 0; i < num_used_counters; i ++)
 		{
-			fprintf (pcfFD, "%d  %d %s (%s)\n", 7, 
+			fprintf (pcfFD, "%d  %d %s %s\n", 7, 
 				used_counters_info[i]->global_id, 
 				used_counters_info[i]->name, 
 				used_counters_info[i]->description);
 
 			if (get_option_merge_AbsoluteCounters())
 			{
-				fprintf (pcfFD, "%d  %d Absolute %s (%s)\n", 7, 
+				fprintf (pcfFD, "%d  %d Absolute %s %s\n", 7, 
 					used_counters_info[i]->global_id + HWC_DELTA_ABSOLUTE,
 					used_counters_info[i]->name,
 					used_counters_info[i]->description);

@@ -53,7 +53,7 @@ struct HWC_Set_t
 #endif
 };
 
-#define MAX_HWC_DESCRIPTION_LENGTH  256
+#define MAX_HWC_DESCRIPTION_LENGTH  2*PAPI_HUGE_STR_LEN
 
 typedef struct HWC_Definition_st
 {
