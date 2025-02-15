@@ -41,8 +41,10 @@
 #define JAVA_JVMTI_EXCEPTION_INDEX        1
 #define JAVA_JVMTI_OBJECT_ALLOC_INDEX     2
 #define JAVA_JVMTI_OBJECT_FREE_INDEX      3
+#define JAVA_JVMTI_THREAD_INDEX           4
+#define JAVA_JVMTI_WAIT_INDEX             5
 
-#define MAX_JAVA_INDEX                    4
+#define MAX_JAVA_INDEX                    6
 
 static int inuse[MAX_JAVA_INDEX] = { FALSE };
 
@@ -51,7 +53,9 @@ void Enable_Java_Operation (int type)
 	ENABLE_JAVA_EVENT(type, JAVA_JVMTI_GARBAGECOLLECTOR);
 	ENABLE_JAVA_EVENT(type, JAVA_JVMTI_EXCEPTION);
 	ENABLE_JAVA_EVENT(type, JAVA_JVMTI_OBJECT_ALLOC);
-	ENABLE_JAVA_EVENT(type, JAVA_JVMTI_OBJECT_FREE);
+    ENABLE_JAVA_EVENT(type, JAVA_JVMTI_OBJECT_FREE);
+    ENABLE_JAVA_EVENT(type, JAVA_JVMTI_THREAD);
+    ENABLE_JAVA_EVENT(type, JAVA_JVMTI_WAIT);
 }
 
 #if defined(PARALLEL_MERGE)
@@ -95,6 +99,16 @@ void JavaEvent_WriteEnabledOperations (FILE * fd)
 	if (inuse[JAVA_JVMTI_OBJECT_FREE_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n%d %d Java object free\n\n", 0, JAVA_JVMTI_OBJECT_FREE_EV);
+	}
+
+	if (inuse[JAVA_JVMTI_THREAD_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n%d %d Java thread running\n\n", 0, JAVA_JVMTI_THREAD_EV);
+	}
+
+	if (inuse[JAVA_JVMTI_WAIT_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n%d %d Java thread waiting in join\n\n", 0, JAVA_JVMTI_WAIT_EV);
 	}
 }
 
