@@ -53,6 +53,7 @@ static stats_info_t MPI_stats_info[] = {
   {MPI_BURST_STATS_GLOBAL_COUNT, "Number of GLOBAL MPI calls"},
   {MPI_BURST_STATS_GLOBAL_BYTES_SENT, "Bytes sent in GLOBAL MPI calls"},
   {MPI_BURST_STATS_GLOBAL_BYTES_RECV, "Bytes received in GLOBAL MPI calls"},
+  {MPI_BURST_STATS_GLOBAL_COMM_WORLD_COUNT, "Number of GLOBAL MPI calls on MPI_COMM_WORLD"},
   {MPI_BURST_STATS_TIME_IN_MPI, "Elapsed time in MPI"},
   {MPI_BURST_STATS_P2P_INCOMING_COUNT, "Number of incoming P2P MPI calls"},
   {MPI_BURST_STATS_P2P_OUTGOING_COUNT, "Number of outgoing P2P MPI calls"},
@@ -195,6 +196,7 @@ void xtr_stats_MPI_reset(int threadid, xtr_MPI_stats_t * mpi_stats )
 		origin_data->COLLECTIVE_Bytes_Recv = 0;
 		origin_data->P2P_Communications = 0;
 		origin_data->COLLECTIVE_Communications = 0;
+		origin_data->COLL_CommWorld_Communications = 0;
 		origin_data->MPI_Others_count = 0;
 
 		origin_data->P2P_Communications_In = 0;
@@ -268,6 +270,7 @@ void xtr_stats_MPI_copy(int threadid, xtr_MPI_stats_t * stats_origin, xtr_MPI_st
 			destination_data->COLLECTIVE_Bytes_Recv = origin_data->COLLECTIVE_Bytes_Recv;
 			destination_data->P2P_Communications = origin_data->P2P_Communications;
 			destination_data->COLLECTIVE_Communications = origin_data->COLLECTIVE_Communications;
+			destination_data->COLL_CommWorld_Communications = origin_data->COLL_CommWorld_Communications;
 			destination_data->MPI_Others_count = origin_data->MPI_Others_count;
 
 			destination_data->P2P_Communications_In = origin_data->P2P_Communications_In;
@@ -337,6 +340,7 @@ void xtr_stats_MPI_subtract (int threadid, xtr_MPI_stats_t *mpi_stats, xtr_MPI_s
 			destination_data->COLLECTIVE_Bytes_Recv = origin_data->COLLECTIVE_Bytes_Recv-subtrahend_data->COLLECTIVE_Bytes_Recv;
 			destination_data->P2P_Communications = origin_data->P2P_Communications-subtrahend_data->P2P_Communications;
 			destination_data->COLLECTIVE_Communications = origin_data->COLLECTIVE_Communications-subtrahend_data->COLLECTIVE_Communications;
+			destination_data->COLL_CommWorld_Communications = origin_data->COLL_CommWorld_Communications-subtrahend_data->COLL_CommWorld_Communications;
 			destination_data->MPI_Others_count = origin_data->MPI_Others_count- subtrahend_data->MPI_Others_count;
 
 			destination_data->P2P_Communications_In = origin_data->P2P_Communications_In-subtrahend_data->P2P_Communications_In;
@@ -391,6 +395,8 @@ int xtr_stats_MPI_get_values(int threadid, xtr_MPI_stats_t * mpi_stats, INT32 * 
 			out_statistic_type[nevents++] =MPI_BURST_STATS_GLOBAL_BYTES_SENT;
 			out_values[nevents] = thread_data->COLLECTIVE_Bytes_Recv;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_GLOBAL_BYTES_RECV;
+			out_values[nevents] = thread_data->COLL_CommWorld_Communications;
+			out_statistic_type[nevents++] =MPI_BURST_STATS_GLOBAL_COMM_WORLD_COUNT;
 			out_values[nevents] = thread_data->elapsed_time[COLLECTIVE];
 			out_statistic_type[nevents++] =MPI_BURST_STATS_TIME_IN_GLOBAL;
 			out_values[nevents] = thread_data->elapsed_time[P2P];
@@ -465,6 +471,8 @@ int xtr_stats_MPI_get_positive_values(int threadid, xtr_MPI_stats_t * mpi_stats,
 				out_statistic_type[nevents++] = MPI_BURST_STATS_GLOBAL_BYTES_RECV;
 			if ((out_values[nevents] = thread_data->COLLECTIVE_Communications) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_GLOBAL_COUNT;
+			if ((out_values[nevents] = thread_data->COLL_CommWorld_Communications) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_GLOBAL_COMM_WORLD_COUNT;
 			if ((out_values[nevents] = thread_data->MPI_Others_count) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_OTHER_COUNT;
 
@@ -546,9 +554,10 @@ void xtr_stats_MPI_update_P2P(UINT64 begin_time, UINT64 end_time, int partner, i
 /**
  * @brief Updates MPI statistics regarding Collective communications
  */
-void xtr_stats_MPI_update_collective(UINT64 begin_time, UINT64 end_time, int inputSize, int outputSize)
+void xtr_stats_MPI_update_collective(UINT64 begin_time, UINT64 end_time, int inputSize, int outputSize, MPI_Comm communicator)
 {
-
+int i, num_tasks, ierror;
+	int result, is_comm_world, is_comm_self;
 	if (TRACING_MPI_STATISTICS)
 	{
 		stats_mpi_thread_data_t * thread_data = xtr_get_mpi_stats_data(MPI_stats, THREADID);
@@ -567,6 +576,13 @@ void xtr_stats_MPI_update_collective(UINT64 begin_time, UINT64 end_time, int inp
 			}
 			DEBUG_MSG("[TID:%d THD:%d] updated MPI COLLECTIVE statistics. inputSize %d outputSize %d. aculumated %d",
 				TASKID, THREADID, inputSize, outputSize, thread_data->COLLECTIVE_Communications);
+
+			ierror = PMPI_Comm_compare (MPI_COMM_WORLD, communicator, &result);
+			is_comm_world = result == MPI_IDENT || result == MPI_CONGRUENT;
+			if( is_comm_world )
+			{
+				thread_data->COLL_CommWorld_Communications ++;
+			}
 		}
 	}
 }

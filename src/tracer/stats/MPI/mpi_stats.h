@@ -26,6 +26,7 @@
 
 #include "stats_types.h"
 #include "common.h"
+#include <mpi.h>
 
 //MPI statistics ids
 enum {
@@ -35,6 +36,7 @@ enum {
    MPI_BURST_STATS_GLOBAL_COUNT,
    MPI_BURST_STATS_GLOBAL_BYTES_SENT,
    MPI_BURST_STATS_GLOBAL_BYTES_RECV,
+   MPI_BURST_STATS_GLOBAL_COMM_WORLD_COUNT,
    MPI_BURST_STATS_TIME_IN_MPI, 
    MPI_BURST_STATS_P2P_INCOMING_COUNT,
    MPI_BURST_STATS_P2P_OUTGOING_COUNT,
@@ -71,6 +73,7 @@ typedef struct stats_mpi_thread_data
   int COLLECTIVE_Bytes_Sent;      /* Sent "bytes" by MPI global operations */
   int COLLECTIVE_Bytes_Recv;      /* Recv "bytes" by MPI global operations */
   int COLLECTIVE_Communications;  /* Number of global operations */
+  int COLL_CommWorld_Communications;  /* Number of global operations in CommWorld*/
   int MPI_Others_count;           /* Number of global operations */
 
 }stats_mpi_thread_data_t;
@@ -96,7 +99,7 @@ int xtr_stats_MPI_get_positive_values(int threadid, xtr_MPI_stats_t * mpi_stats,
 stats_info_t *xtr_stats_MPI_get_types_and_descriptions(void);
 
 void xtr_stats_MPI_update_P2P(UINT64 begin_time, UINT64 end_time, int partner, int inputSize, int outputSize);
-void xtr_stats_MPI_update_collective(UINT64 begin_time, UINT64 end_time, int inputSize, int outputSize);
+void xtr_stats_MPI_update_collective(UINT64 begin_time, UINT64 end_time, int inputSize, int outputSize, MPI_Comm communicator);
 void xtr_stats_MPI_update_other(UINT64 begin_time, UINT64 end_time );
 
 void xtr_stats_MPI_free (xtr_MPI_stats_t * mpi_stats );

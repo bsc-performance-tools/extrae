@@ -2667,7 +2667,7 @@ int MPI_Comm_spawn_C_Wrapper (char *command, char **argv, int maxprocs, MPI_Info
 
   iotimer_t current_time = TIME;
 
-	_xtr_stats_MPI_update_collective(SpawnStartTime, current_time, 0, 0);
+	_xtr_stats_MPI_update_collective(SpawnStartTime, current_time, 0, 0, comm);
   TRACE_MPIEVENT (current_time, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
   return ierror;
 }
