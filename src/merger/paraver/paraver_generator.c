@@ -1271,6 +1271,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 	PRVFileSet_t *prvfset = NULL;
 	unsigned long long num_of_events;
 	struct fdz_fitxer prv_fd;
+	unsigned short isGzip = 1;
 	int error = FALSE;
 #if defined(IS_BG_MACHINE)
 	FILE *crd_fd;
@@ -1289,60 +1290,52 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 	if (0 == taskid)
 	{
+#ifndef HAVE_ZLIB
+		if (strlen(outName) >= 7 &&
+		    strncmp(&(outName[strlen(outName) - 7]), ".prv.gz", 7) == 0)
+		{
+			outName[strlen(outName) - 3] = (char) 0;
+			isGzip = 0;
+		} else
+#endif // HAVE_ZLIB
+		if (strlen(outName) > 4 &&
+		    strncmp(&(outName[strlen(outName) - 4]), ".prv", 4) != 0)
+		{
+			char *dupstr = strdup(outName);
+		    	snprintf(outName, strlen(dupstr) + 5, "%s.prv", dupstr);
+		    	free(dupstr);
+			isGzip = 0;
+		}
+
 #ifdef HAVE_ZLIB
-		if (strlen (outName) >= 7 &&
-		strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
+		if (isGzip)
 		{
-			/*
-			* Open GZ handle for the file, and mark normal handle as unused! 
-			*/
-			prv_fd.handleGZ = gzopen (outName, "wb6");
-			prv_fd.handle = NULL;
-			if (prv_fd.handleGZ == NULL)
-			{
-				fprintf (stderr, "mpi2prv ERROR: creating GZ paraver tracefile : %s\n",
-					outName);
-				exit (-1);
-			}
-		}
-		else
+		    prv_fd.handleGZ = gzopen(outName, "wb6");
+		    prv_fd.handle = NULL;
+		    if (prv_fd.handleGZ == NULL)
+		    {
+		    	fprintf(stderr, "mpi2prv ERROR: "
+		    	    "Couldn't create GZ Paraver tracefile : %s\n",
+		    	    outName);
+		    	exit(-1);
+		    }
+		} else
+#else
 		{
-			/*
-			* Open normal handle for the file, and mark GZ handle as unused! 
-			*/
-#if HAVE_FOPEN64
-			prv_fd.handle = fopen64 (outName, "w");
-#else
-			prv_fd.handle = fopen (outName, "w");
-#endif
-			prv_fd.handleGZ = NULL;
-			if (prv_fd.handle == NULL)
-			{
-				fprintf (stderr, "mpi2prv ERROR: Creating Paraver tracefile : %s\n",
-					outName);
-				exit (-1);
-			}
+# if HAVE_FOPEN64
+		    prv_fd.handle = fopen64(outName, "w");
+# else
+		    prv_fd.handle = fopen(outName, "w");
+# endif // HAVE_    FOPEN64
+		    if (prv_fd.handle == NULL)
+		    {
+		    	fprintf(stderr, "mpi2prv ERROR: "
+		    	    "Couldn't create Paraver tracefile : %s\n",
+		    	    outName);
+		    	exit(-1);
+		    }
 		}
-#else
-
-		/* If the user requested .prv.gz but it is not supported, change into .prv */
-		if (strlen (outName) >= 7 &&
-		strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
-			outName[strlen(outName)-3] = (char) 0;
-
-		/* Open normal handle for the file, and mark GZ handle as unused!  */
-#if HAVE_FOPEN64
-		prv_fd.handle = fopen64 (outName, "w");
-#else
-		prv_fd.handle = fopen (outName, "w");
-#endif
-		if (prv_fd.handle == NULL)
-		{
-			fprintf (stderr, "mpi2prv ERROR: Creating Paraver tracefile : %s\n",
-				outName);
-			exit (-1);
-		}
-#endif
+#endif // HAVE_ZLIB
 	} /* taskid == 0 */
 
 	error = Paraver_WriteHeader (fset, numtasks, taskid, num_appl, Ftime, prv_fd,

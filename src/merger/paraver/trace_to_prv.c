@@ -665,12 +665,15 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 		tmp = &(envName[strlen (envName) - 7]);
 	}
 	else
+#endif
+	if (strlen(envName) >= 4 && strncmp(&(envName[strlen(envName) - 4]), ".prv", 4) == 0)
 	{
 		tmp = &(envName[strlen (envName) - 4]);
 	}
-#else
-	tmp = &(envName[strlen (envName) - 4]);
-#endif
+	else
+	{
+		tmp = &(envName[strlen(envName)]);
+	}
 
 	if (0 == taskid)
 	{
