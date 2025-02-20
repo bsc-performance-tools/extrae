@@ -92,7 +92,7 @@ static Extrae_Vector_t defined_user_event_types;
 
 static Extrae_Vector_t defined_basic_block_labels;
 
-static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t type, char *description)
+static void Labels_Add_CodeLocation_Label (extrae_type_t eventcode, codelocation_type_t type, char *description)
 {
 	unsigned u;
 
@@ -105,7 +105,7 @@ static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t ty
 		{
 			if (strcmp (labels_codelocation[u].description, description))
 			{
-				fprintf (stderr, PACKAGE_NAME": mpi2prv Warning! Already existing definition for event %d with a different description\n", eventcode);
+				fprintf (stderr, PACKAGE_NAME": mpi2prv Warning! Already existing definition for event %u with a different description\n", eventcode);
 			}
 
 			return;
@@ -692,10 +692,11 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 				case 'c':
 				case 'C':
 					{
-						int res, eventcode;
+						int res;
+						extrae_type_t eventcode;
 						char code_description[1024];
 
-						res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, code_description);
+						res = sscanf (LINE, "%u \"%[^\"]\"", &eventcode, code_description);
 						if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 
 						Labels_Add_CodeLocation_Label (eventcode,
@@ -707,14 +708,16 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 
 				case 'd':
 				{
-					int res, eventvalue;
+					int res;
+					extrae_value_t eventvalue;
 					char value_description[1024];
 					value_t * evt_value = NULL;
-					unsigned i, max = Extrae_Vector_Count (&last_event_type_used->event_values);
+					unsigned i, max = Extrae_Vector_Count(&last_event_type_used->event_values);
 
-					res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, value_description);
+					res = sscanf (LINE, "%llu \"%[^\"]\"", &eventvalue, value_description);
 					if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
                         
+
 					for (i = 0; i < max; i++)
 					{
 						value_t * evt = Extrae_Vector_Get (&last_event_type_used->event_values, i);
@@ -722,7 +725,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						{
 							if(strcmp(evt->label, value_description))
 							{
-								fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
+								fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %u,%llu!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
 							}
 							evt_value = evt;
 							break;
@@ -748,12 +751,13 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 
 				case 'D':
 				{
-					int res, eventcode;
+					int res;
+					extrae_type_t eventcode;
 					char code_description[1024];
 					unsigned i, max = Extrae_Vector_Count (&defined_user_event_types);
 					event_type_t * evt_type = NULL;
 
-					res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, code_description);
+					res = sscanf (LINE, "%u \"%[^\"]\"", &eventcode, code_description);
 					if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 
 					for (i = 0; i < max; i++)
@@ -763,7 +767,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						{
 							if(strcmp(evt->event_type.label, code_description))
 							{
-								fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for type %d!\n", __FILE__, __LINE__, code_description, eventcode);
+								fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for type %u!\n", __FILE__, __LINE__, code_description, eventcode);
 							}
 							evt_type = evt;
 							break;
@@ -793,13 +797,14 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 
 				case 'b': // BasicBlocks symbol
 				{
-					int res, eventvalue;
+					int res;
+					extrae_value_t eventvalue;
 					char bb_description[1024];
 					unsigned i, max = Extrae_Vector_Count (&defined_basic_block_labels);
 					event_type_t * evt_type = NULL;
 					value_t * evt_value = NULL;
 
-					res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, bb_description);
+					res = sscanf (LINE, "%llu \"%[^\"]\"", &eventvalue, bb_description);
 					if (res != 2) fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 					if (max==0)
 					{
@@ -822,7 +827,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 						{
 							if (strcmp(evt->label, bb_description))
 							{
-								fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, bb_description,evt_type->event_type.type, eventvalue);
+								fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %u,%llu!\n",__FILE__, __LINE__, bb_description,evt_type->event_type.type, eventvalue);
 							}
 							evt_value = evt;
 							break;
@@ -948,14 +953,14 @@ void Write_UserDefined_Labels(FILE * pcf_fd)
         event_type_t * evt = Extrae_Vector_Get (&defined_user_event_types, i);
         unsigned max_values = Extrae_Vector_Count (&evt->event_values);
         fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-        fprintf (pcf_fd, "0    %d    %s\n", evt->event_type.type, evt->event_type.label);
+        fprintf (pcf_fd, "0    %u    %s\n", evt->event_type.type, evt->event_type.label);
         if (max_values>0)
         {
             fprintf (pcf_fd, "%s\n", VALUES_LABEL);
             for (j = 0; j < max_values; j++)
             {
                 value_t * values = Extrae_Vector_Get (&evt->event_values, j);
-                fprintf (pcf_fd, "%d      %s\n", values->value, values->label);
+                fprintf (pcf_fd, "%llu      %s\n", values->value, values->label);
             }
         }
         LET_SPACES (pcf_fd);
@@ -970,14 +975,14 @@ void Write_BasickBlock_Labels(FILE * pcf_fd)
         event_type_t * evt = Extrae_Vector_Get (&defined_basic_block_labels, i);
         unsigned max_values = Extrae_Vector_Count (&evt->event_values);
         fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-        fprintf (pcf_fd, "0    %d    %s\n", evt->event_type.type, evt->event_type.label);
+        fprintf (pcf_fd, "0    %u    %s\n", evt->event_type.type, evt->event_type.label);
         if (max_values>0)
         {
             fprintf (pcf_fd, "%s\n", VALUES_LABEL);
             for (j = 0; j < max_values; j++)
             {
                 value_t * values = Extrae_Vector_Get (&evt->event_values, j);
-                fprintf (pcf_fd, "%d      %s\n", values->value, values->label);
+                fprintf (pcf_fd, "%llu      %s\n", values->value, values->label);
             }
         }
         LET_SPACES (pcf_fd);

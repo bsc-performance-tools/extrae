@@ -594,6 +594,7 @@ AC_CONFIG_FILES([\
   tests/functional/merger/Makefile \
   tests/functional/merger/dump-events/Makefile \
   tests/functional/merger/shared-libraries/Makefile \
+  tests/functional/merger/value-range/Makefile \
   tests/functional/xml/Makefile \
   tests/functional/hw-counters/Makefile \
   tests/functional/callstack/Makefile \
@@ -638,6 +639,7 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[tests/functional/merger/shared-libraries/main.c:tests/functional/merger/shared-libraries/main.c] \
 		[tests/functional/merger/shared-libraries/fA.c:tests/functional/merger/shared-libraries/fA.c] \
 		[tests/functional/merger/shared-libraries/fB.c:tests/functional/merger/shared-libraries/fB.c] \
+		[tests/functional/merger/value-range/main.c:tests/functional/merger/value-range/main.c] \
 		[etc/extrae.sh:etc/extrae.sh] \
 		[example/LINUX/MPI/detailed_trace_basic.xml:example/LINUX/MPI/detailed_trace_basic.xml] \
 		[example/LINUX/MPI/extrae.xml:example/LINUX/MPI/extrae.xml] \

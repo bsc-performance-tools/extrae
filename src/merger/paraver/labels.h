@@ -28,6 +28,7 @@
 #include "events.h"
 #include "xalloc.h"
 #include <extrae_vector.h>
+#include <extrae_types.h>
 
 typedef enum {
 	CODELOCATION_FUNCTION,
@@ -36,7 +37,7 @@ typedef enum {
 
 typedef struct codelocation_label_st
 {
-	int eventcode;
+	extrae_type_t eventcode;
 	codelocation_type_t type;
 	char *description;
 } codelocation_label_t;
@@ -77,7 +78,7 @@ color_t;
 #define EVENT_LBL   256
 typedef struct evttype_t
 {
-  int type;
+  extrae_type_t type;
   char label[EVENT_LBL];
 }
 evttype_t;
@@ -86,7 +87,7 @@ evttype_t;
 #define VALUE_LBL   256
 typedef struct value_t
 {
-  int value;
+  extrae_value_t value;
   char label[VALUE_LBL];
 }
 value_t;
