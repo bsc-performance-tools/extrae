@@ -650,8 +650,6 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 						HWC_sets[i].counters[MAX_HWC-1] = NO_COUNTER; 
 						HWC_sets[i].num_counters --;
 						j --;
-						/* HWC_sets[i].counters[j] = NO_COUNTER; */
-						/* break; */
 					}
 				}
 			}
