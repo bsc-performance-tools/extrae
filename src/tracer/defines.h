@@ -54,7 +54,9 @@
 # if defined(FC_FUNC)
 #  define CtoF77(x) FC_FUNC(x,x)
 # else
-#  error "Error! Not defined FC_FUNC, how do we deal with Fortran symbols?"
+#   if !defined(OS_RTEMS)
+#       error "Error! Not defined FC_FUNC, how do we deal with Fortran symbols?"
+#   endif
 # endif
 
 #endif /* HAVE_MPI */

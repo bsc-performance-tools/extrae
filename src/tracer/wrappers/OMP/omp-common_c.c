@@ -42,33 +42,40 @@
 	}                                                                      \
 }
 
-#if defined(PIC)
+#if defined(PIC) || defined (OS_RTEMS)
 int (*omp_get_thread_num_real)(void) = NULL;
 void (*omp_set_num_threads_real)(int) = NULL;
 void (*omp_set_lock_real)(omp_lock_t *) = NULL;
 void (*omp_unset_lock_real)(omp_lock_t *) = NULL;
 #endif /* PIC */
 
+#if defined (OS_RTEMS)
+extern int __real_omp_get_thread_num (void ) __attribute__((weak));
+extern void __real_omp_set_num_threads(int num) __attribute__((weak));
+extern void __real_omp_set_lock (omp_lock_t *lock) __attribute__((weak));
+extern void __real_omp_unset_lock (omp_lock_t *lock) __attribute__((weak));
+#endif
+
 void omp_common_get_hook_points_c (int rank)
 {
 	UNREFERENCED_PARAMETER(rank);
 
-#if defined(PIC)
+#if defined(PIC) || defined (OS_RTEMS)
 	/* Obtain @ for omp_get_thread_num_real */
 	omp_get_thread_num_real =
-		(int(*)(void)) dlsym (RTLD_NEXT, "omp_get_thread_num");
+		(int(*)(void)) GET_REAL_FUNCTION(omp_get_thread_num);
 
 	/* Obtain @ for omp_set_num_threads */
 	omp_set_num_threads_real =
-		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads");
+		(void(*)(int)) GET_REAL_FUNCTION(omp_set_num_threads);
 
 	/* Obtain @ for omp_set_lock */
 	omp_set_lock_real =
-		(void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_set_lock");
+		(void(*)(omp_lock_t*)) GET_REAL_FUNCTION(omp_set_lock);
 
 	/* Obtain @ for omp_unset_lock */
 	omp_unset_lock_real =
-		(void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_unset_lock");
+		(void(*)(omp_lock_t*)) GET_REAL_FUNCTION(omp_unset_lock);
 	
 #endif /* PIC */
 }
@@ -79,9 +86,8 @@ void omp_common_get_hook_points_c (int rank)
  *                                                                            * 
 \******************************************************************************/
 
-#if defined(PIC)
-
-int omp_get_thread_num (void)
+#if defined(PIC) || defined (OS_RTEMS)
+int LINK_WRAP(omp_get_thread_num) (void)
 {
 	static int shown = FALSE;
 	int res = 0;
@@ -118,7 +124,7 @@ int omp_get_thread_num (void)
 }
 
 void
-omp_set_num_threads(int num_threads)
+LINK_WRAP(omp_set_num_threads) (int num_threads)
 {
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME
@@ -161,7 +167,7 @@ omp_set_num_threads(int num_threads)
 #endif
 }
 
-void omp_set_lock (omp_lock_t *lock)
+void LINK_WRAP(omp_set_lock) (omp_lock_t *lock)
 {
 	void *lock_ptr = (void *)lock;
 
@@ -197,7 +203,7 @@ void omp_set_lock (omp_lock_t *lock)
 #endif
 }
 
-void omp_unset_lock (omp_lock_t *lock)
+void LINK_WRAP(omp_unset_lock) (omp_lock_t *lock)
 {
 	void *lock_ptr = (void *)lock;
 
@@ -234,3 +240,4 @@ void omp_unset_lock (omp_lock_t *lock)
 }
 
 #endif /* PIC */
+

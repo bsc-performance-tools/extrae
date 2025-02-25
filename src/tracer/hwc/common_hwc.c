@@ -55,7 +55,7 @@
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
 
-#if !defined(SAMPLING_SUPPORT)
+#if !defined(SAMPLING_SUPPORT) || defined(OS_RTEMS)
 int Reset_After_Read = TRUE;
 #else
 int Reset_After_Read = FALSE;
@@ -564,6 +564,13 @@ void HWC_Parse_Env_Config (int task_id)
  * \param store_buffer Buffer where the counters will be stored.
  * \return 1 if counters were read successfully, 0 otherwise.
  */
+#if defined(OS_RTEMS)
+void HWC_update_sampling(unsigned int tid){
+
+	HWCBE_UPDATE_SAMPLING(tid);
+
+}
+#endif
 int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer)
 {
 	int read_ok = FALSE, reset_ok = FALSE; 
@@ -579,6 +586,18 @@ int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer)
 	}
 	return (HWCEnabled && read_ok && reset_ok);
 }
+#if defined(OS_RTEMS)
+int HWC_Read_Sampling (unsigned int tid, UINT64 time, uint32_t *store_buffer)
+{
+	int read_ok = FALSE;
+	if (HWCEnabled)
+	{
+		TOUCH_LASTFIELD( store_buffer );
+		read_ok = HWCBE_READ_Sampling (tid, store_buffer);
+	}
+	return (HWCEnabled && read_ok);
+}
+#endif
 
 /**
  * Resets the counters of the given thread.

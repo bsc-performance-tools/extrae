@@ -227,6 +227,30 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	fset = Create_FS (nfiles, files, taskid, PRV_SEMANTICS);
 	error = (fset == NULL);
 
+#if defined(OS_RTEMS)
+	// As there's no support to read XML from RTEMS we need to specify the program name and the destination folder as environment variables
+	char *prvfile = NULL;
+	env_program_name = getenv ("EXTRAE_PROGRAM_NAME");
+	env_final_dir = getenv ("EXTRAE_FINAL_DIR");
+
+	prvfile = xmalloc(6 + ((env_final_dir != NULL) ? strlen(env_final_dir) : 1) + ((env_program_name != NULL) ? strlen(env_program_name) : 5)));
+	sprintf (PATH_NAME, "%s/%s.prv", (env_final_dir != NULL) ? env_final_dir : ".", (env_program_name != NULL) ? env_program_name : "TRACE");
+
+#if defined(HAVE_BFD)
+	if (!__Extrae_Utils_file_exists(prvfile)){
+		fprintf (stdout, "mpi2prv: WARNING binary file can not be found at the NFS mounted folder, calltrace info (function names) will be empty \n");
+		set_option_dump_Addresses(FALSE);
+	}
+#endif
+
+	set_merge_OutputTraceName (prvfile);
+	set_merge_GivenTraceName (TRUE);
+
+	if (taskid == 0) Labels_loadRTEMSSymbols(prvfile, files);
+
+    xfree(prvfile);
+#else
+
 	Labels_loadLocalSymbols (taskid, nfiles, files, &StartingTimes, &SynchronizationTimes);
 
 	/* If no actual filename is given, use the binary name if possible */
@@ -248,6 +272,8 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			xfree (FirstBinaryName);
 		}
 	}
+
+#endif
 
 	if (__Extrae_Utils_file_exists(get_merge_OutputTraceName()) &&
 	    !get_option_merge_TraceOverwrite())
