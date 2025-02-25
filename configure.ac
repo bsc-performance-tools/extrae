@@ -560,7 +560,6 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/OPENACC/Makefile \
   src/tracer/wrappers/GASPI/Makefile \
   src/tracer/stats/Makefile \
-  src/tracer/burst-mode/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \
   src/tracer/sampling/common/Makefile \

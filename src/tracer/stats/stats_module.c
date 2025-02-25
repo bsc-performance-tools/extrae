@@ -60,6 +60,7 @@ stats_info_t *RuntimeDescriptions[NUM_STATS_GROUPS] = {0};
 */
 stats_vtable_st virtual_table [NUM_STATS_GROUPS] = 
 {
+#if defined(NEW_OMP_SUPPORT)
 	[OMP_STATS_GROUP] =
 	{
 		.reset = xtr_stats_OMP_reset,
@@ -72,6 +73,7 @@ stats_vtable_st virtual_table [NUM_STATS_GROUPS] =
 		.free = xtr_stats_OMP_free,
 		.nevents = OMP_BURST_STATS_COUNT,
 	},
+#endif
 #if defined(MPI_SUPPORT)
 	[MPI_STATS_GROUP] =
 	{
@@ -100,11 +102,13 @@ stats_vtable_st virtual_table [NUM_STATS_GROUPS] =
  */
 xtr_stats_t ** xtr_stats_initialize( void )
 {
+#if defined(NEW_OMP_SUPPORT)
 	if (TRACING_OMP_STATISTICS && RuntimeStats[OMP_STATS_GROUP] == NULL)
 	{
 		RuntimeStats[OMP_STATS_GROUP] = xtr_stats_OMP_init();
 		RuntimeDescriptions[OMP_STATS_GROUP] =  virtual_table[OMP_STATS_GROUP].get_ids_and_descriptions();
 	}
+#endif
 #if defined(MPI_SUPPORT)
 	if (TRACING_MPI_STATISTICS && RuntimeStats[MPI_STATS_GROUP] == NULL)
 	{
@@ -361,10 +365,12 @@ void xtr_stats_finalize()
  */
 void xtr_print_debug_stats ( int tid )
 {
+#if defined(MPI_SUPPORT)
 	if (TRACING_MPI_STATISTICS)
-  	xtr_print_debug_mpi_stats(tid);
+  		xtr_print_debug_mpi_stats(tid);
+#endif
+#if defined(NEW_OMP_SUPPORT)
 	if (TRACING_OMP_STATISTICS)
 	  xtr_print_debug_omp_stats(tid);
+#endif
 }
-
-
