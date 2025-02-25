@@ -770,7 +770,7 @@ static int OMP_Call_Event (
     case GOMP_TARGET_EXT_VAL:
     case GOMP_TARGET_DATA_EXT_VAL:
     case GOMP_TARGET_UPDATE_EXT_VAL:
-      Switch_State (STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
+      Switch_State (STATE_MEMORY_XFER, (EvValue == EVT_BEGIN), ptask, task, thread);
       trace_paraver_state (cpu, ptask, task, thread, current_time);
       break;
 
