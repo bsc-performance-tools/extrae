@@ -651,6 +651,7 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[src/others/pyextrae/cuda/__init__.py:src/others/pyextrae/cuda/__init__.py] \
 		[src/others/pyextrae/mpi/__init__.py:src/others/pyextrae/mpi/__init__.py] \
 		[src/others/pyextrae/multiprocessing/__init__.py:src/others/pyextrae/multiprocessing/__init__.py:] \
+		[src/others/pyextrae/openmp/__init__.py:src/others/pyextrae/openmp/__init__.py:] \
 		[src/others/pyextrae/profile/__init__.py:src/others/pyextrae/profile/__init__.py:] \
 		[src/others/pyextrae/pthreads/__init__.py:src/others/pyextrae/pthreads/__init__.py:] \
 		[src/others/pyextrae/sequential/__init__.py:src/others/pyextrae/sequential/__init__.py] \

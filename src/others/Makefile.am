@@ -53,6 +53,9 @@ endif
 if HAVE_CUDA
 	cp -rL pyextrae/cuda $(DESTDIR)$(libexecdir)/pyextrae
 endif
+if WANT_OPENMP
+	cp -rL pyextrae/openmp $(DESTDIR)$(libexecdir)/pyextrae
+endif 
 if WANT_PTHREAD
 	cp -rL pyextrae/pthreads $(DESTDIR)$(libexecdir)/pyextrae
 endif
