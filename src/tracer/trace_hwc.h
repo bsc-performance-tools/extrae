@@ -30,7 +30,7 @@
 
 # include "hwc.h"
 #if defined(MPI_SUPPORT)
-# include "mpi_interface.h"
+# include "mpi_interface_coll_helper.h"
 #endif
 
 # define MARK_SET_READ(tid, evt, filter)                                                   \

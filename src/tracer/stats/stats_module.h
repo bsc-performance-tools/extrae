@@ -10,7 +10,7 @@
 # define MPI_BURST_STATS_COUNT 0
 #endif
 
-#define STATS_SIZE_PER_GROUP MAX(MPI_BURST_STATS_COUNT, OMP_BURST_STATS_COUNT)
+#define STATS_SIZE_PER_GROUP MAX((int)MPI_BURST_STATS_COUNT, (int)OMP_BURST_STATS_COUNT)
 
 
 /**
@@ -18,15 +18,15 @@
 */
 typedef struct stats_vtable
 {
-  void (*reset) (int threadid, xtr_stats_t * self );
-  void (*copyto) (int threadid, xtr_stats_t * self, struct xtr_stats_t * dest) ;
+  void (*reset) (unsigned int threadid, xtr_stats_t *self);
+  void (*copyto) (unsigned int threadid, xtr_stats_t *self, xtr_stats_t *dest) ;
   xtr_stats_t * (*dup) (xtr_stats_t * self);
-  void (*subtract) (int threadid, xtr_stats_t * self, xtr_stats_t * subtrahend, xtr_stats_t * destination);
-  int (*get_positive_values_and_ids) ( int threadid, xtr_stats_t * self, INT32 * out_type, UINT64 * out_values);
+  void (*subtract) (unsigned int threadid, xtr_stats_t *self, xtr_stats_t *subtrahend, xtr_stats_t *destination);
+  unsigned int (*get_positive_values_and_ids) ( unsigned int threadid, xtr_stats_t *self, INT32 *out_type, UINT64 *out_values);
   stats_info_t * (*get_ids_and_descriptions) ( void );
-  void (*realloc) (xtr_stats_t * self, int new_num_threads);
+  void (*realloc) (xtr_stats_t * self, unsigned int new_num_threads);
   void (*free) (xtr_stats_t * self);
-  int nevents;
+  unsigned int nevents;
 }stats_vtable_st;
 
 

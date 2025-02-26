@@ -172,7 +172,7 @@ void xtr_stats_reset(xtr_stats_t **stats_obj)
 	for (int i=0; i<NUM_STATS_GROUPS; ++i)
 	{
 		if (stats_obj[i] != NULL)
-			virtual_table[stats_obj[i]->category].reset(THREADID, stats_obj);
+			virtual_table[stats_obj[i]->category].reset(THREADID, stats_obj[i]);
 	}
 }
 
@@ -339,8 +339,7 @@ void xtr_stats_free (xtr_stats_t **stats)
 {
 	for (int i =0; i<NUM_STATS_GROUPS; ++i)
 	{
-		if(stats[i] != NULL)
-			virtual_table[stats[i]->category].free ( stats[i] );
+		if(stats[i] != NULL) virtual_table[stats[i]->category].free ( stats[i] );
 	}
 }
 

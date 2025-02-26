@@ -491,21 +491,22 @@ void PhaseStats::DumpZeros( unsigned long long timestamp )
 
 void PhaseStats::DumpToTrace( unsigned long long timestamp, bool dump_hwcs )
 {
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_COUNT_EV, MPI_Stats->P2P_Communications );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_SENT_EV, MPI_Stats->P2P_Bytes_Sent );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_RECV_EV, MPI_Stats->P2P_Bytes_Recv );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_COUNT_EV, MPI_Stats->COLLECTIVE_Communications );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_SENT_EV, MPI_Stats->COLLECTIVE_Bytes_Sent );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_RECV_EV, MPI_Stats->COLLECTIVE_Bytes_Recv );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_MPI_EV, MPI_Stats->Elapsed_Time_In_MPI );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_COUNT_EV, MPI_Stats->P2P_Communications_In );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_COUNT_EV, MPI_Stats->P2P_Communications_Out );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->P2P_Partner_In) );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->P2P_Partner_Out) );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_OTHER_EV, MPI_Stats->Elapsed_Time_In_MPI - MPI_Stats->Elapsed_Time_In_P2P_MPI - MPI_Stats->Elapsed_Time_In_COLLECTIVE_MPI );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_P2P_EV, MPI_Stats->Elapsed_Time_In_P2P_MPI );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_GLOBAL_EV, MPI_Stats->Elapsed_Time_In_COLLECTIVE_MPI );
-  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_OTHER_COUNT_EV, MPI_Stats->MPI_Others_count );
+  // unsigned long lon elapsed_time_in_mpi = MPI_Stats->elapsed_time[OTHER] + MPI_Stats->elapsed_time[COLLECTIVE] + MPI_Stats->elapsed_time[P2P];
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_COUNT_EV, MPI_Stats->p2p_communications );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_SENT_EV, MPI_Stats->p2p_bytes_sent );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_BYTES_RECV_EV, MPI_Stats->p2p_bytes_recv );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_COUNT_EV, MPI_Stats->collective_communications );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_SENT_EV, MPI_Stats->collective_bytes_sent );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_GLOBAL_BYTES_RECV_EV, MPI_Stats->collective_bytes_recv );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_MPI_EV, elapsed_time_in_mpi );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_COUNT_EV, MPI_Stats->p2p_communications_in );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_COUNT_EV, MPI_Stats->p2p_communications_out );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->p2p_partner_in) );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV, mpi_stats_get_num_partners(MPI_Stats, MPI_Stats->p2p_partner_out) );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_OTHER_EV, MPI_Stats->elapsed_time[OTHER] );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_P2P_EV, MPI_Stats->elapsed_time[P2P] );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_TIME_IN_GLOBAL_EV, MPI_Stats->elapsed_time[COLLECTIVE] );
+  // TRACE_ONLINE_EVENT( timestamp, MPI_STATS_OTHER_COUNT_EV, MPI_Stats->others_count );
 
 #if USE_HARDWARE_COUNTERS
   if (dump_hwcs)

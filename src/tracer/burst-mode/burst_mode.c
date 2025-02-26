@@ -42,8 +42,7 @@
 #include "trace_hwc.h"
 #include "trace_macros.h"
 #include "xalloc.h"
-
-
+#include "misc_wrapper.h"
 
 /************************************************************************************************\
  *                                      BURST MODE MODULE                                       *

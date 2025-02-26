@@ -116,7 +116,7 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	iotimer_t begin_time = LAST_READ_TIME;
   TRACE_MPIEVENT (begin_time, MPI_REDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
 
-	ret = PMPI_Reduce (sendbuf, recvbuf, count, datatype, op, root, comm);
+	ret = PMPI_Reduce (sendbuf, recvbuf, count, datatype, op, root, csize);
 
 	/*
 	*   event : REDUCE_EV                    value : EVT_END
@@ -129,11 +129,11 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_REDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -174,7 +174,7 @@ int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	iotimer_t begin_time = LAST_READ_TIME;
   TRACE_MPIEVENT (begin_time, MPI_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
 
-	ret = PMPI_Allreduce (sendbuf, recvbuf, count, datatype, op, comm);
+	ret = PMPI_Allreduce (sendbuf, recvbuf, count, datatype, op, csize);
 
 	/*
 	*   event : ALLREDUCE_EV                 value : EVT_END
@@ -185,7 +185,7 @@ int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, size, size, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, size, size, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_ALLREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -237,7 +237,7 @@ int MPI_Barrier_C_Wrapper (MPI_Comm comm)
   end_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, end_time, 0, 0, comm);
+  xtr_stats_MPI_update_collective(begin_time, end_time, 0, 0, csize);
 
 #if defined(IS_BGL_MACHINE)
   if (!BGL_disable_barrier_inside)
@@ -288,7 +288,7 @@ int MPI_BCast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int roo
 	iotimer_t begin_time = LAST_READ_TIME;
   TRACE_MPIEVENT (begin_time, MPI_BCAST_EV, EVT_BEGIN, root, size, me, comm, EMPTY);
 
-	ret = PMPI_Bcast (buffer, count, datatype, root, comm);
+	ret = PMPI_Bcast (buffer, count, datatype, root, csize);
 
 	/*
 	*   event : BCAST_EV                    value : EVT_END
@@ -301,11 +301,11 @@ int MPI_BCast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int roo
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_BCAST_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -357,7 +357,7 @@ int MPI_Alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	  sendcount * sendsize, me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-	  recvtype, comm);
+	  recvtype, csize);
 
 	/*
 	*   event : ALLTOALL_EV                  value : EVT_END
@@ -368,7 +368,7 @@ int MPI_Alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -425,7 +425,7 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	  sendsize * sendc, me, comm, recvsize * recvc);
 
 	ret = PMPI_Alltoallv (sendbuf, sendcounts, sdispls, sendtype,
-	  recvbuf, recvcounts, rdispls, recvtype, comm);
+	  recvbuf, recvcounts, rdispls, recvtype, csize);
 
 	/*
 	*   event : ALLTOALLV_EV                  value : EVT_END
@@ -436,7 +436,7 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -483,7 +483,7 @@ int MPI_Allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	  me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Allgather (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcount, recvtype, comm);
+	  recvbuf, recvcount, recvtype, csize);
 
 	/*
 	*   event : ALLGATHER_EV                    value : EVT_END
@@ -494,7 +494,7 @@ int MPI_Allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -545,7 +545,7 @@ int MPI_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	  me, comm, recvsize * recvc);
 
 	ret = PMPI_Allgatherv (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcounts, displs, recvtype, comm);
+	  recvbuf, recvcounts, displs, recvtype, csize);
 
 	/*
 	*   event : ALLGATHERV_EV                    value : EVT_END
@@ -556,7 +556,7 @@ int MPI_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -611,7 +611,7 @@ int MPI_Gather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	}
 
 	ret = PMPI_Gather (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcount, recvtype, root, comm);
+	  recvbuf, recvcount, recvtype, root, csize);
 
 	/*
 	*   event : GATHER_EV                    value : EVT_END
@@ -624,11 +624,11 @@ int MPI_Gather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, 0, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_GATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -690,7 +690,7 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	}
 
 	ret = PMPI_Gatherv (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcounts, displs, recvtype, root, comm);
+	  recvbuf, recvcounts, displs, recvtype, root, csize);
 
 	/*
 	*   event : GATHERV_EV                    value : EVT_END
@@ -703,11 +703,11 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, 0, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_GATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -763,7 +763,7 @@ int MPI_Scatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	}
 
 	ret = PMPI_Scatter (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-	  recvtype, root, comm);
+	  recvtype, root, csize);
 
 	/*
 	*   event : SCATTER_EV                   value : EVT_END
@@ -776,11 +776,11 @@ int MPI_Scatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize * csize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize * csize, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_SCATTER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -841,7 +841,7 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 		  recvcount * recvsize);
 	}
 
-	ret = PMPI_Scatterv (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
+	ret = PMPI_Scatterv (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, csize);
 
 	/*
 	*   event : SCATTERV_EV                  value : EVT_END
@@ -854,11 +854,11 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendc * sendsize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendc * sendsize, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_SCATTERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -904,7 +904,7 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
   TRACE_MPIEVENT (begin_time, MPI_REDUCESCAT_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcounts[me] * size);
 
 	ierror = PMPI_Reduce_scatter (sendbuf, recvbuf, recvcounts, datatype,
-	  op, comm);
+	  op, csize);
 
 	/*
 	*   event : REDUCESCAT_EV                    value : EVT_END
@@ -917,11 +917,11 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	/* MPI Stats */
 	if (me == 0)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, sendcount * size, sendcount * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, sendcount * size, sendcount * size, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcounts[me] * size, sendcount * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcounts[me] * size, sendcount * size, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_REDUCESCAT_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -962,7 +962,7 @@ int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
   TRACE_MPIEVENT (begin_time, MPI_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
-	ierror = PMPI_Scan (sendbuf, recvbuf, count, datatype, op, comm);
+	ierror = PMPI_Scan (sendbuf, recvbuf, count, datatype, op, csize);
 
 	/*
 	*   event : SCAN_EV                          value : EVT_END
@@ -976,11 +976,11 @@ int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 
 	if (me != csize - 1)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, csize);
 	}
 	if (me != 0)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_SCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1020,7 +1020,7 @@ int MPI_Exscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	TRACE_MPIEVENT (begin_time, MPI_EXSCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
-	ierror = PMPI_Exscan (sendbuf, recvbuf, count, datatype, op, comm);
+	ierror = PMPI_Exscan (sendbuf, recvbuf, count, datatype, op, csize);
 
 	/*
 	*   event : EXSCAN_EV                    value : EVT_END
@@ -1033,10 +1033,10 @@ int MPI_Exscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	/* MPI Stats */
 
 	if (me != csize - 1)
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, csize);
 
 	if (me != 0)
-		_xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_EXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -1090,11 +1090,11 @@ int MPI_Ireduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_IREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1146,7 +1146,7 @@ int MPI_Iallreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, size, size, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, size, size, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IALLREDUCE_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -1198,7 +1198,7 @@ int MPI_Ibarrier_C_Wrapper (MPI_Comm comm, MPI_Request *req)
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, 0, 0, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, 0, 0, csize);
 
 #if defined(IS_BGL_MACHINE)
   if (!BGL_disable_barrier_inside)
@@ -1262,11 +1262,11 @@ int MPI_Ibcast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int ro
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, size, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, size, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_IBCAST_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1329,7 +1329,7 @@ int MPI_Ialltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -1397,7 +1397,7 @@ int MPI_Ialltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -1455,7 +1455,7 @@ int MPI_Iallgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, sendcount * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -1518,7 +1518,7 @@ int MPI_Iallgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendty
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -1587,11 +1587,11 @@ int MPI_Igather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * csize, 0, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_IGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1666,11 +1666,11 @@ int MPI_Igatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, 0, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_IGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1740,11 +1740,11 @@ int MPI_Iscatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize * csize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendcount * sendsize * csize, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_ISCATTER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1818,11 +1818,11 @@ int MPI_Iscatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	/* MPI Stats */
 	if (me == root)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendc * sendsize, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, sendc * sendsize, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_ISCATTERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1882,11 +1882,11 @@ int MPI_Ireduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	/* MPI Stats */
 	if (me == 0)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, sendcount * size, sendcount * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, sendcount * size, sendcount * size, csize);
 	}
 	else
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, recvcounts[me] * size, sendcount * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, recvcounts[me] * size, sendcount * size, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_IREDUCESCAT_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1941,11 +1941,11 @@ int MPI_Iscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 
 	if (me != csize - 1)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, csize);
 	}
 	if (me != 0)
 	{
-		_xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, csize);
 	}
 
 	TRACE_MPIEVENT (current_time, MPI_ISCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
@@ -1998,10 +1998,10 @@ int MPI_Iexscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	/* MPI Stats */
 
 	if (me != csize - 1)
-		_xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, 0, count * size, csize);
 
 	if (me != 0)
-		_xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, comm);
+		xtr_stats_MPI_update_collective(begin_time, current_time, count * size, 0, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IEXSCAN_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2041,7 +2041,7 @@ int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
   TRACE_MPIEVENT (begin_time, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
 
 	ierror = PMPI_Reduce_scatter_block (sendbuf, recvbuf, recvcount, datatype,
-	  op, comm);
+	  op, csize);
 
 	/*
 	*   event : REDUCE_SCATTER_BLOCK_EV      value : EVT_END
@@ -2052,7 +2052,7 @@ int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * size, sendcount * size, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * size, sendcount * size, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2104,7 +2104,7 @@ int MPI_Ireduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * size, sendcount * size, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * size, sendcount * size, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IREDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2157,7 +2157,7 @@ int MPI_Alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	  sendbytes, me, comm, recvbytes);
 
 	ret = PMPI_Alltoallw (sendbuf, sendcounts, sdispls, sendtypes,
-	  recvbuf, recvcounts, rdispls, recvtypes, comm);
+	  recvbuf, recvcounts, rdispls, recvtypes, csize);
 
 	/*
 	*   event : ALLTOALLW_EV                  value : EVT_END
@@ -2168,7 +2168,7 @@ int MPI_Alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2231,7 +2231,7 @@ int MPI_Ialltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	iotimer_t current_time = TIME;
 
 	/* MPI Stats */
-	_xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, comm);
+	xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, csize);
 
 	TRACE_MPIEVENT (current_time, MPI_IALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2317,7 +2317,7 @@ int MPI_Graph_create_C_Wrapper (MPI_Comm comm_old, int nnodes, int *index, int *
   }
 
   iotimer_t current_time = TIME;
-  _xtr_stats_MPI_update_other(begin_time, current_time);
+  xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 
@@ -2343,7 +2343,7 @@ int MPI_Dist_graph_create_C_Wrapper (MPI_Comm comm_old, int n, int *sources, int
   }
 
   iotimer_t current_time = TIME;
-  _xtr_stats_MPI_update_other(begin_time, current_time);
+  xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_DIST_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 
@@ -2371,7 +2371,7 @@ int MPI_Dist_graph_create_adjacent_C_Wrapper (MPI_Comm comm_old, int indegree, c
   }
 
   iotimer_t current_time = TIME;
-  _xtr_stats_MPI_update_other(begin_time, current_time);
+  xtr_stats_MPI_update_other(begin_time, current_time);
   TRACE_MPIEVENT (current_time, MPI_DIST_GRAPH_CREATE_ADJACENT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 
@@ -2414,7 +2414,7 @@ int MPI_Neighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
-  ret = PMPI_Neighbor_allgather (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+  ret = PMPI_Neighbor_allgather (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, csize);
 
   /*
    *   event  : NEIGHBOR_ALLGATHER_EV       value  : EVT_END
@@ -2425,7 +2425,7 @@ int MPI_Neighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2478,7 +2478,7 @@ int MPI_Ineighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2528,7 +2528,7 @@ int MPI_Neighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvsize * recvc);
 
-  ret = PMPI_Neighbor_allgatherv (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm);
+  ret = PMPI_Neighbor_allgatherv (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, csize);
 
   /*
    *   event  : NEIGHBOR_ALLGATHERV_EV      value  : EVT_END
@@ -2539,7 +2539,7 @@ int MPI_Neighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2600,7 +2600,7 @@ int MPI_Ineighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Dataty
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendcount * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2642,7 +2642,7 @@ int MPI_Neighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype 
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
-  ret = PMPI_Neighbor_alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+  ret = PMPI_Neighbor_alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, csize);
 
   /*
    *   event  : NEIGHBOR_ALLTOALL_EV        value  : EVT_END
@@ -2653,7 +2653,7 @@ int MPI_Neighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype 
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2706,7 +2706,7 @@ int MPI_Ineighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvcount * recvsize * indegree, sendcount * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2763,7 +2763,7 @@ int MPI_Neighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdisp
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
     me, comm, recvsize * recvc);
 
-  ret = PMPI_Neighbor_alltoallv (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm);
+  ret = PMPI_Neighbor_alltoallv (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, csize);
 
   /*
    *   event  : NEIGHBOR_ALLTOALLV_EV       value  : EVT_END
@@ -2774,7 +2774,7 @@ int MPI_Neighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdisp
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2842,7 +2842,7 @@ int MPI_Ineighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdis
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvc * recvsize, sendc * sendsize, csize);
 
   TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2904,7 +2904,7 @@ int MPI_Neighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint *
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
     me, comm, recvbytes);
 
-  ret = PMPI_Neighbor_alltoallw (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm);
+  ret = PMPI_Neighbor_alltoallw (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, csize);
 
   /*
    *   event  : NEIGHBOR_ALLTOALLW_EV       value  : EVT_END
@@ -2915,7 +2915,7 @@ int MPI_Neighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint *
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, csize);
 
   TRACE_MPIEVENT (current_time, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 
@@ -2988,7 +2988,7 @@ int MPI_Ineighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint 
   iotimer_t current_time = TIME;
 
   /* MPI Stats */
-  _xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, comm);
+  xtr_stats_MPI_update_collective(begin_time, current_time, recvbytes, sendbytes, csize);
 
   TRACE_MPIEVENT (current_time, MPI_INEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
 

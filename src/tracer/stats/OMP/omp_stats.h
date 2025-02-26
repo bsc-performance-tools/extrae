@@ -64,19 +64,19 @@ typedef struct stats_omp_thread_data
 typedef struct xtr_OpenMP_stats
 {
   xtr_stats_t common_stats_fields;
-  int num_threads; //necessary to free the allocated memory
+  unsigned int num_threads; //necessary to free the allocated memory
   struct stack **open_region; // used to keep track of the nested runtime calls
 }xtr_OpenMP_stats_t;
 
 
 void *xtr_stats_OMP_init( void );
-void xtr_stats_OMP_realloc ( xtr_OpenMP_stats_t *omp_stats, int new_num_threads );
-void xtr_stats_OMP_reset(int threadid, xtr_OpenMP_stats_t *omp_stats);
-xtr_OpenMP_stats_t *xtr_stats_OMP_dup ( xtr_OpenMP_stats_t *omp_stats );
-void xtr_stats_OMP_copy(int threaid, xtr_OpenMP_stats_t *stats_origin, xtr_OpenMP_stats_t *stats_destination);
-void xtr_stats_OMP_subtract(int threadid, xtr_OpenMP_stats_t *omp_stats, xtr_OpenMP_stats_t *subtrahend, xtr_OpenMP_stats_t *destiantion);
-int xtr_stats_OMP_get_values(int threadid, xtr_OpenMP_stats_t *omp_stats, INT32 *out_statistic_type, UINT64 *out_values);
-int xtr_stats_OMP_get_positive_values(int threadid, xtr_OpenMP_stats_t *omp_stats, INT32 *out_statistic_type, UINT64 *out_values);
+void xtr_stats_OMP_realloc ( xtr_stats_t *stats, unsigned int new_num_threads );
+void xtr_stats_OMP_reset(unsigned int threadid, xtr_stats_t *stats);
+xtr_stats_t *xtr_stats_OMP_dup ( xtr_stats_t *stats );
+void xtr_stats_OMP_copy(unsigned int threaid, xtr_stats_t *stats_origin, xtr_stats_t *stats_destination);
+void xtr_stats_OMP_subtract(unsigned int threadid, xtr_stats_t *stats, xtr_stats_t *subtrahend, xtr_stats_t *destiantion);
+unsigned int xtr_stats_OMP_get_values(unsigned int threadid, xtr_stats_t *stats, INT32 *out_statistic_type, UINT64 *out_values);
+unsigned int xtr_stats_OMP_get_positive_values(unsigned int threadid, xtr_stats_t *stats, INT32 *out_statistic_type, UINT64 *out_values);
 stats_info_t *xtr_stats_OMP_get_types_and_descriptions( void );
 
 void xtr_stats_OMP_update_par_OL_entry (void);
@@ -86,7 +86,7 @@ void xtr_stats_OMP_update_synchronization_exit(void);
 void xtr_stats_OMP_update_overhead_entry(void);
 void xtr_stats_OMP_update_overhead_exit(void);
 
-void xtr_stats_OMP_free( xtr_OpenMP_stats_t *omp_stats );
-void xtr_print_debug_omp_stats(int threadid);
+void xtr_stats_OMP_free( xtr_stats_t *omp_stats );
+void xtr_print_debug_omp_stats(unsigned int threadid);
 
 #endif /* End of OMP_STATS_DEFINED */

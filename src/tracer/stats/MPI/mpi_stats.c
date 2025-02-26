@@ -32,7 +32,7 @@
 #include "stdio.h"
 #include "common.h"
 #include "xalloc.h"
-
+#include "wrapper.h"
 
 // # define DEBUG
 
@@ -47,30 +47,33 @@
 
 
 static stats_info_t MPI_stats_info[] = {
-  {MPI_BURST_STATS_P2P_COUNT, "Number of P2P MPI calls"},
-  {MPI_BURST_STATS_P2P_BYTES_SENT, "Bytes sent in P2P MPI calls"},
-  {MPI_BURST_STATS_P2P_BYTES_RECV, "Bytes received in P2P MPI calls"},
-  {MPI_BURST_STATS_GLOBAL_COUNT, "Number of GLOBAL MPI calls"},
-  {MPI_BURST_STATS_GLOBAL_BYTES_SENT, "Bytes sent in GLOBAL MPI calls"},
-  {MPI_BURST_STATS_GLOBAL_BYTES_RECV, "Bytes received in GLOBAL MPI calls"},
-  {MPI_BURST_STATS_GLOBAL_COMM_WORLD_COUNT, "Number of GLOBAL MPI calls on MPI_COMM_WORLD"},
-  {MPI_BURST_STATS_TIME_IN_MPI, "Elapsed time in MPI"},
-  {MPI_BURST_STATS_P2P_INCOMING_COUNT, "Number of incoming P2P MPI calls"},
-  {MPI_BURST_STATS_P2P_OUTGOING_COUNT, "Number of outgoing P2P MPI calls"},
-  {MPI_BURST_STATS_P2P_INCOMING_PARTNERS_COUNT, "Number of partners in incoming communications"},
-  {MPI_BURST_STATS_P2P_OUTGOING_PARTNERS_COUNT, "Number of partners in outgoing communications"},
-  {MPI_BURST_STATS_TIME_IN_OTHER,  "Elapsed time in OTHER MPI calls"},
-  {MPI_BURST_STATS_TIME_IN_P2P, "Elapsed time in P2P MPI calls"},
-  {MPI_BURST_STATS_TIME_IN_GLOBAL, "Elapsed time in GLOBAL MPI calls"},
-  {MPI_BURST_STATS_OTHER_COUNT, "Number of OTHER MPI calls"},
-	{-1, NULL}
+  { MPI_BURST_STATS_P2P_COUNT,                   "Number of P2P MPI calls" },
+  { MPI_BURST_STATS_P2P_BYTES_SENT,              "Bytes sent in P2P MPI calls" },
+  { MPI_BURST_STATS_P2P_BYTES_RECV,              "Bytes received in P2P MPI calls" },
+  { MPI_BURST_STATS_P2P_INCOMING_COUNT,          "Number of incoming P2P MPI calls" },
+  { MPI_BURST_STATS_P2P_OUTGOING_COUNT,          "Number of outgoing P2P MPI calls" },
+  { MPI_BURST_STATS_P2P_INCOMING_PARTNERS_COUNT, "Number of partners in incoming communications" },
+  { MPI_BURST_STATS_P2P_OUTGOING_PARTNERS_COUNT, "Number of partners in outgoing communications" },
+  { MPI_BURST_STATS_COLLECTIVE_COUNT,            "Number of Collective MPI calls" },
+  { MPI_BURST_STATS_COLLECTIVE_BYTES_SENT,       "Bytes sent in Collective MPI calls" },
+  { MPI_BURST_STATS_COLLECTIVE_BYTES_RECV,       "Bytes received in Collective MPI calls" },
+  { MPI_BURST_STATS_COLLECTIVE_WORLD_COUNT,      "Number of Collective World MPI calls" },
+  { MPI_BURST_STATS_COLLECTIVE_WORLD_BYTES_SENT, "Bytes sent in Collective World calls" },
+  { MPI_BURST_STATS_COLLECTIVE_WORLD_BYTES_RECV, "Bytes received in Collective World calls" },
+  { MPI_BURST_STATS_OTHER_COUNT,                 "Number of Other MPI calls" },
+  { MPI_BURST_STATS_TIME_IN_MPI,                 "Elapsed time in MPI" },
+  { MPI_BURST_STATS_TIME_IN_P2P,                 "Elapsed time in P2P MPI calls" },
+  { MPI_BURST_STATS_TIME_IN_COLLECTIVE,          "Elapsed time in Collective MPI calls" },
+  { MPI_BURST_STATS_TIME_IN_COLLECTIVE_WORLD,    "Elapsed time in Collective World calls" },
+  { MPI_BURST_STATS_TIME_IN_OTHER,               "Elapsed time in Other MPI calls" },
+  { -1, NULL }
 };
 
 xtr_MPI_stats_t * MPI_stats = NULL;
 
 xtr_MPI_stats_t * xtr_mpi_stats_new();
-stats_mpi_thread_data_t *xtr_get_mpi_stats_data( xtr_MPI_stats_t * mpi_stats, int threadid );
-int mpi_stats_get_num_partners(stats_mpi_thread_data_t * data, int * partners_vector);
+stats_mpi_thread_data_t *xtr_get_mpi_stats_data(xtr_MPI_stats_t *mpi_stats, unsigned int threadid);
+unsigned int mpi_stats_get_num_partners(int *partners_vector);
 
 /**
  * @brief Initializes the MPI statistics by allocating and setting up a new xtr_MPI_stats_t structure.
@@ -81,10 +84,10 @@ int mpi_stats_get_num_partners(stats_mpi_thread_data_t * data, int * partners_ve
  * 
  * @return void* A pointer to the newly allocated and initialized `xtr_MPI_stats_t` structure.
  */
-void * xtr_stats_MPI_init( void )
+void *xtr_stats_MPI_init(void)
 {
 	MPI_stats = xtr_mpi_stats_new();
-  return MPI_stats;
+	return MPI_stats;
 }
 
 /**
@@ -96,12 +99,13 @@ void * xtr_stats_MPI_init( void )
  * 
  * @return xtr_MPI_stats_t* A pointer to the newly allocated and initialized `xtr_MPI_stats_t` structure.
  */
-xtr_MPI_stats_t * xtr_mpi_stats_new()
+xtr_MPI_stats_t *xtr_mpi_stats_new()
 {
-	int num_tasks = Extrae_get_num_tasks();
+	unsigned int num_tasks = Extrae_get_num_tasks(); //number of tasks in MPI_COMM_WORLD
 
-	xtr_MPI_stats_t * mpi_stats = xmalloc( sizeof(xtr_MPI_stats_t) );
+	xtr_MPI_stats_t *mpi_stats = xmalloc( sizeof(xtr_MPI_stats_t) );
 	mpi_stats->num_threads = Backend_getMaximumOfThreads();
+	mpi_stats->world_size = num_tasks;
 
 	if (mpi_stats == NULL)
 	{
@@ -112,16 +116,16 @@ xtr_MPI_stats_t * xtr_mpi_stats_new()
 	mpi_stats->common_stats_field.category = MPI_STATS_GROUP;
 	mpi_stats->common_stats_field.data = xmalloc_and_zero (sizeof(stats_mpi_thread_data_t) * mpi_stats->num_threads);
 
-	for(int i =0; i < mpi_stats->num_threads ; ++i)
+	for(unsigned int i =0; i < mpi_stats->num_threads ; ++i)
 	{
-		((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_In = xmalloc_and_zero (num_tasks * sizeof(int));
-		if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_In == NULL)
+		((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in = xmalloc_and_zero(num_tasks * sizeof(int));
+		if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in == NULL)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for MPI Stats");
 			exit(-1);
 		}
-		((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_Out = xmalloc_and_zero (num_tasks * sizeof(int));
-		if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_Out == NULL)
+		((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_out = xmalloc_and_zero(num_tasks * sizeof(int));
+		if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_out == NULL)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for MPI Stats");
 			exit(-1);
@@ -136,34 +140,35 @@ xtr_MPI_stats_t * xtr_mpi_stats_new()
  * 
  * This function increases the capacity of the MPI statistics structure to handle a greater number
  * of threads. It reallocates memory for the `common_stats_field.data` field and initializes the
- * `P2P_Partner_In` and `P2P_Partner_Out` arrays for the newly added threads.
+ * `p2p_partner_in` and `p2p_partner_out` arrays for the newly added threads.
  * 
  * @param mpi_stats Pointer to the `xtr_MPI_stats_t` structure to be reallocated.
  * @param new_num_threads The new number of threads to accommodate.
  */
-void xtr_stats_MPI_realloc (xtr_MPI_stats_t *mpi_stats, int new_num_threads )
+void xtr_stats_MPI_realloc(xtr_stats_t *stats, unsigned int new_num_threads)
 {
+	xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
 	if(new_num_threads <= mpi_stats->num_threads)
 	 return;
 
-	int num_tasks = Extrae_get_num_tasks();
+	int num_tasks = mpi_stats->world_size;
 	if(mpi_stats != NULL)
 	{
 		if(mpi_stats->common_stats_field.category == MPI_STATS_GROUP)
 		{
 			mpi_stats->common_stats_field.data = xrealloc(mpi_stats->common_stats_field.data, sizeof(stats_mpi_thread_data_t) * new_num_threads);
-      memset(&mpi_stats->common_stats_field.data[mpi_stats->num_threads], 0, (new_num_threads-mpi_stats->num_threads) * sizeof(stats_mpi_thread_data_t));
+			memset(&((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[mpi_stats->num_threads], 0, (new_num_threads-mpi_stats->num_threads) * sizeof(stats_mpi_thread_data_t));
 
-			for(int i=mpi_stats->num_threads; i < new_num_threads ; ++i)
+			for(unsigned int i=mpi_stats->num_threads; i < new_num_threads ; ++i)
 			{
-				((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_In = xmalloc_and_zero (num_tasks * sizeof(int));
-				if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_In == NULL)
+				((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in = xmalloc_and_zero (num_tasks * sizeof(int));
+				if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in == NULL)
 				{
 					fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for MPI Stats");
 					exit(-1);
 				}
-				((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_Out = xmalloc_and_zero (num_tasks * sizeof(int));
-				if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_Out == NULL)
+				((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_out = xmalloc_and_zero (num_tasks * sizeof(int));
+				if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_out == NULL)
 				{
 					fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for MPI Stats");
 					exit(-1);
@@ -183,36 +188,43 @@ void xtr_stats_MPI_realloc (xtr_MPI_stats_t *mpi_stats, int new_num_threads )
  * @param mpi_stats Pointer to the `xtr_MPI_stats_t` structure containing the MPI statistics.
  * @param threadid The thread ID for which to reset the statistics data.
  */
-void xtr_stats_MPI_reset(int threadid, xtr_MPI_stats_t * mpi_stats )
+void xtr_stats_MPI_reset( unsigned int threadid, xtr_stats_t *stats )
 {
 	int i;
-  stats_mpi_thread_data_t * origin_data = xtr_get_mpi_stats_data(mpi_stats, threadid);
+	xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
+	stats_mpi_thread_data_t * origin_data = xtr_get_mpi_stats_data(mpi_stats, threadid);
 
 	if (TRACING_MPI_STATISTICS && origin_data != NULL)
 	{
-		origin_data->P2P_Bytes_Sent = 0;
-		origin_data->P2P_Bytes_Recv = 0;
-		origin_data->COLLECTIVE_Bytes_Sent = 0;
-		origin_data->COLLECTIVE_Bytes_Recv = 0;
-		origin_data->P2P_Communications = 0;
-		origin_data->COLLECTIVE_Communications = 0;
-		origin_data->COLL_CommWorld_Communications = 0;
-		origin_data->MPI_Others_count = 0;
+		origin_data->p2p_bytes_sent = 0;
+		origin_data->p2p_bytes_recv = 0;
+		origin_data->collective_bytes_sent = 0;
+		origin_data->collective_bytes_recv = 0;
+		origin_data->p2p_communications = 0;
+		origin_data->collective_communications = 0;
+		origin_data->collective_world_communications = 0;
+		origin_data->collective_world_bytes_recv = 0;
+		origin_data->collective_world_bytes_sent = 0;
+		origin_data->others_count = 0;
 
-		origin_data->P2P_Communications_In = 0;
-		origin_data->P2P_Communications_Out = 0;
+		origin_data->p2p_communications_in = 0;
+		origin_data->p2p_communications_out = 0;
 
 		origin_data->begin_time[OTHER] = 0;
 		origin_data->begin_time[P2P] = 0;
 		origin_data->begin_time[COLLECTIVE] = 0;
+		origin_data->begin_time[COLLECTIVE_COMM_WORLD] = 0;
 
+		origin_data->elapsed_time[OTHER] = 0;
 		origin_data->elapsed_time[P2P] = 0;
 		origin_data->elapsed_time[COLLECTIVE] = 0;
+		origin_data->elapsed_time[COLLECTIVE_COMM_WORLD] = 0;
 
-		for (i = 0; i < origin_data->ntasks; i++)
+
+		for (i = 0; i < mpi_stats->world_size; i++)
 		{
-			origin_data->P2P_Partner_In[i] = 0;
-			origin_data->P2P_Partner_Out[i] = 0;
+			origin_data->p2p_partner_in[i] = 0;
+			origin_data->p2p_partner_out[i] = 0;
 		}
 	}
 }
@@ -227,20 +239,21 @@ void xtr_stats_MPI_reset(int threadid, xtr_MPI_stats_t * mpi_stats )
  * @return Pointer to the newly created `xtr_MPI_stats_t` structure containing the duplicated data.
  *         Returns NULL if `TRACING_MPI_STATISTICS` is not enabled or if `mpi_stats` is NULL.
  */
-xtr_MPI_stats_t * xtr_stats_MPI_dup(xtr_MPI_stats_t * mpi_stats)
+xtr_stats_t *xtr_stats_MPI_dup(xtr_stats_t *stats)
 {
+	xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
 	xtr_MPI_stats_t * new_mpi_stats = NULL;
 	if (TRACING_MPI_STATISTICS && mpi_stats != NULL)
 	{
 		new_mpi_stats = xtr_mpi_stats_new();
 		new_mpi_stats->num_threads = mpi_stats->num_threads;
 		new_mpi_stats->common_stats_field.category = MPI_STATS_GROUP;
-		for(int i=0; i < Backend_getMaximumOfThreads(); ++i)
+		for(unsigned int i=0; i < Backend_getMaximumOfThreads(); ++i)
 		{
-			xtr_stats_MPI_copy(i, mpi_stats, new_mpi_stats);
+			xtr_stats_MPI_copy(i, stats, (xtr_stats_t *)new_mpi_stats);
 		}
 	}
-	return new_mpi_stats;
+	return (xtr_stats_t *)new_mpi_stats;
 }
 
 /**
@@ -253,44 +266,54 @@ xtr_MPI_stats_t * xtr_stats_MPI_dup(xtr_MPI_stats_t * mpi_stats)
  * @param stats_destination Pointer to the destination `xtr_MPI_stats_t` structure.
  * @param threadid The thread ID for which to copy the statistics data.
  */
-void xtr_stats_MPI_copy(int threadid, xtr_MPI_stats_t * stats_origin, xtr_MPI_stats_t * stats_destination )
+void xtr_stats_MPI_copy(unsigned int threadid, xtr_stats_t *stats_origin, xtr_stats_t *stats_destination)
 {
 	if( threadid >= Backend_getMaximumOfThreads() )
 		return;
 
   if (TRACING_MPI_STATISTICS)
   {
-		stats_mpi_thread_data_t *origin_data = xtr_get_mpi_stats_data(stats_origin, threadid);
-		stats_mpi_thread_data_t *destination_data = xtr_get_mpi_stats_data(stats_destination, threadid);
+		xtr_MPI_stats_t *mpi_stats_origin = (xtr_MPI_stats_t *)stats_origin;
+		xtr_MPI_stats_t *mpi_stats_destination = (xtr_MPI_stats_t *)stats_destination;
+
+		stats_mpi_thread_data_t *origin_data = xtr_get_mpi_stats_data(mpi_stats_origin, threadid);
+		stats_mpi_thread_data_t *destination_data = xtr_get_mpi_stats_data(mpi_stats_destination, threadid);
+
 		if(origin_data != NULL && destination_data != NULL)
 		{
-			destination_data->P2P_Bytes_Sent = origin_data->P2P_Bytes_Sent;
-			destination_data->P2P_Bytes_Recv = origin_data->P2P_Bytes_Recv;
-			destination_data->COLLECTIVE_Bytes_Sent = origin_data->COLLECTIVE_Bytes_Sent;
-			destination_data->COLLECTIVE_Bytes_Recv = origin_data->COLLECTIVE_Bytes_Recv;
-			destination_data->P2P_Communications = origin_data->P2P_Communications;
-			destination_data->COLLECTIVE_Communications = origin_data->COLLECTIVE_Communications;
-			destination_data->COLL_CommWorld_Communications = origin_data->COLL_CommWorld_Communications;
-			destination_data->MPI_Others_count = origin_data->MPI_Others_count;
+			destination_data->p2p_bytes_sent = origin_data->p2p_bytes_sent;
+			destination_data->p2p_bytes_recv = origin_data->p2p_bytes_recv;
+			destination_data->collective_bytes_sent = origin_data->collective_bytes_sent;
+			destination_data->collective_bytes_recv = origin_data->collective_bytes_recv;
+			destination_data->p2p_communications = origin_data->p2p_communications;
+			destination_data->collective_communications = origin_data->collective_communications;
+			destination_data->collective_world_communications = origin_data->collective_world_communications;
+			destination_data->collective_world_bytes_recv = origin_data->collective_world_bytes_recv;
+			destination_data->collective_world_bytes_sent = origin_data->collective_world_bytes_sent;
+			destination_data->others_count = origin_data->others_count;
 
-			destination_data->P2P_Communications_In = origin_data->P2P_Communications_In;
-			destination_data->P2P_Communications_Out = origin_data->P2P_Communications_Out;
+			destination_data->p2p_communications_in = origin_data->p2p_communications_in;
+			destination_data->p2p_communications_out = origin_data->p2p_communications_out;
 
 			destination_data->begin_time[OTHER] = origin_data->begin_time[OTHER];
 			destination_data->begin_time[P2P] = origin_data->begin_time[P2P];
 			destination_data->begin_time[COLLECTIVE] = origin_data->begin_time[COLLECTIVE];
+			destination_data->begin_time[COLLECTIVE_COMM_WORLD] = origin_data->begin_time[COLLECTIVE_COMM_WORLD];
 
 			destination_data->elapsed_time[OTHER] = origin_data->elapsed_time[OTHER];
 			destination_data->elapsed_time[P2P] = origin_data->elapsed_time[P2P];
 			destination_data->elapsed_time[COLLECTIVE] = origin_data->elapsed_time[COLLECTIVE];
+			destination_data->elapsed_time[COLLECTIVE_COMM_WORLD] = origin_data->elapsed_time[COLLECTIVE_COMM_WORLD];
 
-			for(int i=0; i < Extrae_get_num_tasks(); ++i)
+			for(int i=0; i < mpi_stats_origin->world_size; ++i)
 			{
-				((stats_mpi_thread_data_t *)(stats_destination->common_stats_field.data))[threadid].P2P_Partner_In[i] = ((stats_mpi_thread_data_t *)(stats_origin->common_stats_field.data))[threadid].P2P_Partner_In[i];
-				((stats_mpi_thread_data_t *)(stats_destination->common_stats_field.data))[threadid].P2P_Partner_Out[i] = ((stats_mpi_thread_data_t *)(stats_origin->common_stats_field.data))[threadid].P2P_Partner_Out[i];
+				((stats_mpi_thread_data_t *)(mpi_stats_destination->common_stats_field.data))[threadid].p2p_partner_in[i] = 
+						((stats_mpi_thread_data_t *)(mpi_stats_origin->common_stats_field.data))[threadid].p2p_partner_in[i];
+				((stats_mpi_thread_data_t *)(mpi_stats_destination->common_stats_field.data))[threadid].p2p_partner_out[i] = 
+						((stats_mpi_thread_data_t *)(mpi_stats_origin->common_stats_field.data))[threadid].p2p_partner_out[i];
 			}
 		}
-  }
+	}
 }
 
 /**
@@ -302,7 +325,7 @@ void xtr_stats_MPI_copy(int threadid, xtr_MPI_stats_t * stats_origin, xtr_MPI_st
  * @param threadid The thread ID for which to retrieve the statistics data.
  * @return Pointer to the `stats_mpi_thread_data` structure for the specified thread, or NULL if the input is invalid.
  */
-stats_mpi_thread_data_t * xtr_get_mpi_stats_data( xtr_MPI_stats_t * mpi_stats, int threadid )
+stats_mpi_thread_data_t *xtr_get_mpi_stats_data(xtr_MPI_stats_t *mpi_stats, unsigned int threadid)
 {
 	if(mpi_stats != NULL)
 	{
@@ -322,41 +345,48 @@ stats_mpi_thread_data_t * xtr_get_mpi_stats_data( xtr_MPI_stats_t * mpi_stats, i
  * @param destination Pointer to the `xtr_MPI_stats_t` structure where the result will be stored.
  * @param threadid The thread ID for which the statistics are being subtracted.
  */
-void xtr_stats_MPI_subtract (int threadid, xtr_MPI_stats_t *mpi_stats, xtr_MPI_stats_t *subtrahend, xtr_MPI_stats_t *destination)
+void xtr_stats_MPI_subtract(unsigned int threadid, xtr_stats_t *stats, xtr_stats_t *subtrahend, xtr_stats_t *destination)
 {
 	int i;
-	unsigned diff;
+	unsigned int diff;
 
 	if(TRACING_MPI_STATISTICS)
 	{
-		stats_mpi_thread_data_t * origin_data = xtr_get_mpi_stats_data(mpi_stats, threadid);
-		stats_mpi_thread_data_t * subtrahend_data = xtr_get_mpi_stats_data(subtrahend, threadid);
-		stats_mpi_thread_data_t * destination_data = xtr_get_mpi_stats_data(destination, threadid);
+		xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
+		xtr_MPI_stats_t *mpi_subtrahend = (xtr_MPI_stats_t *)subtrahend;
+		xtr_MPI_stats_t *mpi_destination = (xtr_MPI_stats_t *)destination;
+
+		stats_mpi_thread_data_t *origin_data = xtr_get_mpi_stats_data(mpi_stats, threadid);
+		stats_mpi_thread_data_t *subtrahend_data = xtr_get_mpi_stats_data(mpi_subtrahend, threadid);
+		stats_mpi_thread_data_t *destination_data = xtr_get_mpi_stats_data(mpi_destination, threadid);
+
 		if(origin_data != NULL && subtrahend_data != NULL && destination_data != NULL)
 		{
-			destination_data->P2P_Bytes_Sent = origin_data->P2P_Bytes_Sent - subtrahend_data->P2P_Bytes_Sent;
-			destination_data->P2P_Bytes_Recv = origin_data->P2P_Bytes_Recv - subtrahend_data->P2P_Bytes_Recv;
-			destination_data->COLLECTIVE_Bytes_Sent = origin_data->COLLECTIVE_Bytes_Sent- subtrahend_data->COLLECTIVE_Bytes_Sent;
-			destination_data->COLLECTIVE_Bytes_Recv = origin_data->COLLECTIVE_Bytes_Recv-subtrahend_data->COLLECTIVE_Bytes_Recv;
-			destination_data->P2P_Communications = origin_data->P2P_Communications-subtrahend_data->P2P_Communications;
-			destination_data->COLLECTIVE_Communications = origin_data->COLLECTIVE_Communications-subtrahend_data->COLLECTIVE_Communications;
-			destination_data->COLL_CommWorld_Communications = origin_data->COLL_CommWorld_Communications-subtrahend_data->COLL_CommWorld_Communications;
-			destination_data->MPI_Others_count = origin_data->MPI_Others_count- subtrahend_data->MPI_Others_count;
+			destination_data->p2p_bytes_sent = origin_data->p2p_bytes_sent - subtrahend_data->p2p_bytes_sent;
+			destination_data->p2p_bytes_recv = origin_data->p2p_bytes_recv - subtrahend_data->p2p_bytes_recv;
+			destination_data->collective_bytes_sent = origin_data->collective_bytes_sent - subtrahend_data->collective_bytes_sent;
+			destination_data->collective_bytes_recv = origin_data->collective_bytes_recv - subtrahend_data->collective_bytes_recv;
+			destination_data->p2p_communications = origin_data->p2p_communications - subtrahend_data->p2p_communications;
+			destination_data->collective_communications = origin_data->collective_communications - subtrahend_data->collective_communications;
+			destination_data->collective_world_communications = origin_data->collective_world_communications - subtrahend_data->collective_world_communications;
+			destination_data->collective_world_bytes_recv = origin_data->collective_world_bytes_recv - subtrahend_data->collective_world_bytes_recv;
+			destination_data->collective_world_bytes_sent = origin_data->collective_world_bytes_sent - subtrahend_data->collective_world_bytes_sent;
+			destination_data->others_count = origin_data->others_count - subtrahend_data->others_count;
 
-			destination_data->P2P_Communications_In = origin_data->P2P_Communications_In-subtrahend_data->P2P_Communications_In;
-			destination_data->P2P_Communications_Out = origin_data->P2P_Communications_Out-subtrahend_data->P2P_Communications_Out;
+			destination_data->p2p_communications_in = origin_data->p2p_communications_in - subtrahend_data->p2p_communications_in;
+			destination_data->p2p_communications_out = origin_data->p2p_communications_out - subtrahend_data->p2p_communications_out;
 
 			for (i =0; i< NUM_MPI_CATEGORIES; ++i)
 			{
 				destination_data->elapsed_time[i] = origin_data->elapsed_time[i] - subtrahend_data->elapsed_time[i];
 			}
 
-			for (i = 0; i < origin_data->ntasks; ++i)
+			for (i = 0; i < mpi_stats->world_size; ++i)
 			{
-				diff = origin_data->P2P_Partner_In[i] - subtrahend_data->P2P_Partner_In[i];
-				destination_data->P2P_Partner_In[i] = diff > 0 ? diff : 0;
-				diff = origin_data->P2P_Partner_Out[i] - subtrahend_data->P2P_Partner_Out[i];
-				destination_data->P2P_Partner_Out[i] = diff > 0 ? diff : 0;
+				diff = origin_data->p2p_partner_in[i] - subtrahend_data->p2p_partner_in[i];
+				destination_data->p2p_partner_in[i] = diff > 0 ? diff : 0;
+				diff = origin_data->p2p_partner_out[i] - subtrahend_data->p2p_partner_out[i];
+				destination_data->p2p_partner_out[i] = diff > 0 ? diff : 0;
 			}
 		}
 	}
@@ -372,57 +402,58 @@ void xtr_stats_MPI_subtract (int threadid, xtr_MPI_stats_t *mpi_stats, xtr_MPI_s
  * 
  * @return The number of statistics events recorded.
  */
-int xtr_stats_MPI_get_values(int threadid, xtr_MPI_stats_t * mpi_stats, INT32 * out_statistic_type, UINT64 * out_values)
+unsigned int xtr_stats_MPI_get_values(unsigned int threadid, xtr_stats_t *stats, INT32 *out_statistic_type, UINT64 *out_values)
 {
-	int nevents = 0;
-	int num_partners;
+	unsigned int nevents = 0;
+	unsigned int num_partners;
 	unsigned long long elapsed_time_in_mpi;
 
 	if (TRACING_MPI_STATISTICS)
 	{
+		xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
 		stats_mpi_thread_data_t * thread_data = xtr_get_mpi_stats_data(mpi_stats, threadid);
 		if( thread_data != NULL)
 		{
-			out_values[nevents] = thread_data->P2P_Communications;
+			out_values[nevents] = thread_data->p2p_communications;
 			out_statistic_type[nevents++] = MPI_BURST_STATS_P2P_COUNT;
-			out_values[nevents] = thread_data->P2P_Bytes_Sent;
+			out_values[nevents] = thread_data->p2p_bytes_sent;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_P2P_BYTES_SENT;
-			out_values[nevents] = thread_data->P2P_Bytes_Recv;
+			out_values[nevents] = thread_data->p2p_bytes_recv;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_P2P_BYTES_RECV;
-			out_values[nevents] = thread_data->COLLECTIVE_Communications;
-			out_statistic_type[nevents++] =MPI_BURST_STATS_GLOBAL_COUNT;
-			out_values[nevents] = thread_data->COLLECTIVE_Bytes_Sent;
-			out_statistic_type[nevents++] =MPI_BURST_STATS_GLOBAL_BYTES_SENT;
-			out_values[nevents] = thread_data->COLLECTIVE_Bytes_Recv;
-			out_statistic_type[nevents++] =MPI_BURST_STATS_GLOBAL_BYTES_RECV;
-			out_values[nevents] = thread_data->COLL_CommWorld_Communications;
-			out_statistic_type[nevents++] =MPI_BURST_STATS_GLOBAL_COMM_WORLD_COUNT;
+			out_values[nevents] = thread_data->collective_communications;
+			out_statistic_type[nevents++] =MPI_BURST_STATS_COLLECTIVE_COUNT;
+			out_values[nevents] = thread_data->collective_bytes_sent;
+			out_statistic_type[nevents++] =MPI_BURST_STATS_COLLECTIVE_BYTES_SENT;
+			out_values[nevents] = thread_data->collective_bytes_recv;
+			out_statistic_type[nevents++] =MPI_BURST_STATS_COLLECTIVE_BYTES_RECV;
+			out_values[nevents] = thread_data->collective_world_communications;
+			out_statistic_type[nevents++] =MPI_BURST_STATS_COLLECTIVE_WORLD_COUNT;
 			out_values[nevents] = thread_data->elapsed_time[COLLECTIVE];
-			out_statistic_type[nevents++] =MPI_BURST_STATS_TIME_IN_GLOBAL;
+			out_statistic_type[nevents++] =MPI_BURST_STATS_TIME_IN_COLLECTIVE;
 			out_values[nevents] = thread_data->elapsed_time[P2P];
 			out_statistic_type[nevents++] =MPI_BURST_STATS_TIME_IN_P2P;
 			out_values[nevents] = thread_data->elapsed_time[OTHER];
 			out_statistic_type[nevents++] =MPI_BURST_STATS_TIME_IN_OTHER;
-			out_values[nevents] = thread_data->P2P_Communications_Out;
+			out_values[nevents] = thread_data->p2p_communications_out;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_P2P_OUTGOING_COUNT;
-			out_values[nevents] = thread_data->P2P_Communications_In;
+			out_values[nevents] = thread_data->p2p_communications_in;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_P2P_INCOMING_COUNT;
-			out_values[nevents] = thread_data->MPI_Others_count;
+			out_values[nevents] = thread_data->others_count;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_OTHER_COUNT;
 
 			elapsed_time_in_mpi = thread_data->elapsed_time[OTHER] + thread_data->elapsed_time[COLLECTIVE] + thread_data->elapsed_time[P2P];
 			out_values[nevents] = elapsed_time_in_mpi;
 			out_statistic_type[nevents++] = MPI_BURST_STATS_TIME_IN_MPI;
 
-			num_partners = mpi_stats_get_num_partners(thread_data, thread_data->P2P_Partner_Out);
+			num_partners = mpi_stats_get_num_partners(thread_data->p2p_partner_out);
 			out_values[nevents] = num_partners;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_P2P_OUTGOING_PARTNERS_COUNT;
-			num_partners = mpi_stats_get_num_partners(thread_data, thread_data->P2P_Partner_In);
+			num_partners = mpi_stats_get_num_partners(thread_data->p2p_partner_in);
 			out_values[nevents] = num_partners;
 			out_statistic_type[nevents++] =MPI_BURST_STATS_P2P_INCOMING_PARTNERS_COUNT;
 		}
 	}
-  return nevents;
+	return nevents;
 }
 
 /**
@@ -432,55 +463,62 @@ int xtr_stats_MPI_get_values(int threadid, xtr_MPI_stats_t * mpi_stats, INT32 * 
  * @param out_statistic_type Pointer to the array to store statistic types.
  * @param out_values Pointer to the array to store statistic values.
  * @param threadid The ID of the thread.
- * @return int The number of positive values retrieved.
+ * @return unsigned int The number of positive values retrieved.
  */
-int xtr_stats_MPI_get_positive_values(int threadid, xtr_MPI_stats_t * mpi_stats, INT32 *out_statistic_type, UINT64 * out_values)
+unsigned int xtr_stats_MPI_get_positive_values(unsigned int threadid, xtr_stats_t *stats, INT32 *out_statistic_type, UINT64 *out_values)
 {
-	int nevents = 0;
-	int num_partners;
+	unsigned int nevents = 0;
+	unsigned int num_partners;
 	unsigned long long elapsed_time_in_mpi;
 
 	if (TRACING_MPI_STATISTICS && out_statistic_type != NULL && out_values != NULL)
 	{
+		xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
 		stats_mpi_thread_data_t * thread_data = xtr_get_mpi_stats_data(mpi_stats, threadid);
 		if(thread_data != NULL)
 		{
 			if ((out_values[nevents] = thread_data->elapsed_time[P2P]) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_TIME_IN_P2P;
 			if ((out_values[nevents] = thread_data->elapsed_time[COLLECTIVE]) > 0)
-				out_statistic_type[nevents++] = MPI_BURST_STATS_TIME_IN_GLOBAL;
+				out_statistic_type[nevents++] = MPI_BURST_STATS_TIME_IN_COLLECTIVE;
+			if ((out_values[nevents] = thread_data->elapsed_time[COLLECTIVE_COMM_WORLD]) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_TIME_IN_COLLECTIVE_WORLD;
 			if ((out_values[nevents] = thread_data->elapsed_time[OTHER]) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_TIME_IN_OTHER;
 
 			elapsed_time_in_mpi = thread_data->elapsed_time[OTHER] + thread_data->elapsed_time[COLLECTIVE] + thread_data->elapsed_time[P2P];
 			if ( (out_values[nevents] = elapsed_time_in_mpi) > 0 )
 				out_statistic_type[nevents++] = MPI_BURST_STATS_TIME_IN_MPI;
-			if ((out_values[nevents] = thread_data->P2P_Bytes_Sent) > 0)
+			if ((out_values[nevents] = thread_data->p2p_bytes_sent) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_P2P_BYTES_SENT;
-			if ((out_values[nevents] = thread_data->P2P_Bytes_Recv) > 0)
+			if ((out_values[nevents] = thread_data->p2p_bytes_recv) > 0)
 				out_statistic_type[nevents++] =MPI_BURST_STATS_P2P_BYTES_RECV;
-			if ((out_values[nevents] = thread_data->P2P_Communications) > 0)
+			if ((out_values[nevents] = thread_data->p2p_communications) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_P2P_COUNT;
-			if ((out_values[nevents] = thread_data->P2P_Communications_In) > 0)
+			if ((out_values[nevents] = thread_data->p2p_communications_in) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_P2P_INCOMING_COUNT;
-			if ((out_values[nevents] = thread_data->P2P_Communications_Out) > 0)
+			if ((out_values[nevents] = thread_data->p2p_communications_out) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_P2P_OUTGOING_COUNT;
-			if ((out_values[nevents] = thread_data->COLLECTIVE_Bytes_Sent) > 0)
-				out_statistic_type[nevents++] = MPI_BURST_STATS_GLOBAL_BYTES_SENT;
-			if ((out_values[nevents] = thread_data->COLLECTIVE_Bytes_Recv) > 0)
-				out_statistic_type[nevents++] = MPI_BURST_STATS_GLOBAL_BYTES_RECV;
-			if ((out_values[nevents] = thread_data->COLLECTIVE_Communications) > 0)
-				out_statistic_type[nevents++] = MPI_BURST_STATS_GLOBAL_COUNT;
-			if ((out_values[nevents] = thread_data->COLL_CommWorld_Communications) > 0)
-				out_statistic_type[nevents++] = MPI_BURST_STATS_GLOBAL_COMM_WORLD_COUNT;
-			if ((out_values[nevents] = thread_data->MPI_Others_count) > 0)
+			if ((out_values[nevents] = thread_data->collective_bytes_sent) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_COLLECTIVE_BYTES_SENT;
+			if ((out_values[nevents] = thread_data->collective_bytes_recv) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_COLLECTIVE_BYTES_RECV;
+			if ((out_values[nevents] = thread_data->collective_communications) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_COLLECTIVE_COUNT;
+			if ((out_values[nevents] = thread_data->collective_world_communications) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_COLLECTIVE_WORLD_COUNT;
+			if ((out_values[nevents] = thread_data->collective_world_bytes_recv) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_COLLECTIVE_WORLD_BYTES_RECV;
+			if ((out_values[nevents] = thread_data->collective_world_bytes_sent) > 0)
+				out_statistic_type[nevents++] = MPI_BURST_STATS_COLLECTIVE_WORLD_BYTES_SENT;
+			if ((out_values[nevents] = thread_data->others_count) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_OTHER_COUNT;
 
-			num_partners = mpi_stats_get_num_partners(thread_data, thread_data->P2P_Partner_In);
+			num_partners = mpi_stats_get_num_partners(thread_data->p2p_partner_in);
 			if ( (out_values[nevents] = num_partners) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_P2P_INCOMING_PARTNERS_COUNT;
 
-			num_partners = mpi_stats_get_num_partners(thread_data, thread_data->P2P_Partner_Out);
+			num_partners = mpi_stats_get_num_partners(thread_data->p2p_partner_out);
 			if ( (out_values[nevents] = num_partners) > 0)
 				out_statistic_type[nevents++] = MPI_BURST_STATS_P2P_OUTGOING_PARTNERS_COUNT;
 		}
@@ -495,7 +533,7 @@ int xtr_stats_MPI_get_positive_values(int threadid, xtr_MPI_stats_t * mpi_stats,
  */
 stats_info_t *xtr_stats_MPI_get_types_and_descriptions(void)
 {
-  return &MPI_stats_info;
+  return (stats_info_t *)&MPI_stats_info;
 }
 
 /**
@@ -507,7 +545,7 @@ stats_info_t *xtr_stats_MPI_get_types_and_descriptions(void)
 /**
  * @brief Updates MPI statistics regarding P2P communications
  */
-void xtr_stats_MPI_update_P2P(UINT64 begin_time, UINT64 end_time, int partner, int inputSize, int outputSize)
+void _xtr_stats_MPI_update_P2P(UINT64 begin_time, UINT64 end_time, int partner, int input_size, int output_size)
 {
 	if (TRACING_MPI_STATISTICS)
 	{
@@ -516,37 +554,37 @@ void xtr_stats_MPI_update_P2P(UINT64 begin_time, UINT64 end_time, int partner, i
 		{
 			thread_data->elapsed_time[P2P] += end_time-begin_time;
 			/* Weird cases: MPI_Sendrecv_Fortran_Wrapper */
-			thread_data->P2P_Communications ++;
-			if (inputSize)
+			thread_data->p2p_communications ++;
+			if (input_size)
 			{
-					thread_data->P2P_Bytes_Recv += inputSize;
-					thread_data->P2P_Communications_In ++;
+					thread_data->p2p_bytes_recv += input_size;
+					thread_data->p2p_communications_in ++;
 					if (partner != MPI_PROC_NULL && partner != MPI_ANY_SOURCE && 
 							partner != MPI_UNDEFINED)
 					{
-							if (partner < thread_data->ntasks)
-									thread_data->P2P_Partner_In[partner] ++;
+							if (partner < MPI_stats->world_size)
+									thread_data->p2p_partner_in[partner] ++;
 							// else
 							// 		fprintf(stderr, "[DEBUG] OUT_OF_RANGE partner=%d/%d\n",
-							// 				partner, thread_data->ntasks);
+							// 				partner, MPI_stats->world_size);
 					}
 			}
-			if (outputSize)
+			if (output_size)
 			{
-					thread_data->P2P_Bytes_Sent += outputSize;
-					thread_data->P2P_Communications_Out ++;
+					thread_data->p2p_bytes_sent += output_size;
+					thread_data->p2p_communications_out ++;
 					if (partner != MPI_PROC_NULL && partner != MPI_ANY_SOURCE && 
 							partner != MPI_UNDEFINED)
 					{
-							if (partner < thread_data->ntasks)
-									thread_data->P2P_Partner_Out[partner] ++;
+							if (partner < MPI_stats->world_size)
+									thread_data->p2p_partner_out[partner] ++;
 							// else
 							// 		fprintf(stderr, "[DEBUG] OUT_OF_RANGE partner=%d/%d\n",
-							// 				partner, thread_data->ntasks);
+							// 				partner, MPI_stats->world_size);
 					}
 			}
-			DEBUG_MSG("[TID:%d THD:%d] updated MPI P2P statistics. inputSize %d outputSize %d. acumulated = %d",
-					TASKID, THREADID, inputSize, outputSize, thread_data->P2P_Communications);
+			DEBUG_MSG("[TID:%d THD:%d] updated MPI P2P statistics. input_size %d output_size %d. acumulated = %d",
+					TASKID, THREADID, input_size, output_size, thread_data->p2p_communications);
 		}
 	}
 }
@@ -554,10 +592,8 @@ void xtr_stats_MPI_update_P2P(UINT64 begin_time, UINT64 end_time, int partner, i
 /**
  * @brief Updates MPI statistics regarding Collective communications
  */
-void xtr_stats_MPI_update_collective(UINT64 begin_time, UINT64 end_time, int inputSize, int outputSize, MPI_Comm communicator)
+void _xtr_stats_MPI_update_collective(UINT64 begin_time, UINT64 end_time, int input_size, int output_size, int comm_size)
 {
-int i, num_tasks, ierror;
-	int result, is_comm_world, is_comm_self;
 	if (TRACING_MPI_STATISTICS)
 	{
 		stats_mpi_thread_data_t * thread_data = xtr_get_mpi_stats_data(MPI_stats, THREADID);
@@ -565,23 +601,30 @@ int i, num_tasks, ierror;
 		{
 			thread_data->elapsed_time[COLLECTIVE] += end_time-begin_time;
 
-			thread_data->COLLECTIVE_Communications ++;
-			if (inputSize)
+			thread_data->collective_communications ++;
+			if (input_size)
 			{
-					thread_data->COLLECTIVE_Bytes_Recv += inputSize;
+					thread_data->collective_bytes_recv += input_size;
 			}
-			if (outputSize)
+			if (output_size)
 			{
-				thread_data->COLLECTIVE_Bytes_Sent += outputSize;
+				thread_data->collective_bytes_sent += output_size;
 			}
-			DEBUG_MSG("[TID:%d THD:%d] updated MPI COLLECTIVE statistics. inputSize %d outputSize %d. aculumated %d",
-				TASKID, THREADID, inputSize, outputSize, thread_data->COLLECTIVE_Communications);
+			DEBUG_MSG("[TID:%d THD:%d] updated MPI COLLECTIVE statistics. input_size %d output_size %d. aculumated %d",
+				TASKID, THREADID, input_size, output_size, thread_data->collective_communications);
 
-			ierror = PMPI_Comm_compare (MPI_COMM_WORLD, communicator, &result);
-			is_comm_world = result == MPI_IDENT || result == MPI_CONGRUENT;
-			if( is_comm_world )
+			if( MPI_stats->world_size == comm_size )
 			{
-				thread_data->COLL_CommWorld_Communications ++;
+				thread_data->elapsed_time[COLLECTIVE_COMM_WORLD] += end_time-begin_time;
+				thread_data->collective_world_communications ++;
+				if (input_size)
+				{
+					thread_data->collective_world_bytes_recv += input_size;
+				}
+				if (output_size)
+				{
+					thread_data->collective_world_bytes_sent += output_size;
+				}
 			}
 		}
 	}
@@ -590,7 +633,7 @@ int i, num_tasks, ierror;
 /**
  * @brief Updates MPI statistics of the remaining runtime calls
  */
-void xtr_stats_MPI_update_other(UINT64 begin_time, UINT64 end_time )
+void _xtr_stats_MPI_update_other(UINT64 begin_time, UINT64 end_time )
 {
 	if (TRACING_MPI_STATISTICS)
 	{
@@ -599,9 +642,9 @@ void xtr_stats_MPI_update_other(UINT64 begin_time, UINT64 end_time )
 		{
 			thread_data->elapsed_time[OTHER] += end_time-begin_time;
 
-			thread_data->MPI_Others_count++;
+			thread_data->others_count++;
 			DEBUG_MSG("[TID:%d THD:%d] updated MPI OTHER statistics, acumulated  = %d ", 
-				TASKID, THREADID, thread_data->MPI_Others_count);
+				TASKID, THREADID, thread_data->others_count);
 		}
 	}
 }
@@ -609,14 +652,15 @@ void xtr_stats_MPI_update_other(UINT64 begin_time, UINT64 end_time )
 /**
  * @brief returns the number of partners present in a given statistic data object
  */
-int mpi_stats_get_num_partners(stats_mpi_thread_data_t * data, int * partners_vector)
+unsigned int mpi_stats_get_num_partners(int *partners_vector)
 {
-  int i, num_partners = 0;
-  for (i = 0; i < data->ntasks; i++)
-  {
-    if (partners_vector[i] > 0) num_partners++;
-  }
-  return num_partners;
+	int i;
+	unsigned int num_partners = 0;
+	for (i = 0; i < MPI_stats->world_size; i++)
+	{
+		if (partners_vector[i] > 0) num_partners++;
+	}
+	return num_partners;
 }
 
 /**
@@ -624,43 +668,45 @@ int mpi_stats_get_num_partners(stats_mpi_thread_data_t * data, int * partners_ve
  *
  * @param mpi_stats Pointer to the `xtr_MPI_stats_t` structure to be freed.
  */
-void xtr_stats_MPI_free (xtr_MPI_stats_t * mpi_stats )
+void xtr_stats_MPI_free(xtr_stats_t *stats)
 {
-	for(int i=0; i < mpi_stats->num_threads ; ++i)
+	xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
+
+	for(unsigned int i=0; i < mpi_stats->num_threads ; ++i)
 	{
-		xfree(((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_In);
-		xfree(((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].P2P_Partner_Out);
+		xfree(((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in);
+		xfree(((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_out);
 	}
 
 	xfree(mpi_stats->common_stats_field.data);
 }
 
-void xtr_print_debug_mpi_stats ( int threadid )
+void xtr_print_debug_mpi_stats(unsigned int threadid)
 {
 	if(MPI_stats == NULL)
 		return;
   fprintf (stderr, PACKAGE_NAME " [DEBUG] [TID:%d THD:%d] MPI_stats: \n \
-            P2P_Bytes_Sent: %d \n \
-            P2P_Bytes_Recv: %d \n \
-            COLLECTIVE_Bytes_Sent: %d \n \
-            COLLECTIVE_Bytes_Recv: %d \n \
-            P2P_Communications: %d \n \
-            COLLECTIVE_Communications: %d \n \
-            MPI_Others_count: %d \n \
-            P2P_Communications_In: %d \n \
-            P2P_Communications_Out: %d \n \
-            elapsed time in OTHER: %d \n \
-            elapsed time in P2P: %d \n \
-            elapsed time in COLLECTIVE: %d \n",
-          TASKID, threadid, ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].P2P_Bytes_Sent,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].P2P_Bytes_Recv,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].COLLECTIVE_Bytes_Sent,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].COLLECTIVE_Bytes_Recv,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].P2P_Communications,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].COLLECTIVE_Communications,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].MPI_Others_count,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].P2P_Communications_In,
-          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].P2P_Communications_Out,
+            p2p_bytes_sent: %d \n \
+            p2p_bytes_recv: %d \n \
+            collective_bytes_sent: %d \n \
+            collective_bytes_recv: %d \n \
+            p2p_communications: %d \n \
+            collective_communications: %d \n \
+            others_count: %d \n \
+            p2p_communications_in: %d \n \
+            p2p_communications_out: %d \n \
+            elapsed time in OTHER: %lu \n \
+            elapsed time in P2P: %lu \n \
+            elapsed time in COLLECTIVE: %lu \n",
+          TASKID, threadid, ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].p2p_bytes_sent,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].p2p_bytes_recv,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].collective_bytes_sent,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].collective_bytes_recv,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].p2p_communications,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].collective_communications,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].others_count,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].p2p_communications_in,
+          ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].p2p_communications_out,
           ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].elapsed_time[OTHER],
           ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].elapsed_time[P2P],
           ((stats_mpi_thread_data_t *)MPI_stats->common_stats_field.data)[threadid].elapsed_time[COLLECTIVE]

@@ -18,7 +18,7 @@ stats_INCLUDES = \
   -I$(BURST_MODE_DIR)
 
 libstats_omp_la_CFLAGS  = $(stats_INCLUDES)
-libstats_mpi_la_CFLAGS  = $(stats_INCLUDES) @MPI_CFLAGS@ -DMPI_SUPPORT
+libstats_mpi_la_CFLAGS  = $(stats_INCLUDES) -I$(INTERFACES_DIR)/MPI @MPI_CFLAGS@ -DMPI_SUPPORT
 
 libstats_omp_la_SOURCES  = $(OMP_STATS_SOURCES)
 libstats_mpi_la_SOURCES  = $(MPI_STATS_SOURCES)

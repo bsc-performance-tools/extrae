@@ -32,6 +32,7 @@
 #include "omp_utils.h"
 #include "threadid.h"
 #include "xalloc.h"
+#include "wrapper.h"
 
 // #define DEBUG 
 
@@ -47,19 +48,19 @@
  * The address of this table will be returned when requesting 'xtr_stats_OMP_get_types_and_descriptions'
  */
 static stats_info_t OMP_stats_info[] = {
-  {OMP_BURST_STATS_TIME_IN_RUNNING, "Elapsed time spent in running inside parallel regions"},
-  {OMP_BURST_STATS_TIME_IN_SYNC, "Elapsed time in OpenMP synchronization"},
-  {OMP_BURST_STATS_TIME_IN_OVERHEAD, "Elapsed time spent in OpenMP runtime overhead"},
-  {OMP_BURST_STATS_RUNNING_COUNT, "Number of running bursts inside parallel regions"},
-  {OMP_BURST_STATS_SYNC_COUNT, "Number of OpenMP synchronization regions"},
-  {OMP_BURST_STATS_OVERHEAD_COUNT, "Number of OpenMP overhead regions"},
+  {OMP_BURST_STATS_TIME_IN_RUNNING,  "Elapsed time in useful inside parallel regions"},
+  {OMP_BURST_STATS_TIME_IN_SYNC,     "Elapsed time in OpenMP synchronization"},
+  {OMP_BURST_STATS_TIME_IN_OVERHEAD, "Elapsed time in OpenMP runtime overhead"},
+  {OMP_BURST_STATS_RUNNING_COUNT,    "Number of useful bursts inside parallel regions"},
+  {OMP_BURST_STATS_SYNC_COUNT,       "Number of OpenMP synchronization regions"},
+  {OMP_BURST_STATS_OVERHEAD_COUNT,   "Number of OpenMP overhead regions"},
   {-1, NULL}
 };
 
 xtr_OpenMP_stats_t * OpenMP_stats = NULL;
 
 xtr_OpenMP_stats_t * xtr_omp_stats_new( int iscopy );
-stats_omp_thread_data_t *xtr_get_omp_stats_data( xtr_OpenMP_stats_t * omp_stats , int threadid);
+stats_omp_thread_data_t *xtr_get_omp_stats_data( xtr_OpenMP_stats_t * omp_stats , unsigned int threadid);
 
 /**
  * @brief Initializes OpenMP statistics.
@@ -106,7 +107,7 @@ xtr_OpenMP_stats_t * xtr_omp_stats_new( int iscopy )
   {
     omp_stats->open_region = xmalloc_and_zero ( sizeof(struct stack *) * omp_stats->num_threads );
 
-    for (int i = 0; i<omp_stats->num_threads; ++i)
+    for (unsigned int i = 0; i<omp_stats->num_threads; ++i)
     {
       (omp_stats->open_region)[i] = newStack();
     }
@@ -125,20 +126,21 @@ xtr_OpenMP_stats_t * xtr_omp_stats_new( int iscopy )
  * 
  * @note The caller must ensure that the OpenMP statistics object pointer is valid.
  */
-void xtr_stats_OMP_realloc( xtr_OpenMP_stats_t *omp_stats, int new_num_threads )
+void xtr_stats_OMP_realloc( xtr_stats_t *stats, unsigned int new_num_threads )
 {
-	if(new_num_threads <= omp_stats->num_threads || !TRACING_OMP_STATISTICS)
-	 return;
+  xtr_OpenMP_stats_t *omp_stats = (xtr_OpenMP_stats_t *)stats;
+  if(new_num_threads <= omp_stats->num_threads || !TRACING_OMP_STATISTICS)
+    return;
 
   if ( omp_stats != NULL )
   {
     if(omp_stats->common_stats_fields.category == OMP_STATS_GROUP)
     {
       omp_stats->common_stats_fields.data = xrealloc(omp_stats->common_stats_fields.data, sizeof(stats_omp_thread_data_t ) * new_num_threads);
-      memset(&omp_stats->common_stats_fields.data[omp_stats->num_threads], 0, (new_num_threads-omp_stats->num_threads) * sizeof(stats_omp_thread_data_t));
+      memset(&((stats_omp_thread_data_t *)(omp_stats->common_stats_fields.data))[omp_stats->num_threads], 0, (new_num_threads-omp_stats->num_threads) * sizeof(stats_omp_thread_data_t));
 
       omp_stats->open_region = xrealloc(omp_stats->open_region, sizeof(struct stack *) * new_num_threads);
-      for (int i = omp_stats->num_threads; i<new_num_threads; ++i)
+      for (unsigned int i = omp_stats->num_threads; i<new_num_threads; ++i)
       {
         omp_stats->open_region[i] = newStack();
       }
@@ -156,10 +158,11 @@ void xtr_stats_OMP_realloc( xtr_OpenMP_stats_t *omp_stats, int new_num_threads )
  *
  * @note The caller must ensure the validity of the OpenMP statistics object pointer and the thread ID.
  */
-void xtr_stats_OMP_reset(int threadid, xtr_OpenMP_stats_t *omp_stats)
+void xtr_stats_OMP_reset(unsigned int threadid, xtr_stats_t *stats)
 {
   if(TRACING_OMP_STATISTICS)
   {
+    xtr_OpenMP_stats_t *omp_stats = (xtr_OpenMP_stats_t *)stats;
     stats_omp_thread_data_t *origin_data = xtr_get_omp_stats_data(omp_stats, threadid);
     if(origin_data != NULL)
     {
@@ -188,20 +191,21 @@ void xtr_stats_OMP_reset(int threadid, xtr_OpenMP_stats_t *omp_stats)
  *
  * @note The caller must handle the returned pointer appropriately, ensuring proper cleanup if needed.
  */
-xtr_OpenMP_stats_t *xtr_stats_OMP_dup( xtr_OpenMP_stats_t *omp_stats )
+xtr_stats_t *xtr_stats_OMP_dup( xtr_stats_t *stats )
 {
+  xtr_OpenMP_stats_t *omp_stats = (xtr_OpenMP_stats_t *)stats;
   xtr_OpenMP_stats_t *new_omp_stats = NULL;
   if (TRACING_OMP_STATISTICS && omp_stats != NULL)
   {
     new_omp_stats = xtr_omp_stats_new(1);
     new_omp_stats->num_threads = omp_stats->num_threads;
     new_omp_stats->common_stats_fields.category = OMP_STATS_GROUP;
-    for (int i = 0; i < new_omp_stats->num_threads; i++)
+    for (unsigned int i = 0; i < new_omp_stats->num_threads; i++)
     {
-      xtr_stats_OMP_copy(i, omp_stats, new_omp_stats);
+      xtr_stats_OMP_copy(i, (xtr_stats_t *)omp_stats, (xtr_stats_t *)new_omp_stats);
     }
   }
-  return new_omp_stats;
+  return (xtr_stats_t *)new_omp_stats;
 }
 
 /**
@@ -215,13 +219,16 @@ xtr_OpenMP_stats_t *xtr_stats_OMP_dup( xtr_OpenMP_stats_t *omp_stats )
  *
  * @note The caller must ensure the validity of the OpenMP statistics object pointers and the thread ID.
  */
-void xtr_stats_OMP_copy(int threadid, xtr_OpenMP_stats_t *stats_origin, xtr_OpenMP_stats_t *stats_destination)
+void xtr_stats_OMP_copy(unsigned int threadid, xtr_stats_t *stats_origin, xtr_stats_t *stats_destination)
 {
-  if( !TRACING_OMP_STATISTICS || threadid >= stats_origin->num_threads || threadid >= stats_destination->num_threads )
+  xtr_OpenMP_stats_t *omp_stats_origin = (xtr_OpenMP_stats_t *)stats_origin;
+  xtr_OpenMP_stats_t *omp_stats_destination = (xtr_OpenMP_stats_t *)stats_destination;
+
+  if( !TRACING_OMP_STATISTICS || threadid >= omp_stats_origin->num_threads || threadid >= omp_stats_destination->num_threads )
     return;
 
-  stats_omp_thread_data_t *origin_data = xtr_get_omp_stats_data(stats_origin, threadid);
-  stats_omp_thread_data_t *destination_data = xtr_get_omp_stats_data(stats_destination, threadid);
+  stats_omp_thread_data_t *origin_data = xtr_get_omp_stats_data(omp_stats_origin, threadid);
+  stats_omp_thread_data_t *destination_data = xtr_get_omp_stats_data(omp_stats_destination, threadid);
 
   if (origin_data != NULL && destination_data != NULL)
   {
@@ -241,7 +248,7 @@ void xtr_stats_OMP_copy(int threadid, xtr_OpenMP_stats_t *stats_origin, xtr_Open
  *
  * @note The caller must ensure the validity of the OpenMP statistics object pointer and the thread ID.
  */
-struct stack *xtr_get_regions_stack( xtr_OpenMP_stats_t *omp_stats, int threadid )
+struct stack *xtr_get_regions_stack( xtr_OpenMP_stats_t *omp_stats, unsigned int threadid )
 {
   if(TRACING_OMP_STATISTICS && omp_stats != NULL)
   {
@@ -265,7 +272,7 @@ struct stack *xtr_get_regions_stack( xtr_OpenMP_stats_t *omp_stats, int threadid
  *
  * @note The caller must ensure the validity of the OpenMP statistics object pointer and the thread ID.
  */
-stats_omp_thread_data_t *xtr_get_omp_stats_data( xtr_OpenMP_stats_t *omp_stats, int threadid )
+stats_omp_thread_data_t *xtr_get_omp_stats_data( xtr_OpenMP_stats_t *omp_stats, unsigned int threadid )
 {
   if(omp_stats != NULL)
   {
@@ -287,20 +294,20 @@ stats_omp_thread_data_t *xtr_get_omp_stats_data( xtr_OpenMP_stats_t *omp_stats, 
  *
  * @note The caller must ensure the validity of the OpenMP statistics object pointers and the thread ID.
  */
-void xtr_stats_OMP_subtract(int threadid, xtr_OpenMP_stats_t *omp_stats, xtr_OpenMP_stats_t *subtrahend, xtr_OpenMP_stats_t *destiantion)
+void xtr_stats_OMP_subtract(unsigned int threadid, xtr_stats_t *stats, xtr_stats_t *subtrahend, xtr_stats_t *destination)
 {
   if (TRACING_OMP_STATISTICS)
   {
-    stats_omp_thread_data_t *omp_stats_data = xtr_get_omp_stats_data(omp_stats, threadid);
-    stats_omp_thread_data_t *subtrahend_data = xtr_get_omp_stats_data(subtrahend, threadid);
-    stats_omp_thread_data_t *destiantion_data = xtr_get_omp_stats_data(destiantion, threadid);
+    stats_omp_thread_data_t *omp_stats_data = xtr_get_omp_stats_data((xtr_OpenMP_stats_t *)stats, threadid);
+    stats_omp_thread_data_t *subtrahend_data = xtr_get_omp_stats_data((xtr_OpenMP_stats_t *)subtrahend, threadid);
+    stats_omp_thread_data_t *destination_data = xtr_get_omp_stats_data((xtr_OpenMP_stats_t *)destination, threadid);
 
-    if (omp_stats_data != NULL && subtrahend_data != NULL && destiantion_data != NULL)
+    if (omp_stats_data != NULL && subtrahend_data != NULL && destination_data != NULL)
     {
-      for (int i=0; i< N_OMP_CATEGORIES; ++i)
+      for (unsigned int i=0; i< N_OMP_CATEGORIES; ++i)
       {
-        destiantion_data->elapsed_time[i] = omp_stats_data->elapsed_time[i] - subtrahend_data->elapsed_time[i];
-        destiantion_data->count[i] = omp_stats_data->count[i] - subtrahend_data->count[i];
+        destination_data->elapsed_time[i] = omp_stats_data->elapsed_time[i] - subtrahend_data->elapsed_time[i];
+        destination_data->count[i] = omp_stats_data->count[i] - subtrahend_data->count[i];
       }
     }
   }
@@ -313,16 +320,16 @@ void xtr_stats_OMP_subtract(int threadid, xtr_OpenMP_stats_t *omp_stats, xtr_Ope
  * @param out_statistic_type Pointer to the array to store statistic types.
  * @param out_values Pointer to the array to store statistic values.
  * @param threadid The ID of the thread.
- * @return int The number of events retrieved.
+ * @return unsigned int The number of events retrieved.
  * 
  * @note The caller must ensure the validity of the OpenMP statistics object pointer and the thread ID, as well as allocate sufficient memory for the output arrays.
  */
-int xtr_stats_OMP_get_values(int threadid, xtr_OpenMP_stats_t *omp_stats, INT32 *out_statistic_type, UINT64 *out_values)
+unsigned int xtr_stats_OMP_get_values(unsigned int threadid, xtr_stats_t *omp_stats, INT32 *out_statistic_type, UINT64 *out_values)
 {
-  int nevents = 0;
+  unsigned int nevents = 0;
   if (TRACING_OMP_STATISTICS)
   {
-    stats_omp_thread_data_t *thread_data = xtr_get_omp_stats_data(omp_stats, threadid);
+    stats_omp_thread_data_t *thread_data = xtr_get_omp_stats_data((xtr_OpenMP_stats_t *)omp_stats, threadid);
     if (thread_data != NULL)
     {
       out_values[nevents] = thread_data->elapsed_time[RUNNING];
@@ -354,13 +361,13 @@ int xtr_stats_OMP_get_values(int threadid, xtr_OpenMP_stats_t *omp_stats, INT32 
  * 
  * @note The caller must ensure the validity of the OpenMP statistics object pointer and the thread ID, as well as allocate sufficient memory for the output arrays.
  */
-int xtr_stats_OMP_get_positive_values(int threadid, xtr_OpenMP_stats_t *omp_stats, INT32 *out_statistic_type, UINT64 *out_values)
+unsigned int xtr_stats_OMP_get_positive_values(unsigned int threadid, xtr_stats_t *omp_stats, INT32 *out_statistic_type, UINT64 *out_values)
 {
-  int nevents = 0;
+  unsigned int nevents = 0;
   
   if (TRACING_OMP_STATISTICS && out_statistic_type != NULL && out_values != NULL)
   {
-    stats_omp_thread_data_t *thread_data = xtr_get_omp_stats_data(omp_stats, threadid);
+    stats_omp_thread_data_t *thread_data = xtr_get_omp_stats_data((xtr_OpenMP_stats_t *)omp_stats, threadid);
     if (thread_data != NULL)
     {
       if ((out_values[nevents] = thread_data->elapsed_time[RUNNING]) > 0)
@@ -399,7 +406,7 @@ int xtr_stats_OMP_get_positive_values(int threadid, xtr_OpenMP_stats_t *omp_stat
  */
 stats_info_t *xtr_stats_OMP_get_types_and_descriptions( void )
 {
-  return &OMP_stats_info;
+  return (stats_info_t *)&OMP_stats_info;
 }
 
 /**
@@ -598,13 +605,14 @@ void xtr_stats_OMP_update_overhead_exit( void )
  *
  * @note The caller must ensure that the OpenMP statistics object pointer is valid and that the object is no longer needed before calling this function.
  */
-void xtr_stats_OMP_free( xtr_OpenMP_stats_t * omp_stats )
+void xtr_stats_OMP_free(xtr_stats_t *stats)
 {
-  if ( omp_stats != NULL )
+  if (stats != NULL)
   {
+    xtr_OpenMP_stats_t *omp_stats = (xtr_OpenMP_stats_t *)stats;
     if(omp_stats->common_stats_fields.category == OMP_STATS_GROUP)
     {
-      for (int i = 0; i < omp_stats->num_threads; ++i)
+      for (unsigned int i = 0; i < omp_stats->num_threads; ++i)
       {
         deleteStack(omp_stats->open_region[i]);
       }
@@ -615,8 +623,13 @@ void xtr_stats_OMP_free( xtr_OpenMP_stats_t * omp_stats )
   }
 }
 
-void xtr_print_debug_omp_stats( int threadid )
+void xtr_print_debug_omp_stats( unsigned int threadid )
 {
+#if !defined(DEBUG)
+  UNREFERENCED_PARAMETER(threadid)
+  return;
+#endif
+
   if(OpenMP_stats == NULL)
     return;
 

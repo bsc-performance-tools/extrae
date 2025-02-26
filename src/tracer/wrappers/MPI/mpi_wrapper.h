@@ -304,14 +304,5 @@ int MPI_Dist_graph_create_adjacent_C_Wrapper(MPI_Comm comm_old, int indegree, co
 											 const int sourceweights[], int outdegree, const int destinations[], const int destweights[],
 											 MPI_Info info, int reorder, MPI_Comm *comm_dist_graph);
 
-#if defined(HAVE_BURST)
-# define _xtr_stats_MPI_update_P2P(...) xtr_stats_MPI_update_P2P(__VA_ARGS__)
-# define _xtr_stats_MPI_update_collective(...) xtr_stats_MPI_update_collective(__VA_ARGS__)
-# define _xtr_stats_MPI_update_other(...) xtr_stats_MPI_update_other(__VA_ARGS__)
-#else
-# define _xtr_stats_MPI_update_P2P(...)
-# define _xtr_stats_MPI_update_collective(...)
-# define _xtr_stats_MPI_update_other(...)
-#endif
 
 #endif /* MPI_WRAPPER_DEFINED */
