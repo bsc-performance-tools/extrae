@@ -499,6 +499,24 @@ void Probe_OpenMP_Ordered_Post_Exit (void)
 					TRACE_OMPEVENTANDCOUNTERS(TIME, ORDERED_EV, OUTORDERED_VAL, EMPTY);
 }
 
+void Probe_OpenMP_Target_Entry(void)
+{
+	DEBUG
+	if (mpitrace_on)
+	{
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TARGET_EV, EVT_BEGIN, EMPTY);
+	}
+}
+
+void Probe_OpenMP_Target_Exit(void)
+{
+	DEBUG
+	if (mpitrace_on)
+	{
+		TRACE_OMPEVENTANDCOUNTERS(TIME, TARGET_EV, EVT_END, EMPTY);
+	}
+}
+
 /*
 	OMPT added probes for OMPT events that do not match the previous events
 */

@@ -87,6 +87,8 @@ void Extrae_OpenMP_Ordered_Wait_Entry (void);
 void Extrae_OpenMP_Ordered_Wait_Exit (void);
 void Extrae_OpenMP_Ordered_Post_Entry (void);
 void Extrae_OpenMP_Ordered_Post_Exit (void);
+void Extrae_OpenMP_Target_Entry(void);
+void Extrae_OpenMP_Target_Exit(void);
 
 /***************\
 |* OMPT probes *|

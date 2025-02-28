@@ -800,6 +800,29 @@ static int OMP_Punctual_Event (
   return 0;
 }
 
+static int
+Target_Event(
+    event_t *current_event,
+    unsigned long long current_time,
+    unsigned int cpu,
+    unsigned int ptask,
+    unsigned int task,
+    unsigned int thread,
+    FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType = Get_EvEvent(current_event);
+	EvValue = Get_EvValue(current_event);
+
+	Switch_State(STATE_MEMORY_XFER, (EvValue != EVT_END), ptask, task, thread);
+	trace_paraver_state(cpu, ptask, task, thread, current_time);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
 static int OMP_Address_Event (
    event_t * current_event,
    unsigned long long current_time,
@@ -886,6 +909,7 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ OMP_STATS_EV, OMP_Stats_Event },
 	{ TASKLOOP_EV, TaskLoop_Event },
 	{ ORDERED_EV, Ordered_Event },
+	{ TARGET_EV, Target_Event },
 	{ OMPSETNUMTHREADS_EV, SetGetNumThreads_Event },
 	{ OMPGETNUMTHREADS_EV, SetGetNumThreads_Event },
 

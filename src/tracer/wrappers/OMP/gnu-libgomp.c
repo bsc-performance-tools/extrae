@@ -154,6 +154,11 @@ static void (*GOMP_parallel_sections_real)(void *, void *, unsigned, unsigned, u
 static void (*GOMP_taskgroup_start_real)(void) = NULL;
 static void (*GOMP_taskgroup_end_real)(void) = NULL;
 
+static void (*GOMP_target_real)(int, void *, const void *, size_t, void **, size_t *, unsigned char *) = NULL;
+static void (*GOMP_target_data_real)(int, const void *, size_t, void **, size_t *, unsigned char *) = NULL;
+static void (*GOMP_target_end_data_real)(void) = NULL;
+static void (*GOMP_target_update_real)(int, const void *, size_t, void **, size_t *, unsigned char *) = NULL;
+
 /********************************************/
 /***** Added (or changed) in OpenMP 4.5 *****/
 /********************************************/
@@ -169,6 +174,13 @@ static int (*GOMP_loop_doacross_guided_start_real)(unsigned, long *, long, long 
 static int (*GOMP_loop_doacross_runtime_start_real)(unsigned, long *, long *, long *) = NULL;
 static void (*GOMP_doacross_post_real)(long *) = NULL;
 static void (*GOMP_doacross_wait_real)(long, ...) = NULL;
+
+static void (*GOMP_target_ext_real)(int, void *, size_t, void **, size_t *, unsigned short *, unsigned int, void **, void **) = NULL;
+static void (*GOMP_target_data_ext_real)(int, size_t, void **, size_t *, unsigned short *) = NULL;
+static void (*GOMP_target_end_data_ext_real)(void) = NULL;
+static void (*GOMP_target_update_ext_real)(int, size_t, void **, size_t *, unsigned short *, unsigned int, void **) = NULL;
+static void (*GOMP_target_enter_exit_data_real)(int, size_t, void **, size_t *, unsigned short *, unsigned int, void **) = NULL;
+
 
 
 /******************************************************************************\
@@ -2305,6 +2317,153 @@ void GOMP_taskgroup_end (void)
 #endif
 }
 
+/**
+ * GOMP_target
+ */
+void GOMP_target(int device, void (*fn) (void *), const void *unused,
+                 size_t mapnum, void **hostaddrs, size_t *sizes,
+                 unsigned char *kinds)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_real);
+
+	if (TRACE(GOMP_target_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
+		GOMP_target_real(device, fn, unused, mapnum, hostaddrs, sizes, kinds);
+		Extrae_OpenMP_Target_Exit();
+	} else if (GOMP_target_real != NULL)
+	{
+		GOMP_target_real(device, fn, unused, mapnum, hostaddrs, sizes, kinds);
+	} else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked!  Exiting!!\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+/**
+ * GOMP_target_data
+ */
+void
+GOMP_target_data(int device, const void *unused, size_t mapnum,
+                 void **hostaddrs, size_t *sizes, unsigned char *kinds)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_data_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_data_real);
+
+	if (TRACE(GOMP_target_data_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
+		GOMP_target_data_real(device, unused, mapnum, hostaddrs, sizes, kinds);
+		Extrae_OpenMP_Target_Exit();
+	} else if (GOMP_target_data_real != NULL)
+	{
+		GOMP_target_data_real(device, unused, mapnum, hostaddrs, sizes, kinds);
+	} else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked!  Exiting ...\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+/**
+ * GOMP_target_end_data
+ */
+void
+GOMP_target_end_data(void)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_end_data_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_end_data_real);
+
+	if (TRACE(GOMP_target_end_data_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
+		GOMP_target_end_data_real();
+		Extrae_OpenMP_Target_Exit();
+	} else if (GOMP_target_end_data_real != NULL)
+	{
+		GOMP_target_end_data_real();
+	} else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked!  Exiting ...\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+/**
+ * GOMP_target_update
+ */
+void
+GOMP_target_update(int device, const void *unused, size_t mapnum,
+                   void **hostaddrs, size_t *sizes, unsigned char *kinds)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_update_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_update_real);
+
+	if (TRACE(GOMP_target_update_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
+		GOMP_target_update_real(device, unused, mapnum, hostaddrs, sizes, kinds);
+		Extrae_OpenMP_Target_Exit();
+	} else if (GOMP_target_update_real != NULL)
+	{
+		GOMP_target_update_real(device, unused, mapnum, hostaddrs, sizes, kinds);
+	} else {
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked!  Exiting ...\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+
 /********************************************/
 /***** Added (or changed) in OpenMP 4.5 *****/
 /********************************************/
@@ -2744,6 +2903,197 @@ void GOMP_doacross_wait (long first, ...)
 #endif
 }
 
+/**
+ * GOMP_target_ext
+ */
+void GOMP_target_ext(int device, void (*fn) (void *), size_t mapnum,
+                     void **hostaddrs, size_t *sizes, unsigned short *kinds,
+                     unsigned int flags, void **depend, void **args)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_ext_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_ext_real);
+
+	if (TRACE(GOMP_target_ext_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		GOMP_target_ext_real(device, fn, mapnum, hostaddrs, sizes, kinds, flags, depend, args);
+		Extrae_OpenMP_Target_Exit();
+	}
+	else if (GOMP_target_ext_real != NULL)
+	{
+		GOMP_target_ext_real(device, fn, mapnum, hostaddrs, sizes, kinds, flags, depend, args);
+	}
+	else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+/**
+ * GOMP_target_data_ext
+ */
+void
+GOMP_target_data_ext(int device, size_t mapnum, void **hostaddrs,
+                     size_t *sizes, unsigned short *kinds)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_data_ext_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_data_ext_real);
+
+	if (TRACE(GOMP_target_data_ext_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		GOMP_target_data_ext_real(device, mapnum, hostaddrs, sizes, kinds);
+		Extrae_OpenMP_Target_Exit();
+	}
+	else if (GOMP_target_data_ext_real != NULL)
+	{
+		GOMP_target_data_ext_real(device, mapnum, hostaddrs, sizes, kinds);
+	}
+	else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+/**
+ * GOMP_target_end_data_ext
+ */
+void
+GOMP_target_end_data_ext(void)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_end_data_ext_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_end_data_ext_real);
+
+	if (TRACE(GOMP_target_end_data_ext_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		GOMP_target_end_data_ext_real();
+		Extrae_OpenMP_Target_Exit();
+	}
+	else if (GOMP_target_end_data_ext_real != NULL)
+	{
+		GOMP_target_end_data_ext_real();
+	}
+	else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+/**
+ * GOMP_target_update_ext
+ */
+void
+GOMP_target_update_ext(int device, size_t mapnum, void **hostaddrs,
+                       size_t *sizes, unsigned short *kinds,
+                       unsigned int flags, void **depend)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_update_ext_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_update_ext_real);
+
+	if (TRACE(GOMP_target_update_ext_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		GOMP_target_update_ext_real(device, mapnum, hostaddrs, sizes, kinds, flags, depend);
+		Extrae_OpenMP_Target_Exit();
+	}
+	else if (GOMP_target_update_ext_real != NULL)
+	{
+		GOMP_target_update_ext_real(device, mapnum, hostaddrs, sizes, kinds, flags, depend);
+	}
+	else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
+/**
+ * GOMP_target_enter_exit_data
+ */
+void
+GOMP_target_enter_exit_data(int device, size_t mapnum, void **hostaddrs,
+                            size_t *sizes, unsigned short *kinds,
+                            unsigned int flags, void **depend)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
+	    THREAD_LEVEL_VAR, __func__, GOMP_target_enter_exit_data_real);
+#endif
+
+	RECHECK_INIT(GOMP_target_enter_exit_data_real);
+
+	if (TRACE(GOMP_target_enter_exit_data_real))
+	{
+		Extrae_OpenMP_Target_Entry();
+		GOMP_target_enter_exit_data_real(device, mapnum, hostaddrs, sizes, kinds, flags, depend);
+		Extrae_OpenMP_Target_Exit();
+	}
+	else if (GOMP_target_enter_exit_data_real != NULL)
+	{
+		GOMP_target_enter_exit_data_real(device, mapnum, hostaddrs, sizes, kinds, flags, depend);
+	}
+	else
+	{
+		fprintf(stderr,
+		    PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR, __func__);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
+	    THREAD_LEVEL_VAR, __func__);
+#endif
+}
+
 
 /******************************************************************************\
  *                                                                            *
@@ -3032,6 +3382,18 @@ static int gnu_libgomp_get_hook_points (int rank)
 	GOMP_taskgroup_end_real = (void(*)(void)) dlsym(RTLD_NEXT, "GOMP_taskgroup_end");
 	INC_IF_NOT_NULL(GOMP_taskgroup_end_real,count);
 
+	/* Obtain @ for GOMP_target */
+	GOMP_target_real = (void(*)(int, void *, const void *, size_t, void **, size_t *, unsigned char *)) dlsym (RTLD_NEXT, "GOMP_target");
+	INC_IF_NOT_NULL(GOMP_target_real,count);
+
+	/* Obtain @ for GOMP_target_data */
+	GOMP_target_data_real = (void(*)(int, const void *, size_t, void **, size_t *, unsigned char *)) dlsym (RTLD_NEXT, "GOMP_target_data");
+	INC_IF_NOT_NULL(GOMP_target_data_real,count);
+
+	/* Obtain @ for GOMP_target_update */
+	GOMP_target_update_real = (void(*)(int, const void *, size_t, void **, size_t *, unsigned char *)) dlsym (RTLD_NEXT, "GOMP_target_update");
+	INC_IF_NOT_NULL(GOMP_target_update_real,count);
+
   /**********************/
   /***** OpenMP 4.5 *****/
   /**********************/
@@ -3074,6 +3436,18 @@ static int gnu_libgomp_get_hook_points (int rank)
 	/* Obtain @ for GOMP_doacross_wait */
 	GOMP_doacross_wait_real = (void(*)(long, ...)) dlsym (RTLD_NEXT, "GOMP_doacross_wait");
 	INC_IF_NOT_NULL(GOMP_doacross_wait_real,count);
+
+	/* Obtain @ for GOMP_target_ext */
+	GOMP_target_ext_real = (void(*)(int, void *, size_t, void **, size_t *, unsigned short *, unsigned int, void **, void **)) dlsym (RTLD_NEXT, "GOMP_target_ext");
+	INC_IF_NOT_NULL(GOMP_target_ext_real,count);
+
+	/* Obtain @ for GOMP_target_data_ext */
+	GOMP_target_data_ext_real = (void(*)(int, size_t, void **, size_t *, unsigned short *)) dlsym (RTLD_NEXT, "GOMP_target_data_ext");
+	INC_IF_NOT_NULL(GOMP_target_data_ext_real,count);
+
+	/* Obtain @ for GOMP_target_update_ext */
+	GOMP_target_update_ext_real = (void(*)(int, size_t, void **, size_t *, unsigned short *, unsigned int, void **)) dlsym (RTLD_NEXT, "GOMP_target_update_ext");
+	INC_IF_NOT_NULL(GOMP_target_update_ext_real,count);
 
 	/* Any hook point? */
 	return (count > 0);

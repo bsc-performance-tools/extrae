@@ -590,6 +590,7 @@ AC_CONFIG_FILES([\
   tests/functional/tracer/OPENCL/Makefile \
   tests/functional/tracer/CUDA/Makefile \
   tests/functional/tracer/IO/Makefile \
+  tests/functional/tracer/OMP/Makefile \
   tests/functional/merger/Makefile \
   tests/functional/merger/dump-events/Makefile \
   tests/functional/merger/shared-libraries/Makefile \
@@ -629,6 +630,8 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[tests/functional/tracer/JAVA/extrae.xml:tests/functional/tracer/JAVA/extrae.xml] \
 		[tests/functional/tracer/IO/trace.sh:tests/functional/tracer/IO/trace.sh] \
 		[tests/functional/tracer/IO/extrae.xml:tests/functional/tracer/IO/extrae.xml] \
+		[tests/functional/tracer/OMP/trace.sh:tests/functional/tracer/OMP/trace.sh] \
+		[tests/functional/tracer/OMP/extrae.xml:tests/functional/tracer/OMP/extrae.xml] \
 		[tests/functional/merger/dump-events/dump-events.reference:tests/functional/merger/dump-events/dump-events.reference] \
 		[tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml:tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml] \
 		[tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml:tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml] \

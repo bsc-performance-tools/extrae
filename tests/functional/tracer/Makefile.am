@@ -24,3 +24,7 @@ endif
 if WANT_JAVA
 SUBDIRS += JAVA
 endif
+
+if WANT_OPENMP
+SUBDIRS += OMP
+endif

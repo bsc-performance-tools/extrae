@@ -359,6 +359,18 @@ void Extrae_OpenMP_Ordered_Post_Exit (void)
 			Backend_Leave_Instrumentation ();
 }
 
+void Extrae_OpenMP_Target_Entry(void)
+{
+	Backend_Enter_Instrumentation();
+	Probe_OpenMP_Target_Entry();
+}
+
+void Extrae_OpenMP_Target_Exit(void)
+{
+	Probe_OpenMP_Target_Exit();
+	Backend_Leave_Instrumentation();
+}
+
 /*
 	OMPT added probes for OMPT events that do not match the previous events
 */

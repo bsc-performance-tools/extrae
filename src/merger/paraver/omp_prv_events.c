@@ -186,8 +186,8 @@ char *OMP_Call_Name[MAX_OMP_CALLS] =
 #define OMP_STATS_INDEX         19
 #define TASKLOOP_INDEX          20 /* Taskloop event */
 #define ORDERED_INDEX           21 /* Ordered section in ordered or doacross loops */
-
-#define MAX_OMP_INDEX           22
+#define TARGET_INDEX            22
+#define MAX_OMP_INDEX           23
 
 static int inuse[MAX_OMP_INDEX] = { FALSE };
 
@@ -223,6 +223,8 @@ void OLD_Enable_OMP_Operation (int type)
 		inuse[TASKLOOP_INDEX] = TRUE;
 	else if (type == ORDERED_EV)
 		inuse[ORDERED_INDEX] = TRUE;
+	else if (type == TARGET_EV)
+		inuse[TARGET_INDEX] = TRUE;
 
 #define ENABLE_TYPE_IF(x,type,v) \
 	if (x ## _EV == type) \
@@ -392,6 +394,12 @@ static void OLD_OMPEvent_WriteEnabledOperations (FILE * fd)
 						     "%d Signaling the exit\n"
 						     "%d Inside ordered\n\n",
 						     OUTORDERED_VAL, WAITORDERED_VAL, POSTORDERED_VAL, INORDERED_VAL);
+	}
+	if (inuse[TARGET_INDEX])
+	{
+		fprintf(fd, "EVENT_TYPE\n");
+		fprintf(fd, "0 %d OpenMP target\n", TARGET_EV);
+		fprintf(fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
 	if (inuse[OMPT_CRITICAL_INDEX])
 	{
