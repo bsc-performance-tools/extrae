@@ -299,6 +299,18 @@ void Extrae_OpenMP_Taskwait_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
+void Extrae_OpenMP_Taskyield_Entry (void)
+{
+	Backend_Enter_Instrumentation ();
+	Probe_OpenMP_Taskyield_Entry ();
+}
+
+void Extrae_OpenMP_Taskyield_Exit (void)
+{
+	Probe_OpenMP_Taskyield_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
 void Extrae_OpenMP_Taskgroup_start_Entry (void)
 {
 	Backend_Enter_Instrumentation ();

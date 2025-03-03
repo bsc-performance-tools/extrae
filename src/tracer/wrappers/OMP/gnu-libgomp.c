@@ -137,6 +137,7 @@ static void (*GOMP_sections_end_nowait_real)(void) = NULL;
 static unsigned (*GOMP_single_start_real)(void) = NULL;
 
 static void (*GOMP_taskwait_real)(void) = NULL;
+static void (*GOMP_taskyield_real)(void) = NULL;
 
 /********************************************/
 /***** Added (or changed) in OpenMP 4.0 *****/
@@ -1927,6 +1928,43 @@ void GOMP_taskwait (void)
 #endif
 }
 
+/* As of 2025-02-28, the implementation of GOMP_taskyield in the GNU OpenMP runtime is empty:
+ * https://github.com/gcc-mirror/gcc/blob/master/libgomp/task.c#L2164 
+ * https://gcc.gnu.org/legacy-ml/gcc-patches/2011-08/msg00080.html 
+ * The wrapper is included just to mark in the trace where a pragma taskyield appears in the user code.
+ */
+void GOMP_taskyield (void)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskyield enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskyield_real);
+#endif
+
+	RECHECK_INIT(GOMP_taskyield_real);
+
+	if (TRACE(GOMP_taskyield_real))
+	{
+		Extrae_OpenMP_Taskyield_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
+		GOMP_taskyield_real ();
+		Extrae_OpenMP_Taskyield_Exit();
+		Extrae_OpenMP_EmitTaskStatistics();
+	}
+	else if (GOMP_taskyield_real != NULL)
+	{
+		GOMP_taskyield_real ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskyield: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskyield exit\n", THREAD_LEVEL_VAR);
+#endif
+}
+
+
 /********************************************/
 /***** Added (or changed) in OpenMP 4.0 *****/
 /********************************************/
@@ -3339,6 +3377,10 @@ static int gnu_libgomp_get_hook_points (int rank)
 	/* Obtain @ for GOMP_taskwait */
 	GOMP_taskwait_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskwait");
 	INC_IF_NOT_NULL(GOMP_taskwait_real,count);
+
+	/* Obtain @ for GOMP_taskyield */
+	GOMP_taskyield_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskyield");
+	INC_IF_NOT_NULL(GOMP_taskyield_real,count);
 
   /**********************/
   /***** OpenMP 4.0 *****/

@@ -79,6 +79,7 @@ enum
   GOMP_SECTIONS_END_NOWAIT_VAL,
   GOMP_SINGLE_START_VAL,
   GOMP_TASKWAIT_VAL,
+  GOMP_TASKYIELD_VAL,
   GOMP_PARALLEL_VAL,
   GOMP_PARALLEL_LOOP_STATIC_VAL,
   GOMP_PARALLEL_LOOP_DYNAMIC_VAL,
@@ -177,6 +178,7 @@ enum
     NEW_OMP_ORDERED_VAL,                // #pragma omp ordered
     NEW_OMP_TASKGROUP_VAL,              // #pragma omp taskgroup
     NEW_OMP_TASKWAIT_VAL,               // #pragma omp taskwait
+    NEW_OMP_TASKYIELD_VAL,              // #pragma omp taskyield
     NEW_OMP_POST_VAL,                   // DOACROSS post
     NEW_OMP_WAIT_VAL,                   // DOACROSS wait
 

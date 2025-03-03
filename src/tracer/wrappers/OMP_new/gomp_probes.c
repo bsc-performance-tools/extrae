@@ -1281,6 +1281,10 @@ void xtr_probe_exit_GOMP_taskloop_ull()
 	xtr_stats_OMP_update_overhead_exit();
 }
 
+/**
+ * GOMP taskwait
+ */
+
 void xtr_probe_entry_GOMP_taskwait()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKWAIT_VAL);
@@ -1292,6 +1296,23 @@ void xtr_probe_exit_GOMP_taskwait()
 {
 	Extrae_OpenMP_Sync_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_TASKWAIT_VAL);
+	xtr_stats_OMP_update_synchronization_exit();
+}
+
+/**
+ * GOMP taskyield
+ */
+void xtr_probe_entry_GOMP_taskyield()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TASKYIELD_VAL);
+	Extrae_OpenMP_Sync_Entry(NEW_OMP_TASKYIELD_VAL);
+	xtr_stats_update_OMP_synchronization_entry();
+}
+
+void xtr_probe_exit_GOMP_taskyield()
+{
+	Extrae_OpenMP_Sync_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TASKYIELD_VAL);
 	xtr_stats_OMP_update_synchronization_exit();
 }
 

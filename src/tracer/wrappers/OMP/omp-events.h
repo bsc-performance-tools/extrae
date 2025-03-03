@@ -6,8 +6,8 @@
  *     ___     This library is free software; you can redistribute it and/or *
  *    /  __         modify it under the terms of the GNU LGPL as published   *
  *   /  /  _____    by the Free Software Foundation; either version 2.1      *
- *  /  /  /     \   of the License, or (at your option); any later version.   *
- * (  (  ( B S C );                                                           *
+ *  /  /  /     \   of the License, or (at your option); any later version.  *
+ * (  (  ( B S C );                                                          *
  *  \  \  \_____/   This library is distributed in hope that it will be      *
  *   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
  *    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
@@ -77,6 +77,8 @@ void Extrae_OpenMP_TaskUF_Entry (const void* uf);
 void Extrae_OpenMP_TaskUF_Exit (void);
 void Extrae_OpenMP_Taskwait_Entry (void);
 void Extrae_OpenMP_Taskwait_Exit (void);
+void Extrae_OpenMP_Taskyield_Entry (void);
+void Extrae_OpenMP_Taskyield_Exit (void);
 void Extrae_OpenMP_Taskgroup_start_Entry (void);
 void Extrae_OpenMP_Taskgroup_start_Exit (void);
 void Extrae_OpenMP_Taskgroup_end_Entry (void);

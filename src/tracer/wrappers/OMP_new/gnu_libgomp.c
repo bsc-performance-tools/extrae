@@ -183,6 +183,13 @@ void (*REAL_SYMBOL_PTR(GOMP_taskwait)) (void) = NULL;
 
 
 /*********************************/
+/***** Available since GCC 4.7 ***/
+/*********************************/
+
+/* libgomp/task.c */
+void (*REAL_SYMBOL_PTR(GOMP_taskyield)) (void) = NULL;
+
+/*********************************/
 /***** Available since GCC 4.9 ***/
 /*********************************/
 
@@ -417,6 +424,7 @@ static int xtr_GOMP_load_hooks (void)
 	OMP_HOOK_INIT(GOMP_taskloop, nhooks);
 	OMP_HOOK_INIT(GOMP_taskloop_ull, nhooks);
 	OMP_HOOK_INIT(GOMP_taskwait, nhooks);
+	OMP_HOOK_INIT(GOMP_taskyield, nhooks);
 	OMP_HOOK_INIT(GOMP_taskgroup_start, nhooks);
 	OMP_HOOK_INIT(GOMP_taskgroup_end, nhooks);
 

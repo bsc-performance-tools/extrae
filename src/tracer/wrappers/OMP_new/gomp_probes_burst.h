@@ -186,6 +186,8 @@ void xtr_probe_entry_GOMP_taskloop_ull_bursts(struct taskloop_helper_t *taskloop
 void xtr_probe_exit_GOMP_taskloop_ull_bursts() __attribute__((weak));
 void xtr_probe_entry_GOMP_taskwait_bursts() __attribute__((weak));
 void xtr_probe_exit_GOMP_taskwait_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_taskyield_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_taskyield_bursts() __attribute__((weak));
 void xtr_probe_entry_GOMP_taskgroup_start_bursts() __attribute__((weak));
 void xtr_probe_exit_GOMP_taskgroup_start_bursts() __attribute__((weak));
 void xtr_probe_entry_GOMP_taskgroup_end_bursts() __attribute__((weak));

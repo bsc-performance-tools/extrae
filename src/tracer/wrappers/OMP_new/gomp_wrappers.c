@@ -1921,6 +1921,27 @@ XTR_WRAP_GOMP(GOMP_taskwait,
               DEBUG_ARGS(""));
 
 /**
+ * GOMP_taskwait
+ * Avail: GCC >= 4.7
+ *
+ * Wrapper for the taskyield construct has an empty implementaion in GNU libgomp as of 2025-02-28,
+ * yet the compiler adds a call to GOMP_taskyield anyway.
+ *
+ * Code transformation:
+ * <<<
+ *    #pragma omp taskyield
+ * >>>
+ *    GOMP_taskyield();
+ */
+XTR_WRAP_GOMP(GOMP_taskyield,
+              PROTOTYPE(),
+              NO_RETURN,
+              ENTRY_PROBE_ARGS(),
+              REAL_SYMBOL_ARGS(),
+              EXIT_PROBE_ARGS(),
+              DEBUG_ARGS(""));
+
+/**
  * GOMP_taskgroup_start
  * Avail: GCC >= 4.9
  *

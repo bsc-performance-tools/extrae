@@ -135,6 +135,14 @@ extern void (*REAL_SYMBOL_PTR(GOMP_taskwait)) (void);
 
 
 /*********************************/
+/***** Available since GCC 4.7 ***/
+/*********************************/
+
+/* libgomp/task.c */
+extern void (*REAL_SYMBOL_PTR(GOMP_taskyield)) (void);
+
+
+/*********************************/
 /***** Available since GCC 4.9 ***/
 /*********************************/
 

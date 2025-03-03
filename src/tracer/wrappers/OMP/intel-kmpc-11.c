@@ -124,6 +124,7 @@ static void (*__kmpc_end_taskgroup_real)(void *, int) = NULL;
 
 static void (*__kmpc_push_num_threads_real)(void *, int, int) = NULL;
 
+static void (*__kmpc_omp_taskyield_real)(void *, uint32_t, int) = NULL;
 
 /******************************************************************************\
  *                                                                            *
@@ -142,12 +143,14 @@ struct helper__kmpc_task_t
 {
 	void *wrap_task;
 	void *real_task;
+	int task_id;
 };
 
 struct helper_list__kmpc_task_t
 {
 	struct helper__kmpc_task_t *list;
-	int count;
+	volatile long long task_ctr;
+	int last_task;
 	int max_helpers;
 };
 
@@ -210,13 +213,15 @@ static void preallocate_kmpc_helpers()
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "preallocate_kmpc_helpers: Allocating %d data helpers\n ", THREAD_LEVEL_VAR, num_helpers);
 #endif 
 
-		hl__kmpc_task->count = 0;
+		hl__kmpc_task->task_ctr = 1;
+		hl__kmpc_task->last_task = 0;
 		hl__kmpc_task->max_helpers = num_helpers;
-    hl__kmpc_task->list = (struct helper__kmpc_task_t *)xmalloc(sizeof(struct helper__kmpc_task_t) * num_helpers);
+    		hl__kmpc_task->list = (struct helper__kmpc_task_t *)xmalloc(sizeof(struct helper__kmpc_task_t) * num_helpers);
 		for (i=0; i<num_helpers; i++)
 		{
 			hl__kmpc_task->list[i].wrap_task = NULL;
 			hl__kmpc_task->list[i].real_task = NULL;
+			hl__kmpc_task->list[i].task_id = 0;
 		}
 	}
 
@@ -248,64 +253,64 @@ static void preallocate_kmpc_helpers()
  */
 static void helper__kmpc_task_register(void *wrap_task, void *real_task)
 {
-	int i = 0;
 
 	pthread_mutex_lock(&hl__kmpc_task_mtx);
-	if (hl__kmpc_task->count < hl__kmpc_task->max_helpers)
-	{
-		/* Look for a free slot in the list */
-		while (hl__kmpc_task->list[i].wrap_task != NULL) 
-		{
-			i++;
-		}
     /* Add the pair of (wrapper, real) tasks to the assigned slot */
-		hl__kmpc_task->list[i].wrap_task = wrap_task;
-		hl__kmpc_task->list[i].real_task = real_task;
-		hl__kmpc_task->count ++;
+
+	int i = hl__kmpc_task->last_task;
+
+	hl__kmpc_task->list[i].wrap_task = wrap_task;
+	hl__kmpc_task->list[i].real_task = real_task;
+
+	hl__kmpc_task->list[i].task_id = hl__kmpc_task->task_ctr++;
+
+	hl__kmpc_task->last_task = (hl__kmpc_task->last_task + 1) % hl__kmpc_task->max_helpers;
+
+	Extrae_OpenMP_TaskID(hl__kmpc_task->list[i].task_id, XTR_TASK_INSTANTIATION);
+
 #if defined(DEBUG)
 		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_register: Registering helper wrap_task=%p real_task=%p slot=%d\n ", THREAD_LEVEL_VAR, wrap_task, real_task, i);
 #endif 
-	}
-	else
-	{
-    fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_register: ERROR! Can not register more tasks because all data helpers are already in use. Please try increasing %s over %d until this error disappears\n ", THREAD_LEVEL_VAR, ENV_VAR_EXTRAE_OPENMP_HELPERS, hl__kmpc_task->max_helpers);
-		exit(-1);
-	}
 	pthread_mutex_unlock(&hl__kmpc_task_mtx);
 }
 
 /**
  * helper__kmpc_task_retrieve
  *
- * Retrieves the real_task for the given wrap_task from the list of active data
- * helpers.
+ * Retrieves the real task and its internal id for the given wrap_task
+ * from the list of data helpers.
  *
  * @param The wrapper task that substitutes the real one
  *
- * @return The real task that got substituted
+ * @return A struct containing the real task that got substituted and its internal id
  */
-static void * helper__kmpc_task_retrieve(void *wrap_task)
+static struct helper__kmpc_task_t * helper__kmpc_task_retrieve(void *wrap_task)
 {
-	int i = 0;
+	struct helper__kmpc_task_t *found_task_info = NULL;
 	void *real_task = NULL;
 
 	pthread_mutex_lock(&hl__kmpc_task_mtx);
 
-	if (hl__kmpc_task->count > 0)
-	{
-		while (i < hl__kmpc_task->max_helpers)
-		{
-	    if (hl__kmpc_task->list[i].wrap_task == wrap_task)
-			{
-				real_task = hl__kmpc_task->list[i].real_task;
+	int i = hl__kmpc_task->last_task - 1;
+	int start_i = i;
 
-				/* Mark this slot free */
-				hl__kmpc_task->list[i].wrap_task = NULL;
-				hl__kmpc_task->list[i].real_task = NULL;
-			  hl__kmpc_task->count --;
-				break;
-			}
-			i ++;
+	while (i != hl__kmpc_task->last_task && hl__kmpc_task->list[i].wrap_task != NULL)
+	{
+		if (i < 0) i = hl__kmpc_task->max_helpers - 1;
+
+		if (hl__kmpc_task->list[i].wrap_task == wrap_task)
+		{
+			found_task_info = &hl__kmpc_task->list[i];
+			real_task = found_task_info->real_task;
+			break;
+		}
+
+		i--;
+
+		//If i has looped around the list the task couldn't be found, give error
+		if (i == start_i) {
+			fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_retrieve: ERROR! Did not find task for wrap_task=%p\n ", THREAD_LEVEL_VAR, wrap_task);
+			exit (-1);			
 		}
 	}
 
@@ -317,10 +322,10 @@ static void * helper__kmpc_task_retrieve(void *wrap_task)
 
 	if (real_task == NULL)
 	{
- 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_retrieve: ERROR! Could not free data helper for wrap_task=%p (%d/%d helpers)\n ", THREAD_LEVEL_VAR, wrap_task, hl__kmpc_task->count, hl__kmpc_task->max_helpers);
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_retrieve: ERROR! Could not find data helper for wrap_task=%p (%d max helpers)\n ", THREAD_LEVEL_VAR, wrap_task, hl__kmpc_task->max_helpers);
 	}
 
-	return real_task;
+	return found_task_info;
 }
 
 /**
@@ -337,18 +342,22 @@ static void * helper__kmpc_task_retrieve(void *wrap_task)
 static void helper__kmpc_task_substitute (int arg, void *wrap_task)
 {
 #if defined(DEBUG)                                                              
-  fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_substitute enter: args=(%d %p)\n ", THREAD_LEVEL_VAR, arg, wrap_task);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL " %llu helper__kmpc_task_substitute enter: args=(%d %p)\n ", 
+THREAD_LEVEL_VAR, /*TIME*/0, arg, wrap_task);
 #endif                                                                          
 
-	void (*real_task)(int,void*) = (void(*)(int,void*)) helper__kmpc_task_retrieve (wrap_task);
+	struct helper__kmpc_task_t *task_info = helper__kmpc_task_retrieve (wrap_task);
+	void (*real_task)(int,void*) = task_info->real_task;
 
 #if defined(DEBUG)
-	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_substitute enter: Substitution for wrap_task=%p is real_task=%p\n ", THREAD_LEVEL_VAR, wrap_task, real_task);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL " %llu helper__kmpc_task_substitute: Found substitution for wrap_task=%p is real_task=%p\n ", THREAD_LEVEL_VAR, /*TIME*/0, wrap_task,
+real_task);
 #endif
 
 	if (real_task != NULL)
 	{
 		Extrae_OpenMP_TaskUF_Entry (real_task);
+		Extrae_OpenMP_TaskID(task_info->task_id, XTR_TASK_EXECUTION);
 		real_task (arg, wrap_task); /* Original code execution */
 		Extrae_OpenMP_Notify_NewExecutedTask();
 		Extrae_OpenMP_TaskUF_Exit ();
@@ -1369,7 +1378,8 @@ void __kmpc_omp_task_begin_if0 (void *loc, int gtid, void *task)
 
 	RECHECK_INIT(__kmpc_omp_task_begin_if0_real);
 
-	void (*__kmpc_task_substituted_func)(int,void*) = (void(*)(int,void*)) helper__kmpc_task_retrieve (task);
+	struct helper__kmpc_task_t *task_info = helper__kmpc_task_retrieve (task);
+        void (*__kmpc_task_substituted_func)(int,void*) = task_info->real_task;
 
 	if (TRACE(__kmpc_task_substituted_func))
 	{
@@ -1510,7 +1520,9 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 
 	/* Retrieve the real task pointer from the list that is maintained in the
 	 * instrumented function __kmpc_omp_task_alloc */
-	real_task = helper__kmpc_task_retrieve(task);
+
+	struct helper__kmpc_task_t *task_info = helper__kmpc_task_retrieve (task);
+        real_task = task_info->real_task;
 
 	if (TRACE(__kmpc_taskloop_real) && (getTrace_OMPTaskloop()))
 	{
@@ -1716,6 +1728,42 @@ __kmpc_push_num_threads(void *loc, int global_tid, int num_threads)
 #endif
 }
 
+void
+__kmpc_omp_taskyield(void *loc, uint32_t global_tid, int end_part)
+{
+#if defined(DEBUG)
+        fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+            "__kmpc_omp_taskyield enter: @=%p args=(%p %u %d)\n ",
+            THREAD_LEVEL_VAR, __kmpc_omp_taskyield_real, loc, global_tid, end_part);
+#endif
+
+        RECHECK_INIT(__kmpc_omp_taskyield_real);
+
+        if (TRACE(__kmpc_omp_taskyield_real))
+        {
+		Extrae_OpenMP_Taskyield_Entry();
+		__kmpc_omp_taskyield_real(loc, global_tid, end_part);
+		Extrae_OpenMP_Taskyield_Exit();
+        }
+        else if (__kmpc_omp_taskyield_real != NULL)
+        {
+                __kmpc_omp_taskyield_real(loc, global_tid, end_part);
+        }
+        else
+        {
+                fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+                    "__kmpc_taskyield: ERROR! This function is not hooked! Exiting!!\n ",
+                    THREAD_LEVEL_VAR);
+                exit(-1);
+        }
+
+#if defined(DEBUG)
+        fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+            "__kmpc_taskyield exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
+
 /******************************************************************************\
  *                                                                            *
  *                             INITIALIZATIONS                                *
@@ -1905,6 +1953,11 @@ static int intel_kmpc_get_hook_points (int rank)
 	__kmpc_push_num_threads_real = (void(*)(void *, int, int))
 	    dlsym(RTLD_NEXT, "__kmpc_push_num_threads");
 	INC_IF_NOT_NULL(__kmpc_push_num_threads_real, count);
+
+	/* Obtain @ or __kmpc_omp_taskyield */
+	__kmpc_omp_taskyield_real = (void(*)(void*, uint32_t, int))
+	    dlsym(RTLD_NEXT, "__kmpc_omp_taskyield");
+	INC_IF_NOT_NULL(__kmpc_omp_taskyield_real, count);
 
 	/* Any hook point? */
 	return count > 0;

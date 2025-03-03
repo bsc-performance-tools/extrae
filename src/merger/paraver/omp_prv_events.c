@@ -130,6 +130,7 @@ char *OMP_Call_Name[MAX_OMP_CALLS] =
   [ GOMP_SECTIONS_END_NOWAIT_VAL ] = "GOMP_sections_end_nowait",
   [ GOMP_SINGLE_START_VAL ] = "GOMP_single_start",
   [ GOMP_TASKWAIT_VAL ] = "GOMP_taskwait",
+  [ GOMP_TASKYIELD_VAL ] = "GOMP_taskyield",
   [ GOMP_PARALLEL_VAL ] = "GOMP_parallel",
   [ GOMP_PARALLEL_LOOP_STATIC_VAL ] = "GOMP_parallel_loop_static",
   [ GOMP_PARALLEL_LOOP_DYNAMIC_VAL ] = "GOMP_parallel_loop_dynamic",
@@ -187,7 +188,9 @@ char *OMP_Call_Name[MAX_OMP_CALLS] =
 #define TASKLOOP_INDEX          20 /* Taskloop event */
 #define ORDERED_INDEX           21 /* Ordered section in ordered or doacross loops */
 #define TARGET_INDEX            22
-#define MAX_OMP_INDEX           23
+#define TASKYIELD_INDEX         23
+
+#define MAX_OMP_INDEX           24
 
 static int inuse[MAX_OMP_INDEX] = { FALSE };
 
@@ -225,6 +228,8 @@ void OLD_Enable_OMP_Operation (int type)
 		inuse[ORDERED_INDEX] = TRUE;
 	else if (type == TARGET_EV)
 		inuse[TARGET_INDEX] = TRUE;
+	else if (type == OMPTASKYIELD_EV)
+		inuse[TASKYIELD_INDEX] = TRUE;
 
 #define ENABLE_TYPE_IF(x,type,v) \
 	if (x ## _EV == type) \
@@ -476,6 +481,13 @@ static void OLD_OMPEvent_WriteEnabledOperations (FILE * fd)
 		OMP_STATS_BASE+OMP_NUM_TASKS_INSTANTIATED,
 		OMP_STATS_BASE+OMP_NUM_TASKS_EXECUTED);
 	}
+	if (inuse[TASKYIELD_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+                  "0 %d OMP taskyield\n"
+		  "VALUES\n0 End\n1 Begin\n\n",
+                  OMPTASKYIELD_EV);
+	}
 }
 
 /* New OpenMP support*/
@@ -557,11 +569,12 @@ static void NEW_OMPEvent_WriteEnabledOperations (FILE * fd)
                  "%d ORDERED\n"
                  "%d TASKGROUP\n"
                  "%d TASKWAIT\n"
+		 "%d TASKYIELD\n"
                  "%d POST\n"
                  "%d WAIT\n\n",
                  NEW_OMP_BARRIER_VAL, NEW_OMP_JOIN_WAIT_VAL, NEW_OMP_JOIN_NOWAIT_VAL,
                  NEW_OMP_LOCK_ATOMIC_VAL, NEW_OMP_LOCK_CRITICAL_VAL, NEW_OMP_LOCK_CRITICAL_NAMED_VAL,
-                 NEW_OMP_ORDERED_VAL, NEW_OMP_TASKGROUP_VAL, NEW_OMP_TASKWAIT_VAL, NEW_OMP_POST_VAL, NEW_OMP_WAIT_VAL);
+                 NEW_OMP_ORDERED_VAL, NEW_OMP_TASKGROUP_VAL, NEW_OMP_TASKWAIT_VAL, NEW_OMP_TASKYIELD_VAL, NEW_OMP_POST_VAL, NEW_OMP_WAIT_VAL);
   }
   if (new_inuse[NEW_OMP_LOCK_INDEX])
   {

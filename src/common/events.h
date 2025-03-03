@@ -522,6 +522,7 @@ enum {
 #define NAMEDCRIT_NAME_EV        60000032 /* Critical address name */
 #define ORDERED_EV               60000033 /* Ordered section in ordered or doacross loop */
 #define TARGET_EV                60000034
+#define OMPTASKYIELD_EV          60000035
 #define OMPT_CRITICAL_EV         60000050
 #define OMPT_ATOMIC_EV           60000051
 #define OMPT_LOOP_EV             60000052

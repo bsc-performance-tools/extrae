@@ -1080,6 +1080,18 @@ void xtr_probe_exit_GOMP_taskwait_bursts ()
   xtr_burst_begin();
 }
 
+void xtr_probe_entry_GOMP_taskyield_bursts ()
+{
+  xtr_stats_update_OMP_synchronization_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_taskyield_bursts ()
+{
+  xtr_stats_OMP_update_synchronization_exit();
+  xtr_burst_begin();
+}
+
 void xtr_probe_entry_GOMP_taskgroup_start_bursts ()
 {
   xtr_stats_update_OMP_synchronization_entry();

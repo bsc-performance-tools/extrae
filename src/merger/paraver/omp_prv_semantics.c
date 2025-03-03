@@ -659,6 +659,27 @@ static int Ordered_Event (
         return 0;
 }
 
+static int TaskYield_Event (
+   event_t * event,
+   unsigned long long time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+        UNREFERENCED_PARAMETER(fset);
+
+        unsigned int EvValue = Get_EvValue (event);
+        Switch_State(STATE_SYNC, (EvValue == EVT_BEGIN), ptask, task, thread);
+        trace_paraver_state (cpu, ptask, task, thread, time);
+
+        trace_paraver_event (cpu, ptask, task, thread, time,
+          OMPTASKYIELD_EV, EvValue);
+
+        return 0;
+}
+
 static int OMP_Call_Event (
    event_t * current_event,
    unsigned long long current_time,
@@ -892,6 +913,7 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ TASK_EV, Task_Event },
 	{ TASKWAIT_EV, Taskwait_Event },
 	{ TASKFUNC_EV, OpenMP_Function_Event },
+	{ OMPTASKYIELD_EV, TaskYield_Event },
 	{ OMPT_CRITICAL_EV, OMPT_event },
 	{ OMPT_ATOMIC_EV, OMPT_event },
 	{ OMPT_LOOP_EV, OMPT_event },

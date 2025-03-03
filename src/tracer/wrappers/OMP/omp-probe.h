@@ -83,6 +83,8 @@ void Probe_OpenMP_TaskUF_Entry (UINT64 uf);
 void Probe_OpenMP_TaskUF_Exit (void);
 void Probe_OpenMP_Taskwait_Entry (void);
 void Probe_OpenMP_Taskwait_Exit (void);
+void Probe_OpenMP_Taskyield_Entry (void);
+void Probe_OpenMP_Taskyield_Exit (void);
 void Probe_OpenMP_Taskgroup_start_Entry (void);
 void Probe_OpenMP_Taskgroup_start_Exit (void);
 void Probe_OpenMP_Taskgroup_end_Entry (void);
@@ -94,6 +96,10 @@ void Probe_OpenMP_Ordered_Wait_Entry (void);
 void Probe_OpenMP_Ordered_Wait_Exit (void);
 void Probe_OpenMP_Ordered_Post_Entry (void);
 void Probe_OpenMP_Ordered_Post_Exit (void);
+
+void Probe_OpenMP_Target_Entry(void);
+void Probe_OpenMP_Target_Exit(void);
+
 
 /* OMPT probes */
 

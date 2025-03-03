@@ -423,6 +423,22 @@ void Probe_OpenMP_Taskwait_Exit (void)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKWAIT_EV, EVT_END, EMPTY);
 }
 
+void Probe_OpenMP_Taskyield_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on) {
+		Extrae_OpenMP_TaskUF_Exit();
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPTASKYIELD_EV, EVT_BEGIN, EMPTY);
+	}
+}
+
+void Probe_OpenMP_Taskyield_Exit (void)
+{
+	DEBUG
+        if (mpitrace_on)
+                TRACE_OMPEVENTANDCOUNTERS(TIME, OMPTASKYIELD_EV, EVT_END, EMPTY);
+}
+
 void Probe_OpenMP_Taskgroup_start_Entry (void)
 {
 	DEBUG
