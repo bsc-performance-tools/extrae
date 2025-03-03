@@ -427,7 +427,6 @@ void Probe_OpenMP_Taskyield_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on) {
-		Extrae_OpenMP_TaskUF_Exit();
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPTASKYIELD_EV, EVT_BEGIN, EMPTY);
 	}
 }
