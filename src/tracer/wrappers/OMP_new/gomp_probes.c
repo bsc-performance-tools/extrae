@@ -329,7 +329,7 @@ void xtr_probe_entry_GOMP_barrier()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_BARRIER_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_BARRIER_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_barrier()
@@ -351,7 +351,7 @@ void xtr_probe_entry_GOMP_critical_start()
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_START_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_CRITICAL_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 
@@ -371,7 +371,7 @@ void xtr_probe_entry_GOMP_critical_end()
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_END_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 
@@ -393,7 +393,7 @@ void xtr_probe_entry_GOMP_critical_name_start(void **pptr)
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_NAME_START_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_CRITICAL_NAMED_VAL);
 		Extrae_OpenMP_Lock_Status(pptr, NEW_OMP_LOCK_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 
@@ -413,7 +413,7 @@ void xtr_probe_entry_GOMP_critical_name_end(void **pptr)
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_CRITICAL_NAME_END_VAL);
 		Extrae_OpenMP_Lock_Status(pptr, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 
@@ -435,7 +435,7 @@ void xtr_probe_entry_GOMP_atomic_start()
 		Extrae_OpenMP_Call_Entry(GOMP_ATOMIC_START_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_ATOMIC_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 
@@ -455,7 +455,7 @@ void xtr_probe_entry_GOMP_atomic_end()
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_ATOMIC_END_VAL);
 		Extrae_OpenMP_Lock_Status(NULL, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 
@@ -1066,7 +1066,7 @@ void xtr_probe_entry_GOMP_loop_end()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_LOOP_END_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_JOIN_WAIT_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_loop_end()
@@ -1123,7 +1123,7 @@ void xtr_probe_entry_GOMP_ordered_end()
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_ORDERED_END_VAL);
 		Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_POST_START_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 
@@ -1147,7 +1147,7 @@ void xtr_probe_entry_GOMP_doacross_post()
 	Extrae_OpenMP_Call_Entry(GOMP_DOACROSS_POST_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_POST_VAL);
 	Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_POST_START_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_doacross_post()
@@ -1163,7 +1163,7 @@ void xtr_probe_entry_GOMP_doacross_wait()
 	Extrae_OpenMP_Call_Entry(GOMP_DOACROSS_WAIT_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_WAIT_VAL);
 	Extrae_OpenMP_Ordered(NEW_OMP_ORDERED_WAIT_START_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_doacross_wait()
@@ -1289,7 +1289,7 @@ void xtr_probe_entry_GOMP_taskwait()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKWAIT_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_TASKWAIT_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_taskwait()
@@ -1325,7 +1325,7 @@ void xtr_probe_entry_GOMP_taskgroup_start()
 	Extrae_OpenMP_Call_Entry(GOMP_TASKGROUP_START_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_TASKGROUP_VAL);
 	Extrae_OpenMP_Taskgroup(NEW_OMP_TASKGROUP_OPENING_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_taskgroup_start()
@@ -1339,7 +1339,7 @@ void xtr_probe_entry_GOMP_taskgroup_end()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKGROUP_END_VAL);
 	Extrae_OpenMP_Taskgroup(NEW_OMP_TASKGROUP_WAITING_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_taskgroup_end()
@@ -1422,7 +1422,7 @@ void xtr_probe_entry_GOMP_sections_end()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_SECTIONS_END_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_JOIN_WAIT_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_sections_end()
@@ -1491,6 +1491,122 @@ void xtr_probe_exit_GOMP_teams_reg()
 }
 
 /**
+ * GOMP target
+ */
+
+void xtr_probe_entry_GOMP_target()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+void xtr_probe_entry_GOMP_target_data()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_DATA_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_DATA_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target_data()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_DATA_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+void xtr_probe_entry_GOMP_target_end_data()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_END_DATA_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_DATA_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target_end_data()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_END_DATA_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+void xtr_probe_entry_GOMP_target_update()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_UPDATE_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_UPDATE_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target_update()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_UPDATE_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+void xtr_probe_entry_GOMP_target_enter_exit_data()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_ENTER_EXIT_DATA_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_ENTER_DATA_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target_enter_exit_data()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_ENTER_EXIT_DATA_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+void xtr_probe_entry_GOMP_target_ext()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_EXT_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target_ext()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_EXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+void xtr_probe_entry_GOMP_target_data_ext()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_DATA_EXT_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_DATA_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target_data_ext()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_DATA_EXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+void xtr_probe_entry_GOMP_target_update_ext()
+{
+	Extrae_OpenMP_Call_Entry(GOMP_TARGET_UPDATE_EXT_VAL);
+	Extrae_OpenMP_Target_Entry(NEW_OMP_TARGET_UPDATE_VAL);
+	xtr_stats_OMP_update_overhead_entry();
+}
+
+void xtr_probe_exit_GOMP_target_update_ext()
+{
+	Extrae_OpenMP_Target_Exit();
+	Extrae_OpenMP_Call_Exit(GOMP_TARGET_UPDATE_EXT_VAL);
+	xtr_stats_OMP_update_overhead_exit();
+}
+
+/**
  * omp_set_num_threads
  */
 
@@ -1513,7 +1629,7 @@ void xtr_probe_entry_omp_set_lock(void *lock)
 		Extrae_OpenMP_Call_Entry(GOMP_SET_LOCK_VAL);
 		Extrae_OpenMP_Sync_Entry(NEW_OMP_LOCK_CRITICAL_NAMED_VAL);
 		Extrae_OpenMP_Lock_Status(lock, NEW_OMP_LOCK_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 void xtr_probe_entry_omp_set_lock_( void * ) __attribute__ ((alias( "xtr_probe_entry_omp_set_lock" )));
@@ -1535,7 +1651,7 @@ void xtr_probe_entry_omp_unset_lock(void *lock)
 	{
 		Extrae_OpenMP_Call_Entry(GOMP_UNSET_LOCK_VAL);
 		Extrae_OpenMP_Lock_Status(lock, NEW_OMP_LOCK_RELEASE_REQUEST_VAL);
-		xtr_stats_update_OMP_synchronization_entry();
+		xtr_stats_OMP_update_synchronization_entry();
 	}
 }
 void xtr_probe_entry_omp_unset_lock_( void * ) __attribute__ ((alias( "xtr_probe_entry_omp_unset_lock" )));

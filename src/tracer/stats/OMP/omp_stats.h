@@ -81,7 +81,7 @@ stats_info_t *xtr_stats_OMP_get_types_and_descriptions( void );
 
 void xtr_stats_OMP_update_par_OL_entry (void);
 void xtr_stats_OMP_update_par_OL_exit (void);
-void xtr_stats_update_OMP_synchronization_entry(void);
+void xtr_stats_OMP_update_synchronization_entry(void);
 void xtr_stats_OMP_update_synchronization_exit(void);
 void xtr_stats_OMP_update_overhead_entry(void);
 void xtr_stats_OMP_update_overhead_exit(void);

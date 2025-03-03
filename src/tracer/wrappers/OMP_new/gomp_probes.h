@@ -223,6 +223,23 @@ void xtr_probe_exit_GOMP_single_start() __attribute__((weak));
 void xtr_probe_entry_GOMP_teams_reg() __attribute__((weak));
 void xtr_probe_exit_GOMP_teams_reg() __attribute__((weak));
 
+void xtr_probe_entry_GOMP_target() __attribute__((weak));
+void xtr_probe_exit_GOMP_target() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_data() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_data() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_end_data() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_end_data() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_update() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_update() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_enter_exit_data() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_enter_exit_data() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_ext() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_ext() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_data_ext() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_data_ext() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_update_ext() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_update_ext() __attribute__((weak));
+
 void xtr_probe_entry_omp_set_num_threads() __attribute__((weak));
 void xtr_probe_exit_omp_set_num_threads(int num_threads) __attribute__((weak));
 void xtr_probe_entry_omp_set_num_threads_() __attribute__((weak));

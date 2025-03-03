@@ -166,6 +166,13 @@ extern void (*REAL_SYMBOL_PTR(GOMP_parallel)) (void *, void *, unsigned, unsigne
 
 extern void (*REAL_SYMBOL_PTR(GOMP_parallel_sections)) (void *, void *, unsigned, unsigned, unsigned);
 
+/* libgomp/target.c */
+
+extern void (*REAL_SYMBOL_PTR(GOMP_target)) (int, void *, void *, size_t, void **, size_t *, unsigned char *);
+extern void (*REAL_SYMBOL_PTR(GOMP_target_data)) (int, void *, size_t, void **, size_t *, unsigned char *);
+extern void (*REAL_SYMBOL_PTR(GOMP_target_end_data)) (void);
+extern void (*REAL_SYMBOL_PTR(GOMP_target_update)) (int, void *, size_t, void **, size_t *, unsigned char *);
+
 
 /*********************************/
 /***** Available since GCC 6.0 ***/
@@ -195,6 +202,18 @@ extern void (*REAL_SYMBOL_PTR(GOMP_doacross_wait)) (long, ...);
 /* libgomp/taskloop.c */
 
 extern void (*REAL_SYMBOL_PTR(GOMP_taskloop)) (void *, void *, void *, long, long, unsigned, unsigned long, int, long, long, long);
+
+
+/*********************************/
+/***** Available since GCC 6.1 ***/
+/*********************************/
+
+/* libgomp/target.c */
+
+extern void (*REAL_SYMBOL_PTR(GOMP_target_ext)) (int, void *, size_t, void **, size_t *, unsigned short *, unsigned int, void **, void **);
+extern void (*REAL_SYMBOL_PTR(GOMP_target_data_ext)) (int, size_t, void **, size_t *, unsigned short *);
+extern void (*REAL_SYMBOL_PTR(GOMP_target_update_ext)) (int, size_t, void **, size_t *, unsigned short *, unsigned int, void **);
+extern void (*REAL_SYMBOL_PTR(GOMP_target_enter_exit_data)) (int, size_t, void **, size_t *, unsigned short *, unsigned int, void **);
 
 
 /*********************************/

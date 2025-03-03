@@ -484,7 +484,7 @@ void xtr_stats_OMP_update_par_OL_exit ( void )
  * 
  * @note The caller must ensure that OpenMP statistics tracing is enabled and handle the initialization of required data structures.
  */
-void xtr_stats_update_OMP_synchronization_entry( void )
+void xtr_stats_OMP_update_synchronization_entry( void )
 {
   if (TRACING_OMP_STATISTICS)
   {

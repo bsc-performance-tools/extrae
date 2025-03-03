@@ -314,7 +314,7 @@ void xtr_probe_exit_GOMP_teams_reg_OL_bursts(void)
 
 void xtr_probe_entry_GOMP_barrier_bursts()
 {
-xtr_stats_update_OMP_synchronization_entry();
+xtr_stats_OMP_update_synchronization_entry();
 xtr_burst_end();
 }
 
@@ -328,7 +328,7 @@ void xtr_probe_entry_GOMP_critical_start_bursts()
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -347,7 +347,7 @@ void xtr_probe_entry_GOMP_critical_end_bursts()
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -365,7 +365,7 @@ void xtr_probe_entry_GOMP_critical_name_start_bursts(void **pptr)
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -383,7 +383,7 @@ void xtr_probe_entry_GOMP_critical_name_end_bursts(void **pptr)
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -401,7 +401,7 @@ void xtr_probe_entry_GOMP_atomic_start_bursts()
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) ) 
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -419,7 +419,7 @@ void xtr_probe_entry_GOMP_atomic_end_bursts()
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -915,7 +915,7 @@ void xtr_probe_exit_GOMP_parallel_loop_maybe_nonmonotonic_runtime_bursts (void)
 
 void xtr_probe_entry_GOMP_loop_end_bursts()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 
@@ -941,7 +941,7 @@ void xtr_probe_entry_GOMP_ordered_start_bursts()
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -958,7 +958,7 @@ void xtr_probe_entry_GOMP_ordered_end_bursts()
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -974,7 +974,7 @@ void xtr_probe_exit_GOMP_ordered_end_bursts()
 
 void xtr_probe_entry_GOMP_doacross_post_bursts()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 
@@ -986,7 +986,7 @@ void xtr_probe_exit_GOMP_doacross_post_bursts()
 
 void xtr_probe_entry_GOMP_doacross_wait_bursts()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 
@@ -1070,7 +1070,7 @@ void xtr_probe_exit_GOMP_taskloop_ull_bursts(void)
 
 void xtr_probe_entry_GOMP_taskwait_bursts ()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 
@@ -1094,7 +1094,7 @@ void xtr_probe_exit_GOMP_taskyield_bursts ()
 
 void xtr_probe_entry_GOMP_taskgroup_start_bursts ()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 
@@ -1106,7 +1106,7 @@ void xtr_probe_exit_GOMP_taskgroup_start_bursts ()
 
 void xtr_probe_entry_GOMP_taskgroup_end_bursts ()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 
@@ -1167,7 +1167,7 @@ void xtr_probe_exit_GOMP_parallel_sections_bursts()
 
 void xtr_probe_entry_GOMP_sections_end_bursts()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 
@@ -1217,7 +1217,7 @@ void xtr_probe_entry_omp_set_lock_bursts(void *lock)
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -1226,7 +1226,7 @@ void xtr_probe_entry_omp_set_lock__bursts( void *lock)
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -1253,7 +1253,7 @@ void xtr_probe_entry_omp_unset_lock_bursts(void *lock)
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }
@@ -1262,7 +1262,7 @@ void xtr_probe_entry_omp_unset_lock__bursts( void * lock)
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )
   {
-    xtr_stats_update_OMP_synchronization_entry();
+    xtr_stats_OMP_update_synchronization_entry();
     xtr_burst_end();
   }
 }

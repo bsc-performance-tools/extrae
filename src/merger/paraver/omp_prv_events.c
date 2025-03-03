@@ -51,6 +51,7 @@ enum
   NEW_OMP_TASKING_INDEX,
   NEW_OMP_TASK_INST_INDEX,
   NEW_OMP_TASK_EXEC_INDEX,
+  NEW_OMP_TARGET_INDEX,
   NEW_MAX_OMP_INDEX
 };
 
@@ -84,6 +85,8 @@ void NEW_Enable_OMP_Operation (int type)
     new_inuse[NEW_OMP_TASK_INST_INDEX] = TRUE;
   else if ((type == NEW_OMP_TASK_EXEC_ID_EV) || (type == NEW_OMP_TASK_EXEC_ADDRESS_EV))
     new_inuse[NEW_OMP_TASK_EXEC_INDEX] = TRUE;
+  else if (type == NEW_OMP_TARGET_EV)
+    new_inuse[NEW_OMP_TARGET_INDEX] = TRUE;
 }
 
 char *OMP_Call_Name[MAX_OMP_CALLS] =
@@ -159,6 +162,14 @@ char *OMP_Call_Name[MAX_OMP_CALLS] =
   [ GOMP_LOOP_NONMONOTONIC_RUNTIME_NEXT_VAL ] = "GOMP_loop_nonmonotonic_runtime_next",
   [ GOMP_LOOP_MAYBE_NONMONOTONIC_RUNTIME_NEXT_VAL ] = "GOMP_loop_maybe_nonmonotonic_runtime_next",
   [ GOMP_TEAMS_REG_VAL ] = "GOMP_teams_reg",
+  [ GOMP_TARGET_VAL ] = "GOMP_target",
+  [ GOMP_TARGET_DATA_VAL ] = "GOMP_target_data",
+  [ GOMP_TARGET_END_DATA_VAL ] = "GOMP_target_end_data",
+  [ GOMP_TARGET_UPDATE_VAL ] = "GOMP_target_update",
+  [ GOMP_TARGET_ENTER_EXIT_DATA_VAL ] = "GOMP_target_enter_exit_data",
+  [ GOMP_TARGET_EXT_VAL ] = "GOMP_target_ext",
+  [ GOMP_TARGET_DATA_EXT_VAL ] = "GOMP_target_data_ext",
+  [ GOMP_TARGET_UPDATE_EXT_VAL ] = "GOMP_target_update_ext",
   [ GOMP_SET_LOCK_VAL ] = "GOMP_set_lock",
   [ GOMP_UNSET_LOCK_VAL ] = "GOMP_unset_lock",
 };
@@ -659,6 +670,20 @@ static void NEW_OMPEvent_WriteEnabledOperations (FILE * fd)
     fprintf (fd, "EVENT_TYPE\n"
                  "0 %d OpenMP executed task ID\n\n",
                  NEW_OMP_TASK_EXEC_ID_EV);
+  }
+
+  if (new_inuse[NEW_OMP_TARGET_INDEX])
+  {
+    fprintf (fd, "EVENT_TYPE\n"
+                 "0 %d OpenMP Target\n", NEW_OMP_TARGET_EV);
+    fprintf (fd, "VALUES\n"
+                 "0 End\n"
+                 "%d TARGET data and task offload\n"
+                 "%d TARGET data offload\n"
+                 "%d TARGET enter data offload\n"
+		 "%d TARGET exit data offload\n"
+		 "%d TARGET data update\n\n",
+                 NEW_OMP_TARGET_VAL, NEW_OMP_TARGET_DATA_VAL, NEW_OMP_TARGET_ENTER_DATA_VAL, NEW_OMP_TARGET_EXIT_DATA_VAL, NEW_OMP_TARGET_UPDATE_VAL);
   }
 }
 

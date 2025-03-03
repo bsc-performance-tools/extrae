@@ -762,7 +762,15 @@ static int OMP_Call_Event (
     case GOMP_LOOP_DOACROSS_RUNTIME_START_VAL:
     case GOMP_TASK_VAL:
     case GOMP_TASKLOOP_VAL:
-      Switch_State (STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
+    case GOMP_TARGET_VAL:
+    case GOMP_TARGET_DATA_VAL:
+    case GOMP_TARGET_END_DATA_VAL:
+    case GOMP_TARGET_UPDATE_VAL:
+    case GOMP_TARGET_ENTER_EXIT_DATA_VAL:
+    case GOMP_TARGET_EXT_VAL:
+    case GOMP_TARGET_DATA_EXT_VAL:
+    case GOMP_TARGET_UPDATE_EXT_VAL:
+      Switch_State (STATE_MEMORY_XFER, (EvValue == EVT_BEGIN), ptask, task, thread);
       trace_paraver_state (cpu, ptask, task, thread, current_time);
       break;
 
@@ -941,6 +949,7 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ NEW_OMP_PARALLEL_EV, OMP_Punctual_Event},
 	{ NEW_OMP_WSH_EV, OMP_Punctual_Event},
 	{ NEW_OMP_SYNC_EV, OMP_Punctual_Event},
+	{ NEW_OMP_TARGET_EV, OMP_Punctual_Event},
 	{ NEW_OMP_LOCK_EV, OMP_Punctual_Event},
 	{ NEW_OMP_LOCK_NAME_EV, OMP_Punctual_Event},
 	{ NEW_OMP_ORDERED_EV, OMP_Punctual_Event},

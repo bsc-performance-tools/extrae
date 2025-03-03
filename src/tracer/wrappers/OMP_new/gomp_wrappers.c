@@ -2286,6 +2286,132 @@ XTR_WRAP_GOMP_TEAMS(GOMP_teams_reg,
                    DEBUG_ARGS("fn=%p data=%p num_teams=%u thread_limit=%u flags=%u", 
                              fn, data, num_teams, thread_limit, flags));
 
+
+/*******************/ 
+/* libgomp/target.c */
+/*******************/
+
+/**
+ * GOMP_target
+ * Avail: GCC >= 4.9
+ * 
+ * Triggers with a #pragma omp target
+ * 
+ * Code transformation:
+ * <<<
+ * >>>
+ */
+XTR_WRAP_GOMP(GOMP_target,
+              PROTOTYPE(int device,
+                        void (*fn)(void *),
+                        void *unused,
+                        size_t mapnum,
+                        void **hostaddrs,
+                        size_t *sizes, 
+                        unsigned char *kinds),
+              NO_RETURN,
+              ENTRY_PROBE_ARGS(),
+              REAL_SYMBOL_ARGS(device, fn, unused, mapnum, hostaddrs, sizes, kinds),
+              EXIT_PROBE_ARGS(),
+              DEBUG_ARGS("device=%d fn=%p unused=%p mapnum=%zu hostaddrs=%p sizes=%zu kinds=%p", 
+                          device, fn, unused, mapnum, hostaddrs, sizes, kinds));
+
+XTR_WRAP_GOMP(GOMP_target_data,
+              PROTOTYPE(int device,
+                        void *unused,
+                        size_t mapnum,
+                        void **hostaddrs,
+                        size_t *sizes, 
+                        unsigned char *kinds),
+              NO_RETURN,
+              ENTRY_PROBE_ARGS(),
+              REAL_SYMBOL_ARGS(device, unused, mapnum, hostaddrs, sizes, kinds),
+              EXIT_PROBE_ARGS(),
+              DEBUG_ARGS("device=%d unused=%p mapnum=%zu hostaddrs=%p sizes=%zu kinds=%p", 
+                          device, mapnum, hostaddrs, sizes, kinds));
+
+XTR_WRAP_GOMP(GOMP_target_end_data,
+              PROTOTYPE(),
+	      NO_RETURN,
+	      ENTRY_PROBE_ARGS(),
+	      REAL_SYMBOL_ARGS(),
+	      EXIT_PROBE_ARGS(),
+	      DEBUG_ARGS(""));
+
+XTR_WRAP_GOMP(GOMP_target_update,
+              PROTOTYPE(int device,
+                        void *unused,
+			size_t mapnum,
+			void **hostaddrs,
+			size_t *sizes,
+			unsigned char *kinds),
+              NO_RETURN,
+	      ENTRY_PROBE_ARGS(),
+	      REAL_SYMBOL_ARGS(device, unused, mapnum, hostaddrs, sizes, kinds),
+	      EXIT_PROBE_ARGS(),
+	      DEBUG_ARGS("device=%d unused=%p mapnum=%zu hostaddrs=%p sizes=%zu kinds=%p",
+                          device, unused, mapnum, hostaddrs, sizes, kinds));
+
+XTR_WRAP_GOMP(GOMP_target_enter_exit_data,
+              PROTOTYPE(int device,
+                        size_t mapnum,
+			void **hostaddrs,
+			size_t *sizes,
+			unsigned short *kinds,
+			unsigned int flags,
+			void **depend),
+              NO_RETURN,
+	      ENTRY_PROBE_ARGS(),
+	      REAL_SYMBOL_ARGS(device, mapnum, hostaddrs, sizes, kinds, flags, depend),
+	      EXIT_PROBE_ARGS(),
+	      DEBUG_ARGS("device=%d mapnum=%zu hostaddrs=%p sizes=%zu kinds=%hu flags=%u depend=%p",
+                          device, mapnum, hostaddrs, sizes, kinds, flags, depend));
+
+XTR_WRAP_GOMP(GOMP_target_ext,
+              PROTOTYPE(int device,
+                        void (*fn)(void *),
+                        size_t mapnum,
+                        void **hostaddrs,
+                        size_t *sizes, 
+                        unsigned short *kinds,
+                        unsigned int flags,
+                        void **depend,
+                        void **args),
+              NO_RETURN,
+              ENTRY_PROBE_ARGS(),
+              REAL_SYMBOL_ARGS(device, fn, mapnum, hostaddrs, sizes, kinds, flags, depend, args),
+              EXIT_PROBE_ARGS(),
+              DEBUG_ARGS("device=%d fn=%p mapnum=%zu hostaddrs=%p sizes=%zu kinds=%hu flags=%u depend=%p args=%p", 
+                          device, fn, mapnum, hostaddrs, sizes, kinds, flags, depend, args));
+
+XTR_WRAP_GOMP(GOMP_target_data_ext,
+              PROTOTYPE(int device,
+                        size_t mapnum,
+                        void **hostaddrs,
+                        size_t *sizes, 
+                        unsigned short *kinds),
+              NO_RETURN,
+              ENTRY_PROBE_ARGS(),
+              REAL_SYMBOL_ARGS(device, mapnum, hostaddrs, sizes, kinds),
+              EXIT_PROBE_ARGS(),
+              DEBUG_ARGS("device=%d mapnum=%zu hostaddrs=%p sizes=%zu kinds=%hu", 
+                          device, mapnum, hostaddrs, sizes, kinds));
+
+XTR_WRAP_GOMP(GOMP_target_update_ext,
+              PROTOTYPE(int device,
+			size_t mapnum,
+			void **hostaddrs,
+			size_t *sizes,
+			unsigned char *kinds,
+			unsigned int flags,
+			void **depend),
+              NO_RETURN,
+	      ENTRY_PROBE_ARGS(),
+	      REAL_SYMBOL_ARGS(device, mapnum, hostaddrs, sizes, kinds, flags, depend),
+	      EXIT_PROBE_ARGS(),
+	      DEBUG_ARGS("device=%d mapnum=%zu hostaddrs=%p sizes=%zu kinds=%p flags=%u depend=%p",
+                          device, mapnum, hostaddrs, sizes, kinds, flags, depend));
+
 /*****************/
 /* OMP API calls */
 /*****************/
