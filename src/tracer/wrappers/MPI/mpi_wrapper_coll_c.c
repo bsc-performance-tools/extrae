@@ -116,7 +116,7 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	iotimer_t begin_time = LAST_READ_TIME;
   TRACE_MPIEVENT (begin_time, MPI_REDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
 
-	ret = PMPI_Reduce (sendbuf, recvbuf, count, datatype, op, root, csize);
+	ret = PMPI_Reduce (sendbuf, recvbuf, count, datatype, op, root, comm);
 
 	/*
 	*   event : REDUCE_EV                    value : EVT_END
@@ -174,7 +174,7 @@ int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	iotimer_t begin_time = LAST_READ_TIME;
   TRACE_MPIEVENT (begin_time, MPI_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
 
-	ret = PMPI_Allreduce (sendbuf, recvbuf, count, datatype, op, csize);
+	ret = PMPI_Allreduce (sendbuf, recvbuf, count, datatype, op, comm);
 
 	/*
 	*   event : ALLREDUCE_EV                 value : EVT_END
@@ -288,7 +288,7 @@ int MPI_BCast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int roo
 	iotimer_t begin_time = LAST_READ_TIME;
   TRACE_MPIEVENT (begin_time, MPI_BCAST_EV, EVT_BEGIN, root, size, me, comm, EMPTY);
 
-	ret = PMPI_Bcast (buffer, count, datatype, root, csize);
+	ret = PMPI_Bcast (buffer, count, datatype, root, comm);
 
 	/*
 	*   event : BCAST_EV                    value : EVT_END
@@ -357,7 +357,7 @@ int MPI_Alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	  sendcount * sendsize, me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-	  recvtype, csize);
+	  recvtype, comm);
 
 	/*
 	*   event : ALLTOALL_EV                  value : EVT_END
@@ -425,7 +425,7 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	  sendsize * sendc, me, comm, recvsize * recvc);
 
 	ret = PMPI_Alltoallv (sendbuf, sendcounts, sdispls, sendtype,
-	  recvbuf, recvcounts, rdispls, recvtype, csize);
+	  recvbuf, recvcounts, rdispls, recvtype, comm);
 
 	/*
 	*   event : ALLTOALLV_EV                  value : EVT_END
@@ -483,7 +483,7 @@ int MPI_Allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 	  me, comm, recvcount * recvsize * csize);
 
 	ret = PMPI_Allgather (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcount, recvtype, csize);
+	  recvbuf, recvcount, recvtype, comm);
 
 	/*
 	*   event : ALLGATHER_EV                    value : EVT_END
@@ -545,7 +545,7 @@ int MPI_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 	  me, comm, recvsize * recvc);
 
 	ret = PMPI_Allgatherv (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcounts, displs, recvtype, csize);
+	  recvbuf, recvcounts, displs, recvtype, comm);
 
 	/*
 	*   event : ALLGATHERV_EV                    value : EVT_END
@@ -611,7 +611,7 @@ int MPI_Gather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	}
 
 	ret = PMPI_Gather (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcount, recvtype, root, csize);
+	  recvbuf, recvcount, recvtype, root, comm);
 
 	/*
 	*   event : GATHER_EV                    value : EVT_END
@@ -690,7 +690,7 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	}
 
 	ret = PMPI_Gatherv (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcounts, displs, recvtype, root, csize);
+	  recvbuf, recvcounts, displs, recvtype, root, comm);
 
 	/*
 	*   event : GATHERV_EV                    value : EVT_END
@@ -763,7 +763,7 @@ int MPI_Scatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	}
 
 	ret = PMPI_Scatter (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-	  recvtype, root, csize);
+	  recvtype, root, comm);
 
 	/*
 	*   event : SCATTER_EV                   value : EVT_END
@@ -841,7 +841,7 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 		  recvcount * recvsize);
 	}
 
-	ret = PMPI_Scatterv (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, csize);
+	ret = PMPI_Scatterv (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
 
 	/*
 	*   event : SCATTERV_EV                  value : EVT_END
@@ -903,8 +903,7 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	iotimer_t begin_time = LAST_READ_TIME;
   TRACE_MPIEVENT (begin_time, MPI_REDUCESCAT_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcounts[me] * size);
 
-	ierror = PMPI_Reduce_scatter (sendbuf, recvbuf, recvcounts, datatype,
-	  op, csize);
+	ierror = PMPI_Reduce_scatter (sendbuf, recvbuf, recvcounts, datatype, op, comm);
 
 	/*
 	*   event : REDUCESCAT_EV                    value : EVT_END
@@ -962,7 +961,7 @@ int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
   TRACE_MPIEVENT (begin_time, MPI_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
-	ierror = PMPI_Scan (sendbuf, recvbuf, count, datatype, op, csize);
+	ierror = PMPI_Scan (sendbuf, recvbuf, count, datatype, op, comm);
 
 	/*
 	*   event : SCAN_EV                          value : EVT_END
@@ -1020,7 +1019,7 @@ int MPI_Exscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	TRACE_MPIEVENT (begin_time, MPI_EXSCAN_EV, EVT_BEGIN, op, count * size, me, comm,
 	  EMPTY);
 
-	ierror = PMPI_Exscan (sendbuf, recvbuf, count, datatype, op, csize);
+	ierror = PMPI_Exscan (sendbuf, recvbuf, count, datatype, op, comm);
 
 	/*
 	*   event : EXSCAN_EV                    value : EVT_END
@@ -2041,7 +2040,7 @@ int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
   TRACE_MPIEVENT (begin_time, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
 
 	ierror = PMPI_Reduce_scatter_block (sendbuf, recvbuf, recvcount, datatype,
-	  op, csize);
+	  op, comm);
 
 	/*
 	*   event : REDUCE_SCATTER_BLOCK_EV      value : EVT_END
@@ -2157,7 +2156,7 @@ int MPI_Alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 	  sendbytes, me, comm, recvbytes);
 
 	ret = PMPI_Alltoallw (sendbuf, sendcounts, sdispls, sendtypes,
-	  recvbuf, recvcounts, rdispls, recvtypes, csize);
+	  recvbuf, recvcounts, rdispls, recvtypes, comm);
 
 	/*
 	*   event : ALLTOALLW_EV                  value : EVT_END
@@ -2414,7 +2413,7 @@ int MPI_Neighbor_allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
-  ret = PMPI_Neighbor_allgather (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, csize);
+  ret = PMPI_Neighbor_allgather (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
 
   /*
    *   event  : NEIGHBOR_ALLGATHER_EV       value  : EVT_END
@@ -2528,7 +2527,7 @@ int MPI_Neighbor_allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatyp
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvsize * recvc);
 
-  ret = PMPI_Neighbor_allgatherv (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, csize);
+  ret = PMPI_Neighbor_allgatherv (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm);
 
   /*
    *   event  : NEIGHBOR_ALLGATHERV_EV      value  : EVT_END
@@ -2642,7 +2641,7 @@ int MPI_Neighbor_alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype 
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
     me, comm, recvcount * recvsize * indegree);
 
-  ret = PMPI_Neighbor_alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, csize);
+  ret = PMPI_Neighbor_alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
 
   /*
    *   event  : NEIGHBOR_ALLTOALL_EV        value  : EVT_END
@@ -2763,7 +2762,7 @@ int MPI_Neighbor_alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdisp
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
     me, comm, recvsize * recvc);
 
-  ret = PMPI_Neighbor_alltoallv (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, csize);
+  ret = PMPI_Neighbor_alltoallv (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm);
 
   /*
    *   event  : NEIGHBOR_ALLTOALLV_EV       value  : EVT_END
@@ -2904,7 +2903,7 @@ int MPI_Neighbor_alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, MPI_Aint *
   TRACE_MPIEVENT (begin_time, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
     me, comm, recvbytes);
 
-  ret = PMPI_Neighbor_alltoallw (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, csize);
+  ret = PMPI_Neighbor_alltoallw (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm);
 
   /*
    *   event  : NEIGHBOR_ALLTOALLW_EV       value  : EVT_END
