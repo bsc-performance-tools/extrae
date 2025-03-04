@@ -41,6 +41,7 @@
 #include "xalloc.h"
 #include "extrae_user_events.h"
 #include "gpu_event_info.h"
+#include "trace_mode.h"
 
 #if defined(__APPLE__)
 # define HOST_NAME_MAX 512

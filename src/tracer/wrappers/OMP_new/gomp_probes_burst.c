@@ -1082,7 +1082,7 @@ void xtr_probe_exit_GOMP_taskwait_bursts ()
 
 void xtr_probe_entry_GOMP_taskyield_bursts ()
 {
-  xtr_stats_update_OMP_synchronization_entry();
+  xtr_stats_OMP_update_synchronization_entry();
   xtr_burst_end();
 }
 

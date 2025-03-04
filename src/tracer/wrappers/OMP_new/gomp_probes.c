@@ -1306,7 +1306,7 @@ void xtr_probe_entry_GOMP_taskyield()
 {
 	Extrae_OpenMP_Call_Entry(GOMP_TASKYIELD_VAL);
 	Extrae_OpenMP_Sync_Entry(NEW_OMP_TASKYIELD_VAL);
-	xtr_stats_update_OMP_synchronization_entry();
+	xtr_stats_OMP_update_synchronization_entry();
 }
 
 void xtr_probe_exit_GOMP_taskyield()
