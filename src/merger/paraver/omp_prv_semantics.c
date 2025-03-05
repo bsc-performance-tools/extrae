@@ -763,6 +763,11 @@ static int OMP_Call_Event (
     case GOMP_LOOP_DOACROSS_RUNTIME_START_VAL:
     case GOMP_TASK_VAL:
     case GOMP_TASKLOOP_VAL:
+        Switch_State (STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
+        trace_paraver_state (cpu, ptask, task, thread, current_time);
+        break;
+
+    //Target memory transfers
     case GOMP_TARGET_VAL:
     case GOMP_TARGET_DATA_VAL:
     case GOMP_TARGET_END_DATA_VAL:
