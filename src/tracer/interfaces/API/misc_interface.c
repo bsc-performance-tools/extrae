@@ -964,7 +964,7 @@ void extrae_restart (void)
 INTERFACE_ALIASES_F(_tracing_mode,_TRACING_MODE,extrae_tracing_mode,(unsigned long long *burst_threshold),void)
 void extrae_tracing_mode(unsigned long long *burst_threshold)
 {
-	TMODE_setCurrent(burst_threshold);
+	TMODE_setCurrent(*burst_threshold);
 }
 
 INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (extrae_type_t *type, extrae_value_t *value),void)
