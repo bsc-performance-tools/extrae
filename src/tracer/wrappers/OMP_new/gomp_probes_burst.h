@@ -209,6 +209,23 @@ void xtr_probe_exit_GOMP_single_start_bursts() __attribute__((weak));
 void xtr_probe_entry_GOMP_teams_reg_bursts() __attribute__((weak));
 void xtr_probe_exit_GOMP_teams_reg_bursts() __attribute__((weak));
 
+void xtr_probe_entry_GOMP_target_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_data_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_data_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_end_data_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_end_data_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_update_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_update_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_enter_exit_data_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_enter_exit_data_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_ext_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_ext_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_data_ext_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_data_ext_bursts() __attribute__((weak));
+void xtr_probe_entry_GOMP_target_update_ext_bursts() __attribute__((weak));
+void xtr_probe_exit_GOMP_target_update_ext_bursts() __attribute__((weak));
+
 void xtr_probe_entry_omp_set_num_threads_bursts() __attribute__((weak));
 void xtr_probe_exit_omp_set_num_threads_bursts(int num_threads) __attribute__((weak));
 void xtr_probe_entry_omp_set_num_threads__bursts() __attribute__((weak));

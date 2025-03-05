@@ -1213,6 +1213,106 @@ void xtr_probe_exit_GOMP_teams_reg_bursts()
   xtr_burst_begin();
 }
 
+/**
+ * GOMP target
+ */
+
+void xtr_probe_entry_GOMP_target_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
+void xtr_probe_entry_GOMP_target_data_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_data_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
+void xtr_probe_entry_GOMP_target_end_data_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_end_data_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
+void xtr_probe_entry_GOMP_target_update_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_update_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
+void xtr_probe_entry_GOMP_target_enter_exit_data_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_enter_exit_data_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
+void xtr_probe_entry_GOMP_target_ext_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_ext_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
+void xtr_probe_entry_GOMP_target_data_ext_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_data_ext_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
+void xtr_probe_entry_GOMP_target_update_ext_bursts()
+{
+  xtr_stats_OMP_update_overhead_entry();
+  xtr_burst_end();
+}
+
+void xtr_probe_exit_GOMP_target_update_ext_bursts()
+{
+  xtr_stats_OMP_update_overhead_exit();
+  xtr_burst_begin();
+}
+
 void xtr_probe_entry_omp_set_lock_bursts(void *lock)
 {
   if( xtr_OMP_check_config(OMP_LOCKS_ENABLED) )

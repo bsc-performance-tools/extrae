@@ -1,6 +1,9 @@
 include $(top_srcdir)/PATHS
 
-noinst_LTLIBRARIES  = libstats_omp.la libstats_mpi.la
+noinst_LTLIBRARIES  = libstats_omp.la
+if HAVE_MPI
+  noinst_LTLIBRARIES  += libstats_mpi.la
+endif
 
 MPI_STATS_SOURCES = MPI/mpi_stats.c MPI/mpi_stats.h
 OMP_STATS_SOURCES = OMP/omp_utils.c OMP/omp_utils.h OMP/omp_stats.c OMP/omp_stats.h
