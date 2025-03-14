@@ -829,70 +829,65 @@ burst_CFLAGS  = -DHAVE_BURST -I$(STATS_DIR) -I$(BURST_MODE_DIR)
 libnewomptrace_la_LIBADD     += $(STATS_LIB)/libstats_omp.la
 libnewomptrace_la_CFLAGS     += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
 
-if HAVE_MPI
-libmpitrace_la_LIBADD        += $(STATS_LIB)/libstats_mpi.la
-libmpitracef_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
-libptmpitrace_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
-libptmpitracef_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-libompitrace_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
-libompitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
 lib_dyn_mpitracec_la_LIBADD  += $(STATS_LIB)/libstats_mpi.la
 lib_dyn_mpitracef_la_LIBADD  += $(STATS_LIB)/libstats_mpi.la
 lib_dyn_mpitracecf_la_LIBADD += $(STATS_LIB)/libstats_mpi.la
 
-libnewompitrace_la_LIBADD      += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-libnewompitracef_la_LIBADD     += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-libcudanewompitrace_la_LIBADD  += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-
-if HAVE_CUDA
-libcudanewompitrace_la_LIBADD   += $(newompi_burst_MODULES)
-libcudanewompitracef_la_LIBADD  += $(newompi_burst_MODULES)
-endif
-
-libmpitrace_la_CFLAGS        += $(burst_CFLAGS)
-libmpitracef_la_CFLAGS       += $(burst_CFLAGS)
-libptmpitrace_la_CFLAGS      += $(burst_CFLAGS)
-libptmpitracef_la_CFLAGS     += $(burst_CFLAGS)
-libompitrace_la_CFLAGS       += $(burst_CFLAGS)
-libompitracef_la_CFLAGS      += $(burst_CFLAGS)
 lib_dyn_mpitracec_la_CFLAGS  += $(burst_CFLAGS)
 lib_dyn_mpitracef_la_CFLAGS  += $(burst_CFLAGS)
 lib_dyn_mpitracecf_la_CFLAGS += $(burst_CFLAGS)
 
-libnewompitrace_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
-libnewompitracef_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+if HAVE_MPI
+  libmpitrace_la_LIBADD        += $(STATS_LIB)/libstats_mpi.la
+  libmpitracef_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
+  libptmpitrace_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
+  libptmpitracef_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
+  libompitrace_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
+  libompitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
+
+  libnewompitrace_la_LIBADD      += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
+  libnewompitracef_la_LIBADD     += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
+
+  libmpitrace_la_CFLAGS        += $(burst_CFLAGS)
+  libmpitracef_la_CFLAGS       += $(burst_CFLAGS)
+  libptmpitrace_la_CFLAGS      += $(burst_CFLAGS)
+  libptmpitracef_la_CFLAGS     += $(burst_CFLAGS)
+  libompitrace_la_CFLAGS       += $(burst_CFLAGS)
+  libompitracef_la_CFLAGS      += $(burst_CFLAGS)
+
+  libnewompitrace_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+  libnewompitracef_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
 
 if HAVE_CUDA
-  libcudanewompitrace_la_CFLAGS   += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
-  libcudanewompitracef_la_CFLAGS  += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
+    libcudampitrace_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
+    libcudampitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
+    libcudanewompitrace_la_LIBADD   += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
+    libcudanewompitracef_la_LIBADD  += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
+
+    libcudanewompitrace_la_CFLAGS   += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
+    libcudanewompitracef_la_CFLAGS  += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
 endif
 
 if SINGLE_MPI_LIBRARY
-  libmpitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-  libptmpitracecf_la_LIBADD   += $(STATS_LIB)/libstats_mpi.la
-  libompitracecf_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
+    libmpitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
+    libptmpitracecf_la_LIBADD   += $(STATS_LIB)/libstats_mpi.la
+    libompitracecf_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
 
-  libnewompitracecf_la_LIBADD += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
+    libnewompitracecf_la_LIBADD += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
 
-  libmpitracecf_la_CFLAGS     += $(burst_CFLAGS)
-  libptmpitracecf_la_CFLAGS   += $(burst_CFLAGS)
-  libompitracecf_la_CFLAGS    += $(burst_CFLAGS)
+    libmpitracecf_la_CFLAGS     += $(burst_CFLAGS)
+    libptmpitracecf_la_CFLAGS   += $(burst_CFLAGS)
+    libompitracecf_la_CFLAGS    += $(burst_CFLAGS)
 
-  libnewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
-
-if HAVE_CUDA
-    libcudanewompitracecf_la_LIBADD += $(newompi_burst_MODULES)
-endif
-
-  libmpitracecf_la_CFLAGS    += $(burst_CFLAGS)
-  libptmpitracecf_la_CFLAGS  += $(burst_CFLAGS)
-  libompitracecf_la_CFLAGS   += $(burst_CFLAGS)
+    libnewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
 
 if HAVE_CUDA
-    libcudanewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
-endif
-endif
+      libcudanewompitracecf_la_LIBADD += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
+      libcudampitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
 
+      libcudanewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
+endif
+endif
 endif
 
 #
