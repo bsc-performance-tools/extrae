@@ -65,7 +65,7 @@ GASPI_Event(event_t *current_event, unsigned long long current_time, unsigned cp
 			Switch_State(STATE_INITFINI, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case GASPI_BARRIER_VAL:
-			Switch_State(STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
+			Switch_State(STATE_BCAST, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case GASPI_WRITE_VAL:
 		case GASPI_READ_VAL:

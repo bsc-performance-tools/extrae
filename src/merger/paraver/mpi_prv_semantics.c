@@ -170,8 +170,6 @@ static int Get_State (unsigned int EvType)
 		break;
 		case MPI_BARRIER_EV:
 		case MPI_IBARRIER_EV:
-			state = STATE_BARRIER;
-		break;
 		case MPI_REDUCE_EV:
 		case MPI_ALLREDUCE_EV:
 		case MPI_BCAST_EV:
@@ -212,8 +210,8 @@ static int Get_State (unsigned int EvType)
 		case MPI_INEIGHBOR_ALLTOALLV_EV:
 		case MPI_NEIGHBOR_ALLTOALLW_EV:
 		case MPI_INEIGHBOR_ALLTOALLW_EV:
-        case MPI_EXSCAN_EV:
-        case MPI_IEXSCAN_EV:
+		case MPI_EXSCAN_EV:
+		case MPI_IEXSCAN_EV:
 			state = STATE_BCAST;
 		break;
 		case MPI_WIN_FENCE_EV:

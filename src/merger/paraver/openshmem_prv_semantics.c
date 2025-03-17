@@ -126,8 +126,6 @@ static int Get_State (unsigned int EvType)
 
 	  case SHMEM_BARRIER_ALL_EV:
 	  case SHMEM_BARRIER_EV:
-		return STATE_BARRIER;
-
 	  case SHMEM_BROADCAST32_EV:
 	  case SHMEM_BROADCAST64_EV:
 	  case SHMEM_COLLECT32_EV:
@@ -146,7 +144,7 @@ static int Get_State (unsigned int EvType)
 	  case SHMEM_LONGLONG_MAX_TO_ALL_EV:
 	  case SHMEM_SHORT_MAX_TO_ALL_EV:
 	  case SHMEM_DOUBLE_MIN_TO_ALL_EV:
-		return STATE_SYNC;
+		return STATE_BCAST;
 
 	  case SHMEM_INT_WAIT_EV:
 	  case SHMEM_INT_WAIT_UNTIL_EV:
