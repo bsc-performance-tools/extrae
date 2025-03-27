@@ -863,10 +863,23 @@ if HAVE_CUDA
     libcudampitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
     libcudanewompitrace_la_LIBADD   += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
     libcudanewompitracef_la_LIBADD  += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
+    libptcudampitrace_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
+    libptcudampitracef_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
 
     libcudanewompitrace_la_CFLAGS   += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
     libcudanewompitracef_la_CFLAGS  += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
 endif
+
+  liboclmpitrace_la_LIBADD        += $(STATS_LIB)/libstats_mpi.la
+  liboclmpitracef_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
+  liboaccmpitrace_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
+  liboaccmpitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
+  liboacccudampitrace_la_LIBADD   += $(STATS_LIB)/libstats_mpi.la
+  liboacccudampitracef_la_LIBADD  += $(STATS_LIB)/libstats_mpi.la
+  libsmpssmpitrace_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
+  libsmpssmpitracef_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
+  libnanosmpitrace_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
+  libnanosmpitracef_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
 
 if SINGLE_MPI_LIBRARY
     libmpitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
@@ -881,7 +894,11 @@ if SINGLE_MPI_LIBRARY
 
     libnewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
 
+    liboclmpitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
+    liboaccmpitracecf_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
+
 if HAVE_CUDA
+      liboacccudampitracecf_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
       libcudanewompitracecf_la_LIBADD += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
       libcudampitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
 
