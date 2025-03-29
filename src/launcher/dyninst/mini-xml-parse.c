@@ -24,11 +24,7 @@
 #include "common.h"
 #include "xalloc.h"
 
-#if !defined(HAVE_XML2)
-
-# error "You need libxml2 to compile this file!"
-
-#else
+#if defined(HAVE_XML2)
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
