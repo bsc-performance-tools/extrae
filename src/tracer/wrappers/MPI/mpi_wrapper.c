@@ -224,29 +224,44 @@ static void Start_Uncore_Service()
 	char *env_extrae_uncore = NULL;
 	char *env_extrae_uncore_launch_cmd = NULL;
 
-	PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm parent;
+	PMPI_Comm_get_parent(&parent);
 
-	if (rank == 0)
+	if (parent == MPI_COMM_NULL)
 	{
-		env_extrae_uncore = getenv("EXTRAE_UNCORE");
-		env_extrae_uncore_launch_cmd = getenv("EXTRAE_UNCORE_LAUNCH_CMD");
-
-		if (env_extrae_uncore != NULL) 
+		// This is the parent application
+		PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if (rank == 0)
 		{
-			num_readers_per_node = atoi(env_extrae_uncore);
-			activate_readers = (num_readers_per_node > 0);
-		}
-	}
+			// Check if it is configured to spawn uncore monitors
+			env_extrae_uncore = getenv("EXTRAE_UNCORE");
+			env_extrae_uncore_launch_cmd = getenv("EXTRAE_UNCORE_LAUNCH_CMD");
 
-	PMPI_Bcast (&activate_readers, 1, MPI_INT, 0, MPI_COMM_WORLD);
+			if (env_extrae_uncore != NULL) 
+			{
+				num_readers_per_node = atoi(env_extrae_uncore);
+				activate_readers = (num_readers_per_node > 0);
+			}
+		}
+
+		PMPI_Bcast (&activate_readers, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 #if defined(DEBUG)
-	fprintf(stderr, "[DEBUG] Start_Uncore_Service: rank=%d num_readers=%d noderep=%d numNodes=%d\n", rank, (getenv("EXTRAE_UNCORE") != NULL ? atoi(getenv("EXTRAE_UNCORE")) : 0), amIFirstOnNode(), numNodes);
+		fprintf(stderr, "[DEBUG] Start_Uncore_Service: rank=%d num_readers=%d noderep=%d numNodes=%d\n", rank, (getenv("EXTRAE_UNCORE") != NULL ? atoi(getenv("EXTRAE_UNCORE")) : 0), amIFirstOnNode(), numNodes);
 #endif
 
-	if (activate_readers)
+		if (activate_readers)
+		{
+			// Spawn uncore monitors
+			PMPI_Comm_spawn(env_extrae_uncore_launch_cmd, NULL, num_readers_per_node * numNodes, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &uncore_intercomm, MPI_ERRCODES_IGNORE);
+			// Sync all parent ranks with the monitors
+			PMPI_Barrier(uncore_intercomm);
+		}
+	}
+	else if (getenv("EXTRAE_UNCORE_SERVICE_WORKER") != NULL)
 	{
-		PMPI_Comm_spawn(env_extrae_uncore_launch_cmd, NULL, num_readers_per_node * numNodes, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &uncore_intercomm, MPI_ERRCODES_IGNORE);
+		// This is an uncore monitor, sync with parent
+		PMPI_Barrier(parent);
 	}
 }
 
