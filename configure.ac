@@ -559,7 +559,6 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/JAVA/Makefile \
   src/tracer/wrappers/OPENACC/Makefile \
   src/tracer/wrappers/GASPI/Makefile \
-  src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \
   src/tracer/sampling/common/Makefile \
@@ -734,8 +733,6 @@ AC_SUBST( [TRACER_LIB], ['$(top_builddir)/src/tracer'] )
 AC_SUBST( [MERGER_LIB], ['$(top_builddir)/src/merger'] )
 AC_SUBST( [CLOCKS_LIB], ['$(TRACER_LIB)/clocks'] )
 AC_SUBST( [HWC_LIB], ['$(TRACER_LIB)/hwc'] )
-AC_SUBST( [STATS_LIB], ['$(TRACER_LIB)/stats'] )
-AC_SUBST( [BURST_LIB], ['$(TRACER_LIB)/burst-mode'] )
 AC_SUBST( [WRAPPERS_LIB], ['$(TRACER_LIB)/wrappers'] )
 AC_SUBST( [INTERFACES_LIB], ['$(TRACER_LIB)/interfaces'] )
 AC_SUBST( [PROBES_LIB], ['$(TRACER_LIB)/probes'] )

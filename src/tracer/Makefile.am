@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-SUBDIRS = clocks hwc interfaces wrappers sampling stats
+SUBDIRS = clocks hwc interfaces wrappers sampling
 
 if HAVE_ONLINE
   SUBDIRS += online
@@ -249,21 +249,28 @@ burst_mode_SRCS = \
  $(BURST_MODE_DIR)/burst_mode.c \
  $(BURST_MODE_DIR)/burst_mode.h
 
+mpi_stats_SRCS = \
+ $(STATS_DIR)/MPI/mpi_stats.c
+
+omp_stats_SRCS = \
+ $(STATS_DIR)/OMP/omp_utils.c \
+ $(STATS_DIR)/OMP/omp_stats.c
+
 # OPENACC trace
 liboacctrace_la_SOURCES = $(core_SRCS)
-liboacccudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-liboaccmpitrace_la_SOURCES = $(core_SRCS)
-liboaccmpitracef_la_SOURCES = $(core_SRCS) extrae_mpif.h
-liboacccudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-liboacccudampitracef_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) extrae_mpif.h
+liboacccudatrace_la_SOURCES = $(liboacctrace_la_SOURCES) $(WRAPPERS_CUDA)
+liboaccmpitrace_la_SOURCES = $(liboacctrace_la_SOURCES) $(mpi_stats_SRCS)
+liboaccmpitracef_la_SOURCES = $(liboaccmpitrace_la_SOURCES) extrae_mpif.h
+liboacccudampitrace_la_SOURCES = $(liboacctrace_la_SOURCES) $(WRAPPERS_CUDA) $(mpi_stats_SRCS)
+liboacccudampitracef_la_SOURCES = $(liboacccudampitrace_la_SOURCES) extrae_mpif.h
 if SINGLE_MPI_LIBRARY
-  liboaccmpitracecf_la_SOURCES = $(core_SRCS) extrae_mpif.h
-  liboacccudampitracecf_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) extrae_mpif.h
+  liboaccmpitracecf_la_SOURCES = $(liboaccmpitracef_la_SOURCES)
+  liboacccudampitracecf_la_SOURCES = $(liboacccudampitracef_la_SOURCES)
 endif
 
 # GASPI trace
-libmpigaspitrace_la_SOURCES = $(core_SRCS)
 libgaspitrace_la_SOURCES = $(core_SRCS)
+libmpigaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES) $(mpi_stats_SRCS)
 libompigaspitrace_la_SOURCES = $(libmpigaspitrace_la_SOURCES)
 libompgaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES)
 libptmpigaspitrace_la_SOURCES = $(libmpigaspitrace_la_SOURCES)
@@ -277,83 +284,83 @@ libnanosgaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES)
 
 # CUDA trace
 libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
+libcudampitrace_la_SOURCES = $(libcudatrace_la_SOURCES) $(mpi_stats_SRCS)
 libcudampitracef_la_SOURCES = $(libcudampitrace_la_SOURCES) extrae_mpif.h
-libcudaomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-libcudanewomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-libptcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-libptcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-libptcudampitracef_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) extrae_mpif.h
+libcudaomptrace_la_SOURCES = $(libcudatrace_la_SOURCES)
+libcudanewomptrace_la_SOURCES = $(libcudatrace_la_SOURCES) $(omp_stats_SRCS) $(burst_mode_SRCS)
+libptcudatrace_la_SOURCES = $(libcudatrace_la_SOURCES)
+libptcudampitrace_la_SOURCES = $(libcudampitrace_la_SOURCES)
+libptcudampitracef_la_SOURCES = $(libcudampitracef_la_SOURCES)
 
 if SINGLE_MPI_LIBRARY
-  libcudampitracecf_la_SOURCES = $(libcudampitrace_la_SOURCES) extrae_mpif.h
+  libcudampitracecf_la_SOURCES = $(libcudampitracef_la_SOURCES)
 endif
 
 # OpenCL trace
 libocltrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL)
-liboclmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL)
+liboclmpitrace_la_SOURCES = $(libocltrace_la_SOURCES) $(mpi_stats_SRCS)
 liboclmpitracef_la_SOURCES = $(liboclmpitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
-  liboclmpitracecf_la_SOURCES = $(liboclmpitrace_la_SOURCES) extrae_mpif.h
+  liboclmpitracecf_la_SOURCES = $(liboclmpitracef_la_SOURCES)
 endif
 
 # CUDA trace & MPItrace & OpenMP
-libcudaompitrace_la_SOURCES = $(core_SRCS)
-libcudaompitracef_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
-libcudanewompitrace_la_SOURCES = $(core_SRCS)
-libcudanewompitracef_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
+libcudaompitrace_la_SOURCES = $(libcudampitrace_la_SOURCES)
+libcudaompitracef_la_SOURCES = $(libcudampitracef_la_SOURCES)
+libcudanewompitrace_la_SOURCES = $(libcudatrace_la_SOURCES) $(mpi_stats_SRCS) $(omp_stats_SRCS) $(burst_mode_SRCS)
+libcudanewompitracef_la_SOURCES = $(libcudanewompitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
-  libcudaompitracecf_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
-  libcudanewompitracecf_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
+  libcudaompitracecf_la_SOURCES = $(libcudaompitracef_la_SOURCES)
+  libcudanewompitracecf_la_SOURCES = $(libcudanewompitracef_la_SOURCES)
 endif
 
 # MPItrace & Sequential trace
-libmpitrace_la_SOURCES = $(core_SRCS) $(burst_mode_SRCS)
+libmpitrace_la_SOURCES = $(core_SRCS) $(mpi_stats_SRCS) $(burst_mode_SRCS)
 libmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) extrae_mpif.h
 libseqtrace_la_SOURCES = $(core_SRCS)
 
 if SINGLE_MPI_LIBRARY
-  libmpitracecf_la_SOURCES = $(libmpitrace_la_SOURCES) extrae_mpif.h
+  libmpitracecf_la_SOURCES = $(libmpitracef_la_SOURCES)
 endif
 
-libptmpitrace_la_SOURCES = $(core_SRCS)
+libptmpitrace_la_SOURCES = $(core_SRCS) $(mpi_stats_SRCS)
 libptmpitracef_la_SOURCES = $(libptmpitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
-  libptmpitracecf_la_SOURCES = $(libptmpitrace_la_SOURCES) extrae_mpif.h
+  libptmpitracecf_la_SOURCES = $(libptmpitracef_la_SOURCES)
 endif
 
 # OpenMP & OpenMP + MPI
-libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
-libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
-libomptrace_la_SOURCES = $(core_SRCS) $(burst_mode_SRCS)
-libnewomptrace_la_SOURCES = $(core_SRCS) $(burst_mode_SRCS)
-libnewompitrace_la_SOURCES = $(core_SRCS) $(burst_mode_SRCS)
-libnewompitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
+libompitrace_la_SOURCES = $(core_SRCS) $(mpi_stats_SRCS)
+libompitracef_la_SOURCES = $(libompitrace_la_SOURCES) extrae_mpif.h
+libomptrace_la_SOURCES = $(core_SRCS)
+libnewomptrace_la_SOURCES = $(core_SRCS) $(omp_stats_SRCS) $(burst_mode_SRCS)
+libnewompitrace_la_SOURCES = $(libnewomptrace_la_SOURCES) $(mpi_stats_SRCS)
+libnewompitracef_la_SOURCES = $(libnewompitrace_la_SOURCES)  extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
-  libompitracecf_la_SOURCES = $(libmpitracecf_la_SOURCES)
-  libnewompitracecf_la_SOURCES = $(libmpitracecf_la_SOURCES)
+  libompitracecf_la_SOURCES = $(libompitracef_la_SOURCES)
+  libnewompitracecf_la_SOURCES = $(libnewompitracef_la_SOURCES)
 endif
 
 # SMPSS & SMPSS + MPI
 libsmpsstrace_la_SOURCES = $(core_SRCS)
-libsmpssmpitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
-libsmpssmpitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
+libsmpssmpitrace_la_SOURCES = $(libsmpsstrace_la_SOURCES) $(mpi_stats_SRCS)
+libsmpssmpitracef_la_SOURCES = $(libsmpssmpitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
-  libsmpssmpitracecf_la_SOURCES = $(libmpitracecf_la_SOURCES)
+  libsmpssmpitracecf_la_SOURCES = $(libsmpssmpitracef_la_SOURCES)
 endif
 
 # Nanos
 libnanostrace_la_SOURCES = $(core_SRCS)
-libnanosmpitrace_la_SOURCES = $(core_SRCS)
+libnanosmpitrace_la_SOURCES = $(libnanostrace_la_SOURCES) $(mpi_stats_SRCS)
 libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
-  libnanosmpitracecf_la_SOURCES = $(libnanosmpitrace_la_SOURCES) extrae_mpif.h
+  libnanosmpitracecf_la_SOURCES = $(libnanosmpitracef_la_SOURCES)
 endif
 
 # pthreads
@@ -625,6 +632,8 @@ core_INCLUDES = \
 # XXX Folder OMP_new will be renamed to OMP (already included by core_INCLUDES above) when deprecated OpenMP support is removed
 NEW_OMP_INCLUDES = -I$(WRAPPERS_INC)/OMP_new 
 
+burst_CFLAGS  = -DHAVE_BURST -I$(STATS_DIR) -I$(BURST_MODE_DIR)
+
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
   core_INCLUDES += @PAPI_CFLAGS@
@@ -733,11 +742,11 @@ endif
 
 libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
-libmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-libmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
+libmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) $(burst_CFLAGS)
+libmpitracef_la_CFLAGS = $(libmpitrace_la_CFLAGS)
 
 if SINGLE_MPI_LIBRARY
-  libmpitracecf_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
+  libmpitracecf_la_CFLAGS  = $(libmpitracef_la_CFLAGS)
 endif
 
 libptmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DPTHREAD_SUPPORT $(PTHREAD_CFLAGS)
@@ -750,15 +759,15 @@ endif
 libompitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 libompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 libomptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
-libnewomptrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
-libnewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-libnewompitracef_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
+libnewomptrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB) $(burst_CFLAGS)
+libnewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) $(burst_CFLAGS)
+libnewompitracef_la_CFLAGS = $(libnewompitrace_la_CFLAGS)
 libcudanewompitrace_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DNEW_OMP_SUPPORT
 libcudanewompitracef_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS) -DNEW_OMP_SUPPORT
 
 if SINGLE_MPI_LIBRARY
   libompitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-  libnewompitracecf_la_CFLAGS = $(NEW_OMP_INCLUDES) $(core_INCLUDES) $(core_CFLAGS) -DNEW_OMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
+  libnewompitracecf_la_CFLAGS = $(libnewompitracef_la_CFLAGS)
 endif
 
 libsmpssmpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DSMPSS_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
@@ -822,89 +831,6 @@ if SINGLE_MPI_LIBRARY
   libompitracecf_la_CFLAGS   += -DHAVE_ONLINE -I$(ONLINE_INC)
 endif
 
-endif
-
-burst_CFLAGS  = -DHAVE_BURST -I$(STATS_DIR) -I$(BURST_MODE_DIR)
-
-libnewomptrace_la_LIBADD     += $(STATS_LIB)/libstats_omp.la
-libnewomptrace_la_CFLAGS     += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
-
-lib_dyn_mpitracec_la_LIBADD  += $(STATS_LIB)/libstats_mpi.la
-lib_dyn_mpitracef_la_LIBADD  += $(STATS_LIB)/libstats_mpi.la
-lib_dyn_mpitracecf_la_LIBADD += $(STATS_LIB)/libstats_mpi.la
-
-lib_dyn_mpitracec_la_CFLAGS  += $(burst_CFLAGS)
-lib_dyn_mpitracef_la_CFLAGS  += $(burst_CFLAGS)
-lib_dyn_mpitracecf_la_CFLAGS += $(burst_CFLAGS)
-
-if HAVE_MPI
-  libmpitrace_la_LIBADD        += $(STATS_LIB)/libstats_mpi.la
-  libmpitracef_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
-  libptmpitrace_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
-  libptmpitracef_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-  libompitrace_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
-  libompitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
-
-  libnewompitrace_la_LIBADD      += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-  libnewompitracef_la_LIBADD     += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-
-  libmpitrace_la_CFLAGS        += $(burst_CFLAGS)
-  libmpitracef_la_CFLAGS       += $(burst_CFLAGS)
-  libptmpitrace_la_CFLAGS      += $(burst_CFLAGS)
-  libptmpitracef_la_CFLAGS     += $(burst_CFLAGS)
-  libompitrace_la_CFLAGS       += $(burst_CFLAGS)
-  libompitracef_la_CFLAGS      += $(burst_CFLAGS)
-
-  libnewompitrace_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
-  libnewompitracef_la_CFLAGS    += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
-
-if HAVE_CUDA
-    libcudampitrace_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
-    libcudampitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
-    libcudanewompitrace_la_LIBADD   += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-    libcudanewompitracef_la_LIBADD  += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-    libptcudampitrace_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-    libptcudampitracef_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
-
-    libcudanewompitrace_la_CFLAGS   += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
-    libcudanewompitracef_la_CFLAGS  += $(burst_CFLAGS) -DNEW_OMP_SUPPORT
-endif
-
-  liboclmpitrace_la_LIBADD        += $(STATS_LIB)/libstats_mpi.la
-  liboclmpitracef_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
-  liboaccmpitrace_la_LIBADD       += $(STATS_LIB)/libstats_mpi.la
-  liboaccmpitracef_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
-  liboacccudampitrace_la_LIBADD   += $(STATS_LIB)/libstats_mpi.la
-  liboacccudampitracef_la_LIBADD  += $(STATS_LIB)/libstats_mpi.la
-  libsmpssmpitrace_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
-  libsmpssmpitracef_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-  libnanosmpitrace_la_LIBADD      += $(STATS_LIB)/libstats_mpi.la
-  libnanosmpitracef_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-
-if SINGLE_MPI_LIBRARY
-    libmpitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-    libptmpitracecf_la_LIBADD   += $(STATS_LIB)/libstats_mpi.la
-    libompitracecf_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
-
-    libnewompitracecf_la_LIBADD += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-
-    libmpitracecf_la_CFLAGS     += $(burst_CFLAGS)
-    libptmpitracecf_la_CFLAGS   += $(burst_CFLAGS)
-    libompitracecf_la_CFLAGS    += $(burst_CFLAGS)
-
-    libnewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
-
-    liboclmpitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-    liboaccmpitracecf_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
-
-if HAVE_CUDA
-      liboacccudampitracecf_la_LIBADD    += $(STATS_LIB)/libstats_mpi.la
-      libcudanewompitracecf_la_LIBADD += $(STATS_LIB)/libstats_omp.la $(STATS_LIB)/libstats_mpi.la
-      libcudampitracecf_la_LIBADD     += $(STATS_LIB)/libstats_mpi.la
-
-      libcudanewompitracecf_la_CFLAGS += $(burst_CFLAGS)  -DNEW_OMP_SUPPORT
-endif
-endif
 endif
 
 #
@@ -1064,7 +990,7 @@ lib_dyn_cudampitracecf_la_LDFLAGS = $(lib_dyn_mpitracecf_la_LDFLAGS)
 #libextrae_core_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 #
 #libextrae_mpi_la_SOURCES = $(WRAPPERS_MPI) $(core_MPI_SRCS)
-#libextrae_mpi_la_LIBADD  = $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+#libextrae_mpi_la_LIBADD  = $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB)
 #libextrae_mpi_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DSTANDALONE
 #if HAVE_ONLINE
 #libextrae_mpi_la_LIBADD += $(ONLINE_LIm)/libonline.la

@@ -59,6 +59,7 @@
 	BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 }
 
+#if defined(HAVE_BURST)
 #define TRACE_MPIEVENT(evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux) \
 { \
 	if (tracejant) \
@@ -98,6 +99,41 @@
 		} \
 	} \
 }
+#else
+#define TRACE_MPIEVENT(evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux) \
+{ \
+	if (tracejant) \
+	{ \
+		int thread_id = THREADID;                                                          \
+		iotimer_t _tmp_current_time = evttime;                                             \
+		                                                                                   \
+		NORMAL_MODE_TRACE_MPIEVENT(thread_id,                                            \
+									_tmp_current_time,                                    \
+									evttype,                                              \
+									evtvalue,                                             \
+									evttarget,                                            \
+									evtsize,                                              \
+									evttag,                                               \
+									evtcomm,                                              \
+									evtaux,                                               \
+									FOUR_CALLS_AGO);                                      \
+		/* Check for pending changes */                                                    \
+		if (evtvalue == EVT_BEGIN)                                                         \
+		{                                                                                  \
+			INCREASE_MPI_DEEPNESS(thread_id);                                                \
+			last_mpi_begin_time = _tmp_current_time;                                         \
+		}                                                                                  \
+		else if (evtvalue == EVT_END)                                                      \
+		{                                                                                  \
+			DECREASE_MPI_DEEPNESS(thread_id);                                                \
+		                                                                                   \
+			/* Update last parallel region time */                                           \
+			last_mpi_exit_time = _tmp_current_time;                                          \
+		} \
+	} \
+}
+#endif
+
 
 #define NORMAL_MODE_TRACE_MPIEVENT(thread_id,evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux,offset) \
 {                                                               \

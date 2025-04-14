@@ -59,8 +59,7 @@ endif
 online_root_bin_SOURCES += \
   GremlinsRoot.cpp GremlinsRoot.h
 
-online_root_bin_LDADD        = extractors/libcontainers-fe.la $(STATS_LIB)/libstats.la $(COMMON_LIB)/libcommon.la
-online_root_bin_DEPENDENCIES = $(STATS_LIB)/libstats.la
+online_root_bin_LDADD        = extractors/libcontainers-fe.la $(COMMON_LIB)/libcommon.la
 
 
 #########################
