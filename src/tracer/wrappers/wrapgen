@@ -137,8 +137,9 @@ fd_events_h   = open(API.lower()+'_events.h', 'w')
 
 fd_interfaces = open( Interfaces, "r" )
 all_functions = fd_interfaces.readlines()
-
-fd_wrappers_c.write("#define _GNU_SOURCE\n\n")
+fd_wrappers_c.write("#if !defined(_GNU_SOURCE)\n")
+fd_wrappers_c.write("#define _GNU_SOURCE\n")
+fd_wrappers_c.write("#endif\n\n")
 
 write_header( fd_wrappers_c, True )
 

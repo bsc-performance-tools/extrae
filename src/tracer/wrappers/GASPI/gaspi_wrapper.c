@@ -21,7 +21,10 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#define _GNU_SOURCE
+#if !defined(_GNU_SOURCE)
+# define _GNU_SOURCE
+#endif
+
 #include "common.h"
 
 #ifdef HAVE_STDIO_H

@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
  *                                   Extrae                                  *
@@ -21,6 +20,10 @@
  *                                 ---------                                 *
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
+
+#if !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 
 #include "common.h"
 

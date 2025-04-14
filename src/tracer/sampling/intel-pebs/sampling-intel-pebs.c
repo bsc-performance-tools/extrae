@@ -32,7 +32,9 @@
  * - EventSel=CDH UMask=01H --> config=0x01cd
  */
 
-#define _GNU_SOURCE 1
+ #if !defined(_GNU_SOURCE)
+ #define _GNU_SOURCE
+ #endif
 
 #include "common.h"
 

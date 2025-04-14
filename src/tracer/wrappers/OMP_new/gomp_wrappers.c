@@ -33,7 +33,9 @@
  * https://gcc.gnu.org/onlinedocs/libgomp
  */
 
-#define _GNU_SOURCE
+ #if !defined(_GNU_SOURCE)
+ #define _GNU_SOURCE
+ #endif
 
 #include "atomic_counter.h"
 #include "gnu_libgomp.h"
