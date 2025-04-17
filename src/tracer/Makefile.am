@@ -242,19 +242,16 @@ core_SRCS = \
  $(auto_fini_instr_SRCS)                     \
  $(WRAPPERS_CORE)
 
-burst_mode_SRCS = \
- $(STATS_DIR)/stats_module.c \
- $(STATS_DIR)/stats_module.h \
- $(STATS_DIR)/stats_types.h \
- $(BURST_MODE_DIR)/burst_mode.c \
- $(BURST_MODE_DIR)/burst_mode.h
+burst_mode_SRCS = $(STATS_DIR)/stats_types.h \
+ $(STATS_DIR)/stats_module.c $(STATS_DIR)/stats_module.h \
+ $(BURST_MODE_DIR)/burst_mode.c $(BURST_MODE_DIR)/burst_mode.h \
 
 mpi_stats_SRCS = \
- $(STATS_DIR)/MPI/mpi_stats.c
+ $(STATS_DIR)/MPI/mpi_stats.c $(STATS_DIR)/MPI/mpi_stats.h
 
 omp_stats_SRCS = \
- $(STATS_DIR)/OMP/omp_utils.c \
- $(STATS_DIR)/OMP/omp_stats.c
+ $(STATS_DIR)/OMP/omp_utils.c $(STATS_DIR)/OMP/omp_utils.h \
+ $(STATS_DIR)/OMP/omp_stats.c $(STATS_DIR)/OMP/omp_stats.h
 
 # OPENACC trace
 liboacctrace_la_SOURCES = $(core_SRCS)
