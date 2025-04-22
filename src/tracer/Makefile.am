@@ -244,7 +244,7 @@ core_SRCS = \
 
 burst_mode_SRCS = $(STATS_DIR)/stats_types.h \
  $(STATS_DIR)/stats_module.c $(STATS_DIR)/stats_module.h \
- $(BURST_MODE_DIR)/burst_mode.c $(BURST_MODE_DIR)/burst_mode.h \
+ $(BURST_MODE_DIR)/burst_mode.c $(BURST_MODE_DIR)/burst_mode.h
 
 mpi_stats_SRCS = \
  $(STATS_DIR)/MPI/mpi_stats.c $(STATS_DIR)/MPI/mpi_stats.h
