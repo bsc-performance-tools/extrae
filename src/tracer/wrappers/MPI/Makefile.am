@@ -30,7 +30,7 @@ WRAPPERS_MPI_ALL = \
  hash_table.c hash_table.h
 
 if HAVE_MPI
-EXTRA_MPI_CFLAGS = -I$(COMMON_MPI_DIR) -DMPI_SUPPORT @MPI_CFLAGS@ $(PARALLEL_CFLAGS_MERGE_LIB) -DHAVE_BURST \
+EXTRA_MPI_CFLAGS = -I$(COMMON_MPI_DIR) -DMPI_SUPPORT @MPI_CFLAGS@ $(PARALLEL_CFLAGS_MERGE_LIB) \
  -I$(TRACER_INC) -I$(HWC_INC) -I$(CLOCKS_INC) \
  -I$(INTERFACES_INC)/API -I$(INTERFACES_INC)/MPI \
  -I$(STATS_DIR) -I$(STATS_DIR)/MPI -I$(BURST_MODE_DIR) \
@@ -38,9 +38,9 @@ EXTRA_MPI_CFLAGS = -I$(COMMON_MPI_DIR) -DMPI_SUPPORT @MPI_CFLAGS@ $(PARALLEL_CFL
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)
 endif
 
-noinst_LTLIBRARIES  = libwrap_mpi_c.la libwrap_mpi_f.la
+noinst_LTLIBRARIES  = libwrap_mpi_c.la libwrap_mpi_f.la libwrap_mpi_burst_c.la libwrap_mpi_burst_f.la 
 if SINGLE_MPI_LIBRARY
- noinst_LTLIBRARIES += libwrap_mpi_cf.la
+ noinst_LTLIBRARIES += libwrap_mpi_cf.la libwrap_mpi_burst_cf.la
 endif
 
 libwrap_mpi_c_la_CFLAGS = -DC_SYMBOLS $(EXTRA_MPI_CFLAGS)
@@ -51,3 +51,12 @@ libwrap_mpi_f_la_SOURCES = $(WRAPPERS_MPI_F_ONLY)
 
 libwrap_mpi_cf_la_CFLAGS = -DC_SYMBOLS -DFORTRAN_SYMBOLS $(EXTRA_MPI_CFLAGS)
 libwrap_mpi_cf_la_SOURCES = $(WRAPPERS_MPI_ALL)
+
+libwrap_mpi_burst_c_la_CFLAGS = $(libwrap_mpi_c_la_CFLAGS) -DHAVE_BURST
+libwrap_mpi_burst_c_la_SOURCES = $(WRAPPERS_MPI_C_ONLY)
+
+libwrap_mpi_burst_f_la_CFLAGS = $(libwrap_mpi_f_la_CFLAGS) -DHAVE_BURST
+libwrap_mpi_burst_f_la_SOURCES = $(WRAPPERS_MPI_F_ONLY)
+
+libwrap_mpi_burst_cf_la_CFLAGS = $(libwrap_mpi_cf_la_CFLAGS) -DHAVE_BURST
+libwrap_mpi_burst_cf_la_SOURCES = $(WRAPPERS_MPI_ALL)

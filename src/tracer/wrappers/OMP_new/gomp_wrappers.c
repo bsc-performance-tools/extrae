@@ -41,9 +41,10 @@
 #include "gnu_libgomp.h"
 #include "gomp_helpers.h"
 #include "gomp_probes.h"
-#include "gomp_probes_burst.h"
 #include "omp_wrap_macros.h"
-
+#if defined(HAVE_BURST)
+# include "gomp_probes_burst.h"
+#endif
 /**********************/
 /* Outlined callbacks */
 /**********************/

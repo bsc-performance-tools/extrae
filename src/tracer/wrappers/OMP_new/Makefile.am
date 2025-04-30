@@ -21,11 +21,11 @@ EXTRA_OPENMP_CFLAGS =
 
 # GNU GOMP instrumentation
 if WANT_OPENMP_GNU
-WRAPPERS_OPENMP += gnu_libgomp.c gnu_libgomp.h gomp_helpers.c gomp_helpers.h gomp_wrappers.c gomp_probes.c gomp_probes.h gomp_probes_burst.c gomp_probes_burst.h
+WRAPPERS_OPENMP += gnu_libgomp.c gnu_libgomp.h gomp_helpers.c gomp_helpers.h gomp_wrappers.c gomp_probes.c gomp_probes.h
 EXTRA_OPENMP_CFLAGS += -DGNU_OPENMP
 endif # WANT_OPENMP_GNU
 
-noinst_LTLIBRARIES  = libwrap_openmp.la
+noinst_LTLIBRARIES  = libwrap_openmp.la libwrap_openmp_burst.la
 
 libwrap_openmp_la_CFLAGS = \
  $(EXTRA_OPENMP_CFLAGS) \
@@ -40,3 +40,6 @@ libwrap_openmp_la_CFLAGS = \
  -I$(STATS_DIR)/OMP \
  -I$(BURST_MODE_DIR)
 libwrap_openmp_la_SOURCES = $(WRAPPERS_OPENMP)
+
+libwrap_openmp_burst_la_SOURCES = $(libwrap_openmp_la_SOURCES) gomp_probes_burst.c gomp_probes_burst.h
+libwrap_openmp_burst_la_CFLAGS = $(libwrap_openmp_la_CFLAGS) -DHAVE_BURST

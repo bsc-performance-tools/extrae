@@ -31,8 +31,10 @@
 #include "hwc.h"
 #include "utils.h"
 #include "xalloc.h"
-#include "burst_mode.h"
 #include "change_mode.h"
+#if defined(HAVE_BURST)
+# include "burst_mode.h"
+#endif
 
 int *MPI_Deepness              = NULL;
 int *Current_Trace_Mode        = NULL;

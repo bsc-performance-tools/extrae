@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include "stats_module.h"
 
-#include "burst_mode.h"
 #include "common.h"
 #include "change_mode.h"
 #include "omp_stats.h"

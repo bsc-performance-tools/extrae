@@ -123,8 +123,13 @@
 #define ENTRY_PROBE(symbol) xtr_probe_entry_ ## symbol
 #define EXIT_PROBE(symbol)  xtr_probe_exit_ ## symbol
 
-#define ENTRY_PROBE_BURST(symbol) xtr_probe_entry_ ## symbol ## _bursts
-#define EXIT_PROBE_BURST(symbol) xtr_probe_exit_ ## symbol ## _bursts
+#if defined(HAVE_BURST)
+# define ENTRY_PROBE_BURST(symbol) xtr_probe_entry_ ## symbol ## _bursts
+# define EXIT_PROBE_BURST(symbol) xtr_probe_exit_ ## symbol ## _bursts
+#else
+# define ENTRY_PROBE_BURST(symbol) ENTRY_PROBE(symbol)
+# define EXIT_PROBE_BURST(symbol) EXIT_PROBE(symbol)
+#endif
 
 // To pass configurable blocks of code 
 #define CODE(...)                    __VA_ARGS__

@@ -39,9 +39,7 @@
 #include "wrapper.h"
 #include "hash_table.h"
 
-#if defined(HAVE_BURST)
 # include "mpi_stats.h"
-#endif
 
 #if !defined(MPI_HAS_MPI_F_STATUS_SIZE)
 #warning MPI_F_STATUS_SIZE definition not found in mpi.h. Assuming our configure check for MPI_STATUS_INTEGER_FIELDS_COUNT.
