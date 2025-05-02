@@ -143,6 +143,9 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 			switch(Future_Trace_Mode[tid])
 			{
 				case TRACE_MODE_DETAIL:
+#if defined(HAVE_BURST)
+					xtr_burst_emit_statistics();
+#endif
 					break;
 				case TRACE_MODE_BURST:
 					ACCUMULATED_COUNTERS_RESET(tid);

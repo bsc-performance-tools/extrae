@@ -130,18 +130,15 @@ xtr_stats_t ** xtr_stats_initialize( void )
  *
  * @note The caller must ensure that `stats` is a valid pointer to an array of statistics objects.
  */
-void xtr_stats_realloc (xtr_stats_t **stats, int old_num_threads, int new_num_threads)
+void xtr_stats_realloc (xtr_stats_t **stats, int new_num_threads)
 {
-	if(new_num_threads > old_num_threads)
+	for(int i =0; i<NUM_STATS_GROUPS; ++i)
 	{
-		for(int i =0; i<NUM_STATS_GROUPS; ++i)
+		if(stats[i] != NULL)
 		{
-			if(stats[i] != NULL)
-			{
-				virtual_table[stats[i]->category].realloc( stats[i], new_num_threads );
-			}
+			virtual_table[stats[i]->category].realloc( stats[i], new_num_threads );
 		}
-	} 
+	}
 }
 
 /**
@@ -152,9 +149,9 @@ void xtr_stats_realloc (xtr_stats_t **stats, int old_num_threads, int new_num_th
  * @param new_num_threads The new number of threads to allocate resources for.
  * @note This operation is not thread safe
  */
-void xtr_stats_change_nthreads(int old_num_threads, int new_num_threads)
+void xtr_stats_change_nthreads(int new_num_threads)
 {
-	xtr_stats_realloc(RuntimeStats, old_num_threads, new_num_threads);
+	xtr_stats_realloc(RuntimeStats, new_num_threads);
 }
 
 /**

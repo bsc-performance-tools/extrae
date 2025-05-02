@@ -32,9 +32,9 @@ typedef struct stats_vtable
 
 xtr_stats_t ** xtr_stats_initialize( void );
 
-void xtr_stats_realloc (xtr_stats_t **stats, int old_num_threads, int new_num_threads );
+void xtr_stats_realloc (xtr_stats_t **stats, int new_num_threads );
 
-void xtr_stats_change_nthreads(int old_num_threads, int new_num_threads);
+void xtr_stats_change_nthreads(int new_num_threads);
 
 void xtr_stats_reset(xtr_stats_t **stats_obj);
 

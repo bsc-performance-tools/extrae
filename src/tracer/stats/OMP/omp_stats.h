@@ -28,45 +28,73 @@
 #include "omp_utils.h"
 #include "common.h"
 
-//OpenMP statistics ids
+/**
+ * Enumeration of OpenMP runtime statistic IDs.
+ * 
+ * These IDs are used to define the types numbering used to emmit
+ * the statistics events.
+ * Each ID corresponds to a specific OpenMP runtime behavior category.
+ */
 enum {
-  OMP_BURST_STATS_TIME_IN_RUNNING = 0,
-  OMP_BURST_STATS_TIME_IN_SYNC,
-  OMP_BURST_STATS_TIME_IN_OVERHEAD,
-  OMP_BURST_STATS_RUNNING_COUNT,
-  OMP_BURST_STATS_SYNC_COUNT,
-  OMP_BURST_STATS_OVERHEAD_COUNT,
-  OMP_BURST_STATS_COUNT /* Total number of OMP statistics */
+  OMP_BURST_STATS_TIME_IN_RUNNING = 0,   // Time spent executing user code
+  OMP_BURST_STATS_TIME_IN_SYNC,          // Time spent in synchronization operations
+  OMP_BURST_STATS_TIME_IN_OVERHEAD,      // Time spent in OpenMP runtime overhead
+  OMP_BURST_STATS_RUNNING_COUNT,         // Number of times user code was executed
+  OMP_BURST_STATS_SYNC_COUNT,            // Number of synchronization operations
+  OMP_BURST_STATS_OVERHEAD_COUNT,        // Number of overhead operations
+  OMP_BURST_STATS_COUNT                  // Total number of statistic types
 };
 
-//These statistics are divided in three categories to store them in an array
-enum
-{
-  RUNNING,
-  SYNCHRONIZATION,
-  OVERHEAD,
-  N_OMP_CATEGORIES
-};
 
 /**
- * definition of the struct that contains the statistics data
+ * Enumeration of OpenMP runtime statistic categories.
+ * These categories correspond to how OpenMP calls are represented as states
+ * in the new GOMP implementation.
+ *
+ * The statistics are divided into three main categories and stored in arrays. 
+ * This enum is used for indexing this array. 
+ */
+enum
+{
+  RUNNING,          // Time spent executing actual work ( outlined parallel regions, tasks, etc.)
+  SYNCHRONIZATION,  // Time spent in barriers, critical sections, and other sync operations
+  OVERHEAD,         // Time spent in runtime overhead (e.g., task scheduling, region setup)
+  N_OMP_CATEGORIES  // Total number of categories
+};
+
+
+/**
+ * Structure that holds per-thread OpenMP runtime statistics.
+ * 
+ * Each field is an array indexed by an OpenMP region category.
+ * This allows tracking statistics for different runtime events or phases.
  */
 typedef struct stats_omp_thread_data
 {
-  UINT64 begin_time[N_OMP_CATEGORIES];
-  UINT64 elapsed_time[N_OMP_CATEGORIES];
-  int count[N_OMP_CATEGORIES];
-}stats_omp_thread_data_t;
+  UINT64 begin_time[N_OMP_CATEGORIES];   // Start time for each OpenMP region category
+  UINT64 elapsed_time[N_OMP_CATEGORIES]; // Total accumulated time spent in each region
+  int count[N_OMP_CATEGORIES];           // Number of times each region category was entered
+} stats_omp_thread_data_t;
+
 
 /**
- * Statistic object, first field is  'xtr_stats_t' as required by the stats manager.
+ * OpenMP-specific statistics structure.
+ * 
+ * The first field must be of type 'xtr_stats_t' to maintain compatibility with the stats manager.
+ * 
+ * The 'common_stats_fields' field stores per-thread OpenMP runtime statistics.
+ * Specifically, 'common_stats_fields.data' points to an array of 'stats_omp_thread_data_t' 
+ * structures, with one entry per thread.
+ * 
+ * The 'open_regions_stack' field is an array of stacks (one per thread), used to track nested 
+ * OpenMP region calls during execution.
  */
 typedef struct xtr_OpenMP_stats
 {
-  xtr_stats_t common_stats_fields;
-  unsigned int num_threads; //necessary to free the allocated memory
-  struct stack **open_region; // used to keep track of the nested runtime calls
-}xtr_OpenMP_stats_t;
+  xtr_stats_t common_stats_fields;   // Common statistics fields required by the stats manager
+  unsigned int size;                 // Number of elements in 'common_stats_fields' and 'open_regions_stack' (used for memory allocation)
+  struct stack **open_regions_stack; // Per-thread stacks for tracking nested region calls
+} xtr_OpenMP_stats_t;
 
 
 void *xtr_stats_OMP_init( void );

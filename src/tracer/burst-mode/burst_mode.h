@@ -38,7 +38,8 @@ void xtr_burst_parallel_OL_entry (void * function_address) __attribute__((weak))
 
 void xtr_burst_parallel_OL_exit ( void ) __attribute__((weak));
 
-void xtr_burst_realloc (int old_num_threads, int new_num_threads);
+void xtr_burst_realloc (int new_num_threads);
 
+void xtr_burst_emit_statistics (void);
 
 #endif /* End of BURST_MOD_DEFINED */

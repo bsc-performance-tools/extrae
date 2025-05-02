@@ -2039,13 +2039,10 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 			Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads);
 
 #if defined(HAVE_BURST)
-			if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURST)
-			{
-				xtr_burst_realloc(get_maximum_NumOfThreads(), new_num_threads);
-				xtr_stats_change_nthreads( get_maximum_NumOfThreads(), new_num_threads);
-			}
+			/* Realloc burst and statistics modules */
+			xtr_burst_realloc(new_num_threads);
+			xtr_stats_change_nthreads(new_num_threads);
 #endif
-
 
 #if USE_HARDWARE_COUNTERS
 			/* Reallocate and start reading counters for these threads */

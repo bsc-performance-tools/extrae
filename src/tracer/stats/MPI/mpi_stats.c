@@ -104,7 +104,7 @@ xtr_MPI_stats_t *xtr_mpi_stats_new()
 	unsigned int num_tasks = Extrae_get_num_tasks(); //number of tasks in MPI_COMM_WORLD
 
 	xtr_MPI_stats_t *mpi_stats = xmalloc( sizeof(xtr_MPI_stats_t) );
-	mpi_stats->num_threads = Backend_getMaximumOfThreads();
+	mpi_stats->size = Backend_getMaximumOfThreads();
 	mpi_stats->world_size = num_tasks;
 
 	if (mpi_stats == NULL)
@@ -114,9 +114,9 @@ xtr_MPI_stats_t *xtr_mpi_stats_new()
 	}
 
 	mpi_stats->common_stats_field.category = MPI_STATS_GROUP;
-	mpi_stats->common_stats_field.data = xmalloc_and_zero (sizeof(stats_mpi_thread_data_t) * mpi_stats->num_threads);
+	mpi_stats->common_stats_field.data = xmalloc_and_zero (sizeof(stats_mpi_thread_data_t) * mpi_stats->size);
 
-	for(unsigned int i =0; i < mpi_stats->num_threads ; ++i)
+	for(unsigned int i =0; i < mpi_stats->size ; ++i)
 	{
 		((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in = xmalloc_and_zero(num_tasks * sizeof(int));
 		if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in == NULL)
@@ -148,7 +148,7 @@ xtr_MPI_stats_t *xtr_mpi_stats_new()
 void xtr_stats_MPI_realloc(xtr_stats_t *stats, unsigned int new_num_threads)
 {
 	xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
-	if(new_num_threads <= mpi_stats->num_threads)
+	if(new_num_threads <= mpi_stats->size)
 	 return;
 
 	int num_tasks = mpi_stats->world_size;
@@ -157,9 +157,9 @@ void xtr_stats_MPI_realloc(xtr_stats_t *stats, unsigned int new_num_threads)
 		if(mpi_stats->common_stats_field.category == MPI_STATS_GROUP)
 		{
 			mpi_stats->common_stats_field.data = xrealloc(mpi_stats->common_stats_field.data, sizeof(stats_mpi_thread_data_t) * new_num_threads);
-			memset(&((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[mpi_stats->num_threads], 0, (new_num_threads-mpi_stats->num_threads) * sizeof(stats_mpi_thread_data_t));
+			memset(&((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[mpi_stats->size], 0, (new_num_threads-mpi_stats->size) * sizeof(stats_mpi_thread_data_t));
 
-			for(unsigned int i=mpi_stats->num_threads; i < new_num_threads ; ++i)
+			for(unsigned int i=mpi_stats->size; i < new_num_threads ; ++i)
 			{
 				((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in = xmalloc_and_zero (num_tasks * sizeof(int));
 				if (((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in == NULL)
@@ -174,7 +174,7 @@ void xtr_stats_MPI_realloc(xtr_stats_t *stats, unsigned int new_num_threads)
 					exit(-1);
 				}
 			}
-			mpi_stats->num_threads = new_num_threads;
+			mpi_stats->size = new_num_threads;
 		}
 	}
 }
@@ -246,7 +246,7 @@ xtr_stats_t *xtr_stats_MPI_dup(xtr_stats_t *stats)
 	if (TRACING_MPI_STATISTICS && mpi_stats != NULL)
 	{
 		new_mpi_stats = xtr_mpi_stats_new();
-		new_mpi_stats->num_threads = mpi_stats->num_threads;
+		new_mpi_stats->size = mpi_stats->size;
 		new_mpi_stats->common_stats_field.category = MPI_STATS_GROUP;
 		for(unsigned int i=0; i < Backend_getMaximumOfThreads(); ++i)
 		{
@@ -672,7 +672,7 @@ void xtr_stats_MPI_free(xtr_stats_t *stats)
 {
 	xtr_MPI_stats_t *mpi_stats = (xtr_MPI_stats_t *)stats;
 
-	for(unsigned int i=0; i < mpi_stats->num_threads ; ++i)
+	for(unsigned int i=0; i < mpi_stats->size ; ++i)
 	{
 		xfree(((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_in);
 		xfree(((stats_mpi_thread_data_t *)(mpi_stats->common_stats_field.data))[i].p2p_partner_out);

@@ -87,9 +87,9 @@ typedef struct stats_mpi_thread_data
  */
 typedef struct xtr_MPI_stats
 {
-  xtr_stats_t common_stats_field;
-  unsigned int num_threads; // necessary to free the allocated memory 
-  int world_size;  // number of ranks in MPI_COMM_WORLD
+  xtr_stats_t common_stats_field; // Common statistics fields required by the stats manager
+  unsigned int size;              // Number of elements in 'common_stats_fields' and 'open_regions_stack' (used for memory allocation)
+  int world_size;                 // Number of ranks in MPI_COMM_WORLD
 } xtr_MPI_stats_t;
 
 

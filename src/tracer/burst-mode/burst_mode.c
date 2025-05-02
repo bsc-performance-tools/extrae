@@ -81,19 +81,22 @@ enum
 };
 
 /**
- * Variables needed by each thread to operate in burst mode. 
-*/
+ * Structure containing per-thread data required for operating in burst mode
+ * to track timing and region state information
+ * during execution of burst and parallel code regions.
+ */
 typedef struct burst_mode_st
 {
-  iotimer_t burst_begin_time;     //stores the begin time of the burst region
-  iotimer_t parallel_begin_time;  //stores the begin time of sumarized parallel regions
-  iotimer_t last_traced_time;     //stores the time at which events are emitted
-  int in_summarization_region;    //flag to control when we are in the summarization region
-  int last_traced_region;         //flag to know if the last emmited event was generated in a burst or parallel region
-  func_ptr_t cbk_address;         //address of the outlined routine to retrieve later on the name and line of the function
-}burst_mode_st;
+  iotimer_t burst_begin_time;     // Timestamp marking the start of a burst region
+  iotimer_t parallel_begin_time;  // Timestamp marking the start of a summarized parallel region
+  iotimer_t last_traced_time;     // Timestamp of the last emitted event
+  int in_summarization_region;    // Flag indicating whether currently in a summarization region
+  int last_traced_region;         // Flag indicating if the last emitted event was from a burst or parallel region
+  func_ptr_t cbk_address;         // Pointer to the outlined routine for function name and line retrieval
+} burst_mode_st;
 
 struct burst_mode_st *burst_info;
+int burst_info_size = 0;
 
 /**
  * This variable holds the statistics of the entire execution
@@ -129,7 +132,9 @@ void xtr_burst_init ( void )
 {
   if ( burst_initialized ) return;
 
-  burst_info = xmalloc_and_zero( Backend_getMaximumOfThreads() * sizeof(burst_mode_st));
+  int current_num_threads = Backend_getMaximumOfThreads();
+  burst_info = xmalloc_and_zero( current_num_threads * sizeof(burst_mode_st));
+  burst_info_size = current_num_threads;
 
   current_stats = xtr_stats_initialize();
 
@@ -167,20 +172,20 @@ void xtr_burst_init ( void )
  *
  * This operation is not thread safe
  * 
- * @param old_num_threads The current number of threads.
  * @param new_num_threads The new number of threads.
  */
-void xtr_burst_realloc(int old_num_threads, int new_num_threads)
+void xtr_burst_realloc(int new_num_threads)
 {
-  if ( burst_initialized && new_num_threads > old_num_threads )
+  if ( burst_initialized && new_num_threads > burst_info_size )
   {
     burst_info = xrealloc(burst_info, new_num_threads * sizeof(burst_mode_st));
-    memset(&burst_info[old_num_threads], 0, (new_num_threads-old_num_threads) * sizeof(burst_mode_st));
+    memset(&burst_info[burst_info_size], 0, (new_num_threads-burst_info_size) * sizeof(burst_mode_st));
+    burst_info_size = new_num_threads;
 
-    xtr_stats_realloc( stats_at_burst_begin, old_num_threads, new_num_threads );
-    xtr_stats_realloc( stats_at_last_traced, old_num_threads, new_num_threads );
-    xtr_stats_realloc( stats_at_parallel_OL_entry, old_num_threads, new_num_threads );
-    xtr_stats_realloc( delta_stats, old_num_threads, new_num_threads );
+    xtr_stats_realloc( stats_at_burst_begin, new_num_threads );
+    xtr_stats_realloc( stats_at_last_traced, new_num_threads );
+    xtr_stats_realloc( stats_at_parallel_OL_entry, new_num_threads );
+    xtr_stats_realloc( delta_stats, new_num_threads );
   }
 }
 
@@ -426,7 +431,7 @@ void xtr_burst_parallel_OL_exit()
  */
 void xtr_burst_finalize (void)
 {
-  if( CURRENT_TRACE_MODE(THREADID) != TRACE_MODE_BURST || !burst_initialized )
+  if( !burst_initialized )
     return;
 
   burst_initialized = FALSE;
@@ -443,9 +448,35 @@ void xtr_burst_finalize (void)
   }
 
   xfree(burst_info);
+  burst_info_size = 0;
+
   xtr_stats_free(stats_at_burst_begin);
   xtr_stats_free(stats_at_parallel_OL_entry);
   xtr_stats_free(stats_at_last_traced);
   xtr_stats_free(delta_stats);
   xtr_stats_finalize();
 }
+
+/**
+ * @brief Emits accumulated statistics for all active threads.
+ * 
+ * This function forces the emission of all currently accumulated burst-related 
+ * statistics, including runtime metrics and hardware counters, for each thread.
+ */
+void xtr_burst_emit_statistics (void)
+{
+  if( !burst_initialized )
+    return;
+
+  for (int threadid = 0; threadid < Backend_getMaximumOfThreads(); ++threadid)
+  {
+    if ( burst_info[threadid].last_traced_time < burst_info[threadid].burst_begin_time )
+    {
+      trace_statistics(stats_at_last_traced, stats_at_burst_begin, delta_stats, threadid, burst_info[threadid].last_traced_region == PARALLEL_REGION, burst_info[threadid].last_traced_time, burst_info[threadid].burst_begin_time);
+
+      TRACE_EVENTAND_ACCUMULATEDCOUNTERS(burst_info[threadid].burst_begin_time, CPU_BURST_EV, EVT_BEGIN);
+      ACCUMULATED_COUNTERS_RESET(threadid);
+    }
+  }
+}
+

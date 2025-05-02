@@ -35,22 +35,23 @@ enum stats_group
 };
 
 /**
- * Statistic object
- * Every runtime statistic has to have this struct
- * as a first field in its ownly define struct
- * in order to allow the retrival of the fields
- * listed here without the need of casting
+ * Base statistics structure.
  * 
- * An statistic object can be used for two purposes 
- * first to store the acumulated statisics until any given time
- * and second to store the differences(deltas) when subtracting
- * two statistic objects of different timestamps
+ * This structure must be the first field in any runtime-specific
+ * statistics structure. This design allows access to the common
+ * fields defined here without requiring explicit casting.
+ * 
+ * A statistics object serves two main purposes:
+ * 1. To store the accumulated statistics up to a given point in time.
+ * 2. To store the differences (deltas) between two statistics objects 
+ *    captured at different timestamps.
  */
 typedef struct xtr_stats
 {
-  enum stats_group category; //stores the runtime type
-  void *data; //stores all the statistics of the runtime
-}xtr_stats_t;
+  enum stats_group category; // Indicates the runtime category/type
+  void *data;                // Pointer to runtime-specific statistics data
+} xtr_stats_t;
+
 
 /**
  * Used to create a table with all the statistics ids of a runtime and their descriptions

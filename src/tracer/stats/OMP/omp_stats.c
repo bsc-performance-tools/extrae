@@ -92,7 +92,7 @@ void *xtr_stats_OMP_init( void )
 xtr_OpenMP_stats_t * xtr_omp_stats_new( int iscopy )
 {
 	xtr_OpenMP_stats_t * omp_stats = xmalloc_and_zero( sizeof(xtr_OpenMP_stats_t) );
-	omp_stats->num_threads = Backend_getMaximumOfThreads();
+	omp_stats->size = Backend_getMaximumOfThreads();
 
 	if (omp_stats == NULL)
 	{
@@ -101,15 +101,15 @@ xtr_OpenMP_stats_t * xtr_omp_stats_new( int iscopy )
 	}
 
   omp_stats->common_stats_fields.category = OMP_STATS_GROUP;
-  omp_stats->common_stats_fields.data = xmalloc_and_zero ( sizeof(stats_omp_thread_data_t ) * omp_stats->num_threads );
+  omp_stats->common_stats_fields.data = xmalloc_and_zero ( sizeof(stats_omp_thread_data_t ) * omp_stats->size );
 
   if(!iscopy)
   {
-    omp_stats->open_region = xmalloc_and_zero ( sizeof(struct stack *) * omp_stats->num_threads );
+    omp_stats->open_regions_stack = xmalloc_and_zero ( sizeof(struct stack *) * omp_stats->size );
 
-    for (unsigned int i = 0; i<omp_stats->num_threads; ++i)
+    for (unsigned int i = 0; i<omp_stats->size; ++i)
     {
-      (omp_stats->open_region)[i] = newStack();
+      (omp_stats->open_regions_stack)[i] = newStack();
     }
   }
 
@@ -129,7 +129,7 @@ xtr_OpenMP_stats_t * xtr_omp_stats_new( int iscopy )
 void xtr_stats_OMP_realloc( xtr_stats_t *stats, unsigned int new_num_threads )
 {
   xtr_OpenMP_stats_t *omp_stats = (xtr_OpenMP_stats_t *)stats;
-  if(new_num_threads <= omp_stats->num_threads || !TRACING_OMP_STATISTICS)
+  if(new_num_threads <= omp_stats->size || !TRACING_OMP_STATISTICS)
     return;
 
   if ( omp_stats != NULL )
@@ -137,13 +137,14 @@ void xtr_stats_OMP_realloc( xtr_stats_t *stats, unsigned int new_num_threads )
     if(omp_stats->common_stats_fields.category == OMP_STATS_GROUP)
     {
       omp_stats->common_stats_fields.data = xrealloc(omp_stats->common_stats_fields.data, sizeof(stats_omp_thread_data_t ) * new_num_threads);
-      memset(&((stats_omp_thread_data_t *)(omp_stats->common_stats_fields.data))[omp_stats->num_threads], 0, (new_num_threads-omp_stats->num_threads) * sizeof(stats_omp_thread_data_t));
+      memset(&((stats_omp_thread_data_t *)(omp_stats->common_stats_fields.data))[omp_stats->size], 0, (new_num_threads-omp_stats->size) * sizeof(stats_omp_thread_data_t));
 
-      omp_stats->open_region = xrealloc(omp_stats->open_region, sizeof(struct stack *) * new_num_threads);
-      for (unsigned int i = omp_stats->num_threads; i<new_num_threads; ++i)
+      omp_stats->open_regions_stack = xrealloc(omp_stats->open_regions_stack, sizeof(struct stack *) * new_num_threads);
+      for (unsigned int i = omp_stats->size; i<new_num_threads; ++i)
       {
-        omp_stats->open_region[i] = newStack();
+        omp_stats->open_regions_stack[i] = newStack();
       }
+      omp_stats->size = new_num_threads;
     }
   }
 }
@@ -185,6 +186,7 @@ void xtr_stats_OMP_reset(unsigned int threadid, xtr_stats_t *stats)
  * @brief Duplicates OpenMP statistics object.
  * 
  * This function duplicates an OpenMP statistics object.
+ * It does not copy the stacks since stacks are only used internally to count.
  *
  * @param omp_stats Pointer to the OpenMP statistics object to be duplicated.
  * @return xtr_OpenMP_stats_t* Pointer to the duplicated OpenMP statistics object, or NULL if tracing is not enabled or if the input object is NULL.
@@ -198,9 +200,9 @@ xtr_stats_t *xtr_stats_OMP_dup( xtr_stats_t *stats )
   if (TRACING_OMP_STATISTICS && omp_stats != NULL)
   {
     new_omp_stats = xtr_omp_stats_new(1);
-    new_omp_stats->num_threads = omp_stats->num_threads;
+    new_omp_stats->size = omp_stats->size;
     new_omp_stats->common_stats_fields.category = OMP_STATS_GROUP;
-    for (unsigned int i = 0; i < new_omp_stats->num_threads; i++)
+    for (unsigned int i = 0; i < new_omp_stats->size; i++)
     {
       xtr_stats_OMP_copy(i, (xtr_stats_t *)omp_stats, (xtr_stats_t *)new_omp_stats);
     }
@@ -224,7 +226,7 @@ void xtr_stats_OMP_copy(unsigned int threadid, xtr_stats_t *stats_origin, xtr_st
   xtr_OpenMP_stats_t *omp_stats_origin = (xtr_OpenMP_stats_t *)stats_origin;
   xtr_OpenMP_stats_t *omp_stats_destination = (xtr_OpenMP_stats_t *)stats_destination;
 
-  if( !TRACING_OMP_STATISTICS || threadid >= omp_stats_origin->num_threads || threadid >= omp_stats_destination->num_threads )
+  if( !TRACING_OMP_STATISTICS || threadid >= omp_stats_origin->size || threadid >= omp_stats_destination->size )
     return;
 
   stats_omp_thread_data_t *origin_data = xtr_get_omp_stats_data(omp_stats_origin, threadid);
@@ -254,7 +256,7 @@ struct stack *xtr_get_regions_stack( xtr_OpenMP_stats_t *omp_stats, unsigned int
   {
     if(omp_stats->common_stats_fields.category == OMP_STATS_GROUP)
     {
-      return (omp_stats->open_region)[threadid];
+      return (omp_stats->open_regions_stack)[threadid];
     }
   }
 
@@ -431,16 +433,16 @@ void xtr_stats_OMP_update_par_OL_entry ( void )
     stats_omp_thread_data_t * thread_data = xtr_get_omp_stats_data(OpenMP_stats, THREADID);
     if(thread_data != NULL)
     {
-      struct stack * open_region = xtr_get_regions_stack(OpenMP_stats, THREADID);
+      struct stack * open_regions_stack = xtr_get_regions_stack(OpenMP_stats, THREADID);
 
-      if(!isEmpty(open_region))
+      if(!isEmpty(open_regions_stack))
       {
-        thread_data->elapsed_time[peek(open_region)] += LAST_READ_TIME - thread_data->begin_time[peek(open_region)];
-        thread_data->count[peek(open_region)] += 1;
-        thread_data->begin_time[peek(open_region)] = 0;
+        thread_data->elapsed_time[peek(open_regions_stack)] += LAST_READ_TIME - thread_data->begin_time[peek(open_regions_stack)];
+        thread_data->count[peek(open_regions_stack)] += 1;
+        thread_data->begin_time[peek(open_regions_stack)] = 0;
       }
 
-      push(open_region, RUNNING);
+      push(open_regions_stack, RUNNING);
 
       thread_data->begin_time[RUNNING] = LAST_READ_TIME;
     }
@@ -461,19 +463,19 @@ void xtr_stats_OMP_update_par_OL_exit ( void )
     stats_omp_thread_data_t * thread_data = xtr_get_omp_stats_data(OpenMP_stats, THREADID);
     if(thread_data != NULL)
     {
-      struct stack * open_region = xtr_get_regions_stack(OpenMP_stats, THREADID);
+      struct stack * open_regions_stack = xtr_get_regions_stack(OpenMP_stats, THREADID);
 
-      if( peek(open_region) == RUNNING && thread_data->begin_time[RUNNING] > 0 )
+      if( peek(open_regions_stack) == RUNNING && thread_data->begin_time[RUNNING] > 0 )
       {
         thread_data->elapsed_time[RUNNING] += LAST_READ_TIME - thread_data->begin_time[RUNNING];
         thread_data->count[RUNNING] += 1;
         thread_data->begin_time[RUNNING] = 0;
       }
-      pop(open_region);
+      pop(open_regions_stack);
 
-      if(!isEmpty(open_region))
+      if(!isEmpty(open_regions_stack))
       {
-        thread_data->begin_time[peek(open_region)] = LAST_READ_TIME;
+        thread_data->begin_time[peek(open_regions_stack)] = LAST_READ_TIME;
       }
     }
   }
@@ -491,16 +493,16 @@ void xtr_stats_OMP_update_synchronization_entry( void )
     stats_omp_thread_data_t * thread_data = xtr_get_omp_stats_data(OpenMP_stats, THREADID);
     if(thread_data != NULL)
     {
-      struct stack * open_region = xtr_get_regions_stack(OpenMP_stats, THREADID);
+      struct stack * open_regions_stack = xtr_get_regions_stack(OpenMP_stats, THREADID);
 
-      if(!isEmpty(open_region))
+      if(!isEmpty(open_regions_stack))
       {
-        thread_data->elapsed_time[peek(open_region)] += LAST_READ_TIME - thread_data->begin_time[peek(open_region)];
-        thread_data->count[peek(open_region)] += 1;
-        thread_data->begin_time[peek(open_region)] = 0;
+        thread_data->elapsed_time[peek(open_regions_stack)] += LAST_READ_TIME - thread_data->begin_time[peek(open_regions_stack)];
+        thread_data->count[peek(open_regions_stack)] += 1;
+        thread_data->begin_time[peek(open_regions_stack)] = 0;
       }
 
-      push(open_region, SYNCHRONIZATION);
+      push(open_regions_stack, SYNCHRONIZATION);
 
       thread_data->begin_time[SYNCHRONIZATION] = LAST_READ_TIME;
     }
@@ -519,19 +521,19 @@ void xtr_stats_OMP_update_synchronization_exit( void )
     stats_omp_thread_data_t * thread_data = xtr_get_omp_stats_data(OpenMP_stats, THREADID);
     if(thread_data != NULL)
     {
-      struct stack * open_region = xtr_get_regions_stack(OpenMP_stats, THREADID);
+      struct stack * open_regions_stack = xtr_get_regions_stack(OpenMP_stats, THREADID);
 
-      if( peek(open_region) == SYNCHRONIZATION && thread_data->begin_time[SYNCHRONIZATION] > 0 )
+      if( peek(open_regions_stack) == SYNCHRONIZATION && thread_data->begin_time[SYNCHRONIZATION] > 0 )
       {
         thread_data->elapsed_time[SYNCHRONIZATION] += LAST_READ_TIME - thread_data->begin_time[SYNCHRONIZATION];
         thread_data->count[SYNCHRONIZATION] += 1;
         thread_data->begin_time[SYNCHRONIZATION] = 0;
       }
-      pop(open_region);
+      pop(open_regions_stack);
 
-      if(!isEmpty(open_region))
+      if(!isEmpty(open_regions_stack))
       {
-        thread_data->begin_time[peek(open_region)] = LAST_READ_TIME;
+        thread_data->begin_time[peek(open_regions_stack)] = LAST_READ_TIME;
       }
     }
   }
@@ -549,16 +551,16 @@ void xtr_stats_OMP_update_overhead_entry( void )
     stats_omp_thread_data_t * thread_data = xtr_get_omp_stats_data(OpenMP_stats, THREADID);
     if(thread_data != NULL)
     {
-      struct stack * open_region = xtr_get_regions_stack(OpenMP_stats, THREADID);
+      struct stack * open_regions_stack = xtr_get_regions_stack(OpenMP_stats, THREADID);
 
-      if(!isEmpty(open_region))
+      if(!isEmpty(open_regions_stack))
       {
-        thread_data->elapsed_time[peek(open_region)] += LAST_READ_TIME - thread_data->begin_time[peek(open_region)];
-        thread_data->count[peek(open_region)] += 1;
-        thread_data->begin_time[peek(open_region)] = 0;
+        thread_data->elapsed_time[peek(open_regions_stack)] += LAST_READ_TIME - thread_data->begin_time[peek(open_regions_stack)];
+        thread_data->count[peek(open_regions_stack)] += 1;
+        thread_data->begin_time[peek(open_regions_stack)] = 0;
       }
 
-      push(open_region, OVERHEAD);
+      push(open_regions_stack, OVERHEAD);
 
       thread_data->begin_time[OVERHEAD] = LAST_READ_TIME;
     }
@@ -577,19 +579,19 @@ void xtr_stats_OMP_update_overhead_exit( void )
     stats_omp_thread_data_t * thread_data = xtr_get_omp_stats_data(OpenMP_stats, THREADID);
     if(thread_data != NULL)
     {
-      struct stack * open_region = xtr_get_regions_stack(OpenMP_stats, THREADID);
+      struct stack * open_regions_stack = xtr_get_regions_stack(OpenMP_stats, THREADID);
 
-      if( peek(open_region) == OVERHEAD && thread_data->begin_time[OVERHEAD] > 0 )
+      if( peek(open_regions_stack) == OVERHEAD && thread_data->begin_time[OVERHEAD] > 0 )
       {
         thread_data->elapsed_time[OVERHEAD] += LAST_READ_TIME - thread_data->begin_time[OVERHEAD];
         thread_data->count[OVERHEAD] += 1;
         thread_data->begin_time[OVERHEAD] = 0;
       }
-      pop(open_region);
+      pop(open_regions_stack);
 
-      if(!isEmpty(open_region))
+      if(!isEmpty(open_regions_stack))
       {
-        thread_data->begin_time[peek(open_region)] = LAST_READ_TIME;
+        thread_data->begin_time[peek(open_regions_stack)] = LAST_READ_TIME;
       }
     }
   }
@@ -599,7 +601,7 @@ void xtr_stats_OMP_update_overhead_exit( void )
  * @brief Frees resources allocated for an OpenMP statistics object.
  * 
  * This function deallocates memory and frees resources associated with an OpenMP statistics object.
- *
+ * 
  * @param omp_stats Pointer to the OpenMP statistics object to be freed.
  *
  *
@@ -612,13 +614,16 @@ void xtr_stats_OMP_free(xtr_stats_t *stats)
     xtr_OpenMP_stats_t *omp_stats = (xtr_OpenMP_stats_t *)stats;
     if(omp_stats->common_stats_fields.category == OMP_STATS_GROUP)
     {
-      for (unsigned int i = 0; i < omp_stats->num_threads; ++i)
+      if( omp_stats->open_regions_stack != NULL ) // statistic objects that are copies do not have region stack
       {
-        deleteStack(omp_stats->open_region[i]);
+        for (unsigned int i = 0; i < omp_stats->size; ++i)
+        {
+          deleteStack(omp_stats->open_regions_stack[i]);
+        }
+        xfree(omp_stats->open_regions_stack);
       }
-
-      xfree(omp_stats->open_region);
       xfree(omp_stats->common_stats_fields.data);
+      omp_stats->size = 0;
     }
   }
 }
