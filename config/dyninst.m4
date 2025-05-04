@@ -121,6 +121,7 @@ AC_DEFUN([AX_PROG_DYNINST],
   AC_REQUIRE([AX_PROG_ELFUTILS])
   AC_REQUIRE([AX_PROG_TBB])
   AC_REQUIRE([AX_PROG_BOOST])
+  AC_REQUIRE([AX_PROG_XML2([2.5.0])])
 
   AX_FLAGS_SAVE()
 
@@ -148,6 +149,10 @@ AC_DEFUN([AX_PROG_DYNINST],
 
     if test "${BOOST_INSTALLED}" != "yes" ; then
       AC_MSG_ERROR([Dyninst support was activated but a required dependency was not found. Please specify where to find Boost C++ libraries and includes with --with-boost.])
+    fi
+
+    if test "${XML2_INSTALLED}" != "yes" ; then
+      AC_MSG_ERROR([Dyninst support was activated but a required dependency was not found. Please specify where to find Boost C++ libraries and includes with --with-xml2.])
     fi
 
     dnl Search for Dyninst installation
