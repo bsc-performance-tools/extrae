@@ -53,7 +53,12 @@ struct HWC_Set_t
 #endif
 };
 
-#define MAX_HWC_DESCRIPTION_LENGTH  2*PAPI_HUGE_STR_LEN
+// Define a safe default if PAPI is not available
+#ifdef PAPI_HUGE_STR_LEN
+#define MAX_HWC_DESCRIPTION_LENGTH (2 * PAPI_HUGE_STR_LEN)
+#else
+#define MAX_HWC_DESCRIPTION_LENGTH 2048
+#endif
 
 typedef struct HWC_Definition_st
 {
