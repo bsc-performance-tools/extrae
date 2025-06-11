@@ -112,7 +112,7 @@ void initialize_comunicadors (int n_ptasks)
 
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
-		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
+		ptask_t *ptask_info = ObjectTree_getPtaskInfo(ii+1);
 		alies_comunicadors[ii] = (CommAliasInfo_t *) xmalloc (ptask_info->ntasks * sizeof (CommAliasInfo_t));
 	}
 
@@ -121,7 +121,7 @@ void initialize_comunicadors (int n_ptasks)
 	num_InterCommunicatorAlias = (unsigned **) xmalloc (n_ptasks * sizeof (unsigned *));
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
-		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
+		ptask_t *ptask_info = ObjectTree_getPtaskInfo(ii+1);
 
 		Intercomm_ptask_task[ii] = (InterCommInfoAlias_t**) xmalloc_and_zero (ptask_info->ntasks * sizeof (InterCommInfoAlias_t *));
 
@@ -130,7 +130,7 @@ void initialize_comunicadors (int n_ptasks)
 
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
-		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
+		ptask_t *ptask_info = ObjectTree_getPtaskInfo(ii+1);
 		for (jj = 0; jj < ptask_info->ntasks; jj++)
 			INIT_QUEUE (&(alies_comunicadors[ii][jj]));
 	}

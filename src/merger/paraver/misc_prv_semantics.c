@@ -41,7 +41,9 @@
 #include "paraver_generator.h"
 #include "communication_queues.h"
 #include "trace_communication.h"
-#include "addresses.h"
+#if defined(HAVE_LIBADDR2LINE)
+# include "addresses.h"
+#endif
 #include "options.h"
 #include "extrae_types.h"
 #include "online_events.h"
@@ -277,7 +279,7 @@ static int Tracing_Event (event_t * current_event,
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	task_info = GET_TASK_INFO(ptask, task);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
 	task_info -> tracing_disabled = TRUE;
 
 	/* Mark all threads of the current task as not tracing */
@@ -391,7 +393,7 @@ static int User_Event (event_t * current_event,
 				break;
 		}
 
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 		if (found && get_option_merge_SortAddresses() && EvValue != 0)
 		{
 			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, addr2types->FunctionType_lbl);
@@ -454,7 +456,7 @@ static int MPI_Caller_Event (event_t * current_event,
                              unsigned int thread,
                              FileSet_t *fset)
 {
-	thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t *thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 	unsigned i, deepness;	
 	UINT64 EvValue = Get_EvValue(current_event);
 	UNREFERENCED_PARAMETER(fset);
@@ -479,7 +481,7 @@ static int MPI_Caller_Event (event_t * current_event,
 		}
 	}
 
-#if defined(HAVE_BFD)
+#if defined(LIBADDR2LINE)
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue,
@@ -646,7 +648,7 @@ static int USRFunction_Event (event_t * current,
 	   state Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 	*/
 
-#if defined(HAVE_BFD)
+#if defined(LIBADDR2LINE)
 	if (get_option_merge_SortAddresses() && EvValue != 0)
 	{
 		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2UF_FUNCTION);
@@ -673,7 +675,7 @@ static int Sampling_Address_Event (event_t * current,
 	int EvType;
 	UINT64 EvValue;
 	UINT64 EvParam;
-	task_t *task_info = GET_TASK_INFO(ptask, task);
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType = Get_EvEvent (current);
@@ -692,7 +694,7 @@ static int Sampling_Address_Event (event_t * current,
 	if (EvValue != 0)
 	{
 
-#if defined(HAVE_BFD)
+#if defined(LIBADDR2LINE)
 		if (get_option_merge_SortAddresses())
 		{
 			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2SAMPLE_FUNCTION);
@@ -726,9 +728,20 @@ static int Sampling_Address_Event (event_t * current,
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
 		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV, 0);
 	}
-	else
+	else {
+		/*
+ 		 * The sampled address does not belong to a dynamically allocated object because it 
+		 * was not found in AddressSpace_search, so we assume it belongs to a static allocation 
+		 * (e.g., a global variable).
+		 * 
+		 * FIXME: It could belong to an untracked malloc that was filtered because the size allocated was too small!
+		 *        This case is not covered by the current implementation.
+		 *        Maybe we could lookup the address to see if it belongs to a known mapping first, 
+		 *        to distinguish between static and untracked dynamic allocations. 
+		 */
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
 		  SAMPLING_ADDRESS_STATIC_OBJECT_EV, EvParam);
+	}
 
 	return 0;
 }
@@ -801,7 +814,7 @@ static int Sampling_Caller_Event (event_t * current,
 	if (EvValue != 0)
 	{
 
-#if defined(HAVE_BFD)
+#if defined(LIBADDR2LINE)
 		if (get_option_merge_SortAddresses())
 		{
 			if (EvTypeDelta == 0)
@@ -900,7 +913,7 @@ static int Evt_CountersDefinition (
 
 	/* The hardware counter set definition exists only on the master thread.
 	   We replicate them to all the threads as they appear */
-	nthreads = (GET_TASK_INFO(ptask,task))->nthreads;
+	nthreads = (ObjectTree_getTaskInfo(ptask,task))->nthreads;
 	for (i = 1; i <= nthreads; i++)
 		HardwareCounters_NewSetDefinition(ptask, task, i, newSet, HWCIds);
 
@@ -915,8 +928,8 @@ static int Evt_CountersDefinition (
 static void ResetCounters (unsigned ptask, unsigned task, unsigned thread)
 {
 	unsigned cnt;
-	thread_t * Sthread = GET_THREAD_INFO(ptask, task, thread); 
-	task_t *Stask = GET_TASK_INFO(ptask, task);
+	thread_t * Sthread = ObjectTree_getThreadInfo(ptask, task, thread); 
+	task_t *Stask = ObjectTree_getTaskInfo(ptask, task);
 
 	Stask->tracing_disabled = FALSE;
 
@@ -972,7 +985,7 @@ static int Evt_SetCounters (
 	UNREFERENCED_PARAMETER(fset);
 	unsigned int newSet = Get_EvValue (current_event);
 
-	Sthread = GET_THREAD_INFO(ptask, task, thread);
+	Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
 	Sthread->last_hw_group_change = current_time;
 
 	return HWC_Change_Ev (newSet, current_time, cpu, ptask, task, thread);
@@ -1176,8 +1189,8 @@ static int User_Send_Event (event_t * current_event,
 	event_t * recv_begin, * recv_end;
 	UNREFERENCED_PARAMETER(cpu);
 
-	task_info = GET_TASK_INFO(ptask, task);
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 
 	if (MatchComms_Enabled(ptask, task))
 	{
@@ -1188,7 +1201,7 @@ static int User_Send_Event (event_t * current_event,
 
 		if (isTaskInMyGroup (fset, ptask-1, partner))
 		{
-			task_info_partner = GET_TASK_INFO(ptask, partner+1);
+			task_info_partner = ObjectTree_getTaskInfo(ptask, partner+1);
 
 #if defined(DEBUG)
 			fprintf (stdout, "USER SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, partner, Get_EvTag(current_event));
@@ -1247,8 +1260,8 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 	UNREFERENCED_PARAMETER(cpu);
 	UNREFERENCED_PARAMETER(current_time);
 
-	task_info = GET_TASK_INFO(ptask, task);
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 
 	if (MatchComms_Enabled(ptask, task))
 	{
@@ -1259,7 +1272,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 
 		if (isTaskInMyGroup (fset, ptask-1, partner))
 		{
-			task_info_partner = GET_TASK_INFO(ptask, partner+1);
+			task_info_partner = ObjectTree_getTaskInfo(ptask, partner+1);
 
 #if defined(DEBUG)
 			fprintf (stdout, "USER RECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, partner, Get_EvTag(current_event));
@@ -1308,8 +1321,8 @@ static int Resume_Virtual_Thread_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
-	task_t *task_info = GET_TASK_INFO(ptask, task);
+	thread_t *thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
 	UNREFERENCED_PARAMETER(fset);
 
@@ -1378,8 +1391,8 @@ static int Suspend_Virtual_Thread_Event (event_t * current_event,
 	if (!get_option_merge_NanosTaskView())
 	{
 		unsigned u, i;
-		thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
-		task_t *task_info = GET_TASK_INFO(ptask, task);
+		thread_t *thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
+		task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 		active_task_thread_t *att = &(task_info->active_task_threads[thread_info->active_task_thread-1]);
 
 		/* Write as many "POPs" (0s) in tracefile according to the current
@@ -1538,8 +1551,8 @@ static int DynamicMemory_Event (event_t * event,
 	unsigned long long time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	task_t *task_info = GET_TASK_INFO(ptask, task);
-	thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
+	thread_t *thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 	UNREFERENCED_PARAMETER(fset);
 
 	unsigned EvType = Get_EvEvent (event);

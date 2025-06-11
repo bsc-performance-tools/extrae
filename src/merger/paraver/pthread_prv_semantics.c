@@ -38,15 +38,14 @@
 #include "semantics.h"
 #include "paraver_state.h"
 #include "paraver_generator.h"
-#include "addresses.h"
+#if defined(HAVE_LIBADDR2LINE)
+# include "addresses.h"
+# include "addr2info.h"
+#endif
 #include "options.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
-#endif
-
-#ifdef HAVE_BFD
-# include "addr2info.h" 
 #endif
 
 #include "record.h"
@@ -84,7 +83,7 @@ static int pthread_Call (event_t * current_event, unsigned long long current_tim
 
 	if (EvType == PTHREAD_CREATE_EV)
 	{
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 		if (get_option_merge_SortAddresses() && EvValue > 0)
 		{
 			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);
@@ -117,7 +116,7 @@ static int pthread_Function_Event (event_t * current_event,
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);

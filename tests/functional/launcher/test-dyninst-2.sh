@@ -24,7 +24,7 @@ if test -f TRACE.sym ; then
 	no_lines=`wc -l < TRACE.sym`
 	if test "${no_lines}" == "0"; then
 		rm TRACE.sym
-		${EXTRAE_HOME}/bin/mpi2prv -dump-without-time -f TRACE.mpits -d >& MYDUMP
+		${EXTRAE_HOME}/bin/mpi2prv -no-dump-time -f TRACE.mpits -d >& MYDUMP
 		grep ^TIME MYDUMP > MYDUMP2
 		grep -v "EV: 40000033" MYDUMP2 > MYDUMP3
 		rm -f MYDUMP MYDUMP2

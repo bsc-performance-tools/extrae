@@ -256,8 +256,8 @@ static int Any_Send_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
-	task_info = GET_TASK_INFO(ptask, task);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
 
 	switch (EvValue)
 	{
@@ -276,7 +276,7 @@ static int Any_Send_Event (event_t * current_event,
 #if defined(DEBUG)
 						fprintf (stderr, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", EvType, current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
 #endif
-						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(current_event)+1);
+						task_info_partner = ObjectTree_getTaskInfo(target_ptask, Get_EvTarget(current_event)+1);
 						CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, &recv_vthread, 0);
 
 						if (recv_begin == NULL || recv_end == NULL)
@@ -337,8 +337,8 @@ static int SendRecv_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent(current_event), Get_EvValue(current_event));
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
-	task_info = GET_TASK_INFO(ptask, task);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
 
 	if (!get_option_merge_SkipSendRecvComms())
 	{
@@ -357,7 +357,7 @@ static int SendRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 						fprintf (stderr, "SENDRECV/SEND: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(thread_info->Send_Rec), task-1, Get_EvTarget(thread_info->Send_Rec), Get_EvTag(thread_info->Send_Rec));
 #endif
-						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(thread_info->Send_Rec)+1);
+						task_info_partner = ObjectTree_getTaskInfo(target_ptask, Get_EvTarget(thread_info->Send_Rec)+1);
 
 						CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (thread_info->Send_Rec), &recv_begin, &recv_end, &recv_thread, &recv_vthread, 0);
 
@@ -410,7 +410,7 @@ static int SendRecv_Event (event_t * current_event,
 						fprintf (stderr, "SENDRECV/RECV: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(thread_info->Recv_Rec), task-1, Get_EvTarget(thread_info->Recv_Rec), Get_EvTag(thread_info->Recv_Rec));
 #endif
 
-						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(thread_info->Recv_Rec)+1);
+						task_info_partner = ObjectTree_getTaskInfo(target_ptask, Get_EvTarget(thread_info->Recv_Rec)+1);
 
 						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (thread_info->Recv_Rec), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
@@ -564,7 +564,7 @@ static int GlobalOP_event (event_t * current_event,
             (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_MATCHES) && /* The buffer behavior is to skip matches */
             (!MatchComms_Enabled(ptask, task))                         && /* Not matching already */
             (EvValue == EVT_END)                                       && /* End of the collective */
-            (Get_EvSize(current_event) == GET_NUM_TASKS(ptask))        && /* World collective */
+            (Get_EvSize(current_event) == ObjectTree_getNumTasks(ptask))        && /* World collective */
             (getTagForCircularBuffer() == Get_EvAux(current_event)))
 	{
 		MatchComms_On(ptask, task);
@@ -625,7 +625,7 @@ static int Other_MPI_Event (event_t * current_event,
 	 * before through a call to Extrae_shutdown. This is necessary because we can't skip
 	 * tracing this event due to various initialization needs.
 	 */
-	task_t *task_info = GET_TASK_INFO(ptask, task);
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 	if ((EvType != MPI_INIT_EV) ||
 	    ((EvType == MPI_INIT_EV) && (!task_info->tracing_disabled)))
 	{
@@ -691,8 +691,8 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 	task_t *task_info, *task_info_partner;
 	int EvComm;
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
-	task_info = GET_TASK_INFO(ptask, task);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
 
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
@@ -717,7 +717,7 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 #if defined(DEBUG)
 					fprintf (stderr, "RECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
 #endif
-					task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(current_event)+1);
+					task_info_partner = ObjectTree_getTaskInfo(target_ptask, Get_EvTarget(current_event)+1);
 
 					CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
@@ -776,8 +776,8 @@ static int IRecv_Event (event_t * current_event,
 	int EvComm;
 	int irecved_found_in_thread = 0;
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
-	task_info = GET_TASK_INFO(ptask, task);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
 
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
@@ -790,7 +790,7 @@ static int IRecv_Event (event_t * current_event,
 		if (MatchComms_Enabled(ptask, task))
 		{
 			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file, &irecved_found_in_thread);
-			irecved_thread_info = GET_THREAD_INFO(ptask, task, irecved_found_in_thread);
+			irecved_thread_info = ObjectTree_getThreadInfo(ptask, task, irecved_found_in_thread);
 
 			if (NULL != receive)
 			{
@@ -803,7 +803,7 @@ static int IRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 						fprintf (stderr, "IRECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(receive), Get_EvTag(receive));
 #endif
-						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(receive)+1);
+						task_info_partner = ObjectTree_getTaskInfo(target_ptask, Get_EvTarget(receive)+1);
 
 						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
@@ -890,8 +890,8 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 
 	EvComm = Get_EvComm( current_event );
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
-	task_info = GET_TASK_INFO(ptask, task);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
+	task_info = ObjectTree_getTaskInfo(ptask, task);
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	/* If this is a send, look for the receive */
@@ -911,7 +911,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 					fprintf (stderr, "PERS_REQ_ISEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvValue (current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
 #endif
 
-					task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(current_event)+1);
+					task_info_partner = ObjectTree_getTaskInfo(target_ptask, Get_EvTarget(current_event)+1);
 
 					CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, &recv_vthread, 0);
 
@@ -955,7 +955,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 		if (MatchComms_Enabled(ptask, task))
 		{
 			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file, &irecved_found_in_thread);
-			irecved_thread_info = GET_THREAD_INFO(ptask, task, irecved_found_in_thread);
+			irecved_thread_info = ObjectTree_getThreadInfo(ptask, task, irecved_found_in_thread);
 
 			if (NULL != receive)
 			{
@@ -969,7 +969,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 						fprintf (stderr, "PERS_REQ_IRECV_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvValue (current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(receive), Get_EvTag(receive));
 #endif
 
-						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(receive)+1);
+						task_info_partner = ObjectTree_getTaskInfo(ptask, Get_EvTarget(receive)+1);
 
 						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
@@ -1054,7 +1054,7 @@ int MPI_Start_Event (event_t * current_event, unsigned long long current_time,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 	switch (EvValue)
 	{
 		/* We don't know if the start will issue a send or recv, so we store both.

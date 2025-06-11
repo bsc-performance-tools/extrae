@@ -21,8 +21,6 @@ common_FILES = \
  ../common/addresses.c ../common/addresses.h \
  ../common/vector.c ../common/vector.h \
  ../common/stack.c ../common/stack.h \
- ../common/bfd_manager.c ../common/bfd_manager.h \
- ../common/bfd_manager_extra.h ../common/bfd_data_symbol.h \
  ../common/thread_dependencies.c ../common/thread_dependencies.h \
  ../common/address_space.c ../common/address_space.h
 
@@ -93,17 +91,13 @@ if !HAVE_PAPI_EMBEDDED
 endif
 endif
 
-libmpimpi2prv_la_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
-if HAVE_BINUTILS
-libmpimpi2prv_la_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-endif
+libmpimpi2prv_la_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @LIBADDR2LINE_CFLAGS@
 libmpimpi2prv_la_LDFLAGS = -o libmpimpi2prv.la $(CFLAGS) 
 
-mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ 
+mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @LIBADDR2LINE_CFLAGS@
 mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv $(PAPI_LINKER_FLAGS) @MPI_LDFLAGS@ @MPI_RPATH@ @MPI_LIBS@
-if HAVE_BINUTILS
-mpimpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpimpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_RPATH@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_RPATH@ @LIBERTY_LIBS@
+if HAVE_LIBADDR2LINE
+mpimpi2prv_LDADD = @LIBADDR2LINE_LDADD@
 endif
 mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la
 
@@ -111,13 +105,6 @@ if NEED_MPI_LIB_INCLUDE
   libmpimpi2prv_la_CFLAGS += @MPI_CFLAGS@
   mpimpi2prv_CFLAGS += @MPI_CFLAGS@
   mpimpi2prv_LDFLAGS += @MPI_LDFLAGS@ @MPI_LIBS@
-endif
-
-if BFD_NEEDS_LDL
-  mpimpi2prv_LDFLAGS += -ldl
-endif
-if BFD_NEEDS_LINTL
-  mpimpi2prv_LDFLAGS += -lintl
 endif
 
 if HAVE_ZLIB

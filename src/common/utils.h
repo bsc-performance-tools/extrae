@@ -45,6 +45,7 @@ int __Extrae_Utils_append_from_to_file (const char *source, const char *destinat
 int __Extrae_Utils_rename_or_copy (char *origen, char *desti);
 unsigned long long __Extrae_Utils_getTimeFromStr (const char *time, const char *envvar, int rank);
 unsigned long long __Extrae_Utils_getFactorValue (const char *value, const char *ref, int rank);
+int __Extrae_Utils_copy_file (char *src, char *dst);
 int __Extrae_Utils_mkdir_recursive (const char *path);
 int __Extrae_Utils_file_exists (const char *file);
 int __Extrae_Utils_directory_exists (const char *file);

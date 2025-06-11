@@ -167,6 +167,7 @@
 #include "threadid.h"
 
 
+
 #if defined(HAVE_BURST)
 # include "burst_mode.h"
 # include "stats_module.h"
@@ -406,7 +407,7 @@ void Extrae_setCheckForGlobalOpsTracingIntervals (int b)
 int circular_buffering = 0;
 event_t *circular_HEAD;
 
-static void Extrae_getExecutableInfo (void);
+static void Extrae_getExecutableInfo (char *output_maps);
 
 #if defined(EMBED_MERGE_IN_TRACE)
 int MergeAfterTracing = FALSE;
@@ -2318,6 +2319,18 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 	else
 		r = __Extrae_Utils_append_from_to_file (tmp_name, trace);
 
+	// Main thread stores a copy of the /proc/self/maps
+	if (thread == 0) 
+	{
+		char *maps_file = strdup(trace);
+		char *dot = strrchr(maps_file, '.');
+		if (dot) {
+			strcpy(dot, EXT_MAPS);
+		}
+		Extrae_getExecutableInfo(maps_file);
+		free(maps_file);
+	}
+
 	if (r == 0)
 		fprintf (stdout,
 		  PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
@@ -2466,8 +2479,6 @@ void Backend_Finalize (void)
 			Generate_Task_File_List();
 		}
 	}
-
-	Extrae_getExecutableInfo ();
 
 	unsigned thread;
 	int online_mode = 0;
@@ -3008,50 +3019,47 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	#undef LINE_SIZE
 }
 
-static void Extrae_getExecutableInfo (void)
+/**
+ * Extrae_getExecutableInfo
+ * 
+ * This function reads the /proc/self/maps file and stores a copy of it 
+ * in a file with the same name as the .mpit file but with the extension .maps.
+ * It also reads the /proc/self/exe file to get the path of the running
+ * executable and stores it in the .sym file under the type 'X'.
+ * 
+ * @param output_maps The name of the file where the /proc/self/maps content will be stored.
+ */
+static void Extrae_getExecutableInfo (char *output_maps)
 {
-#if defined(OS_LINUX) || defined(OS_ANDROID) || defined(HAVE_PROC_MAPS)
+#if defined(HAVE_PROC_SELF_EXE)
+	char main_binary[BUFSIZ];
+	ssize_t len;
 
-	FILE *mapsfile = fopen("/proc/self/maps", "r");
+	// Read /proc/self/exe and store the path to the main executable in the .sym file
+	len = readlink("/proc/self/exe", main_binary, sizeof(main_binary)-1);
+	if (len > 0) 
+	{
+		main_binary[len] = '\0';
+		Extrae_AddTypeValuesEntryToLocalSYM('X', 0, main_binary, (char) 0, 0, NULL, NULL);
+	}
+#endif /* HAVE_PROC_SELF_EXE */
 
-	if (mapsfile == NULL)
-		return;
-
-	#define LINE_SIZE 2048
-	char line[LINE_SIZE];
-	while (!feof(mapsfile))
-		if (fgets (line, LINE_SIZE, mapsfile) != NULL)
-		{
-			int match;
-			unsigned long start, end, offset;
-			char module[LINE_SIZE];
-			char perms[5];
-			module[0] = 0;
-		
-			match = sscanf (line, "%lx-%lx %s %lx %*s %*u %[^\n]", &start, &end, perms,
-			  &offset, module);
-
-			if (match == 5)
-				if (strcmp(perms, "r-xp") == 0 || strcmp(perms, "rwxp") == 0)
-					if (strlen(module) > 0 && module[0] != '[') // avoid [vdso], [syscall] and others
-					{
-						char nline[LINE_SIZE];
-						sprintf (nline, "%lx-%lx %lx %s", start, end, offset, module);
-						Extrae_AddTypeValuesEntryToLocalSYM ('B', 0, nline, (char) 0, 0, NULL, NULL);
-					}
-		}
-	#undef LINE_SIZE
-
-	fclose(mapsfile);
+#if defined(HAVE_PROC_SELF_MAPS)
+	// We used to parse the /proc/self/maps and store line by line in the .sym, now we just save a copy of the file
+	if (__Extrae_Utils_copy_file("/proc/self/maps", output_maps) == -1)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error copying /proc/self/maps to %s\n", output_maps);
+	}
 #else
-    if (TASKID == 0)
-    {
-        static Extrae_getExecutableInfo_first_time_call = 0;
-        if (!Extrae_getExecutableInfo_first_time_call)
-        {
-            fprintf (stderr, PACKAGE_NAME": Warning! File /proc/self/maps doesn't exist. Address translation may be limited.\n");
-        }
-    }
+	if (TASKID == 0)
+	{
+		static int once = TRUE;
+		if (once)
+		{
+			fprintf (stderr, PACKAGE_NAME": Warning! File /proc/self/maps doesn't exist. Address translation may be limited.\n");
+			once = FALSE;
+		}
+	}
 #endif
 }
 

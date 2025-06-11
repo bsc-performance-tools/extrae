@@ -27,8 +27,8 @@
 #define DEFAULT_PRV_OUTPUT_NAME "EXTRAE_Paraver_trace.prv"
 #define DEFAULT_DIM_OUTPUT_NAME "EXTRAE_Dimemas_Trace.dim"
 
-int get_option_merge_dump (void);
-void set_option_merge_dump (int b);
+int get_option_merge_Dump (void);
+void set_option_merge_Dump (int b);
 
 int get_option_merge_SincronitzaTasks (void);
 void set_option_merge_SincronitzaTasks (int b);
@@ -90,11 +90,11 @@ void set_option_merge_NanosTaskView (int b);
 int get_option_merge_RemoveFiles (void);
 void set_option_merge_RemoveFiles (int b);
 
-int get_option_dump_Time (void);
-void set_option_dump_Time (int b);
+int get_option_merge_DumpTime (void);
+void set_option_merge_DumpTime (int b);
 
-int get_option_dump_Addresses (void);
-void set_option_dump_Addresses (int b);
+int get_option_merge_DumpSymtab (void);
+void set_option_merge_DumpSymtab (int b);
 
 #if defined(IS_BG_MACHINE)
 int get_option_merge_BG_XYZT (void);

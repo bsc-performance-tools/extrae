@@ -77,7 +77,7 @@
 # include <mpi.h>
 #endif
 
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 # include "addr2info.h" 
 #endif
 
@@ -102,51 +102,47 @@ void Help (const char *ProgName)
 		  "       %s -f file.mpits [-o <OutputFile>] [otheroptions]\n"
 		  "       %s -h\n"
 		  "Options:\n"
-		  "    -h                   Get this help.\n"
-		  "    -v                   Increase verbosity.\n"
-		  "    -absolute-counters   Emit hardware counters in absolute form in addition to relative form.\n"
-		  "    -o file              Output trace file name.\n"
-		  "    -e file              Uses the executable file to obtain some information.\n"
-		  "    -f file              MpitFILE File with the names of the \".mpit\" input files.\n"
-		  "    -syn-by-task         Synchronize traces at the MPI task-level using the MPI_Init information.\n"
-		  "    -syn-by-node         Synchronize traces at the MPI node-level using the MPI_Init information (default).\n"
-		  "    -syn-apps            Align all applications at their synchronization points.\n"
-		  "    -no-syn              Do not synchronize traces at the end of MPI_Init.\n"
-		  "    -maxmem M            Uses up to M megabytes of memory at the last step of merging process.\n"
-		  "    -dimemas             Force the generation of a Dimemas trace.\n"
-		  "    -paraver             Force the generation of a Paraver trace.\n"
-		  "    -keep-mpits          Keeps MPIT files after trace generation (default).\n"
-		  "    -no-keep-mpits       Removes MPIT files after trace generation.\n"
-		  "    -trace-overwrite     Overwrites the tracefile.\n"
-		  "    -no-trace-overwrite  Do not overwrite the tracefile, renaming the new one.\n"
-		  "    -stop-at-percentage  Stops the merging process at the specified percentage.\n"
+		  "    -h                    Get this help.\n"
+		  "    -v                    Increase verbosity.\n"
+		  "    -absolute-counters    Emit hardware counters in absolute form in addition to relative form.\n"
+		  "    -o <file>             Output trace file name.\n"
+		  "    -e <file>             Uses the specified executable file to translate memory addresses into debugging information (superseded by /proc/self/maps if available).\n"
+		  "    -f <file>             Specifies the \".mpits\" file that contains the list of names of the \".mpit\" input files.\n"
+		  "    -syn-by-task          Synchronize traces at the MPI task-level using the MPI_Init information.\n"
+		  "    -syn-by-node          Synchronize traces at the MPI node-level using the MPI_Init information (default).\n"
+		  "    -syn-apps             Align all applications at their synchronization points.\n"
+		  "    -no-syn               Do not synchronize traces at the end of MPI_Init.\n"
+		  "    -maxmem <MB>          Uses up to <MB> megabytes of memory at the last step of merging process.\n"
+		  "    -dimemas              Force the generation of a Dimemas trace.\n"
+		  "    -paraver              Force the generation of a Paraver trace.\n"
+		  "    -[no-]keep-mpits      Keeps (default) or removes MPIT files after trace generation.\n"
+		  "    -[no-]trace-overwrite Overwrite (default) or prevent overwriting the trace file.\n"
+		  "    -stop-at-percentage   Stops the merging process at the specified percentage.\n"
 #if defined(IS_BG_MACHINE)
-		  "    -xyzt                Generates additional output file with BG/L torus coordinates.\n"
+		  "    -xyzt                 Generates additional output file with BG/L torus coordinates.\n"
 #endif
 #if defined(PARALLEL_MERGE)
-		  "    -tree-fan-out N      Orders the parallel merge to distribute its work in a N-order tree.\n"
-		  "    -cyclic              Distributes MPIT files cyclically among tasks.\n"
-		  "    -block               Distributes MPIT files in a block fashion among tasks.\n"
-		  "    -size                Distributes MPIT trying to build groups of equal size.\n"
-		  "    -consecutive-size    Distributes MPIT files in a block fashion considering file size.\n"
-		  "    -use-disk-for-comms  Uses the disk instead of memory to match foreign communications.\n"
+		  "    -tree-fan-out <N>     Orders the parallel merge to distribute its work in a N-order tree.\n"
+		  "    -cyclic               Distributes MPIT files cyclically among tasks.\n"
+		  "    -block                Distributes MPIT files in a block fashion among tasks.\n"
+		  "    -size                 Distributes MPIT trying to build groups of equal size.\n"
+		  "    -consecutive-size     Distributes MPIT files in a block fashion considering file size.\n"
+		  "    -use-disk-for-comms   Uses the disk instead of memory to match foreign communications.\n"
 #endif
-		  "    -s file              Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
-		  "    -d/-dump             Sequentially dumps the contents of every *.mpit file.\n"
-		  "    -dump-without-time   Do not show event time in when dumping events (useful for testing purposes).\n"
-		  "    -remove-files        Remove intermediate files after processing them.\n"
-		  "    -split-states        Do not merge consecutives states that are the same.\n"
-		  "    -skip-sendrecv       Do not emit communication for SendReceive operations.\n"
-		  "    -unique-caller-id    Choose whether use a unique value identifier for different callers.\n"
-		  "    -translate-addresses         Translate code addresses into code references if available.\n"
-		  "    -no-translate-addresses      Do not translate code addresses into code references if available.\n"
-		  "    -translate-data-addresses    Identify allocated objects by their full callpath.\n"
-		  "    -no-translate-data-addresses Identify allocated objects by the tuple <library, symbol_offset>.\n"
-		  "    -emit-library-events Emit library information for unknown references if possible.\n"
-		  "    -sort-addresses      Sort source code references by <line, filename>.\n"
-		  "    -task-view           Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
-		  "    -without-addresses   Do not emit address information into PCF (useful for testing purposes).\n"
-		  "    --                   Take the next trace files as a diferent parallel task.\n"
+		  "    -s <file>                      Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
+		  "    -d/-dump                       Sequentially dumps the contents of every *.mpit file.\n"
+		  "    -[no-]dump-time                Show (default) or supress event timestamps when dumping events (useful for testing).\n"
+		  "    -[no-]dump-symtab              Include or omit (default) the main's task symbol table in the PCF.\n"
+		  "    -remove-files                  Remove intermediate files after processing them.\n"
+		  "    -split-states                  Do not merge consecutives states that are the same.\n"
+		  "    -skip-sendrecv                 Do not emit communication for SendReceive operations.\n"
+		  "    -unique-caller-id              Enable unique value identifiers for different callers.\n"
+		  "    -[no-]translate-addresses      Translate code addresses (callstack, kernels, outlined...) into source references (default), or keep raw addresses.\n"
+		  "    -[no-]translate-data-addresses Translate data addresses (PEBS samples) to their full allocation callpath (default), or keep raw <library, offset> identifiers.\n" 
+		  "    -emit-library-events           Emit library information for unknown references if possible.\n"
+		  "    -sort-addresses                Sort source code references by <line, filename>.\n"
+		  "    -task-view                     Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
+		  "    --                             Take the next trace files as a diferent parallel task.\n"
 		  "\n",
           ProgName, ProgName, ProgName);
 }
@@ -841,27 +837,27 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		}
 		if (!strcmp (argv[CurArg], "-d") || !strcmp(argv[CurArg], "-dump"))
 		{
-			set_option_merge_dump (TRUE);
+			set_option_merge_Dump (TRUE);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-dump-without-time"))
+		if (!strcmp (argv[CurArg], "-no-dump-time"))
 		{
-			set_option_dump_Time (FALSE);
+			set_option_merge_DumpTime (FALSE);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-dump-with-time"))
+		if (!strcmp (argv[CurArg], "-dump-time"))
 		{
-			set_option_dump_Time (TRUE);
+			set_option_merge_DumpTime (TRUE);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-with-addresses"))
+		if (!strcmp (argv[CurArg], "-dump-symtab"))
 		{
-			set_option_dump_Addresses (TRUE);
+			set_option_merge_DumpSymtab (TRUE);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-without-addresses"))
+		if (!strcmp (argv[CurArg], "-no-dump-symtab"))
 		{
-			set_option_dump_Addresses (FALSE);
+			set_option_merge_DumpSymtab (FALSE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-maxmem"))
@@ -1438,14 +1434,6 @@ int merger_post (int numtasks, int taskid)
 		}
 	}
 
-	if (get_option_merge_TranslateAddresses())
-	{
-		if (taskid == 0 && strlen(get_merge_ExecutableFileName()) > 0)
-			Address2Info_Initialize (get_merge_ExecutableFileName());
-		else
-			Address2Info_Initialize (NULL);
-	}
-
 #if defined(PARALLEL_MERGE)
 	if (taskid == 0)
 	{
@@ -1531,7 +1519,7 @@ int merger_post (int numtasks, int taskid)
 	else
 		fprintf (stderr, "mpi2prv: An error has been encountered when generating the tracefile. Dying...\n");
 
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 	if (get_option_merge_VerboseLevel() > 0)
 		Addr2Info_HashCache_ShowStatistics();
 #endif

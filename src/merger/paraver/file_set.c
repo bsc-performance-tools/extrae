@@ -427,7 +427,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	fitem->thread = IFile->thread;
 	fitem->cpu = IFile->cpu;
 
-	(GET_THREAD_INFO(fitem->ptask,IFile->task,IFile->thread))->file = fitem;
+	(ObjectTree_getThreadInfo(fitem->ptask,IFile->task,IFile->thread))->file = fitem;
 
 	/* Create a buffered file with 512 entries of paraver_rec_t */
 	tmp_fd = newTemporalFile (taskid, TRUE, 0, paraver_tmp);
@@ -793,9 +793,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 		prvfset->nfiles = fset->nfiles + numtasks - 1;
 		prvfset->records_per_block = records_per_block / prvfset->nfiles;
 	}
-	else
-		prvfset->nfiles = fset->nfiles;
-
+	else prvfset->nfiles = fset->nfiles;
 
         prvfset->files = xmalloc(nTraces * sizeof(PRVFileItem_t));
 	/* Set local files first */
@@ -1333,21 +1331,21 @@ int getTagForCircularBuffer (void)
 
 void MatchComms_ChangeZone(unsigned int ptask, unsigned int task)
 {
-  task_t *task_info = GET_TASK_INFO(ptask, task);
+  task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
   task_info->match_zone ++;
 }
 
 int MatchComms_GetZone(unsigned int ptask, unsigned int task)
 {
-  task_t *task_info = GET_TASK_INFO(ptask, task);
+  task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
   return task_info->match_zone;
 }
 
 void MatchComms_On(unsigned int ptask, unsigned int task)
 {   
-  task_t *task_info = GET_TASK_INFO(ptask, task);
+  task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
   MatchComms_ChangeZone(ptask, task);
 
@@ -1356,7 +1354,7 @@ void MatchComms_On(unsigned int ptask, unsigned int task)
 
 void MatchComms_Off(unsigned int ptask, unsigned int task)
 {   
-  task_t *task_info = GET_TASK_INFO(ptask, task);
+  task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
   MatchComms_ChangeZone(ptask, task);
 
@@ -1368,7 +1366,7 @@ void MatchComms_Off(unsigned int ptask, unsigned int task)
 
 int MatchComms_Enabled(unsigned int ptask, unsigned int task)
 {   
-  task_t *task_info = GET_TASK_INFO(ptask, task);
+  task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
   return task_info->MatchingComms;
 }

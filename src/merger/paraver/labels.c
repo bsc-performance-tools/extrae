@@ -586,6 +586,8 @@ int Assign_File_Global_Id(char *file_name)
 
 /******************************************************************************
  *** Labels_loadSYMfile
+ *** This function is called both to load the global and the local SYM files.
+ *** Thus, it processes all possible entries in both files.
  ******************************************************************************/
 void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 	unsigned task, char *name, int report, UINT64 *io_TaskStartTime, UINT64 *io_TaskSyncTime)
@@ -634,24 +636,10 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 		{
 			switch (Type)
 			{
-				case 'B':
-					{
-						unsigned long start, end, offset;
-						char module[1024];
-						int res = sscanf (LINE, "0 \"%lx-%lx %lx %[^\n\"]\"", &start, &end, &offset, module);
-						if (res == 4)
-						{
-							ObjectTable_AddBinaryObject (allobjects, ptask, task, start, end, offset, module);
-						}
-						else fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
-					}
-					break;
-
 				case 'O':
 				case 'U':
 				case 'P':
 					{
-#ifdef HAVE_BFD
 						/* Example of line: U 0x100016d4 fA mpi_test.c 0 */
 						char fname[1024], modname[1024];
 						int line;
@@ -672,7 +660,6 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 
 						Address2Info_AddSymbol (address, type, fname, modname, line);
 						function_count++;
-#endif /* HAVE_BFD */
 					}
 					break;
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
@@ -889,6 +876,23 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 					fprintf (stderr, PACKAGE_NAME" mpi2prv: Error! Task %d found unexpected line in symbol file '%s'\n", taskid, LINE);
 					break;
 				}
+
+				/*
+				 * 'X' represents the main executable absolute path taken from /proc/self/exe
+				 */
+				case 'X':
+				{
+					char main_exec[BUFSIZ];
+
+					int res = sscanf (LINE, "0 \"%[^\"]\"", main_exec);
+					if (res == 1)
+					{
+						ObjectTree_setProcExe(ptask, task, main_exec);
+					}
+
+					break;
+				}
+					
 			}
 		}
 	}
@@ -1022,19 +1026,21 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Paraver_gradient_colors (fd);
 	Paraver_gradient_names (fd);
 
-#ifdef HAVE_BFD
-	Address2Info_Write_LibraryIDs (fd);
+#ifdef HAVE_LIBADDR2LINE
+	if (get_option_merge_EmitLibraryEvents()) Address2Info_Write_LibraryIDs (fd);
 	Address2Info_Write_MPI_Labels (fd, get_option_merge_UniqueCallerID());
-	Address2Info_Write_UF_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_Sample_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_CUDA_Labels (fd, get_option_merge_UniqueCallerID());
-	Address2Info_Write_OTHERS_Labels (fd, get_option_merge_UniqueCallerID(),
-		num_labels_codelocation, labels_codelocation);
-# if defined(BFD_MANAGER_GENERATE_ADDRESSES)
-	if (get_option_dump_Addresses())
-		ObjectTable_dumpAddresses (fd, ADDRESSES_FOR_BINARY_EV);
-# endif
+
+#ifdef HAVE_LIBADDR2LINE_LIB_symtab
+	if (get_option_merge_DumpSymtab()) {
+		Address2Info_writeDataObjects (fd, ADDRESSES_FOR_BINARY_EV);
+	}
 #endif
+#endif
+	// Unprotected to allow user-translated addresses through O|P|U entries in SYM file
+	Address2Info_Write_UF_Labels (fd, get_option_merge_UniqueCallerID());
+	Address2Info_Write_OTHERS_Labels (fd, get_option_merge_UniqueCallerID(), num_labels_codelocation, labels_codelocation);
 
 	Write_rusage_Labels (fd);
 	Write_memusage_Labels (fd);

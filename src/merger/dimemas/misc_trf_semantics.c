@@ -114,8 +114,8 @@ static int Set_Overflow_Event (event_t * current,
 static void ResetCounters (unsigned ptask, unsigned task, unsigned thread)
 {
 	unsigned cnt;
-	thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
-	task_t *Stask = GET_TASK_INFO(ptask, task);
+	thread_t *Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
+	task_t *Stask = ObjectTree_getTaskInfo(ptask, task);
 
 	Stask->tracing_disabled = FALSE;
 

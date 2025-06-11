@@ -43,7 +43,7 @@ static int num_counters = 0;
 
 static void show_current (const event_t * c, UINT64 max_time)
 {
-	int dump_time = get_option_dump_Time();
+	int dump_time = get_option_merge_DumpTime();
 
 	if (c->time < max_time) /* Check whether this event is back in time */
 	{

@@ -54,11 +54,11 @@ void trace_communicationAt (unsigned ptask_s, unsigned task_s, unsigned thread_s
 	unsigned cpu_r, cpu_s;
 
 	/* Look for the receive partner ... in the sender events */
-	thread_r_info = GET_THREAD_INFO(ptask_r, task_r, thread_r);
+	thread_r_info = ObjectTree_getThreadInfo(ptask_r, task_r, thread_r);
 	cpu_r = thread_r_info->cpu;
 
 	/* Look for the sender partner ... in the receiver events */
-	thread_s_info = GET_THREAD_INFO(ptask_s, task_s, thread_s);
+	thread_s_info = ObjectTree_getThreadInfo(ptask_s, task_s, thread_s);
 	cpu_s = thread_s_info->cpu;
 
 	/* Synchronize event times */
@@ -85,7 +85,7 @@ int trace_pending_communication (unsigned int ptask_s, unsigned int task_s,
 	unsigned long long log_s, phy_s;
 	unsigned cpu_s;
 
-	thread_s_info = GET_THREAD_INFO(ptask_s, task_s, thread_s);
+	thread_s_info = ObjectTree_getThreadInfo(ptask_s, task_s, thread_s);
 	cpu_s = thread_s_info->cpu; /* The receiver cpu is fixed at FixPendingCommunication */
 
 	/* Synchronize event times */

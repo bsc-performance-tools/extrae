@@ -38,15 +38,15 @@
 #include "semantics.h"
 #include "paraver_state.h"
 #include "paraver_generator.h"
-#include "addresses.h"
 #include "options.h"
 
 #if USE_HARDWARE_COUNTERS
 #include "HardwareCounters.h"
 #endif
 
-#ifdef HAVE_BFD
-# include "addr2info.h" 
+#ifdef HAVE_LIBADDR2LINE
+# include "addresses.h" 
+# include "addr2info.h"
 #endif
 
 #include "record.h"
@@ -169,7 +169,7 @@ static int OpenMP_Function_Event (
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);
@@ -281,10 +281,10 @@ static int Task_Event (
 {
 	UNREFERENCED_PARAMETER(fset);
 
-#if defined(HAVE_BFD)
-	/* Add the instantiated task to the list of known addresses, and emit its
-	   reference for matching in final tracefile */
-
+#if defined(HAVE_LIBADDR2LINE)
+	/* Add the instantiated task to the list of known addresses, 
+	 * and emit its reference for matching in final tracefile 
+	 */
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, ptask, task,
@@ -456,7 +456,7 @@ static int OMPT_dependence_Event (event_t *event,
 	UNREFERENCED_PARAMETER(time);
 	UNREFERENCED_PARAMETER(thread);
 
-	task_t *task_info = GET_TASK_INFO(ptask, task);
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
 	ThreadDependency_add (task_info->thread_dependencies, event);
 
@@ -540,10 +540,10 @@ static int OMPT_TaskFunction_Event (
 {
 	UNREFERENCED_PARAMETER(fset);
 
-#if defined(HAVE_BFD)
-	/* Add the instantiated task to the list of known addresses, and emit its
-	   reference for matching in final tracefile */
-
+#if defined(HAVE_LIBADDR2LINE)
+	/* Add the instantiated task to the list of known addresses, 
+	 * and emit its reference for matching in final tracefile 
+	 */
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, ptask, task,
@@ -563,7 +563,7 @@ static int OMPT_TaskFunction_Event (
 
 	if (Get_EvValue(event) == EVT_END)
 	{
-		task_t * task_info = GET_TASK_INFO(ptask, task);
+		task_t * task_info = ObjectTree_getTaskInfo(ptask, task);
 		struct TaskFunction_Event_Info_EmitDependencies data;
 		data.time = time;
 		data.cpu = cpu;
@@ -579,7 +579,7 @@ static int OMPT_TaskFunction_Event (
 	}
 	else
 	{
-		task_t * task_info = GET_TASK_INFO(ptask, task);
+		task_t * task_info = ObjectTree_getTaskInfo(ptask, task);
 		struct TaskFunction_Event_Info_EmitDependencies data;
 		data.time = time;
 		data.cpu = cpu;
@@ -874,10 +874,10 @@ static int OMP_Address_Event (
   EvType  = Get_EvEvent (current_event);
   EvValue = Get_EvValue (current_event);
 
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
   /* Add the outlined/task address to the list of known addresses,
-   * and emit its reference for matching in final tracefile */
-
+   * and emit its reference for matching in final tracefile 
+   */
   if (get_option_merge_SortAddresses())
   {
     AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);

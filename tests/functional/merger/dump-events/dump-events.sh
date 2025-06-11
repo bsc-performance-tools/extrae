@@ -1,7 +1,7 @@
 #!/bin/bash
 
 EXTRAE_ON=1 ./dump-events
-../../../../src/merger/mpi2prv -f TRACE.mpits -dump -dump-without-time >& OUTPUT
+../../../../src/merger/mpi2prv -f TRACE.mpits -dump -no-dump-time >& OUTPUT
 
 # Remove headers for mpi2prv dump
 grep -v ^mpi2prv OUTPUT   > OUTPUT-1

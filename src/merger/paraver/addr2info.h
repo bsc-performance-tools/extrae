@@ -26,9 +26,6 @@
 
 #include <config.h>
 
-#ifdef HAVE_BFD_H
-# include <bfd.h>
-#endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -43,15 +40,18 @@
 #include "labels.h"
 #include "addr2types.h"
 #include "xalloc.h"
+#include "addresses.h"
 
-#define ADDR_UNRESOLVED "Unresolved"
-#define ADDR_NOT_FOUND  "_NOT_Found"
 #define UNRESOLVED_ID 0
-#define NOT_FOUND_ID 1
 
+typedef struct library_id
+{
+	char **library_names;
+	int num_libraries;
+} library_id_t;
 
 /* Public routines */
-void Address2Info_Initialize (char * binary);
+void Address2Info_Initialize (void);
 int Address2Info_Initialized (void);
 UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 	int event_type, int uniqueID);
@@ -73,7 +73,15 @@ void Address2Info_Sort (int unique_ids);
 
 UINT64 Address2Info_GetLibraryID (unsigned ptask, unsigned task, UINT64 address);
 void Address2Info_Write_LibraryIDs (FILE *pcf_fd);
+void Address2Info_Unify(int numtasks, int taskid, struct address_collector_t *CollectedAddresses);
 
+/*
+ * TODO: Feels very redundant to the enum below, it's splitting each category into two,
+ *       one for the events that translate into functions, and one for the events that
+ *       translate into line number and file name.
+ *       Maybe a single enum with two values: FUNCTION and LINEFILE, in combination with 
+ *       the category enum below would be enough.
+ */
 enum
 {
 	ADDR2OMP_FUNCTION,
@@ -123,11 +131,9 @@ struct address_table
 
 struct address_object_info_st
 {
-	int is_static;
-	int line;
-	const char * file_name;
+	int static_or_dynamic;
+	const char * data_reference;
 	const char * module;
-	const char * name;
 };
 
 struct address_object_table_st

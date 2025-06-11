@@ -23,9 +23,7 @@
 
 #include "common.h"
 
-#ifdef HAVE_BFD
-# include "addr2info.h"
-#endif
+#include "addr2info.h"
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
@@ -330,7 +328,7 @@ static void OLD_OMPEvent_WriteEnabledOperations (FILE * fd)
 		             "5 SECTIONS\n"
 		             "6 SINGLE\n\n");
 	}
-#if defined(HAVE_BFD)
+//#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
 	if (inuse[FNC_OMP_INDEX])
 	{
 		Address2Info_Write_OMP_Labels (fd, OMPFUNC_EV, "Executed OpenMP parallel function",
@@ -343,7 +341,7 @@ static void OLD_OMPEvent_WriteEnabledOperations (FILE * fd)
 			TASKFUNC_INST_LINE_EV, "Instantiated OpenMP task function line and file",
 			get_option_merge_UniqueCallerID());
 	}
-#endif
+//#endif HAVE_LIBADDR2LINE
 	if (inuse[LCK_OMP_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
@@ -625,7 +623,7 @@ static void NEW_OMPEvent_WriteEnabledOperations (FILE * fd)
                  "%d TASKGROUP: Waiting child\n\n",
                  NEW_OMP_TASKGROUP_END_VAL, NEW_OMP_TASKGROUP_OPENING_VAL, NEW_OMP_TASKGROUP_ENTERING_VAL, NEW_OMP_TASKGROUP_WAITING_VAL);
   }
-#if defined(HAVE_BFD)
+//#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
   if (new_inuse[NEW_OMP_OUTLINED_INDEX])
   {
     Address2Info_Write_OMP_Labels (fd,
@@ -633,7 +631,7 @@ static void NEW_OMPEvent_WriteEnabledOperations (FILE * fd)
       NEW_OMP_OUTLINED_LINE_EV, "OpenMP Outlined function at line/file",
       get_option_merge_UniqueCallerID());
   }
-#endif
+//#endif
   if (new_inuse[NEW_OMP_TASKING_INDEX])
   {
     fprintf (fd, "EVENT_TYPE\n"
@@ -649,24 +647,24 @@ static void NEW_OMPEvent_WriteEnabledOperations (FILE * fd)
 
   if (new_inuse[NEW_OMP_TASK_INST_INDEX])
   {
-#if defined(HAVE_BFD)
+//#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
     Address2Info_Write_OMP_Labels (fd,
       NEW_OMP_TASK_INST_NAME_EV, "OpenMP instantiated task",
       NEW_OMP_TASK_INST_LINE_EV, "OpenMP instantiated task at line/file",
       get_option_merge_UniqueCallerID());
-#endif
+//#endif
     fprintf (fd, "EVENT_TYPE\n"
                  "0 %d OpenMP instantiated task ID\n\n",
                  NEW_OMP_TASK_INST_ID_EV);
   }
   if (new_inuse[NEW_OMP_TASK_EXEC_INDEX])
   {
-#if defined(HAVE_BFD)
+//#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
     Address2Info_Write_OMP_Labels (fd,
       NEW_OMP_TASK_EXEC_NAME_EV, "OpenMP executed task",
       NEW_OMP_TASK_EXEC_LINE_EV, "OpenMP executed task at line/file",
       get_option_merge_UniqueCallerID());
-#endif
+//#endif
     fprintf (fd, "EVENT_TYPE\n"
                  "0 %d OpenMP executed task ID\n\n",
                  NEW_OMP_TASK_EXEC_ID_EV);

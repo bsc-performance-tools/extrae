@@ -441,6 +441,7 @@ static int get_latency_load_event(unsigned long long *config)
 		case PROCESSOR_SKYLAKE_X:
 		case PROCESSOR_CASCADELAKE_X:
 		case PROCESSOR_SAPPHIRERAPIDS:
+		case PROCESSOR_KABYLAKE:
 			*config=0x1cd; // MEM_TRANS_RETIRED.LOAD_LATENCY
 			break;
 		case PROCESSOR_KNIGHTSLANDING:
@@ -475,6 +476,7 @@ static int get_store_event (unsigned long long *config)
 		case PROCESSOR_SKYLAKE_X:
 		case PROCESSOR_CASCADELAKE_X:
 		case PROCESSOR_SAPPHIRERAPIDS:
+		case PROCESSOR_KABYLAKE:
 			*config=0x82d0; // MEM_INST_RETIRED.ALL_STORES
 			break;
 	        case PROCESSOR_KNIGHTSLANDING:
@@ -496,6 +498,7 @@ static int get_load_l3m_event (unsigned long long *config)
 		case PROCESSOR_SKYLAKE_X:
 		case PROCESSOR_CASCADELAKE_X:
 		case PROCESSOR_SAPPHIRERAPIDS:
+		case PROCESSOR_KABYLAKE:
 			*config= 0x20d1; // MEM_LOAD_RETIRED.L3_MISS
 			break;
 		default:
@@ -515,6 +518,7 @@ static int get_offcore_store_l3m_event(unsigned long long *config)
 		case PROCESSOR_SKYLAKE:
 		case PROCESSOR_SKYLAKE_X:
 		case PROCESSOR_CASCADELAKE_X:
+		case PROCESSOR_KABYLAKE:
 			*config = 0x3fbc000002; // OFFCORE_RESPONSE.DEMAND_RFO.L3_MISS.ANY_SNOOP
 			break;
 		default:

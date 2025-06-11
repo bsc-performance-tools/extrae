@@ -476,6 +476,51 @@ int __Extrae_Utils_directory_exists (const char *fname)
 }
 
 /******************************************************************************
+ **      Function name : __Extrae_Utils_copy_file (char*, char*)
+ **      Description : Copy file 'src' to 'dst'
+ ******************************************************************************/
+int __Extrae_Utils_copy_file (char *src, char *dst)
+{
+	char  buf[BUFSIZ];
+	size_t nread = 0;
+
+	// Open source for reading
+	FILE *in = fopen(src, "rb");
+	if (!in) return -1;
+
+	// Open destination truncating if if it already exists
+	FILE *out = fopen(dst, "wb");
+	if (!out) { 
+		fclose(in); 
+		return -1; 
+	}
+
+	// Copy loop
+	while ((nread = fread(buf, 1, sizeof(buf), in)) > 0) 
+	{
+		if (fwrite(buf, 1, nread, out) != nread) 
+		{
+			fclose(in);
+			fclose(out);
+			remove(dst);
+			return -1;
+		}
+        }
+
+	// Detect read errors and make sure all data was flushed
+	if (ferror(in) || fclose(out) != 0) 
+	{
+		fclose(in);
+		remove(dst);
+		return -1;
+	}
+
+	fclose(in);
+	return 0; // Success
+}
+
+
+/******************************************************************************
  **      Function name : __Extrae_Utils_mkdir_recursive (char*)
  **      Author : HSG
  **      Description : make a recursive recursively

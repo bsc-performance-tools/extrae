@@ -37,8 +37,14 @@ AX_SYSTEM_TYPE
 # Check if exist /proc/self/maps for address translation
 if test ${cross_compiling} == "no"; then
     AC_CHECK_FILE(
+        [/proc/self/exe],
+        [AC_DEFINE([HAVE_PROC_SELF_EXE], [1], [Define to 1 if /proc/self/exe is available])],
+        AC_MSG_WARN(["/proc/self/exe" not found. Symbol table dumping will not be supported.])
+    )
+
+    AC_CHECK_FILE(
         [/proc/self/maps],
-        [AC_DEFINE([HAVE_PROC_MAPS],[1],[Define if have /proc/self/maps])],
+        [AC_DEFINE([HAVE_PROC_SELF_MAPS], [1], [Define to 1 if /proc/self/maps is available])],
         AC_MSG_WARN(["/proc/self/maps" not found. Address translation may be not fully supported.])
     )
 fi
@@ -321,7 +327,7 @@ AX_PROG_DYNINST
 AX_PROG_COUNTERS # Check for PAPI and/or PMAPI
 AX_PROG_SIONLIB
 
-AX_PROG_BINUTILS
+AX_PROG_LIBADDR2LINE
 
 #######################################
 # Enable/Disable some tracing options #
@@ -419,22 +425,6 @@ if test "${enable_instrument_syscall}" = "yes" ; then
   AC_DEFINE([INSTRUMENT_SYSCALL], [1], [Determine whether system calls (other than I/O and mallocs) are instrumented])
 fi
 AM_CONDITIONAL(INSTRUMENT_SYSCALL, test "${enable_instrument_syscall}" = "yes" )
-
-AC_ARG_ENABLE(bfd-generate-addresses,
-	AC_HELP_STRING(
-		[--enable-bfd-generate-addresses],
-		[Generates information for data objects found in binaries (experimental, enabled if --enable-instrument-dynamic-memory is enabled)]
-	),
-	[enable_bfd_generate_addresses="${enableval}"],
-	[
-		if test "${enable_instrument_dynamic_memory}" = "yes" -a "${have_binutils}" = "yes" ; then
-      enable_bfd_generate_addresses="yes"
-    fi
-	]
-)
-if test "${enable_bfd_generate_addresses}" = "yes" ; then
-	AC_DEFINE([BFD_MANAGER_GENERATE_ADDRESSES], [1], [Determine if BFD must generate information for data objects in binary])
-fi
 
 AC_ARG_ENABLE(dcarrera-hadoop,
 	AC_HELP_STRING(
@@ -744,6 +734,12 @@ AC_SUBST( [BUFFERS_LIB], ['$(WRAPPERS_LIB)/API'] )
 AC_SUBST( [EXTRAE_MAJOR], extrae_major )
 AC_SUBST( [EXTRAE_MINOR], extrae_minor )
 AC_SUBST( [EXTRAE_MICRO], extrae_micro )
+
+ac_configure_args="${elfutils_addr2line_configure_args} ${binutils_addr2line_configure_args}"
+
+if test "${LIBADDR2LINE_INSTALLED}" = "yes" ; then
+   AC_CONFIG_SUBDIRS([libaddr2line])
+fi
 
 AC_OUTPUT
 

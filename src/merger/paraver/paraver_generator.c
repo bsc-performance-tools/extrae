@@ -136,7 +136,7 @@ void trace_paraver_state_noahead (
    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
    unsigned long long current_time)
 {
-	thread_t * thread_info = GET_THREAD_INFO (ptask, task, thread);
+	thread_t * thread_info = ObjectTree_getThreadInfo (ptask, task, thread);
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 	unsigned current_state = Top_State(ptask, task, thread);
 
@@ -182,7 +182,7 @@ void trace_paraver_state (
    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
    unsigned long long current_time)
 {
-	thread_t * thread_info = GET_THREAD_INFO (ptask, task, thread);
+	thread_t * thread_info = ObjectTree_getThreadInfo (ptask, task, thread);
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 	unsigned current_state = Top_State(ptask, task, thread);
 
@@ -256,7 +256,7 @@ void trace_paraver_event (
 	paraver_rec_t record;
 	int tipus;
 	UINT64 valor;
-	thread_info = GET_THREAD_INFO (ptask, task, thread);
+	thread_info = ObjectTree_getThreadInfo (ptask, task, thread);
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 
 #if !defined(DCARRERA_HADOOP)
@@ -294,7 +294,7 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
 	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag)
 {
-	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_t * thread_info_s = ObjectTree_getThreadInfo (ptask_s, task_s, thread_s);
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
 
@@ -330,7 +330,7 @@ void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 	unsigned long long phy_r, unsigned int size, unsigned int tag,
 	int giveOffset, off_t position)
 {
-	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_t * thread_info_s = ObjectTree_getThreadInfo (ptask_s, task_s, thread_s);
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
 
@@ -369,7 +369,7 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
 	unsigned int tag)
 {
-	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_t * thread_info_s = ObjectTree_getThreadInfo (ptask_s, task_s, thread_s);
 	off_t where;
 	paraver_rec_t record;
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
@@ -602,8 +602,8 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
   return 0;
 }
 
-#if defined(HAVE_BFD)
-static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
+#if defined(HAVE_LIBADDR2LINE)
+static UINT64 paraver_translate_address_event (unsigned ptask, unsigned task,
 	unsigned eventtype, UINT64 eventvalue)
 {
 	if (eventtype == USRFUNC_EV)
@@ -675,7 +675,7 @@ static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
 
 	return eventvalue;
 }
-#endif /* HAVE_BFD */
+#endif /* HAVE_LIBADDR2LINE */
 
 static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 	PRVFileSet_t * fset, unsigned long long *num_events)
@@ -721,7 +721,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 
 			if (cur->event == MPI_GLOBAL_OP_COMM)
 				values[nevents] = (UINT64)alies_comunicador ((int) cur->value, cur->ptask, cur->task);
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 			else
 			{
 				if (cur->event == USRFUNC_EV || cur->event == USRFUNC_LINE_EV ||
@@ -738,7 +738,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				  cur->event == PTHREAD_FUNC_EV || cur->event == PTHREAD_FUNC_LINE_EV ||
 				  cur->event == CUDAFUNC_EV || cur->event == CUDAFUNC_LINE_EV)
 				{
-					values[nevents] = paraver_translate_bfd_event (cur->ptask,
+					values[nevents] = paraver_translate_address_event (cur->ptask,
 					  cur->task, cur->event, cur->value);
 				}
 
@@ -788,7 +788,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 
 						if (element->FunctionType == cur->event ||
 						    element->LineType == cur->event)
-							values[nevents] = paraver_translate_bfd_event (cur->ptask,
+							values[nevents] = paraver_translate_address_event (cur->ptask,
 							  cur->task, cur->event, cur->value);
 					}
 				}
@@ -801,7 +801,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					  cur->event == OMPFUNC_EV || cur->event == TASKFUNC_INST_EV ||
 					  cur->event == PTHREAD_FUNC_EV || cur->event == CUDAFUNC_EV)
 					{
-						if (cur->value == UNRESOLVED_ID+1 || cur->value == NOT_FOUND_ID+1)
+						if (cur->value == UNRESOLVED_ID+1)
 						{
 							nevents++;
 							events[nevents] = LIBRARY_EV;
@@ -820,7 +820,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 									Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
 	
 								if (element->FunctionType == cur->event || element->LineType == cur->event)
-									if (cur->value == UNRESOLVED_ID+1 || cur->value == NOT_FOUND_ID+1)
+									if (cur->value == UNRESOLVED_ID+1)
 									{
 										nevents++;
 										events[nevents] = LIBRARY_EV;
@@ -831,7 +831,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					}
 				}
 			}
-#endif
+#endif /* HAVE_LIBADDR2LINE */
 
 			/* These events don't go into final tracefile */
 			if (!(cur->event >= SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV &&
@@ -925,15 +925,15 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 
 		if (taskid == 0)
 		{
-			ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
-			task_t *last_task_info = GET_TASK_INFO(ptask+1,ptask_info->ntasks);
+			ptask_t *ptask_info = ObjectTree_getPtaskInfo(ptask+1);
+			task_t *last_task_info = ObjectTree_getTaskInfo(ptask+1,ptask_info->ntasks);
 
 			sprintf (Header, "%d(", ptask_info->ntasks);
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 			for (task = 0; task < ptask_info->ntasks-1; task++)
 			{
-				task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+				task_t *task_info = ObjectTree_getTaskInfo(ptask+1,task+1);
 
 #if defined(PARALLEL_MERGE)
 				threads = vthreads_count[task];
@@ -1035,7 +1035,7 @@ static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 		current->receive[LOGICAL_COMMUNICATION] = tmp->logic;
 		current->receive[PHYSICAL_COMMUNICATION] = tmp->physic;
 		current->thread_r = tmp->vthread+1; /* AddForeignRecv is called with (vthread-1) */
-		thread_r_info = GET_THREAD_INFO(current->ptask_r, current->task_r, current->thread_r);
+		thread_r_info = ObjectTree_getThreadInfo(current->ptask_r, current->task_r, current->thread_r);
 		current->cpu_r = thread_r_info->cpu; /* The sender cpu is set at trace_paraver_pending_communication */
 		current->type = COMMUNICATION;
 		tmp->logic = tmp->physic = 0;

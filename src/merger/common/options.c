@@ -29,9 +29,9 @@
 
 #include "paraver_state.h" /* for joint states */
 
-static int option_merge_dump = FALSE;
-int get_option_merge_dump (void) { return option_merge_dump; }
-void set_option_merge_dump (int b) { option_merge_dump = b; }
+static int option_merge_Dump = FALSE;
+int get_option_merge_Dump (void) { return option_merge_Dump; }
+void set_option_merge_Dump (int b) { option_merge_Dump = b; }
 
 static int option_merge_SincronitzaTasks = FALSE;
 int get_option_merge_SincronitzaTasks (void) { return option_merge_SincronitzaTasks; }
@@ -113,13 +113,13 @@ static int option_merge_RemoveFiles = FALSE;
 int get_option_merge_RemoveFiles (void) { return option_merge_RemoveFiles; }
 void set_option_merge_RemoveFiles (int b) { option_merge_RemoveFiles = b; }
 
-static int option_dump_Time = TRUE;
-int get_option_dump_Time (void) { return option_dump_Time; }
-void set_option_dump_Time (int b) { option_dump_Time = b; }
+static int option_merge_DumpTime = TRUE;
+int get_option_merge_DumpTime (void) { return option_merge_DumpTime; }
+void set_option_merge_DumpTime (int b) { option_merge_DumpTime = b; }
 
-static int option_dump_Address = TRUE;
-int get_option_dump_Addresses (void) { return option_dump_Address; }
-void set_option_dump_Addresses (int b) { option_dump_Address = b; }
+static int option_merge_DumpSymtab = FALSE;
+int get_option_merge_DumpSymtab (void) { return option_merge_DumpSymtab; }
+void set_option_merge_DumpSymtab (int b) { option_merge_DumpSymtab = b; }
 
 #if defined(IS_BG_MACHINE)
 static int option_merge_BG_XYZT = FALSE;

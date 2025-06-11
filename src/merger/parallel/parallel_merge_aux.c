@@ -719,7 +719,7 @@ void ShareTraceInformation (int numtasks, int taskid)
 	fflush (stdout);
 	Share_MISC_Operations ();
 
-#if defined(HAVE_BFD)
+#if defined(HAVE_LIBADDR2LINE)
 	if (0 == taskid)
 		fprintf (stdout, " callers");
 	fflush (stdout);
@@ -909,7 +909,7 @@ unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
 {
 	int res;
 	unsigned *temp, *temp_out = NULL;
-	ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+	ptask_t *ptask_info = ObjectTree_getPtaskInfo(ptask+1);
 	unsigned ntasks = ptask_info->ntasks;
 	unsigned u;
 
@@ -927,7 +927,7 @@ unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
 	for (u = 0; u < ntasks; u++)
 		if (isTaskInMyGroup(fset, ptask, u))
 		{
-			task_t *task_info = GET_TASK_INFO(ptask+1, u+1);
+			task_t *task_info = ObjectTree_getTaskInfo(ptask+1, u+1);
 			temp[u] = task_info->num_virtual_threads;
 		}
 		else

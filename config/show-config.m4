@@ -54,7 +54,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo Performance counters: no
 	fi
 
-        echo
+	echo
 	if test "${enable_pebs_sampling}" = "yes" ; then
 		echo PEBS sampling: yes
 	else
@@ -62,19 +62,10 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	fi
 
 	echo
-	if test "${BFD_INSTALLED}" = "yes" ; then
-		echo libbfd available: yes \(${BFD_LIBSDIR}\)
+	if test "${LIBADDR2LINE_INSTALLED}" = "yes" ; then
+		echo libaddr2line available: yes 
 	else
-		echo libbfd available: no
-	fi
-
-	if test "${LIBERTY_INSTALLED}" = "yes" ; then
-		echo libiberty available: yes \(${LIBERTY_LIBSDIR}\)
-	else
-		echo libiberty available: no
-	fi
-	if test "${BFD_INSTALLED}" != "yes" -o "${LIBERTY_INSTALLED}" != "yes" ; then
-		echo Warning! Source code addresses cannot be translated due to lack of libbfd/libiberty
+		echo libaddr2line available: no
 	fi
 
 	if test "${zhome_dir}" != "not found" ; then

@@ -152,8 +152,8 @@ static void HandleStackedType (unsigned ptask, unsigned task, unsigned thread,
 		unsigned pos;
 		unsigned u;
 		int found;
-		task_t *task_info = GET_TASK_INFO(ptask, task);
-		thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+		task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
+		thread_t *thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 		active_task_thread_t *att = &(task_info->active_task_threads[thread_info->active_task_thread-1]);
 
 		/* Look for existing stacked_types for the current task/thread */
@@ -213,9 +213,9 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	records_per_task /= get_option_merge_TreeFanOut();        /* divide by the tree fan out */
 #endif
 
-	InitializeObjectTable (num_appl, files, nfiles);
+	ObjectTree_Initialize (taskid, num_appl, files, nfiles);
 	for (i = 0; i < num_appl; i++)
-		num_appl_tasks[i] = (GET_PTASK_INFO(i+1))->ntasks;
+		num_appl_tasks[i] = (ObjectTree_getPtaskInfo(i+1))->ntasks;
 
 #if defined(PARALLEL_MERGE)
 	ParallelMerge_InitCommunicators();
@@ -232,7 +232,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	/* If no actual filename is given, use the binary name if possible */
 	if (!get_merge_GivenTraceName())
 	{
-		char *tmp = ObjectTable_GetBinaryObjectName (1, 1);
+		char *tmp = ObjectTree_getMainBinary (1, 1);
 
 		/* Duplicate the string as basename may modify it */
 		char *FirstBinaryName = NULL;
@@ -304,7 +304,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 		return -1;
 	}
 
-	if (get_option_merge_dump())
+	if (get_option_merge_Dump())
 		make_dump (fset);
 
 #if defined(HETEROGENEOUS_SUPPORT)
@@ -419,7 +419,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE || Type == OPENACC_TYPE ||
 				Type == GASPI_TYPE)
 			{
-				task_t *task_info = GET_TASK_INFO(ptask, task);
+				task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
 				if (handler != NULL)
 				{
@@ -476,7 +476,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				if (Get_EvHWCRead (current_event))
 				{
-					thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
+					thread_t *Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
  
 					if (Sthread->last_hw_group_change != current_time)
 					{
@@ -510,8 +510,8 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			tmp_nevents = 1;
 		}
 
-		(GET_THREAD_INFO(ptask,task,thread))->First_Event = FALSE;
-		(GET_THREAD_INFO(ptask,task,thread))->Previous_Event_Time = current_time;
+		(ObjectTree_getThreadInfo(ptask,task,thread))->First_Event = FALSE;
+		(ObjectTree_getThreadInfo(ptask,task,thread))->Previous_Event_Time = current_time;
 
 		parsed_events += tmp_nevents;
 		pct = ((double) parsed_events)/((double) num_of_events)*100.0f;
@@ -596,45 +596,18 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	   paraver_rec_t for a new state, remove it (so TRUE in 2nd param) */
 	Flush_FS (fset, FALSE);
 
-	if (get_option_merge_SortAddresses())
+	gettimeofday (&time_begin, NULL);
+	Address2Info_Unify(numtasks, taskid, &CollectedAddresses);
+	if (taskid == 0)
 	{
-		gettimeofday (&time_begin, NULL);
-
-#if defined(PARALLEL_MERGE)
-		AddressCollector_GatherAddresses (numtasks, taskid, &CollectedAddresses);
-#endif
-
-		/* Address translation and address sorting is only done by the master */
-		if (taskid == 0)
-		{
-			UINT64 *buffer_addresses = AddressCollector_GetAllAddresses (&CollectedAddresses);
-			int *buffer_types = AddressCollector_GetAllTypes (&CollectedAddresses);
-			unsigned *buffer_ptasks = AddressCollector_GetAllPtasks (&CollectedAddresses);
-			unsigned *buffer_tasks = AddressCollector_GetAllTasks (&CollectedAddresses);
-
-			for (i = 0; i < AddressCollector_Count(&CollectedAddresses); i++)
-				Address2Info_Translate (buffer_ptasks[i], buffer_tasks[i],
-				  buffer_addresses[i], buffer_types[i], get_option_merge_UniqueCallerID());
-
-			Address2Info_Sort (get_option_merge_UniqueCallerID());
-		}
-
-		if (taskid == 0)
-		{
-			time_t delta;
-			gettimeofday (&time_end, NULL);
-			delta = time_end.tv_sec - time_begin.tv_sec;
-#if !defined(PARALLEL_MERGE)
-			fprintf (stdout, "mpi2prv: Elapsed time sorting addresses: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
-#else
-			fprintf (stdout, "mpi2prv: Elapsed time broadcasting and sorting addresses: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
-#endif
-		}
+		time_t delta;
+		gettimeofday (&time_end, NULL);
+		delta = time_end.tv_sec - time_begin.tv_sec;
+		fprintf (stdout, "mpi2prv: Elapsed time unifying addresses: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 	}
 
 #if defined(PARALLEL_MERGE)
-	if (taskid == 0)
-		gettimeofday (&time_begin, NULL);
+	if (taskid == 0) gettimeofday (&time_begin, NULL);
 
 	ParallelMerge_BuildCommunicators (numtasks, taskid);
 

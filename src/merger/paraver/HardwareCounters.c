@@ -368,7 +368,7 @@ int HardwareCounters_GetUsed(hwc_info_t ***used_counters_io)
  */
 static hwc_id_t * get_set_ids(int ptask, int task, int thread, int set_id)
 {
-	thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
+	thread_t *Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
 
 	if ((set_id+1 > Sthread->num_HWCSets) || (set_id < 0))
 	{
@@ -401,7 +401,7 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 {
 	thread_t *Sthread;
 
-	Sthread = GET_THREAD_INFO(ptask, task, thread);
+	Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
 
 	if (newSet >= Sthread->num_HWCSets)
 	{
@@ -470,7 +470,7 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 int HardwareCounters_Change (int ptask, int task, int thread, unsigned long long change_time, int newSetId, unsigned int *outtypes, unsigned long long *outvalues)
 {
 	int i = 0;
-	thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
+	thread_t *Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
 
 	// Count how many set changes has seen this thread
 	int first_hwc_change = (Sthread->HWCChange_count == 0);
@@ -542,7 +542,7 @@ int HardwareCounters_Change (int ptask, int task, int thread, unsigned long long
 void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Event)
 {
 	int cnt;
-	thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
+	thread_t *Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
 	int set_id = Sthread->current_HWCSet;
 
 	for (cnt = 0; cnt < MAX_HWC; cnt++)
@@ -575,7 +575,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 {
 	int cnt = 0;
 	int outcount = 0;
-	thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
+	thread_t *Sthread = ObjectTree_getThreadInfo(ptask, task, thread);
 
 	hwc_id_t *SetHWCIds = get_set_ids (ptask, task, thread, Sthread->current_HWCSet);
 

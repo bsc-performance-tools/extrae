@@ -23,7 +23,7 @@
 
 #include "common.h"
 
-#ifdef HAVE_BFD
+#ifdef HAVE_LIBADDR2LINE
 # include "addr2info.h"
 #endif
 #ifdef HAVE_STDLIB_H
@@ -122,17 +122,17 @@ void WriteEnabled_pthread_Operations (FILE * fd)
 {
 	unsigned u;
 	int anypresent = FALSE;
-#if defined(HAVE_BFD)
+//#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
 	int createpresent = FALSE;
-#endif
+//#endif
 
 	for (u = 0; u < MAX_PTHREAD_TYPE_ENTRIES; u++)
 	{
 		anypresent = anypresent || pthread_event_presency_label[u].present;
-#if defined(HAVE_BFD)
+//#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
 		if (pthread_event_presency_label[u].eventtype == PTHREAD_CREATE_EV)
 			createpresent = TRUE;
-#endif
+//#endif
 	}
 
 	if (anypresent)
@@ -150,12 +150,12 @@ void WriteEnabled_pthread_Operations (FILE * fd)
 		LET_SPACES(fd);
 	}
 
-#if defined(HAVE_BFD)
+//#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
 	/* Hey, pthread & OpenMP share the same labels? */
 	if (createpresent)
 		Address2Info_Write_OMP_Labels (fd, PTHREAD_FUNC_EV, "pthread function",
 			PTHREAD_FUNC_LINE_EV, "pthread function line and file",
 			get_option_merge_UniqueCallerID());
-#endif
+//#endif
 }
 

@@ -31,82 +31,127 @@
 #include "utils.h"
 #include "debug.h"
 #include "xalloc.h"
+#include "options.h"
+#if defined(HAVE_LIBADDR2LINE)
+# include "addr2info.h"
+# include "maps.h"
+#endif
 
 appl_t ApplicationTable;
 
-/******************************************************************************
- ***  InitializeObjectTable
- ******************************************************************************/
-void InitializeObjectTable (unsigned num_appl, struct input_t * files,
-	unsigned long nfiles)
+
+/**
+ * getMapsFromMpit
+ *
+ * This function takes a file name with ".mpit" extension and replaces it with ".maps".A
+ *
+ * @param mpit_file The input file name with ".mpit" extension
+ * @return A new string with the ".maps" extension. The caller is responsible for freeing the returned string.
+ */
+static char * getMapsFromMpit(char *mpit_file)
+{
+	char *maps_file = strdup(mpit_file);
+	char *dot = strrchr(maps_file, '.');
+	if (dot) {
+		strcpy(dot, EXT_MAPS);
+	}
+	return maps_file;
+}
+
+
+/**
+ * ObjectTree_Initialize
+ *
+ * Initializes the object tree structure according to the application's object hierarchy,
+ * which includes the number of applications, tasks per application, and threads per task.
+ * Each node in the tree stores information relevant to its corresponding level-application, task, or thread.
+ *
+ * @param worker_id The ID of the current parallel merger process
+ * @param num_appl The number of applications
+ * @param files The input_t structure containing all trace files
+ * @param nfiles The number of trace files
+ */
+void ObjectTree_Initialize (int worker_id, unsigned num_appl, struct input_t * files, unsigned long nfiles)
 {
 	unsigned int ptask, task, thread, i, j, v;
 	unsigned int ntasks[num_appl], **nthreads = NULL;
 
-	/* First step, collect number of applications, number of tasks per application and
-	   number of threads per task within an app */
-	for (i = 0; i < num_appl; i++)
+	/*
+	 * 1st step, collect number of applications, number of tasks per application and
+	 * number of threads per task within an app
+	 */
+	for (i = 0; i < num_appl; i++) {
 		ntasks[i] = 0;
+	}
 
-	for (i = 0; i < nfiles; i++)
+	for (i = 0; i < nfiles; i++) {
 		ntasks[files[i].ptask-1] = MAX(files[i].task, ntasks[files[i].ptask-1]);
+	}
 
 	nthreads = (unsigned**) xmalloc (num_appl*sizeof(unsigned*));
-	
-	for (i = 0; i < num_appl; i++)
+	for (i = 0; i < num_appl; i++) 
 	{
 		nthreads[i] = (unsigned*) xmalloc (ntasks[i]*sizeof(unsigned));
 		
-		for (j = 0; j < ntasks[i]; j++)
+		for (j = 0; j < ntasks[i]; j++) {
 			nthreads[i][j] = 0;
+		}
+	}
+	for (i = 0; i < nfiles; i++) {
+		nthreads[files[i].ptask-1][files[i].task-1] = MAX(files[i].thread, nthreads[files[i].ptask-1][files[i].task-1]);
 	}
 
-	for (i = 0; i < nfiles; i++)
-		nthreads[files[i].ptask-1][files[i].task-1] = MAX(files[i].thread, nthreads[files[i].ptask-1][files[i].task-1]);
-
-	/* Second step, allocate structures respecting the number of apps, tasks and threads found */
+	/* 2nd step, allocate structures for the number of apps, tasks and threads found */
 	ApplicationTable.nptasks = num_appl;
 	ApplicationTable.ptasks = (ptask_t*) xmalloc (sizeof(ptask_t)*num_appl);
 	
 	for (i = 0; i < ApplicationTable.nptasks; i++)
 	{
-		/* Allocate per task information within each ptask */
+		// Allocate per task information within each ptask
 		ApplicationTable.ptasks[i].ntasks = ntasks[i];
 		ApplicationTable.ptasks[i].tasks = (task_t*) xmalloc (sizeof(task_t)*ntasks[i]);
 		
 		for (j = 0; j < ApplicationTable.ptasks[i].ntasks; j++)
 		{
-			/* Initialize pending communication queues for each task */
+			// Initialize pending communication queues for each task
 			CommunicationQueues_Init (
 			  &(ApplicationTable.ptasks[i].tasks[j].send_queue),
 			  &(ApplicationTable.ptasks[i].tasks[j].recv_queue));
 
-			/* Allocate per thread information within each task */
+			// Allocate per thread information within each task
 			ApplicationTable.ptasks[i].tasks[j].threads = (thread_t*) xmalloc (sizeof(thread_t)*nthreads[i][j]);
 		}
 	}
 
-	/* 3rd step, Initialize the object table structure */
-	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++)
+	/* 3rd step, initialize the corresponding object-level structures */
+	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++) 
+	{
 		for (task = 0; task < ApplicationTable.ptasks[ptask].ntasks; task++)
 		{
-			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			// Initialize task-level structures
+			task_t *task_info = ObjectTree_getTaskInfo(ptask+1,task+1);
 			task_info->tracing_disabled = FALSE;
 			task_info->nthreads = nthreads[ptask][task];
 			task_info->num_virtual_threads = nthreads[ptask][task];
 			task_info->MatchingComms = TRUE;
 			task_info->match_zone = 0;
-			task_info->num_binary_objects = 0;
-			task_info->binary_objects = NULL;
 			task_info->thread_dependencies = ThreadDependency_create();
 			task_info->AddressSpace = AddressSpace_create();
+			// Initialize structures related to address translations
+			task_info->proc_self_exe = NULL;
+#if defined(HAVE_LIBADDR2LINE)
+			task_info->proc_self_maps = NULL;
+			task_info->addr2line = NULL;
+#endif
 
+			// Initialize thread-level structures
 			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{
-				thread_t *thread_info = GET_THREAD_INFO(ptask+1,task+1,thread+1);
+				thread_t *thread_info = ObjectTree_getThreadInfo(ptask+1,task+1,thread+1);
 
-				/* Look for the appropriate CPU for this ptask, task, thread */
-				for (i = 0; i < nfiles; i++)
+				// Look for the appropriate CPU for this ptask, task, thread
+				for (i = 0; i < nfiles; i++) 
+				{
 					if (files[i].ptask == ptask+1 &&
 					    files[i].task == task+1 &&
 					    files[i].thread == thread+1)
@@ -114,6 +159,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 						thread_info->cpu = files[i].cpu;
 						break;
 					}
+				}
 
 				thread_info->dimemas_size = 0;
 				thread_info->virtual_thread = thread+1;
@@ -122,8 +168,9 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 				thread_info->nStates_Allocated = 0;
 				thread_info->First_Event = TRUE;
 				thread_info->HWCChange_count = 0;
-				for (v = 0; v < MAX_CALLERS; v++)
+				for (v = 0; v < MAX_CALLERS; v++) {
 					thread_info->AddressSpace_calleraddresses[v] = 0;
+				}
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
 				thread_info->num_HWCSets = 0;
@@ -131,195 +178,135 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 #endif
 			}
 		}
+	}
 
-	/* 4th step Assign the node ID */
+	/* 4th step, assign the node ID */
 	for (i = 0; i < nfiles; i++)
 	{
-		task_t *task_info = GET_TASK_INFO(files[i].ptask, files[i].task);
+		task_t *task_info = ObjectTree_getTaskInfo(files[i].ptask, files[i].task);
 		task_info->nodeid = files[i].nodeid;
 	}
 
 	/* This is needed for get_option_merge_NanosTaskView() == FALSE */
-	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++)
+	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++) 
+	{
 		for (task = 0; task < ApplicationTable.ptasks[ptask].ntasks; task++)
 		{
-			task_t *task_info = GET_TASK_INFO(ptask+1, task+1);
+			task_t *task_info = ObjectTree_getTaskInfo(ptask+1, task+1);
 			task_info->num_active_task_threads = 0;
 			task_info->active_task_threads = NULL;
 		}
+	}
+
+#if defined(HAVE_LIBADDR2LINE)
+	/* Load the maps files for address translations */
+	if (worker_id == 0) // For now, the translations are done in the master merger only. In the future remove this constraint.
+	{
+		for (i = 0; i < nfiles; i++)
+		{
+			if (files[i].thread == 1) // Only for the main thread of each task
+			{
+				// Assign to each task its corresponding maps file
+				ObjectTree_setProcMaps(files[i].ptask, files[i].task, getMapsFromMpit(files[i].name));
+			}
+		}
+	}
+#endif
+
+        /*
+         * Initialization of the address translation module 
+	 *
+	 * This operation is performed without protection to allow setup of the
+	 * tables that store user-translated addresses based on O|P|U entries
+	 * in the SYM file.
+	 *
+	 * Previously, this method initialized both the tables holding already
+	 * translated addresses by category (i.e. MPI call stack, OMP outlined,
+	 * CUDA kernel, etc.), as well as the translation back-end. The back-end
+	 * initialization has since been removed from here. It is now performed
+	 * lazily the first time an address translation is attempted.
+	 * See Initialize_Translation_Backend at addr2info.c for details.
+         */
+	Address2Info_Initialize();
 
 	/* Clean up */
 	if (nthreads != NULL)
 	{
-		for (i = 0; i < num_appl; i++)
-			if (nthreads[i] != NULL)
+		for (i = 0; i < num_appl; i++) 
+		{
+			if (nthreads[i] != NULL) {
 				xfree (nthreads[i]);
-		xfree (nthreads);		
-	}
-}
-
-static void AddBinaryObjectInto (unsigned ptask, unsigned task,
-	unsigned long long start, unsigned long long end, unsigned long long offset,
-	char *binary)
-{
-	task_t *task_info = GET_TASK_INFO(ptask, task);
-	//unsigned found = FALSE, u;
-
-	if (!__Extrae_Utils_file_exists(binary))
-	{
-		fprintf (stderr, "mpi2prv: Warning: Couldn't open %s for reading, addresses may not be translated.\n", binary);
-		return;
-	}
-
-	/* Do not discard repeated entries for the same binary. It seems 
-	 * there can be repetitions in /proc/self/maps with different
-	 * address ranges.
-	 *
-	 * for (u = 0; u < task_info->num_binary_objects && !found; u++)
-	 *	found = strcmp (task_info->binary_objects[u].module, binary) == 0;
-	 *
-   * if (!found)
-	 */
-	
-	unsigned last_index = task_info->num_binary_objects;
-	task_info->binary_objects = (binary_object_t*) xrealloc (
-	  task_info->binary_objects,
-	  (last_index+1) * sizeof(binary_object_t));
-	task_info->binary_objects[last_index].module = strdup (binary);
-	task_info->binary_objects[last_index].start_address = start;
-	task_info->binary_objects[last_index].end_address = end;
-	task_info->binary_objects[last_index].offset = offset;
-	task_info->binary_objects[last_index].index = last_index+1;
-
-	/* Check if the current binary is the main binary and flag it */
-	if (last_index == 0) task_info->binary_objects[last_index].main_binary = 1;
-	else 
-	{
-		task_info->binary_objects[last_index].main_binary =
-			(strcmp (task_info->binary_objects[last_index].module, task_info->binary_objects[0].module) == 0);
-	}
-
-#if defined(HAVE_BFD)
-	task_info->binary_objects[last_index].nDataSymbols = 0;
-	task_info->binary_objects[last_index].dataSymbols = NULL;
-
-	BFDmanager_loadBinary (binary,
-	  &(task_info->binary_objects[last_index].bfdImage),
-	  &(task_info->binary_objects[last_index].bfdSymbols),
-	  &(task_info->binary_objects[last_index].nDataSymbols),
-	  &(task_info->binary_objects[last_index].dataSymbols));
-#endif
-
-	task_info->num_binary_objects++;
-}
-
-void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
-	unsigned long long start, unsigned long long end, unsigned long long offset,
-	char *binary)
-{
-	if (allobjects)
-	{
-		unsigned _ptask, _task;
-		for (_ptask = 1; _ptask <= ApplicationTable.nptasks; _ptask++)
-			for (_task = 1; _task <= ApplicationTable.ptasks[_ptask].ntasks; _task++)
-				AddBinaryObjectInto (_ptask, _task, start, end, offset, binary);
-	}
-	else
-		AddBinaryObjectInto (ptask, task, start, end, offset, binary);
-}
-
-char * ObjectTable_GetBinaryObjectName (unsigned ptask, unsigned task)
-{
-	task_t *task_info = GET_TASK_INFO(ptask, task);
-
-	if (task_info->num_binary_objects > 0)
-		return task_info->binary_objects[0].module;
-	else
-		return NULL;
-}
-
-binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, UINT64 address)
-{
-	task_t *task_info = GET_TASK_INFO(ptask, task);
-	unsigned u;
-
-	for (u = 0; u < task_info->num_binary_objects; u++)
-		if (address >= task_info->binary_objects[u].start_address &&
-		    address < task_info->binary_objects[u].end_address)
-			return &(task_info->binary_objects[u]);
-
-	return NULL;
-}
-
-int ObjectTable_GetSymbolFromAddress (UINT64 address, unsigned ptask,
-	unsigned task, char **symbol)
-{
-#if !defined(HAVE_BFD)
-	UNREFERENCED_PARAMETER(address);
-	UNREFERENCED_PARAMETER(ptask);
-	UNREFERENCED_PARAMETER(task);
-	UNREFERENCED_PARAMETER(symbol);
-	return FALSE;
-#else
-	unsigned a;
-	task_t *task_info = GET_TASK_INFO(ptask, task);
-
-#if defined(DEBUG)
-	fprintf (stderr, "mpi2prv: DEBUG: ObjectTable_GetSymbolFromAddress (%llx, %u, %u, %p)\n",
-	  address, ptask, task, symbol);
-#endif
-
-	/* For now, emit only data symbols for binary object 0 */
-	for (a = 0; a < task_info->binary_objects[0].nDataSymbols; a++)
-	{
-		data_symbol_t *d = &task_info->binary_objects[0].dataSymbols[a];
-		uint64_t addr_begin = (uint64_t) d->address;
-		uint64_t addr_end = addr_begin + d->size;
-		if (addr_begin <= address && address < addr_end)
-		{
-			*symbol = d->name;
-			return TRUE;
-		}
-	}
-	return FALSE;
-#endif
-}
-
-#if defined(BFD_MANAGER_GENERATE_ADDRESSES)
-void ObjectTable_dumpAddresses (FILE *fd, unsigned eventstart)
-{
-	unsigned _ptask, _task, _address;
-
-	/* Temporary, just dump information for ptask 1.task 1 */
-	/* Emitting the rest of ptask/task requires some changes in mpimpi2prv */
-
-	for (_ptask = 1; _ptask <= 1 /* ApplicationTable.nptasks */; _ptask++)
-	{
-		for (_task = 1; _task <= 1 /* ApplicationTable.ptasks[_ptask].ntasks */; _task++)
-		{
-			task_t *task_info = GET_TASK_INFO(_ptask, _task);
-
-			if (task_info->binary_objects[0].nDataSymbols > 0)
-			{
-				fprintf (fd, "EVENT_TYPE\n");
-				fprintf (fd, "0 %u Object addresses for task %u.%u\n", eventstart++, _ptask, _task);
-				fprintf (fd, "VALUES\n");
-
-				/* For now, emit only data symbols for binary object 0 */
-				for (_address = 0; _address < task_info->binary_objects[0].nDataSymbols; _address++)
-				{
-					data_symbol_t *d = &task_info->binary_objects[0].dataSymbols[_address];
-
-					fprintf (fd, "%u %s [0x%08llx-0x%08llx]\n",
-					  _address+1,
-					  d->name,
-					  (unsigned long long) d->address, 
-					  ((unsigned long long) d->address)+d->size-1);
-				}
-				fprintf (fd, "\n");
 			}
 		}
+		xfree (nthreads);
+	}
+}
+
+
+#if defined(HAVE_LIBADDR2LINE)
+/**
+ * ObjectTree_setProcMaps
+ * 
+ * This function sets the proc_self_maps for a given task in the object tree.
+ * 
+ * @param ptask The ptask ID
+ * @param task The task ID
+ * @param maps_file The path to the maps file
+ */
+void ObjectTree_setProcMaps(unsigned ptask, unsigned task, char *maps_file)
+{
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
+
+	if (task_info && maps_file) {
+		task_info->proc_self_maps = maps_parse_file(maps_file, OPTION_READ_SYMTAB);
 	}
 }
 #endif
+
+
+/**
+ * ObjectTree_setProcExe
+ * 
+ * This function sets the proc_self_exe for a given task in the object tree.
+ * 
+ * @param ptask The ptask ID
+ * @param task The task ID
+ * @param self_exe The path to the executable file
+ */
+void ObjectTree_setProcExe(unsigned ptask, unsigned task, char *self_exe)
+{
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
+
+	if (task_info && self_exe) {
+		task_info->proc_self_exe = strdup(self_exe);
+	}
+}
+
+
+/**
+ * ObjectTree_getMainBinary
+ *
+ * Gets the main binary name for the given ptask and task.
+ * This function prioritizes to retrieve the binary name from the /proc/self/exe that was captured during the tracing (and stored in SYM entry 'X').
+ * If that is not available, it checks for the user-given executable name (through mpi2prv flag -e).
+ * If neither is available, it returns NULL to indicate that the binary name could not be determined.
+ *
+ * @param ptask The ptask ID
+ * @param task The task ID
+ * @return The main binary name for the given ptask and task, or NULL if not available
+ */
+char * ObjectTree_getMainBinary(unsigned ptask, unsigned task)
+{
+	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
+	if (task_info->proc_self_exe != NULL) {
+		// Return the /proc/self/exe path that was captured during the tracing, if available
+		return task_info->proc_self_exe;
+	}
+	char *user_given_exe = get_merge_ExecutableFileName();
+	if (strlen(user_given_exe) > 0) {
+		// Alternatively, return the user executable name, if given
+		return user_given_exe;
+	}
+	return NULL;
+}
 

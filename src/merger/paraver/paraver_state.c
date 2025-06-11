@@ -57,7 +57,7 @@ int Get_Last_State (void)
 unsigned Push_State (unsigned new_state, unsigned ptask, unsigned task, unsigned thread)
 {	
 	unsigned int top_state;
-	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t * thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 
 #if defined(DEBUG_STATES)
 	fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] PUSH_STATE %d\n", ptask, task, thread, new_state);
@@ -100,7 +100,7 @@ unsigned Push_State (unsigned new_state, unsigned ptask, unsigned task, unsigned
 unsigned Pop_State (unsigned old_state, unsigned ptask, unsigned task, unsigned thread)
 {
    unsigned int top_state;
-   thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+   thread_t * thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 
 #if defined(DEBUG_STATES)
    fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] POP_STATE\n", ptask, task, thread);
@@ -129,7 +129,7 @@ unsigned Pop_State (unsigned old_state, unsigned ptask, unsigned task, unsigned 
       return top_state;
    }
 
-   thread_info = GET_THREAD_INFO(ptask, task, thread);
+   thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
    if (thread_info->nStates - 1 >= 0)
    {
       top_state = thread_info->State_Stack[--thread_info->nStates];
@@ -151,7 +151,7 @@ static unsigned Pop_State_On_Top(unsigned ptask, unsigned task, unsigned thread)
    unsigned int top_state;
    thread_t * thread_info;
 
-   thread_info = GET_THREAD_INFO(ptask, task, thread);
+   thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
    if (thread_info->nStates - 1 >= 0)
    {
       thread_info->nStates --;
@@ -169,7 +169,7 @@ unsigned Pop_Until (unsigned until_state, unsigned ptask, unsigned task, unsigne
    unsigned int top_state;
    thread_t * thread_info;
 
-   thread_info = GET_THREAD_INFO(ptask, task, thread);
+   thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
 
    top_state = Top_State (ptask, task, thread);
    while ((top_state != until_state) && (thread_info->nStates > 0))
@@ -197,7 +197,7 @@ unsigned Top_State (unsigned ptask, unsigned task, unsigned thread)
 {
    thread_t * thread_info;
   
-   thread_info = GET_THREAD_INFO(ptask, task, thread);
+   thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
    if (thread_info->nStates > 0)
    {
       return thread_info->State_Stack[thread_info->nStates - 1];
@@ -238,7 +238,7 @@ void Initialize_Trace_Mode_States (unsigned cpu, unsigned ptask, unsigned task,
 #endif
 
 	/* Clear the states stack */
-	thread_info = GET_THREAD_INFO (ptask, task, thread);
+	thread_info = ObjectTree_getThreadInfo (ptask, task, thread);
 	thread_info->nStates = 0;
 
 	/* Push STATE_STOPPED to find it on top of the stack at the APPL_EV EVT_END */
@@ -277,7 +277,7 @@ void Dump_States_Stack (unsigned ptask, unsigned task, unsigned thread)
   int i = 0;
   thread_t *thread_info = NULL;
 
-  thread_info = GET_THREAD_INFO(ptask, task, thread);
+  thread_info = ObjectTree_getThreadInfo(ptask, task, thread);
   fprintf(stderr, "Dumping states stack:\n");
   for (i=0; i<thread_info->nStates; i++)
   {
@@ -300,7 +300,7 @@ void Initialize_States (FileSet_t * fset)
       GetNextObj_FS (fset, obj, &cpu, &ptask, &task, &thread);
 
       /* Mark no state has been written yet */
-      thread_info = GET_THREAD_INFO (ptask, task, thread);
+      thread_info = ObjectTree_getThreadInfo (ptask, task, thread);
       thread_info->incomplete_state_offset = (off_t)-1;
 
       /* First state is set to STATE_STOPPED */

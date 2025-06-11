@@ -81,14 +81,14 @@ int Dimemas_WriteHeader (unsigned num_appl, FILE *trf_fd,
 	/* DIMEMAS just supports 1 ptask */
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
-		task_t *last_task_info = GET_TASK_INFO(ptask+1, ptask_info->ntasks);
+		ptask_t *ptask_info = ObjectTree_getPtaskInfo(ptask+1);
+		task_t *last_task_info = ObjectTree_getTaskInfo(ptask+1, ptask_info->ntasks);
 
 		fprintf (trf_fd, "%d(", ptask_info->ntasks);
 
 		for (task = 0; task < ptask_info->ntasks - 1; task++)
 		{
-			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			task_t *task_info = ObjectTree_getTaskInfo(ptask+1,task+1);
 			fprintf (trf_fd, "%d,", task_info->threads);
 		}
 		threads = last_task_info->nthreads;

@@ -117,4 +117,6 @@
 
 #define EXT_CALLBACK   ".cbk"
 
+#define EXT_MAPS       ".maps"
+
 #endif

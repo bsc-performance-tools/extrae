@@ -669,355 +669,93 @@ AC_DEFUN([AX_PROG_XML2],
    fi
 ])
 
-#
-# TEST_BFD_SECTION_FUNCTION
-# -------------------------
-# Receives "bfd_function" and defines "HAVE_BFD_FUNCTION"
-#
-AC_DEFUN([TEST_BFD_SECTION_FUNCTION],
+# AX_PROG_ELFUTILS
+# --------------------
+# Check for elfutils installation
+AC_DEFUN([AX_PROG_ELFUTILS],
 [
-	fn=$1
+   AX_FLAGS_SAVE()
 
-	AC_MSG_CHECKING([whether $1 is defined in bfd.h])
-
-	#
-	# Section routines in versions prior to 2.34 need 2 parameters while newer
-	# ones just require one. Names also changed from bfd_get_* to bfd_*
-	#
-	bfd_fn_works="no"
-	if test "$fn" = "bfd_get_section_vma" -o "$fn" = "bfd_get_section_flags" ; then
-		AC_LINK_IFELSE(
-			[AC_LANG_PROGRAM([[ #include <bfd.h> ]],
-			[[
-				asection *section;
-				bfd *abfd;
-
-				int result = $1(abfd, section);
-			]]
-			)],
-			[ bfd_fn_works="yes" ]
-		)
-	else 
-		AC_LINK_IFELSE(
-			[AC_LANG_PROGRAM([[ #include <bfd.h> ]],
-			[[
-				asection *section;
-
-				int result = $1(section);
-			]]
-			)],
-			[ bfd_fn_works="yes" ]
-		)
-	fi
-	if [ test "$bfd_fn_works" = "yes" ]; then
-		AC_DEFINE(m4_join(_, [HAVE], m4_toupper($1)), [1], [Defined to 1 if bfd.h defines $1])
-		AC_MSG_RESULT([yes])
-	else
-		AC_MSG_RESULT([no])
-	fi
-])
-
-#
-# AX_PROG_BINUTILS
-# ----------------
-#
-AC_DEFUN([AX_PROG_BINUTILS],
-[
-   BFD_INSTALLED="no"
-   LIBERTY_INSTALLED="no"
-
-   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
-      binutils_default_paths="${BG_HOME}/blrts-gnu"
-      binutils_require_shared="no"
-   elif test "${OperatingSystem}" = "android"; then
-      binutils_default_paths="/usr /usr/local /opt/local"
-      binutils_require_shared="no"
-   else
-      binutils_default_paths="/usr /usr/local /opt/local"
-      binutils_require_shared=${enable_shared}
-   fi
-
-   AC_ARG_WITH(binutils,
+   AC_ARG_WITH(elfutils,
       AC_HELP_STRING(
-         [--with-binutils@<:@=DIR@:>@],
-         [specify where to find BFD and LIBERTY libraries and includes]
+         [--with-elfutils@<:@=DIR@:>@],
+         [Specify where to find elfutils' installation]
       ),
-      [binutils_paths="${withval}"],
-      [binutils_paths="${binutils_default_paths}"]
+      [elfutils_paths="${withval}"],
+      [elfutils_paths="no"]
    )
 
-   if test -z "${binutils_paths}" ; then
-      AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed. Also, if you want to generate shared libraries check for the existance of the libbfd.so library])
-   fi
+   if test "${elfutils_paths}" != "no" ; then
+      # Search for elfutils installation
+      AX_FIND_INSTALLATION([ELFUTILS], [${elfutils_paths}], [eu-addr2line], [], [], [], [], [], [], [])
 
-   UNAME_M=`uname -m`
-   TARGET_CPU=${target_cpu%%-*}
-
-   if test "${binutils_paths}" != "no" ; then
-      AC_MSG_CHECKING([for binutils])
-
-      unset BFD_LIBSDIR
-      unset LIBERTY_LIBSDIR
-
-      for binutils_home_dir in [${binutils_paths} "notfound"]; do
-   
-         if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" -o \
-                 -r "${binutils_home_dir}/lib${BITS}/libbfd.dylib" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a \
-                    "${binutils_require_shared}" = "no" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.so" -o \
-                   -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.dylib" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.a" -a \
-                      "${binutils_require_shared}" = "no" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-         elif test -r "${binutils_home_dir}/lib/libbfd.so" -o \
-                   -r "${binutils_home_dir}/lib/libbfd.dylib" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib"
-         elif test -r "${binutils_home_dir}/lib/libbfd.a" -a \
-                      "${binutils_require_shared}" = "no" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib"
-         else
-            dnl Try something more automatic using find command
-            libbfd_lib=""
-
-            if test -d ${binutils_home_dir}/lib${BITS} ; then
-               nlibbfd=`find ${binutils_home_dir}/lib${BITS} -name libbfd\*.so | wc -l`
-               if test ${nlibbfd} -ge 1 ; then
-                  libbfd_lib=`find ${binutils_home_dir}/lib${BITS} -name libbfd\*.so | head -1`
-               fi
-            fi
-
-            if test -d ${binutils_home_dir}/lib -a "${libbfd_lib}" = "" ; then
-               nlibbfd=`find ${binutils_home_dir}/lib -name libbfd\*.so | wc -l`
-               if test ${nlibbfd} -ge 1 ; then
-                  libbfd_lib=`find ${binutils_home_dir}/lib -name libbfd\*.so | head -1`
-               fi
-            fi
-
-            if test "${libbfd_lib}" != "" ; then
-               BFD_LIBSDIR=`dirname ${libbfd_lib}`
-            fi
-         fi
-   
-         if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" -o -r "${binutils_home_dir}/lib${BITS}/libiberty.dylib" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.so" -o -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.dylib"; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-         elif test -r "${binutils_home_dir}/lib/libiberty.so" -o -r "${binutils_home_dir}/lib/libiberty.dylib" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
-         elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
-         else
-            dnl Try something more automatic using find command
-            libiberty_lib=""
-
-            if test -d ${binutils_home_dir}/lib${BITS} ; then
-               nlibiberty=`find ${binutils_home_dir}/lib${BITS} -name libiberty.a | wc -l`
-               if test ${nlibiberty} -ge 1 ; then
-                  libiberty_lib=`find ${binutils_home_dir}/lib${BITS} -name libiberty.a | head -1`
-               fi
-            fi
-
-            if test -d ${binutils_home_dir}/lib -a "${libiberty_lib}" = "" ; then
-               nlibiberty=`find ${binutils_home_dir}/lib -name libiberty.a | wc -l`
-               if test ${nlibiberty} -ge 1 ; then
-                  libiberty_lib=`find ${binutils_home_dir}/lib -name libiberty.a | head -1`
-               fi
-            fi
-
-            if test "${libiberty_lib}" != "" ; then
-               LIBERTY_LIBSDIR=`dirname ${libiberty_lib}`
-            fi
-         fi
-         
-   
-         if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then
-           # Both libraries are present
-           break
-         fi
-
-         dnl unset BFD_LIBSDIR
-         dnl unset LIBERTY_LIBSDIR
-
-      done
-      AC_MSG_RESULT(${binutils_home_dir})
-   fi
-
-   if test "${BFD_LIBSDIR}" = "" ; then
-      AC_MSG_NOTICE([Warning! Cannot find the libbfd library in the given binutils home. Please, make sure that the binutils packages is correctly installed. If you have installed the binutils package by hand from their source code, make sure to add --enable-shared in its configure execution.])
-   else
-      AC_MSG_NOTICE([libbfd library directory: ${BFD_LIBSDIR}])
-   fi
-   if test "${LIBERTY_LIBSDIR}" = "" ; then
-      AC_MSG_NOTICE([Warning! Cannot find the libiberty library in the given binutils home. Please, make sure that the binutils packages is correctly installed. If you have installed the binutils package by hand from their source code, make sure that libiberty is installed. Some releases of the binutils package do not install the libibery even invoking make install. The library should be within the libiberty directory within the binutils source tree.])
-   else
-      AC_MSG_NOTICE([libiberty library directory: ${LIBERTY_LIBSDIR}])
-   fi
-   if test "${binutils_paths}" != "${binutils_default_paths}" -a "${binutils_home_dir}" = "notfound" ; then
-      AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the previous warning messages. Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed.])
-   fi
-
-   AX_FLAGS_SAVE()
-   CPPFLAGS="-I${binutils_home_dir}/include ${CPPFLAGS}"
-   AC_CHECK_HEADERS([bfd.h], [BFD_HEADER_INSTALLED="yes"], [BFD_HEADER_INSTALLED="no"])
-
-   if test "${BFD_HEADER_INSTALLED}" = "yes" -a "${LIBERTY_LIBSDIR}" != ""; then
-      AC_MSG_CHECKING([whether libbfd and libiberty work])
-
-      if test "${OperatingSystem}" != "aix" -a "${OperatingSystem}" != "freebsd" ; then
-         LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
+      if test "${ELFUTILS_INSTALLED}" != "yes" ; then
+         AC_MSG_ERROR([elfutils installation cannot be found. Please review --with-elfutils option.])
       else
-         LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS} -lintl"
-         libbfd_needs_lintl="yes"
-      fi
-      AC_TRY_LINK(
-         [ #include <bfd.h> ], 
-         [ bfd *abfd = bfd_openr ("", ""); ],
-         [ bfd_and_iberty_work="yes" ]
-      )
-      if test "${bfd_and_iberty_work}" != "yes" ; then
-
-         dnl Newer systems require libdl to be linked with -lbfd
-         LIBS="${LIBS} -ldl"
-         AC_TRY_LINK(
-            [ #include <bfd.h> ], 
-            [ bfd *abfd = bfd_openr ("", ""); ],
-            [ bfd_and_iberty_work="yes" ]
-         )
-         if test "${bfd_and_iberty_work}" = "yes" ; then
-            AC_DEFINE([BFD_NEEDS_LDL], 1, [Define to 1 if libbfd/libiberty need -ldl to link])
-            libbfd_needs_ldl="yes"
-         else
-            dnl On some machines BFD/LIBERTY need an special symbol (e.g BGL)
-            AC_TRY_LINK(
-               [ #include <bfd.h> 
-                 int *__errno_location(void) { return 0; }
-               ], 
-               [ bfd *abfd = bfd_openr ("", ""); ],
-               [ bfd_and_iberty_work="yes" ]
-            )
-            if test "${bfd_and_iberty_works}" = "yes" ; then
-               AC_DEFINE([NEED_ERRNO_LOCATION_PATCH], 1, [Define to 1 if system requires __errno_location and does not provide it])
-            fi
-         fi
-      fi
-      if test "${bfd_and_iberty_work}" = "yes" ; then
-         AC_MSG_RESULT([yes])
-
-         BFD_HOME="${binutils_home_dir}"
-         BFD_INCLUDES="${BFD_HOME}/include"
-         BFD_CFLAGS="-I${BFD_INCLUDES}"
-         BFD_CXXFLAGS=${BFD_CFLAGS}
-         BFD_CPPFLAGS=${BFD_CFLAGS}
-         BFD_LIBS="-lbfd"
-         BFD_LDFLAGS="-L${BFD_LIBSDIR}"
-         AC_SUBST(BFD_HOME)
-         AC_SUBST(BFD_INCLUDES)
-         AC_SUBST(BFD_CFLAGS)
-         AC_SUBST(BFD_CXXFLAGS)
-         AC_SUBST(BFD_CPPFLAGS)
-         AC_SUBST(BFD_LIBS)
-         AC_SUBST(BFD_LIBSDIR)
-         if test -d ${BFD_LIBSDIR}/shared ; then
-            BFD_LDFLAGS="${BFD_LDFLAGS} -L${BFD_LIBSDIR}/shared"
-         fi
-         AC_SUBST(BFD_LDFLAGS)
-         BFD_RPATH="-R${BFD_LIBSDIR}"
-         AC_SUBST(BFD_RPATH)
-
-         LIBERTY_HOME="${binutils_home_dir}"
-         LIBERTY_INCLUDES="${LIBERTY_HOME}/include"
-         LIBERTY_CFLAGS="-I${LIBERTY_INCLUDES}"
-         LIBERTY_CXXFLAGS=${LIBERTY_CFLAGS}
-         LIBERTY_CPPFLAGS=${LIBERTY_CFLAGS}
-         if test "${OperatingSystem}" != "aix" ; then
-            LIBERTY_LIBS="-liberty"
-         else
-            LIBERTY_LIBS="-liberty -lintl"
-         fi
-         LIBERTY_LDFLAGS="-L${LIBERTY_LIBSDIR}"
-         AC_SUBST(LIBERTY_HOME)
-         AC_SUBST(LIBERTY_INCLUDES)
-         AC_SUBST(LIBERTY_CFLAGS)
-         AC_SUBST(LIBERTY_CXXFLAGS)
-         AC_SUBST(LIBERTY_CPPFLAGS)
-         AC_SUBST(LIBERTY_LIBS)
-         AC_SUBST(LIBERTY_LIBSDIR)
-         if test -d ${LIBERTY_LIBSDIR}/shared ; then
-            LIBERTY_LDFLAGS="${LIBERTY_LDFLAGS} -L${LIBERTY_LIBSDIR}/shared"
-         fi
-         AC_SUBST(LIBERTY_LDFLAGS)
-         LIBERTY_RPATH="-R${LIBERTY_LIBSDIR}"
-         AC_SUBST(LIBERTY_RPATH)
-
-         BFD_INSTALLED="yes"
-         LIBERTY_INSTALLED="yes"
-
-         AC_DEFINE([HAVE_BFD], 1, [Define to 1 if BFD is installed in the system])
-
-	 # Test needed section functions
-	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_vma], [bfd_section_vma])
-	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_size], [bfd_section_size])
-	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_flags], [bfd_section_flags])
-
-	 TEST_BFD_SECTION_FUNCTION([bfd_get_section_size_before_reloc])
-
-         AC_MSG_CHECKING([whether bfd_demangle is defined in bfd.h])
-	 AC_LINK_IFELSE(
-	   [AC_LANG_PROGRAM([[ #include <bfd.h> ]],
-             [[
-	         char *res = bfd_demangle ((void*)0, "", 0);
-	     ]])],
-           [
-	     AC_DEFINE(HAVE_BFD_DEMANGLE, [1], [Defined to 1 if bfd.h contains bfd_demangle])
-             AC_MSG_RESULT([yes])
-	   ],[
-	     AC_MSG_RESULT([no])
-           ]
-	 )
-
-      else
-         AC_MSG_RESULT([no, see config.log for further details])
+         AC_DEFINE([HAVE_LIBADDR2LINE], [1], [Define to 1 if libaddr2line is available])
+         elfutils_addr2line_configure_args="--with-elfutils-addr2line=${elfutils_paths}/bin/eu-addr2line"
       fi
    fi
 
    AX_FLAGS_RESTORE()
+])
 
-   dnl If unwind is given, then we'll need the binutils for sure, unless stated no!
-   if test "${unwind_paths}" != "no" -a "${binutils_paths}" != "no"; then
-      if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
-         AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind which must be translated using binutils, but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
+# AX_PROG_BINUTILS
+# --------------------
+# Check for binutils installation
+AC_DEFUN([AX_PROG_BINUTILS],
+[
+   AX_FLAGS_SAVE()
+
+   AC_ARG_WITH(binutils,
+      AC_HELP_STRING(
+         [--with-binutils@<:@=DIR@:>@],
+         [Specify where to find binutils' installation]
+      ),
+      [binutils_paths="${withval}"],
+      [binutils_paths="no"]
+   )
+
+   if test "${binutils_paths}" != "no" ; then
+      # Search for binutils installation
+      AX_FIND_INSTALLATION([BINUTILS], [${binutils_paths}], [addr2line], [], [], [], [], [], [], [])
+
+      if test "${BINUTILS_INSTALLED}" != "yes" ; then
+         AC_MSG_ERROR([binutils installation cannot be found. Please review --with-binutils option.])
+      else
+         AC_DEFINE([HAVE_LIBADDR2LINE], [1], [Define to 1 if libaddr2line is available])
+         binutils_addr2line_configure_args="--with-binutils-addr2line=${binutils_paths}/bin/addr2line"
       fi
    fi
 
-   dnl If this is running on Linux, then we'll probably need the binutils
-   dnl linux offers the backtrace syscall, removing the requirement for the
-   dnl unwind, again, unless stated no
-   if test "${binutils_paths}" != "no"; then
-      case "${target_os}" in
-         linux* )
-            if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
-               AC_MSG_ERROR([You can gather call-site information which must be translated using binutils, but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
-            fi ;;
-      esac
-   fi
-
-   if test "${BFD_INSTALLED}" = "yes" -a "${LIBERTY_INSTALLED}" = "yes" ; then
-	   have_binutils="yes"
-   fi
-   AM_CONDITIONAL(HAVE_BINUTILS, test "${have_binutils}" = "yes")
-   AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
-   AM_CONDITIONAL(BFD_NEEDS_LINTL, test "${libbfd_needs_lintl}" = "yes")
-
+   AX_FLAGS_RESTORE()
 ])
 
+# AX_PROG_LIBADDR2LINE
+# --------------------
+AC_DEFUN([AX_PROG_LIBADDR2LINE],
+[
+   AC_REQUIRE([AX_PROG_ELFUTILS])
+   AC_REQUIRE([AX_PROG_BINUTILS])
+
+   LIBADDR2LINE_INSTALLED="no"
+   LIBADDR2LINE_SRCDIR="\${top_srcdir}/libaddr2line/src"
+   LIBADDR2LINE_CFLAGS="-I${LIBADDR2LINE_SRCDIR}"
+   if test "${ELFUTILS_INSTALLED}" = "yes" -o "${BINUTILS_INSTALLED}" = "yes" ; then
+      LIBADDR2LINE_INSTALLED="yes"
+      LIBADDR2LINE_BLDDIR="\${top_builddir}/libaddr2line/src"
+      LIBADDR2LINE_LIBADD="${LIBADDR2LINE_BLDDIR}/libaddr2line.la ${LIBADDR2LINE_BLDDIR}/libmaps.la"
+      LIBADDR2LINE_LDADD="${LIBADDR2LINE_BLDDIR}/libaddr2line.la ${LIBADDR2LINE_BLDDIR}/libmaps.la"
+      if test "${ELFUTILS_INSTALLED}" = "yes" ; then
+         LIBADDR2LINE_LIBADD="${LIBADDR2LINE_LIBADD} ${LIBADDR2LINE_BLDDIR}/libsymtab.la"
+         LIBADDR2LINE_LDADD="${LIBADDR2LINE_LDADD} ${LIBADDR2LINE_BLDDIR}/libsymtab.la"
+      fi
+      AC_SUBST(LIBADDR2LINE_LIBADD)
+      AC_SUBST(LIBADDR2LINE_LDADD)
+   fi
+   AC_SUBST(LIBADDR2LINE_CFLAGS)
+   AM_CONDITIONAL(HAVE_LIBADDR2LINE, test "${LIBADDR2LINE_INSTALLED}" = "yes")
+])
 
 # AX_CHECK_PERUSE
 # ---------------------------

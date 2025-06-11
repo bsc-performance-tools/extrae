@@ -81,25 +81,30 @@ These are the available options for the sequential |PARAVER| merger:
 
   Dumps the information stored in the intermediate trace files.
 
-.. option:: -dump-without-time
+.. option:: -dump-time, -no-dump-time
 
-  The information dumped with :option:`-d` or :option:`-dump` does not show 
-  the timestamp.
+  Choose whether the information dumped with :option:`-d` or :option:`-dump` includes (default) or not the event timestamp.
+
+.. option:: -dump-symtab, -no-dump-symtab
+
+  Include or omit (default) the main's task symbol table in the PCF.
 
 .. option:: -e <BINARY>
 
-  Uses the given <BINARY> to translate addresses that are stored in the
-  intermediate trace files into useful information (including function name,
-  source file and line). The application has to be compiled with :option:`-g`
-  flag so as to obtain valuable information.
+  Uses the specified <BINARY> to translate addresses stored in the intermediate 
+  trace files into human-readable information (including function names, 
+  source files and line numbers). The application must be compiled with the 
+  :option:`-g` flag to include the necessary debug information.
 
   .. note::
-    Since |TRACE| version 2.4.0 this flag is superseded in Linux systems where
-    :file:`/proc/self/maps` is readable. The instrumentation part will annotate
-    the binaries and shared libraries in use and will try to use them before
-    using <BINARY>. This flag is still available in Linux systems as a default
-    case just in case the binaries and libraries pointed by
-    :file:`/proc/self/maps` are not available.
+    Since |TRACE| version 2.4.0, this flag has been superseded on Linux systems 
+    where :file:`/proc/self/maps` is readable. The instrumentation component will 
+    save a copy of the process's memory mappings (binaries and shared libraries) 
+    and attempt to use them for the translations. 
+
+    This flag remains available for all other systems, as well as on Linux as a 
+    fallback, in case :file:`/proc/self/maps` cannot be retrieved, or the
+    mappings referenced in it are not accessible.
 
 .. option:: -emit-library-events
 
@@ -192,7 +197,7 @@ These are the available options for the sequential |PARAVER| merger:
   Stops the generation of the tracefile at a given percentage. Accepts integer
   values from ``1`` to ``99``. All other values disable this option.
 
-.. option:: no-syn
+.. option:: -no-syn
 
   If set, the merger will not attempt to synchronize the different tasks. This
   is useful when merging intermediate files obtained from a single node (and

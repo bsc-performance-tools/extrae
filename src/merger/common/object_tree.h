@@ -21,15 +21,14 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef _OBJECT_TREE_H
-#define _OBJECT_TREE_H
+#ifndef __OBJECT_TREE_H__
+#define __OBJECT_TREE_H__
 
 #include "common.h"
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#include "bfd_manager.h"
 #include "file_set.h"
 #include "new-queue.h"
 #include "HardwareCounters.h"
@@ -37,30 +36,26 @@
 #include "stack.h"
 #include "thread_dependencies.h"
 #include "address_space.h"
-
+#if defined(HAVE_LIBADDR2LINE)
+# include "addr2line.h"
+# include "symtab.h"
+#endif
 
 #define MAX_STATES_ALLOCATION  128
 #define MAX_CALLERS            100
 
-#define GET_NUM_TASKS(ptask) \
-    (ApplicationTable.ptasks[ptask - 1].ntasks)
-
-#define GET_PTASK_INFO(ptask) \
-		&(ApplicationTable.ptasks[ptask - 1])
-
-#define GET_TASK_INFO(ptask, task) \
-    &(ApplicationTable.ptasks[ptask - 1].tasks[task - 1])
-
-#define GET_THREAD_INFO(ptask, task, thread) \
-    &(ApplicationTable.ptasks[ptask - 1].tasks[task - 1].threads[thread - 1])
-
+/**
+ * thread_t
+ * 
+ * This structure contains the information at the thread-level in the object tree
+ */
 typedef struct thread_st
 {
 	/* Where is this thread running? */
 	unsigned int cpu;
 
 	/* Did we passed the first event? */
-	unsigned int First_Event:1;
+	unsigned int First_Event;
 
 	/* Count the number of HWC changes */
 	unsigned int HWCChange_count;
@@ -114,27 +109,13 @@ typedef struct active_task_thread_st
 	unsigned num_stacks;
 } active_task_thread_t;
 
-typedef struct binary_object_st
-{
-	char *module;
-	unsigned long long start_address;
-	unsigned long long end_address;
-	unsigned long long offset;
-	unsigned index;
-	unsigned main_binary;
-#if defined(HAVE_BFD)
-	bfd *bfdImage;
-	asymbol **bfdSymbols;
-	unsigned nDataSymbols;
-	data_symbol_t *dataSymbols;
-#endif
-} binary_object_t;
-
+/**
+ * task_t
+ * 
+ * This structure contains the information at the task-level in the object tree
+ */
 typedef struct task_st
 {
-	unsigned num_binary_objects;
-	binary_object_t *binary_objects;
-
 	unsigned int nodeid;
 	unsigned int nthreads;
 	thread_t *threads;
@@ -149,42 +130,71 @@ typedef struct task_st
 	/* Arrangement of thread dependencies within the task level */
 	struct ThreadDependencies_st * thread_dependencies;
 
-	/* Address space variables & preparation info*/
+	/* Address space variables & preparation info */
 	struct AddressSpace_st *AddressSpace;
 
 	unsigned num_virtual_threads;
 	unsigned num_active_task_threads;
 	active_task_thread_t *active_task_threads;
 
+	/* Address translation */
+	char *proc_self_exe;    // Name of the main binary taken from /proc/self/exe
+#if defined(HAVE_LIBADDR2LINE)
+	maps_t *proc_self_maps; // Dump of the /proc/self/maps for address translation
+	addr2line_t *addr2line; // Handler for libaddr2line
+#endif
 } task_t;
 
+/**
+ * ptask_t
+ * 
+ * This structure contains the information at the application-level in the object tree
+ */
 typedef struct ptask_st
 {
   unsigned int ntasks;
   task_t *tasks;
 } ptask_t;
 
+/**
+ * appl_t
+ * 
+ * This is the top-level structure of the object tree, and contains the information of all applications being merged
+ */
 typedef struct appl_st
 {
 	unsigned int nptasks;
 	ptask_t *ptasks;
 } appl_t;
 
+// ApplicationTable is a global instance of the object tree
 extern appl_t ApplicationTable;
 
-void InitializeObjectTable (unsigned num_appl, struct input_t * files,
-	unsigned long nfiles);
-void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
-	unsigned long long start, unsigned long long end, unsigned long long offset,
-	char *binary);
-binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task,
-	UINT64 address);
-int ObjectTable_GetSymbolFromAddress (UINT64 address, unsigned ptask,
-	unsigned task, char **symbol);
-char * ObjectTable_GetBinaryObjectName (unsigned ptask, unsigned task);
+// Macros to access the object tree
 
-# if defined(BFD_MANAGER_GENERATE_ADDRESSES)
-void ObjectTable_dumpAddresses (FILE *fd, unsigned eventstart);
-# endif
+#define ObjectTree_getNumPtasks() \
+	(ApplicationTable.nptasks)
 
-#endif
+#define ObjectTree_getNumTasks(ptask) \
+	(ApplicationTable.ptasks[ptask - 1].ntasks)
+
+#define ObjectTree_getPtaskInfo(ptask) \
+	&(ApplicationTable.ptasks[ptask - 1])
+
+#define ObjectTree_getTaskInfo(ptask, task) \
+	&(ApplicationTable.ptasks[ptask - 1].tasks[task - 1])
+
+#define ObjectTree_getThreadInfo(ptask, task, thread) \
+	&(ApplicationTable.ptasks[ptask - 1].tasks[task - 1].threads[thread - 1])
+
+
+// Functions to access the object tree
+
+void   ObjectTree_Initialize (int worker_id, unsigned num_appl, struct input_t * files, unsigned long nfiles);
+
+void   ObjectTree_setProcMaps(unsigned ptask, unsigned task, char *maps_file);
+void   ObjectTree_setProcExe(unsigned ptask, unsigned task, char *self_exe);
+
+char * ObjectTree_getMainBinary(unsigned ptask, unsigned task);
+
+#endif /* __OBJECT_TREE_H__ */

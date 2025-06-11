@@ -12,8 +12,8 @@ extrae_cmd_CFLAGS = -I$(INCLUDE_DIR) -I$(COMMON_INC) -I$(TRACER_INC) \
  -I$(TRACER_INC)/wrappers/API -I$(TRACER_INC)/clocks -I$(TRACER_INC)/hwc -O -g
 
 extrae_cmd_LDADD = $(TRACER_LIB)/libseqtrace.la $(MERGER_LIB)/libmpi2prv.la -lm
-if HAVE_BINUTILS
-extrae_cmd_LDADD += $(BFD_LDFLAGS) $(BFD_RPATH) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_RPATH) $(LIBERTY_LIBS)
+if HAVE_LIBADDR2LINE
+extrae_cmd_LDADD += $(LIBADDR2LINE_LDADD)
 endif
 if HAVE_SIONLIB
 extrae_cmd_LDADD += @SIONLIB_LIBS@

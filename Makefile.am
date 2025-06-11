@@ -1,6 +1,12 @@
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src include scripts etc tests
+SUBDIRS =
+
+if HAVE_LIBADDR2LINE
+SUBDIRS += libaddr2line
+endif
+
+SUBDIRS += src include scripts etc tests
 if GENERATE_DOCUMENTATION
 SUBDIRS += docs
 endif

@@ -29,9 +29,6 @@
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
-#ifdef HAVE_BFD
-# include "addr2info.h"
-#endif
 
 #include "events.h"
 #include "mpi2out.h"

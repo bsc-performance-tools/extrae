@@ -120,10 +120,10 @@ static void Dimemas_GenerateOffsets (unsigned num_appl, unsigned long long **ptr
 	/* Count total number of running threads of the application */
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+		ptask_t *ptask_info = ObjectTree_getPtaskInfo(ptask+1);
 		for (task = 0; task < ptask_info->ntasks; task++)
 		{
-			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			task_t *task_info = ObjectTree_getTaskInfo(ptask+1,task+1);
 			i += task_info->nthreads;
 		}
 	}
@@ -135,13 +135,13 @@ static void Dimemas_GenerateOffsets (unsigned num_appl, unsigned long long **ptr
 	i = 0;
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+		ptask_t *ptask_info = ObjectTree_getPtaskInfo(ptask+1);
 		for (task = 0; task < ptask_info->ntasks; task++)
 		{
-			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			task_t *task_info = ObjectTree_getTaskInfo(ptask+1,task+1);
 			for (thread = 0; thread < task_info->nthreads; thread++, i++)
 			{
-				thread_t *thread_info = GET_THREAD_INFO(ptask+1,task+1,thread+1);
+				thread_t *thread_info = ObjectTree_getThreadInfo(ptask+1,task+1,thread+1);
 				offsets[i] = thread_info->dimemas_size;
 			}
 		}
@@ -179,7 +179,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		exit (-1);
 	}
 
-	InitializeObjectTable (num_appl, files, nfiles);
+	ObjectTree_Initialize (taskid, num_appl, files, nfiles);
 
 #if defined(PARALLEL_MERGE)
 	ParallelMerge_InitCommunicators();
@@ -192,7 +192,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	/* If no actual filename is given, use the binary name if possible */
 	if (!get_merge_GivenTraceName())
 	{
-		char *FirstBinaryName = ObjectTable_GetBinaryObjectName (1, 1);
+		char *FirstBinaryName = ObjectTree_getMainBinary (1, 1);
 		if (FirstBinaryName != NULL)
 		{
 			char prvfile[strlen(FirstBinaryName) + 5];
@@ -251,7 +251,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		return -1;
 	}
 
-	if (get_option_merge_dump())
+	if (get_option_merge_Dump())
 		make_dump (fset);
 
 #if defined(HETEROGENEOUS_SUPPORT)
@@ -422,11 +422,11 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		if (current_file != GetActiveFile(fset))
 		{
 #if !defined(HAVE_FTELL64) && !defined(HAVE_FTELLO64)
-			(GET_THREAD_INFO(ptask,task,thread))->dimemas_size = ftell (fset->output_file);
+			(ObjectTree_getThreadInfo(ptask,task,thread))->dimemas_size = ftell (fset->output_file);
 #elif defined(HAVE_FTELL64)
-			(GET_THREAD_INFO(ptask,task,thread))->dimemas_size = ftell64 (fset->output_file);
+			(ObjectTree_getThreadInfo(ptask,task,thread))->dimemas_size = ftell64 (fset->output_file);
 #elif defined(HAVE_FTELLO64)
-			(GET_THREAD_INFO(ptask,task,thread))->dimemas_size = ftello64 (fset->output_file);
+			(ObjectTree_getThreadInfo(ptask,task,thread))->dimemas_size = ftello64 (fset->output_file);
 #endif
 			InitTracingTime = Get_EvTime (current_event);
 			current_file = GetActiveFile (fset);
@@ -481,8 +481,8 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			}
 		}
 
-		(GET_THREAD_INFO(ptask,task,thread))->First_Event = FALSE;
-		(GET_THREAD_INFO(ptask,task,thread))->Previous_Event_Time = current_time;
+		(ObjectTree_getThreadInfo(ptask,task,thread))->First_Event = FALSE;
+		(ObjectTree_getThreadInfo(ptask,task,thread))->Previous_Event_Time = current_time;
 
 		/* Right now, progress bar is only shown when numtasks is 1 */
 		if (1 == numtasks)

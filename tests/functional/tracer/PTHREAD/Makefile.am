@@ -8,7 +8,7 @@ EXTRA_DIST= \
 check_PROGRAMS =
 TESTS =
 
-if HAVE_BINUTILS
+if HAVE_LIBADDR2LINE
 check_PROGRAMS += \
  pthread
 

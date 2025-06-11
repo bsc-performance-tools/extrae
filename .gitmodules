@@ -1,0 +1,3 @@
+[submodule "libaddr2line"]
+	path = libaddr2line
+	url = https://github.com/bsc-performance-tools/libaddr2line.git

@@ -24,8 +24,6 @@ common_FILES = \
  common/addresses.c common/addresses.h \
  common/vector.c common/vector.h \
  common/stack.c common/stack.h \
- common/bfd_manager.c common/bfd_manager.h \
- common/bfd_manager_extra.h common/bfd_data_symbol.h \
  common/thread_dependencies.c common/thread_dependencies.h \
  common/address_space.c common/address_space.h
 
@@ -91,25 +89,14 @@ if !HAVE_PAPI_EMBEDDED
 endif
 endif
 
-libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
-if HAVE_BINUTILS
-libmpi2prv_la_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@ 
-endif
+libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @LIBADDR2LINE_CFLAGS@
 
-mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
+mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @LIBADDR2LINE_CFLAGS@
 mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_LIB)/libcommon.la $(PAPI_LINKER_FLAGS)
-if HAVE_BINUTILS
-mpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_RPATH@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_RPATH@ @LIBERTY_LIBS@
+if HAVE_LIBADDR2LINE
+mpi2prv_LDADD = @LIBADDR2LINE_LDADD@
 endif
 mpi2prv_DEPENDENCIES = libmpi2prv.la $(COMMON_LIB)/libcommon.la
-
-if BFD_NEEDS_LDL
-  mpi2prv_LDFLAGS += -ldl
-endif
-if BFD_NEEDS_LINTL
-  mpi2prv_LDFLAGS += -lintl
-endif
 
 if HAVE_ZLIB
   libmpi2prv_la_CFLAGS += @LIBZ_CFLAGS@

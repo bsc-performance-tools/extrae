@@ -6,7 +6,7 @@ main_debug_SOURCES = fA.c fB.c main.c
 
 TESTS = 
 
-if HAVE_BINUTILS
+if HAVE_LIBADDR2LINE
 TESTS += \
  test-shared-library-nodebug.sh \
  test-shared-library-debug.sh
