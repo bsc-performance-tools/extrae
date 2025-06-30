@@ -1,8 +1,18 @@
 #!/bin/sh
 
+git submodule update --init --recursive
+
+for dir in libaddr2line; do
+	echo "Bootstrapping $dir ..."
+	(cd "$dir" && ./bootstrap)
+done
+
 autoreconf -fvi
 
 if test `basename ${0}` = "bootstrap-and-dist" ; then
-	./configure --without-mpi --without-papi --without-dyninst --without-unwind --without-binutils --disable-xml
+	cd libaddr2line
+	./configure --without-elfutils-addr2line --without-binutils-addr2line
+	cd ..
+	./configure --without-mpi --without-papi --without-dyninst --without-unwind --without-elfutils --without-binutils --disable-xml
 	make dist-bzip2
 fi
