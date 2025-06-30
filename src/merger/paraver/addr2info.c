@@ -1286,12 +1286,15 @@ static void prettify_function(char *function, char **short_label, char **long_la
 	char *short_str = strdup(function);
 	char *long_str = NULL;
 
-	char *open_bracket = strchr(short_str, '(');
-	if (open_bracket)
+	char *open_template = strchr(short_str, '<');
+	if (open_template) *open_template = '\0';
+	else
 	{
-		*open_bracket = '\0';
-		long_str = strdup(function);
+		char *open_bracket = strchr(short_str, '(');
+		if (open_bracket) *open_bracket = '\0';
 	}
+	if (strcmp(short_str, function) != 0) long_str = strdup(function);
+
 	*short_label = short_str;
 	*long_label = long_str;
 }
