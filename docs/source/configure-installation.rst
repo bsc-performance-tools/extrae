@@ -127,10 +127,13 @@ enabled or disabled. To enable them use ``--enable-X`` or ``--with-X=``
   Specify the location of the BOOST package. This package is required when using
   the DynInst instrumentation with versions newer than 7.0.1.
 
+* .. option:: --with-elfutils=<PATH>
+
+  Specify the location for the elfutils package to translate addresses into source code references.
+
 * .. option:: --with-binutils=<PATH>
 
-  Specify the location for the binutils package. The binutils package is
-  necessary to translate addresses into source code references.
+  Specify the location for the binutils package to translate addresses into source code references. Note that elfutils is preferred.
 
 * .. option:: --with-clustering=<PATH>
 
@@ -348,16 +351,16 @@ BlueGene/Q
 To enable parsing the XML configuration file, the libxml2 must be installed. As
 of the time of writing this user guide, we have been only able to install the
 static version of the library in a BG/Q machine, so take this into consideration
-if you install the libxml2 in the system. Similarly, the binutils package
+if you install the libxml2 in the system. Similarly, the elfutils package
 (responsible for translating application addresses into source code locations)
 that is available in the system may not be properly installed and we suggest
-installing the binutils from the source code using the BG/Q cross-compiler.
+installing the elfutils from the source code using the BG/Q cross-compiler.
 Regarding the cross-compilers, we have found that using the IBM XL compilers may
 require using the XL libraries when generating the final application binary with
 |TRACE|, so we would suggest using the GNU cross-compilers
 (``/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-*``).
 
-If you want to add libxml2 and binutils support into |TRACE|, your configuration
+If you want to add libxml2 and elfutils support into |TRACE|, your configuration
 command may resemble to:
 
 .. parsed-literal::
@@ -371,7 +374,7 @@ command may resemble to:
               --with-libz=/bgsys/local/zlib/v1.2.5
               --with-papi=/usr/local/UNITE/packages/papi/5.0.1
               --with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2-gcc
-              --with-binutils=/homec/jzam11/jzam1128/aplic/juqueen/binutils-gcc
+              --with-elfutils=/homec/jzam11/jzam1128/aplic/juqueen/elfutils-gcc
               --enable-merge-in-trace
 
 Otherwise, if you do not want to add support for the libxml2 library, your
@@ -595,8 +598,7 @@ Configuration command:
               --with-binary-type=64
               --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1\_gnu4.1.2
               --disable-xmltest
-              --with-bfd=/opt/cray/cce/7.1.5/cray-binutils
-              --with-liberty=/opt/cray/cce/7.1.5/cray-binutils
+              --with-elfutils=/opt/cray/cce/7.1.5/cray-elfutils
               --enable-sampling
               --enable-shared=no
               --with-papi=/opt/xt-tools/papi/3.7.2/v23
@@ -800,8 +802,7 @@ Configuration command, enabling MPI, PAPI:
               --with-unwind=/home/markomg/lib
               --without-dyninst
               --disable-xmltest
-              --with-bfd=/opt/cray/cce/default/cray-binutils
-              --with-liberty=/opt/cray/cce/default/cray-binutils
+              --with-elfutils=/opt/cray/cce/default/cray-elfutils
               --enable-sampling
               --enable-shared=no
               --with-papi=/opt/cray/papi/5.3.2.1
