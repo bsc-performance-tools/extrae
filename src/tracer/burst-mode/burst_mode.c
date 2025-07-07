@@ -211,7 +211,7 @@ void xtr_burst_begin( void )
   burst_info[THREADID].burst_begin_time = LAST_READ_TIME;
 
   xtr_stats_copyto(current_stats, stats_at_burst_begin);
-  HWC_Accum(THREADID, burst_info[THREADID].burst_begin_time);
+  HARDWARE_COUNTERS_ACCUMULATE(THREADID, burst_info[THREADID].burst_begin_time);
 }
 
 
