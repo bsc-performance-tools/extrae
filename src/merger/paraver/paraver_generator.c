@@ -1320,7 +1320,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 		    	exit(-1);
 		    }
 		} else
-#else
+#endif
 		{
 # if HAVE_FOPEN64
 		    prv_fd.handle = fopen64(outName, "w");
@@ -1335,7 +1335,6 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 		    	exit(-1);
 		    }
 		}
-#endif // HAVE_ZLIB
 	} /* taskid == 0 */
 
 	error = Paraver_WriteHeader (fset, numtasks, taskid, num_appl, Ftime, prv_fd,
