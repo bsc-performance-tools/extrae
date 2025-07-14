@@ -54,7 +54,7 @@
 {                                                                      \
     if (HWC_IsEnabled())                                               \
     {                                                                  \
-        HWC_Accum (tid, evt.time);                                     \
+        HWC_Accum (tid, time);                                         \
     }                                                                  \
 }
 
