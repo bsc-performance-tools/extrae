@@ -2667,6 +2667,14 @@ void Backend_Finalize (void)
 		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 		remove_temporal_files ();
 	}
+
+#if defined(MPI_SUPPORT)
+  int mpi_is_finalized= -1;
+  PMPI_Finalized(&mpi_is_finalized);
+  if (0 == mpi_is_finalized) {
+    PMPI_Finalize();
+  }
+#endif  /* MPI_SUPPORT */
 }
 
 static int *Extrae_inSampling = NULL;
