@@ -258,7 +258,7 @@ void ObjectTree_setProcMaps(unsigned ptask, unsigned task, char *maps_file)
 	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
 
 	if (task_info && maps_file) {
-		task_info->proc_self_maps = maps_parse_file(maps_file, OPTION_READ_SYMTAB);
+		task_info->proc_self_maps = maps_parse_file(maps_file, (get_option_merge_DumpSymtab() ? OPTION_READ_SYMTAB : 0));
 	}
 }
 #endif
