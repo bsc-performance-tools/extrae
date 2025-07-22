@@ -2651,6 +2651,15 @@ void Backend_Finalize (void)
 			sprintf (tmp, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 #endif
 			mergerLoadFilesInEmbeddedMode(TASKID, Extrae_get_num_tasks(), tmp);
+
+#if defined(MPI_SUPPORT)
+			int mpi_is_finalized= -1;
+			PMPI_Finalized(&mpi_is_finalized);
+			if (0 == mpi_is_finalized) {
+				PMPI_Finalize();
+			}
+#endif  /* MPI_SUPPORT */
+
 		}
 #endif /* EMBED_MERGE_IN_TRACE */
 	}
