@@ -1327,7 +1327,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 	Start_Uncore_Service();
 #endif
-
 }
 #endif /* MPI_HAS_INIT_THREAD_F */
 
@@ -2139,7 +2138,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Start_Uncore_Service();
 #endif
 
-
 	return val;
 }
 
@@ -2250,7 +2248,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 	Start_Uncore_Service();
 #endif
-
 
 	return val;
 }

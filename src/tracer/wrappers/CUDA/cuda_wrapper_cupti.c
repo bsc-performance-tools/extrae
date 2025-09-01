@@ -668,57 +668,65 @@ CUPTIAPI Extrae_CUPTI_callback(void *udata, CUpti_CallbackDomain domain,
 	UNREFERENCED_PARAMETER(domain);
 	int ret = 0;
 
-	if (!mpitrace_on || !Extrae_get_trace_CUDA() || cbinfo == NULL)
-		return;
-
-	/*
-	 * Filter out all nested callbacks
-	 */
-	if((cbinfo->callbackSite == CUPTI_API_ENTER))
-		Extrae_CUDA_updateDepth(cbinfo);
-
-	if ( (Extrae_CUDA_getDepth() <= 1) )
+	if( cbinfo != NULL )
 	{
-		switch (domain)
-		{
-			case CUPTI_CB_DOMAIN_DRIVER_API:
-				ret = Extrae_DriverAPI_callback(cbid, cbinfo);
-				break;
-			case CUPTI_CB_DOMAIN_RUNTIME_API:
-				ret = Extrae_RuntimeAPI_callback(cbid, cbinfo);
-				break;
-			default:
-				ret = -1;
-	#if LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS
-				fprintf(stderr, "CUDA call (domain = %d cbid = %d\n", domain, cbid);
-	#endif
-		}
+		if (cbinfo->callbackSite == CUPTI_API_ENTER) Backend_Enter_Instrumentation();
+	}
+	else
+	{
+		Backend_Enter_Instrumentation();
+	}
 
-		if (ret == 0)
+	if (EXTRAE_ON() && Extrae_get_trace_CUDA())
+	{
+		if( Backend_Get_InstrumentationLevel() == 1)
 		{
-			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			switch (domain)
 			{
-	#if LOG_UNTRACKED_CALLBACKS
-				const char *callbackName = "Untracked";
-				if (cuptiGetCallbackName_real != NULL)
-				{
-					cuptiGetCallbackName_real
-						(domain, cbid, &callbackName);
-				}
-				fprintf(stderr, "%s CUDA call (domain = %d cbid = %d)\n", callbackName, domain, cbid);
-	#endif
-
-				TRACE_EVENT(LAST_READ_TIME, CUDA_UNTRACKED_EV, cbid);
+				case CUPTI_CB_DOMAIN_DRIVER_API:
+					ret = Extrae_DriverAPI_callback(cbid, cbinfo);
+					break;
+				case CUPTI_CB_DOMAIN_RUNTIME_API:
+					ret = Extrae_RuntimeAPI_callback(cbid, cbinfo);
+					break;
+				default:
+					ret = -1;
+		#if LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS
+					fprintf(stderr, "CUDA call (domain = %d cbid = %d\n", domain, cbid);
+		#endif
 			}
-			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+
+			if (ret == 0)
 			{
-				TRACE_EVENT(TIME, CUDA_UNTRACKED_EV, EVT_END);
+				if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				{
+		#if LOG_UNTRACKED_CALLBACKS
+					const char *callbackName = "Untracked";
+					if (cuptiGetCallbackName_real != NULL)
+					{
+						cuptiGetCallbackName_real
+							(domain, cbid, &callbackName);
+					}
+					fprintf(stderr, "%s CUDA call (domain = %d cbid = %d)\n", callbackName, domain, cbid);
+		#endif
+
+					TRACE_EVENT(LAST_READ_TIME, CUDA_UNTRACKED_EV, cbid);
+				}
+				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				{
+					TRACE_EVENT(TIME, CUDA_UNTRACKED_EV, EVT_END);
+				}
 			}
 		}
 	}
-
-	if((cbinfo->callbackSite == CUPTI_API_EXIT))
-		Extrae_CUDA_updateDepth(cbinfo);
+	if( cbinfo != NULL )
+	{
+		if((cbinfo->callbackSite == CUPTI_API_EXIT)) Backend_Leave_Instrumentation();
+	}
+	else
+	{
+		Backend_Leave_Instrumentation();
+	}
 }
 
 void Extrae_CUDA_init (int rank)

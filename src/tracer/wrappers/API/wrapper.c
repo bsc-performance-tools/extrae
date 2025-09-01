@@ -181,6 +181,11 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
 static int requestedDynamicMemoryInstrumentation = FALSE;
 
+/**
+ * We need to track the deepness of instrumentation if we want to prevent instrumenting runtime calls within. 
+ * In particular when mixing wrapper and callback interposition for different runtimes.
+ */
+static __thread int inInstrumentationLevel = 0;
 
 #if defined(STANDALONE)
 module_t *Modules = NULL;
@@ -1689,7 +1694,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 		Extrae_setAppendingEventsToGivenPID (atoi(getenv("EXTRAE_APPEND_PID")));
 
 	/* Mark the initialization as if we're in instrumentation */
-	Backend_setInInstrumentation (THREADID, TRUE);
 
 	if (gethostname (hostname, sizeof(hostname)) != 0)
 		sprintf (hostname, "localhost");
@@ -1875,7 +1879,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	/* Remove the locals .sym file */
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 	{
-		Backend_setInInstrumentation (u, FALSE);
 		Backend_setInSampling (u, FALSE);
 		
 		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
@@ -2026,7 +2029,6 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 			/* We leave... so, we're no longer in instrumentatin from this point */
 			for (u = get_maximum_NumOfThreads(); u < new_num_threads; u++)
 			{
-				Backend_setInInstrumentation (u, FALSE);
 				Backend_setInSampling (u, FALSE);
 			}
 	
@@ -2248,10 +2250,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 #if defined(HAVE_BURST)
 	xtr_burst_init();
 #endif
-
-	/* We leave... so, we're no longer in instrumentation from this point */
-	for (u = 0; u < get_maximum_NumOfThreads(); u++)
-		Backend_setInInstrumentation (u, FALSE);
 
 	EXTRAE_SET_INITIALIZED(TRUE);
 
@@ -2671,16 +2669,20 @@ void Backend_Finalize (void)
 	}
 }
 
-//static int Extrae_inInstrumentation = FALSE;
-static int *Extrae_inInstrumentation = NULL;
 static int *Extrae_inSampling = NULL;
 
 int Backend_inInstrumentation (unsigned thread)
 {
-	if ((Extrae_inInstrumentation != NULL) && (Extrae_inSampling != NULL))
-		return (Extrae_inInstrumentation[thread] || Extrae_inSampling[thread]);
+    if (Extrae_inSampling != NULL)
+		return Extrae_inSampling[thread] || (inInstrumentationLevel > 0);
 	else
-		return FALSE;
+		return inInstrumentationLevel > 0;
+}
+
+
+int Backend_Get_InstrumentationLevel()
+{
+	return inInstrumentationLevel;
 }
 
 void Backend_setInSampling (unsigned thread, int insampling)      
@@ -2689,105 +2691,108 @@ void Backend_setInSampling (unsigned thread, int insampling)
 			    Extrae_inSampling[thread] = insampling;                       
 }                                                                               
 
-void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
+void _Backend_Update_InstrumentationLevel (int value)
 {
-	if (Extrae_inInstrumentation != NULL)
-		Extrae_inInstrumentation[thread] = ininstrumentation;
+	inInstrumentationLevel += value;
 }
 
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 {
-	Extrae_inInstrumentation = (int*) xrealloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
 	Extrae_inSampling = (int*) xrealloc (Extrae_inSampling, sizeof(int)*nthreads);
 }
 
+/*
+* Possible improvement: 
+* We could add a parameter, a mask, that indicates which wrappers we want to allow inside the current one.
+* We also would need another parameter to indicate which wrapper we are inside, so that we can check
+* whether we are allowed to enter or not.
+*/
 void Backend_Enter_Instrumentation ()
 {
-	unsigned thread = THREADID;
-	UINT64 current_time;
+	Increase_InstrumentationLevel();
+	if (EXTRAE_ON() && Backend_Get_InstrumentationLevel() == 1)
+	{
+		unsigned thread = THREADID;
+		UINT64 current_time;
 
-	if (!mpitrace_on)
-		return;
+		/* Check if we have to fill the sampling buffer */
+	#if defined(SAMPLING_SUPPORT)
+		if (Extrae_get_DumpBuffersAtInstrumentation())
+			if (SamplingBuffer != NULL && SAMPLING_BUFFER(THREADID) != NULL &&
+				Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
+			{
+				event_t FlushEv_Begin, FlushEv_End;
 
-	Backend_setInInstrumentation (thread, TRUE);
+				/* Disable sampling first, and then reestablish whether it was set */
+				int prev = Extrae_isSamplingEnabled();
+				Extrae_setSamplingEnabled (FALSE);
 
-	/* Check if we have to fill the sampling buffer */
-#if defined(SAMPLING_SUPPORT)
-	if (Extrae_get_DumpBuffersAtInstrumentation())
-		if (SamplingBuffer != NULL && SAMPLING_BUFFER(THREADID) != NULL &&
-		  Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
-		{
-			event_t FlushEv_Begin, FlushEv_End;
+				/* Get time now, to mark in the instrumentation buffer the begin of the flush */
+				FlushEv_Begin.time = TIME;
+				FlushEv_Begin.event = FLUSH_EV;
+				FlushEv_Begin.value = EVT_BEGIN;
+				HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin,
+					Extrae_Flush_Wrapper_getCounters());
 
-			/* Disable sampling first, and then reestablish whether it was set */
-			int prev = Extrae_isSamplingEnabled();
-			Extrae_setSamplingEnabled (FALSE);
+				/* Actually flush buffer */
+				Buffer_Flush(SAMPLING_BUFFER(THREADID));
 
-			/* Get time now, to mark in the instrumentation buffer the begin of the flush */
-			FlushEv_Begin.time = TIME;
-			FlushEv_Begin.event = FLUSH_EV;
-			FlushEv_Begin.value = EVT_BEGIN;
-			HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin,
-			  Extrae_Flush_Wrapper_getCounters());
+				/* Get time now, to mark in the instrumentation buffer the end of the flush */
+				FlushEv_End.time = TIME;
+				FlushEv_End.event = FLUSH_EV;
+				FlushEv_End.value = EVT_END;
+				HARDWARE_COUNTERS_READ (THREADID, FlushEv_End,
+					Extrae_Flush_Wrapper_getCounters());
 
-			/* Actually flush buffer */
-			Buffer_Flush(SAMPLING_BUFFER(THREADID));
+				/* Add events into instrumentation buffer */
+				BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_Begin);
+				BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_End);
 
-			/* Get time now, to mark in the instrumentation buffer the end of the flush */
-			FlushEv_End.time = TIME;
-			FlushEv_End.event = FLUSH_EV;
-			FlushEv_End.value = EVT_END;
-			HARDWARE_COUNTERS_READ (THREADID, FlushEv_End,
-			  Extrae_Flush_Wrapper_getCounters());
+				/* Reestablish sampling */
+				Extrae_setSamplingEnabled (prev);
+			}
+	#endif
 
-			/* Add events into instrumentation buffer */
-			BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_Begin);
-			BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_End);
+		/* Check whether we will fill the buffer soon (or now) */
+		if (Buffer_RemainingEvents(TracingBuffer[thread]) <= NEVENTS)
+			Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
 
-			/* Reestablish sampling */
-			Extrae_setSamplingEnabled (prev);
-		}
-#endif
+		/* Record the time when this is happening
+			we need this for subsequent calls to TIME, as this is being cached in
+			clock routines */
+		current_time = TIME;
 
-	/* Check whether we will fill the buffer soon (or now) */
-	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= NEVENTS)
-		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
+		if (Trace_Mode_FirstMode(thread))
+			Trace_Mode_Change (thread, current_time);
 
-	/* Record the time when this is happening
-	   we need this for subsequent calls to TIME, as this is being cached in
-	   clock routines */
-	current_time = TIME;
-
-	if (Trace_Mode_FirstMode(thread))
-		Trace_Mode_Change (thread, current_time);
-
-#if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS)
-	/* Must change counters? check only at detail tracing, at bursty
-     tracing it is leveraged to the mpi macros at BURSTS_MODE_TRACE_MPIEVENT */
-	if (CURRENT_TRACE_MODE(thread) == TRACE_MODE_DETAIL)
-		HARDWARE_COUNTERS_CHANGE(current_time, thread);
-#else
-	/* Otherwise, get rid of a warning about "set but unused" */
-	UNREFERENCED_PARAMETER(current_time);
-#endif
+	#if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS)
+		/* Must change counters? check only at detail tracing, at bursty
+			tracing it is leveraged to the mpi macros at BURSTS_MODE_TRACE_MPIEVENT */
+		if (CURRENT_TRACE_MODE(thread) == TRACE_MODE_DETAIL)
+			HARDWARE_COUNTERS_CHANGE(current_time, thread);
+	#else
+		/* Otherwise, get rid of a warning about "set but unused" */
+		UNREFERENCED_PARAMETER(current_time);
+	#endif
+	}
 }
 
 void Backend_Leave_Instrumentation (void)
 {
-	unsigned thread = THREADID;
+	if (EXTRAE_ON() && Backend_Get_InstrumentationLevel() == 1)
+	{
+		unsigned thread = THREADID;
 
-	if (!mpitrace_on)
-		return;
+		// Exit probe already executed, some OpenMP probes already forced the emission of this.
+		// LAST_READ_TIME same time as exit probe, if already forced, won't do it again because time hasn't progressed.
+		xtr_AnnotateCPU(thread, LAST_READ_TIME, FALSE);
 
-	// Exit probe already executed, some OpenMP probes already forced the emission of this.
-	// LAST_READ_TIME same time as exit probe, if already forced, won't do it again because time hasn't progressed.
-	xtr_AnnotateCPU(thread, LAST_READ_TIME, FALSE);
+		/* Change trace mode? (issue from API) */
+		if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
+			Trace_Mode_Change(thread, LAST_READ_TIME);
+	}
 
-	/* Change trace mode? (issue from API) */
-	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
-		Trace_Mode_Change(thread, LAST_READ_TIME);
-
-	Backend_setInInstrumentation (thread, FALSE);
+	Decrease_InstrumentationLevel();
 }
 
 void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *description,

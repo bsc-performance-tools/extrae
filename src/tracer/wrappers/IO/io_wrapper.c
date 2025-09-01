@@ -128,19 +128,9 @@ void xtr_IO_enable_internals()
 	traceInternalsIO = TRUE;
 }
 
-static void IO_Enter_Instrumentation()
-{
-	__in_io_depth ++;
-	Backend_Enter_Instrumentation ();
-}
 
-static void IO_Leave_Instrumentation()
-{
-	Backend_Leave_Instrumentation ();
-	__in_io_depth --;
-}
 
-#define CHECK_IO_INTERNALS() ((__in_io_depth < 1) && (traceInternalsIO || !Backend_inInstrumentation(THREADID)))
+#define CHECK_IO_INTERNALS() ((Backend_Get_InstrumentationLevel() == 1))
 
 # if defined(PIC) /* Only available for .so libraries */
 
@@ -151,6 +141,7 @@ static void IO_Leave_Instrumentation()
  */
 int open(const char *pathname, int flags, ...)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   int errno_real = errno;
 #endif
@@ -164,7 +155,7 @@ int open(const char *pathname, int flags, ...)
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
    * and THREADID calls a null callback if Extrae is not yet initialized */ 
-  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS(); //XXX this extra if should not be necessary.
 
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: open() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
@@ -195,7 +186,6 @@ int open(const char *pathname, int flags, ...)
   if (real_open != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
 	  errno = errno_real;                                                         
 #endif                                                                          
@@ -207,7 +197,6 @@ int open(const char *pathname, int flags, ...)
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
     Probe_IO_open_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -232,6 +221,8 @@ int open(const char *pathname, int flags, ...)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: open() returns\n", TASKID);
 #endif
+
+	Backend_Leave_Instrumentation ();
   return fd;
 }
 
@@ -242,6 +233,7 @@ int open(const char *pathname, int flags, ...)
  */
 int open64(const char *pathname, int flags, ...)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif
@@ -286,7 +278,6 @@ int open64(const char *pathname, int flags, ...)
   if (real_open64 != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
     errno = errno_real;
 #endif
@@ -298,7 +289,6 @@ int open64(const char *pathname, int flags, ...)
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
     Probe_IO_open_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -323,6 +313,7 @@ int open64(const char *pathname, int flags, ...)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: open64() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return fd;
 }
 
@@ -333,7 +324,8 @@ int open64(const char *pathname, int flags, ...)
  */
 FILE * fopen(const char *path, const char *mode)
 {
-#ifdef HAVE_ERRNO_H
+  Backend_Enter_Instrumentation ();
+  #ifdef HAVE_ERRNO_H
   int errno_real = errno;
 #endif
   FILE *f = NULL;
@@ -369,7 +361,6 @@ FILE * fopen(const char *path, const char *mode)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
 		int fd = -1;
-    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -386,7 +377,6 @@ FILE * fopen(const char *path, const char *mode)
 		TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
 		Probe_IO_fopen_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -411,6 +401,7 @@ FILE * fopen(const char *path, const char *mode)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: fopen() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return f;
 }
 
@@ -421,6 +412,7 @@ FILE * fopen(const char *path, const char *mode)
  */
 FILE * fopen64(const char *path, const char *mode)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   int errno_real = errno;
 #endif
@@ -457,7 +449,6 @@ FILE * fopen64(const char *path, const char *mode)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
 		int fd = -1;
-    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 	  errno = errno_real;
 #endif
@@ -473,7 +464,6 @@ FILE * fopen64(const char *path, const char *mode)
 		TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
     Probe_IO_fopen_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 	  errno = errno_real;
 #endif
@@ -498,6 +488,7 @@ FILE * fopen64(const char *path, const char *mode)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: fopen64() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return f;
 }
 
@@ -508,6 +499,7 @@ FILE * fopen64(const char *path, const char *mode)
  */
 int ioctl(int fd, unsigned long request, char *argp)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   int errno_real = errno;
 #endif
@@ -543,7 +535,6 @@ int ioctl(int fd, unsigned long request, char *argp)
   if (real_ioctl != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
     Probe_IO_ioctl_Entry (fd, request);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -554,7 +545,6 @@ int ioctl(int fd, unsigned long request, char *argp)
     errno_real = errno;
 #endif
     Probe_IO_ioctl_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
     errno = errno_real;
 #endif
@@ -579,6 +569,7 @@ int ioctl(int fd, unsigned long request, char *argp)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: ioctl() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -589,6 +580,7 @@ int ioctl(int fd, unsigned long request, char *argp)
  */
 ssize_t read (int fd, void *buf, size_t count)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   int errno_real = errno;
 #endif
@@ -624,7 +616,6 @@ ssize_t read (int fd, void *buf, size_t count)
   if (real_read != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
     Probe_IO_read_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -635,7 +626,6 @@ ssize_t read (int fd, void *buf, size_t count)
 		errno_real = errno;
 #endif
     Probe_IO_read_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -660,6 +650,7 @@ ssize_t read (int fd, void *buf, size_t count)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: read() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -670,6 +661,7 @@ ssize_t read (int fd, void *buf, size_t count)
  */
 ssize_t write (int fd, const void *buf, size_t count)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   int errno_real = errno;
 #endif
@@ -705,7 +697,6 @@ ssize_t write (int fd, const void *buf, size_t count)
   if (real_write != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
     Probe_IO_write_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -716,7 +707,6 @@ ssize_t write (int fd, const void *buf, size_t count)
 		errno_real = errno;
 #endif
     Probe_IO_write_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -741,6 +731,7 @@ ssize_t write (int fd, const void *buf, size_t count)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: write() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -751,6 +742,7 @@ ssize_t write (int fd, const void *buf, size_t count)
  */
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -786,7 +778,6 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
     Probe_IO_fread_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -797,7 +788,6 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 		errno_real = errno;
 #endif
     Probe_IO_fread_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -822,6 +812,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: fread() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -832,6 +823,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
  */
 size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -866,7 +858,6 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
     Probe_IO_fwrite_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -877,7 +868,6 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 		errno_real = errno;
 #endif
     Probe_IO_fwrite_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -902,6 +892,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: fwrite() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -912,6 +903,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
  */
 ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -947,7 +939,6 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
   if (real_pread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
     Probe_IO_pread_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -958,7 +949,6 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pread_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -983,6 +973,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: pread() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -993,6 +984,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
  */
 ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -1028,7 +1020,6 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
   if (real_pwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    IO_Enter_Instrumentation ();
     Probe_IO_pwrite_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -1039,7 +1030,6 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pwrite_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1064,6 +1054,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: pwrite() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -1074,6 +1065,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
  */
 ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -1112,7 +1104,6 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
     int i;
     ssize_t size = 0;
 
-    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1129,7 +1120,6 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 		errno_real = errno;
 #endif
     Probe_IO_readv_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1154,6 +1144,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: readv() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -1164,6 +1155,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
  */
 ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -1202,7 +1194,6 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
     int i;
     ssize_t size = 0;
 
-    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1219,7 +1210,6 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 		errno_real = errno;
 #endif
     Probe_IO_writev_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
     errno = errno_real;
 #endif
@@ -1244,6 +1234,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: writev() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -1254,6 +1245,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
  */
 ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -1292,7 +1284,6 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     int i;
     ssize_t size = 0;
 
-    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1309,7 +1300,6 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_preadv_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1334,6 +1324,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: preadv() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -1344,6 +1335,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
  */
 ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -1382,7 +1374,6 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     int i;
     ssize_t size = 0;
 
-    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1399,7 +1390,6 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_preadv_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1424,6 +1414,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: preadv64() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -1434,6 +1425,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
  */
 ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -1472,7 +1464,6 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     int i;
     ssize_t size = 0;
 
-    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1489,7 +1480,6 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pwritev_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1514,6 +1504,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: pwritev() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -1524,6 +1515,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
  */
 ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
@@ -1562,7 +1554,6 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     int i;
     ssize_t size = 0;
 
-    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1579,7 +1570,6 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pwritev_Exit ();
-    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1604,6 +1594,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 #if defined(DEBUG)
   fprintf(stderr, "[DEBUG] Task %d: pwritev64() returns\n", TASKID);
 #endif
+	Backend_Leave_Instrumentation ();
   return res;
 }
 
@@ -1615,6 +1606,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 int
 close(int fildes)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 	int errno_real = errno;
 #endif
@@ -1657,7 +1649,6 @@ close(int fildes)
 	if (real_close != NULL && canInstrument)
 	{
 		/* Instrumentation is enabled, emit events and invoke the real call */
-		IO_Enter_Instrumentation();
 
 		Probe_IO_close_Entry(fildes);
 		TRACE_IO_CALLER(LAST_READ_TIME, 3);
@@ -1669,7 +1660,6 @@ close(int fildes)
 		errno_real = errno;
 #endif
 		Probe_IO_close_Exit();
-		IO_Leave_Instrumentation();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1696,6 +1686,7 @@ close(int fildes)
 #if defined(DEBUG)
 	fprintf(stderr, "[DEBUG] Task %d: %s() returns\n", TASKID, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -1707,6 +1698,7 @@ close(int fildes)
 int
 fclose(FILE *stream)
 {
+	Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 	int errno_real = errno;
 #endif
@@ -1749,7 +1741,6 @@ fclose(FILE *stream)
 	if (real_fclose != NULL && canInstrument)
 	{
 		/* Instrumentation is enabled, emit events and invoke the real call */
-		IO_Enter_Instrumentation();
 
 		Probe_IO_fclose_Entry(stream);
 		TRACE_IO_CALLER(LAST_READ_TIME, 3);
@@ -1761,7 +1752,6 @@ fclose(FILE *stream)
 		errno_real = errno;
 #endif
 		Probe_IO_fclose_Exit();
-		IO_Leave_Instrumentation();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1788,6 +1778,7 @@ fclose(FILE *stream)
 #if defined(DEBUG)
 	fprintf(stderr, "[DEBUG] Task %d: %s() returns\n", TASKID, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 

@@ -128,19 +128,19 @@ void NAME_ROUTINE_C2F(mpi_bsend) (void *buf, MPI_Fint *count,
                                   MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Bsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_BSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_bsend) (buf, count, datatype, dest, tag, comm, ierror);
 
 	DLB(DLB_MPI_Bsend_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -156,19 +156,19 @@ void NAME_ROUTINE_C2F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
                                   MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ssend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 	
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_SSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_ssend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
 	DLB(DLB_MPI_Ssend_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -186,19 +186,19 @@ void NAME_ROUTINE_C2F(mpi_rsend) (void *buf, MPI_Fint *count,
                                   MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Rsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_RSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_rsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
 	DLB(DLB_MPI_Rsend_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -215,19 +215,19 @@ void NAME_ROUTINE_C2F(mpi_send) (void *buf, MPI_Fint *count,
                                  MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Send_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Send_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_send) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
 	DLB(DLB_MPI_Send_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -246,19 +246,19 @@ void NAME_ROUTINE_C2F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
                                    MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ibsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IBSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_ibsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Ibsend_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -276,19 +276,19 @@ void NAME_ROUTINE_C2F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
                                   MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Isend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_ISend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_isend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Isend_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -306,19 +306,19 @@ void NAME_ROUTINE_C2F(mpi_issend) (void *buf, MPI_Fint *count,
                                    MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Issend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_ISSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_issend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 			
 	DLB(DLB_MPI_Issend_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -336,19 +336,19 @@ void NAME_ROUTINE_C2F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
                                    MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Irsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IRSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_irsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Irsend_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -366,19 +366,19 @@ void NAME_ROUTINE_C2F(mpi_recv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
                                  MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Recv_F_enter, buf, count, datatype, source, tag, comm, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Recv_Wrapper (buf, count, datatype, source, tag, comm, status, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, status, ierror);
 
 	DLB(DLB_MPI_Recv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -396,19 +396,19 @@ void NAME_ROUTINE_C2F(mpi_irecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
                                   MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Irecv_F_enter, buf, count, datatype, source, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IRecv_Wrapper (buf, count, datatype, source, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_irecv) (buf, count, datatype, source, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Irecv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(MPI3)
@@ -426,19 +426,19 @@ void NAME_ROUTINE_C2F(mpi_mrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
                                   MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Mrecv_F_enter, buf, count, datatype, message, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 			DEBUG_INTERFACE(ENTER)
-			Backend_Enter_Instrumentation ();
 			PMPI_Mrecv_Wrapper (buf, count, datatype, message, status, ierror);
-			Backend_Leave_Instrumentation ();
 			DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_mrecv) (buf, count, datatype, message, status, ierror);
 
 	DLB(DLB_MPI_Mrecv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -454,19 +454,19 @@ void NAME_ROUTINE_C2F(mpi_imrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
                                    MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Imrecv_F_enter, buf, count, datatype, message, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 			DEBUG_INTERFACE(ENTER)
-			Backend_Enter_Instrumentation ();
 			PMPI_Imrecv_Wrapper (buf, count, datatype, message, request, ierror);
-			Backend_Leave_Instrumentation ();
 			DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_imrecv) (buf, count, datatype, message, request, ierror);
 
 	DLB(DLB_MPI_Imrecv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #endif /* MPI3 */
@@ -484,19 +484,19 @@ void NAME_ROUTINE_C2F(mpi_probe) (MPI_Fint *source, MPI_Fint *tag,
                                   MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Probe_F_enter, source, tag, comm, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Probe_Wrapper (source, tag, comm, status, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_probe) (source, tag, comm, status, ierror);
 
 	DLB(DLB_MPI_Probe_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -512,19 +512,19 @@ void NAME_ROUTINE_C2F(mpi_iprobe) (MPI_Fint *source, MPI_Fint *tag,
                                    MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iprobe_F_enter, source, tag, comm, flag, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IProbe_Wrapper (source, tag, comm, flag, status, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_iprobe) (source, tag, comm, flag, status, ierror);
 
 	DLB(DLB_MPI_Iprobe_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(MPI3)
@@ -542,19 +542,19 @@ void NAME_ROUTINE_C2F(mpi_mprobe) (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *co
                                    MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Mprobe_F_enter, source, tag, comm, message, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 			DEBUG_INTERFACE(ENTER)
-			Backend_Enter_Instrumentation ();
 			PMPI_Mprobe_Wrapper (source, tag, comm, message, status, ierror);
-			Backend_Leave_Instrumentation ();
 			DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_mprobe) (source, tag, comm, message, status, ierror);
 
 	DLB(DLB_MPI_Mprobe_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -570,19 +570,19 @@ void NAME_ROUTINE_C2F(mpi_improbe) (MPI_Fint *source, MPI_Fint *tag,
                                     MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Improbe_F_enter, source, tag, comm, flag, message, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 			DEBUG_INTERFACE(ENTER)
-			Backend_Enter_Instrumentation (); 
 			PMPI_Improbe_Wrapper (source, tag, comm, flag, message, status, ierror);
-			Backend_Leave_Instrumentation ();
 			DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_improbe) (source, tag, comm, flag, message, status, ierror);
 
 	DLB(DLB_MPI_Improbe_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #endif /* MPI3 */
@@ -600,19 +600,19 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
                                  MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Test_F_enter, request, flag, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Test_Wrapper (request, flag, status, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_test) (request, flag, status, ierror);
 
 	DLB(DLB_MPI_Test_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -632,19 +632,19 @@ void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint *count,
                                     MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Testall_F_enter, count, array_of_requests, flag, array_of_statuses, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_TestAll_Wrapper (count, array_of_requests, flag, array_of_statuses, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_testall) (count, array_of_requests, flag, array_of_statuses, ierror);
 
 	DLB(DLB_MPI_Testall_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -661,19 +661,19 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint *array_of_requests
                                     MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Testany_F_enter, count, array_of_requests, index, flag, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_TestAny_Wrapper (count, array_of_requests, index, flag, status, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, status, ierror);
 
 	DLB(DLB_MPI_Testany_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -692,19 +692,19 @@ void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint *array_of_reque
                                      MPI_Fint *array_of_statuses, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Testsome_F_enter, incount, array_of_requests, outcount, array_of_indices, array_of_statuses, ierror);
 		
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_TestSome_Wrapper (incount, array_of_requests, outcount, array_of_indices, array_of_statuses, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_testsome) (incount, array_of_requests, outcount, array_of_indices, array_of_statuses, ierror);
 
 	DLB(DLB_MPI_Testsome_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -718,19 +718,19 @@ void NAME_ROUTINE_F(mpi_wait) (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ie
 void NAME_ROUTINE_C2F(mpi_wait) (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Wait_F_enter, request, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Wait_Wrapper (request, status, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_wait) (request, status, ierror);
 
 	DLB(DLB_MPI_Wait_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -744,19 +744,19 @@ void NAME_ROUTINE_F(mpi_waitall) (MPI_Fint *count, MPI_Fint *array_of_requests, 
 void NAME_ROUTINE_C2F(mpi_waitall) (MPI_Fint *count, MPI_Fint *array_of_requests, MPI_Fint *array_of_statuses, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Waitall_F_enter, count, array_of_requests, array_of_statuses, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_WaitAll_Wrapper (count, array_of_requests, array_of_statuses, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_waitall) (count, array_of_requests, array_of_statuses, ierror);
 		  
 	DLB(DLB_MPI_Waitall_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -773,19 +773,19 @@ void NAME_ROUTINE_C2F(mpi_waitany) (MPI_Fint *count, MPI_Fint *array_of_requests
                                     MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Waitany_F_enter, count, array_of_requests, index, status, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_WaitAny_Wrapper (count, array_of_requests, index, status, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_waitany) (count, array_of_requests, index, status, ierror);
 
 	DLB(DLB_MPI_Waitany_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -804,22 +804,22 @@ void NAME_ROUTINE_C2F(mpi_waitsome) (MPI_Fint *incount, MPI_Fint *array_of_reque
                                      MPI_Fint *array_of_statuses, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Waitsome_F_enter, incount, array_of_requests, 
 	    outcount, array_of_indices, array_of_statuses, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_WaitSome_Wrapper (incount, array_of_requests, outcount,
 		                       array_of_indices, array_of_statuses, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_waitsome) (incount, array_of_requests, outcount,
 	                             array_of_indices, array_of_statuses, ierror);
 		  
 	DLB(DLB_MPI_Waitsome_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -837,19 +837,19 @@ void NAME_ROUTINE_C2F(mpi_recv_init) (void *buf, MPI_Fint *count,
                                       MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Recv_init_F_enter, buf, count, datatype, source, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Recv_init_Wrapper (buf, count, datatype, source, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_recv_init) (buf, count, datatype, source, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Recv_init_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -867,19 +867,19 @@ void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
                                       MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Send_init_F_enter, buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Send_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_send_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Send_init_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -897,19 +897,19 @@ void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
                                        MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Bsend_init_F_enter, buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Bsend_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_bsend_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Bsend_init_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -927,19 +927,19 @@ void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
                                        MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Rsend_init_F_enter, buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Rsend_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_rsend_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Rsend_init_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -957,19 +957,19 @@ void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *dat
                                        MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ssend_init_F_enter, buf, count, datatype, dest, tag, comm, request, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Ssend_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77 (pmpi_ssend_init) (buf, count, datatype, dest, tag, comm, request, ierror);
 
 	DLB(DLB_MPI_Ssend_init_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -989,23 +989,23 @@ void NAME_ROUTINE_C2F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
                                      MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Sendrecv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 	    recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Sendrecv_Fortran_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, dest, sendtag, recvbuf, recvcount, recvtype,
 			source, recvtag, comm, status, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77(pmpi_sendrecv) (sendbuf, sendcount, sendtype, dest, sendtag,
 	                            recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr);
 
 	DLB(DLB_MPI_Sendrecv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1023,22 +1023,22 @@ void NAME_ROUTINE_C2F(mpi_sendrecv_replace) (void *buf, MPI_Fint *count,
                                              MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Sendrecv_replace_F_enter, buf, count, type, dest, sendtag, source,
 	    recvtag, comm, status, ierr);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Sendrecv_replace_Fortran_Wrapper (buf, count, type, dest,
 		                                      sendtag, source, recvtag, comm, status, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else CtoF77(pmpi_sendrecv_replace) (buf, count, type, dest, sendtag,
 	                                    source, recvtag, comm, status, ierr);
 
 	DLB(DLB_MPI_Sendrecv_replace_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #endif /* defined(FORTRAN_SYMBOLS) */

@@ -237,7 +237,8 @@ iotimer_t Backend_Get_Last_Leave_Time (void);
 void Backend_Enter_Instrumentation ();
 void Backend_Leave_Instrumentation (void);
 int Backend_inInstrumentation (unsigned thread);
-void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);
+int Backend_Get_InstrumentationLevel();
+void _Backend_Update_InstrumentationLevel (int value);
 void Backend_setInSampling (unsigned thread, int insampling);
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads);
 void Backend_createExtraeDirectory (int taskid, int Temporal);
@@ -254,6 +255,9 @@ extern event_t *circular_HEAD;
 void Parse_Callers (int, char *, int);
 
 int remove_temporal_files (void);
+
+#define Increase_InstrumentationLevel() _Backend_Update_InstrumentationLevel(1);
+#define Decrease_InstrumentationLevel() _Backend_Update_InstrumentationLevel(-1);
 
 enum {
    KEEP,

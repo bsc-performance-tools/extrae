@@ -141,9 +141,9 @@
                     (NOT_IN_NESTED),                                            \
                     NOOP_BEFORE_ENTRY_PROBE,                                    \
                     ARGS(entry_probe_args),                                     \
-                    NOOP_BEFORE_REAL_SYMBOL,                                    \
+                    CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation(); fprintf(stderr, "ol before real sym \n");),  \
                     ARGS(real_symbol_args),                                     \
-                    NOOP_BEFORE_EXIT_PROBE,                                     \
+                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation();fprintf(stderr, "ol after real sym \n");),   \
                     ARGS(exit_probe_args),                                      \
                     NOOP_AFTER_EXIT_PROBE )
 
@@ -189,10 +189,10 @@
                       }                                                                                             \
                     ),                                                                                              \
                     ARGS(entry_probe_args),                                                                         \
-                    NOOP_BEFORE_REAL_SYMBOL,                                                                        \
+                    CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation(); fprintf(stderr, "fork before real sym \n");),  \
                     /* Call our XTR_WRAP_GOMP_PARALLEL_OL and pass real fn/data through helper to it  */            \
                     REAL_SYMBOL_ARGS(REPLACE_ARGS_FN_DATA(symbol ## _OL, &helper, real_symbol_args)),               \
-                    NOOP_BEFORE_EXIT_PROBE,                                                                         \
+                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation();fprintf(stderr, "fork after real sym \n"); ),   \
                     ARGS(exit_probe_args),                                                                          \
                     CODE_AFTER_EXIT_PROBE(                                                                          \
                       if (level == 0)                                                                               \
@@ -376,6 +376,31 @@
                    NOOP_AFTER_EXIT_PROBE )
 
 /**
+ * GOMP_ALLOW_INTERNAL_TRACING_LOGIC
+ *
+ * This logic its a variation of GOMP_COMMON_TRACING_LOGIC that allows to instrument during the execution of the real
+ * GOMP call.
+ * This is currently only used in taskwait, but could be in some other task synchronization points, beacause during those
+ * synchronizations a task can be executed "inside" the synchronization region.
+ */
+#define GOMP_ALLOW_INTERNAL_TRACING_LOGIC( symbol,                              \
+                                   rettype,                                     \
+                                   entry_probe_args,                            \
+                                   real_symbol_args,                            \
+                                   exit_probe_args,                             \
+                                   IF_TRACING_BLOCK )                           \
+  IF_TRACING_BLOCK( symbol,                                                     \
+                    rettype,                                                    \
+                    xtr_OMP_check_config(OMP_ENABLED) && (NOT_IN_NESTED),       \
+                    NOOP_BEFORE_ENTRY_PROBE,                                    \
+                    ARGS(entry_probe_args),                                     \
+                    CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation();),  \
+                    ARGS(real_symbol_args),                                     \
+                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation();),   \
+                    ARGS(exit_probe_args),                                      \
+                    NOOP_AFTER_EXIT_PROBE )
+
+/**
  * GOMP_TASKLOOP_TRACING_LOGIC
  *
  * Swaps the real outlined task with our instrumentation wrapper.
@@ -477,6 +502,17 @@ XTR_WRAP(symbol, GOMP, prototype, rettype, EMPTY_PROLOGUE, GOMP_COMMON_TRACING_L
                            debug_args,       \
                            varargs...)       \
 XTR_WRAP(symbol, GOMP, prototype, rettype, EMPTY_PROLOGUE, GOMP_TASK_TRACING_LOGIC, ARGS(probe_enter_args), ARGS(real_symbol_args), ARGS(probe_leave_args), EMPTY_EPILOGUE, ARGS(debug_args), ## varargs)
+
+#define XTR_WRAP_TASKWAIT(symbol,       \
+                      prototype,        \
+                      rettype,          \
+                      probe_enter_args, \
+                      real_symbol_args, \
+                      probe_leave_args, \
+                      debug_args,       \
+                      varargs...)       \
+XTR_WRAP(symbol, GOMP, prototype, rettype, EMPTY_PROLOGUE, GOMP_ALLOW_INTERNAL_TRACING_LOGIC, ARGS(probe_enter_args), ARGS(real_symbol_args), ARGS(probe_leave_args), EMPTY_EPILOGUE, ARGS(debug_args), ## varargs)
+
 
 #define XTR_WRAP_GOMP_TASKLOOP(symbol,           \
                                prototype,        \

@@ -34,12 +34,10 @@
 #define ENTERING_OUTLINED()                         \
 {                                                   \
     Extrae_OpenMP_Counters();                       \
-    Backend_setInInstrumentation (THREADID, FALSE); \
 }
 
 #define EXITING_OUTLINED()                          \
 {                                                   \
-    Backend_setInInstrumentation (THREADID, TRUE);  \
     TIME;                                           \
     Extrae_OpenMP_Counters();                       \
 }

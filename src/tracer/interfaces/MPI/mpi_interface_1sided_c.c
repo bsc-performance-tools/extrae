@@ -89,20 +89,20 @@ int MPI_Win_create (void *base, MPI_Aint size, int disp_unit, MPI_Info info,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_create_enter, base, size, disp_unit, info, comm, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_create_C_Wrapper (base, size, disp_unit, info, comm, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_create (base, size, disp_unit, info, comm, win);
 
 	DLB(DLB_MPI_Win_create_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -111,20 +111,20 @@ int MPI_Win_fence (int assert, MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_fence_enter, assert, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_fence_C_Wrapper (assert, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_fence (assert, win);
 
 	DLB(DLB_MPI_Win_fence_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -133,20 +133,20 @@ int MPI_Win_start (MPI_Group group, int assert, MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_start_enter, group, assert, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_start_C_Wrapper (group, assert, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_start (group, assert, win);
 
 	DLB(DLB_MPI_Win_start_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -155,20 +155,20 @@ int MPI_Win_free (MPI_Win *win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_free_enter, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_free_C_Wrapper (win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_free (win);
 
 	DLB(DLB_MPI_Win_free_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -177,20 +177,20 @@ int MPI_Win_complete (MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_complete_enter, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_complete_C_Wrapper (win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_complete (win);
 
 	DLB(DLB_MPI_Win_complete_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -199,20 +199,20 @@ int MPI_Win_wait (MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_wait_enter, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_wait_C_Wrapper (win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_wait (win);
 
 	DLB(DLB_MPI_Win_wait_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -221,20 +221,20 @@ int MPI_Win_post (MPI_Group group, int assert, MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_post_enter, group, assert, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_post_C_Wrapper (group, assert, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_post (group, assert, win);
 
 	DLB(DLB_MPI_Win_post_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -245,16 +245,15 @@ int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Get_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Get_C_Wrapper (origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -263,6 +262,7 @@ int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 			win);
 
 	DLB(DLB_MPI_Get_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -273,16 +273,15 @@ int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Put_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Put_C_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -291,6 +290,7 @@ int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin
 			win);
 
 	DLB(DLB_MPI_Put_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -300,20 +300,20 @@ int MPI_Win_lock (int lock_type, int rank, int assert, MPI_Win win)
 
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_lock_enter, lock_type, rank, assert, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_lock_C_Wrapper (lock_type, rank, assert, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_lock (lock_type, rank, assert, win);
 
 	DLB(DLB_MPI_Win_lock_leave);
+	Backend_Leave_Instrumentation ();
 	return res;
 
 }
@@ -324,20 +324,20 @@ int MPI_Win_unlock (int rank, MPI_Win win)
 
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_unlock_enter, rank, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_unlock_C_Wrapper (rank, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_Win_unlock (rank, win);
 
 	DLB(DLB_MPI_Win_unlock_leave);
+	Backend_Leave_Instrumentation ();
 	return res;
 
 }
@@ -350,6 +350,7 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Get_accumulate_enter, MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype, result_addr,
 		result_count, result_datatype, target_rank, target_disp, target_count,
                 target_datatype, op, win);
@@ -357,11 +358,9 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Get_accumulate_C_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			result_addr, result_count, result_datatype,
 			target_rank, target_disp, target_count, target_datatype, op, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -370,6 +369,7 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 			target_rank, target_disp, target_count, target_datatype, op, win);
 
 	DLB(DLB_MPI_Get_accumulate_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -389,6 +389,7 @@ int MPI_Fetch_and_op (MPI3_CONST void *origin_addr, void *result_addr,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Fetch_and_op_enter, MPI3_VOID_P_CAST origin_addr,
 	  MPI3_VOID_P_CAST result_addr, datatype, target_rank, target_disp, op,
 	  win);
@@ -396,11 +397,9 @@ int MPI_Fetch_and_op (MPI3_CONST void *origin_addr, void *result_addr,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Fetch_and_op_C_Wrapper (MPI3_VOID_P_CAST origin_addr,
 		  MPI3_VOID_P_CAST result_addr, datatype, target_rank, target_disp, op,
 		  win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -409,6 +408,7 @@ int MPI_Fetch_and_op (MPI3_CONST void *origin_addr, void *result_addr,
 	}
 
 	DLB(DLB_MPI_Fetch_and_op_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -425,6 +425,7 @@ int MPI_Compare_and_swap(MPI3_CONST void *origin_addr, MPI3_CONST void *compare_
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Compare_and_swap_enter, MPI3_VOID_P_CAST origin_addr,
 	  MPI3_VOID_P_CAST compare_addr, MPI3_VOID_P_CAST result_addr, datatype,
 	  target_rank, target_disp, win);
@@ -432,11 +433,9 @@ int MPI_Compare_and_swap(MPI3_CONST void *origin_addr, MPI3_CONST void *compare_
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Compare_and_swap_C_Wrapper (MPI3_VOID_P_CAST origin_addr,
 		  MPI3_VOID_P_CAST compare_addr, MPI3_VOID_P_CAST result_addr, datatype,
 		  target_rank, target_disp, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -446,6 +445,7 @@ int MPI_Compare_and_swap(MPI3_CONST void *origin_addr, MPI3_CONST void *compare_
 	}
 
 	DLB(DLB_MPI_Compare_and_swap_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -454,14 +454,13 @@ int MPI_Win_flush (int rank, MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_enter, rank, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_flush_C_Wrapper (rank, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -469,6 +468,7 @@ int MPI_Win_flush (int rank, MPI_Win win)
 	}
 
 	DLB(DLB_MPI_Win_flush_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -477,14 +477,13 @@ int MPI_Win_flush_all (MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_all_enter, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_flush_all_C_Wrapper (win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -492,6 +491,7 @@ int MPI_Win_flush_all (MPI_Win win)
 	}
 
 	DLB(DLB_MPI_Win_flush_all_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -500,14 +500,13 @@ int MPI_Win_flush_local (int rank, MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_local_enter, rank, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_flush_local_C_Wrapper (rank, win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -515,6 +514,7 @@ int MPI_Win_flush_local (int rank, MPI_Win win)
 	}
 
 	DLB(DLB_MPI_Win_flush_local_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -523,14 +523,13 @@ int MPI_Win_flush_local_all (MPI_Win win)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_local_all_enter, win);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_Win_flush_local_all_C_Wrapper (win);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -538,6 +537,7 @@ int MPI_Win_flush_local_all (MPI_Win win)
 	}
 
 	DLB(DLB_MPI_Win_flush_local_all_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }

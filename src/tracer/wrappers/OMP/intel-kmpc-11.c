@@ -266,7 +266,7 @@ static void helper__kmpc_task_register(void *wrap_task, void *real_task)
 
 	hl__kmpc_task->last_task = (hl__kmpc_task->last_task + 1) % hl__kmpc_task->max_helpers;
 
-	Extrae_OpenMP_TaskID(hl__kmpc_task->list[i].task_id, XTR_TASK_INSTANTIATION);
+	Probe_OpenMP_TaskID(hl__kmpc_task->list[i].task_id, XTR_TASK_INSTANTIATION);
 
 #if defined(DEBUG)
 		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_register: Registering helper wrap_task=%p real_task=%p slot=%d\n ", THREAD_LEVEL_VAR, wrap_task, real_task, i);
@@ -341,6 +341,7 @@ static struct helper__kmpc_task_t * helper__kmpc_task_retrieve(void *wrap_task)
  */
 static void helper__kmpc_task_substitute (int arg, void *wrap_task)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)                                                              
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL " %llu helper__kmpc_task_substitute enter: args=(%d %p)\n ", 
 THREAD_LEVEL_VAR, /*TIME*/0, arg, wrap_task);
@@ -356,17 +357,20 @@ real_task);
 
 	if (real_task != NULL)
 	{
-		Extrae_OpenMP_TaskUF_Entry (real_task);
-		Extrae_OpenMP_TaskID(task_info->task_id, XTR_TASK_EXECUTION);
+		Probe_OpenMP_TaskUF_Entry (real_task);
+		Probe_OpenMP_TaskID(task_info->task_id, XTR_TASK_EXECUTION);
+		Backend_Leave_Instrumentation ();
 		real_task (arg, wrap_task); /* Original code execution */
+		Backend_Enter_Instrumentation ();
 		Extrae_OpenMP_Notify_NewExecutedTask();
-		Extrae_OpenMP_TaskUF_Exit ();
+		Probe_OpenMP_TaskUF_Exit ();
 	}
 	else
 	{
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_task_substitute: ERROR! Did not find task substitution for wrap_task=%p\n ", THREAD_LEVEL_VAR, wrap_task);
 		exit (-1);
 	}
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -388,6 +392,7 @@ real_task);
  */
 void helper__kmpc_taskloop_substitute (int arg, void *wrap_task, int helper_id)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)                                                              
 	  fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_taskloop_substitute enter: args=(%d %p %d)\n ", THREAD_LEVEL_VAR, arg, wrap_task, helper_id);
 #endif                                                                          
@@ -400,16 +405,19 @@ void helper__kmpc_taskloop_substitute (int arg, void *wrap_task, int helper_id)
 
 		if (real_task != NULL)
 		{
-			Extrae_OpenMP_TaskUF_Entry (real_task);
+			Probe_OpenMP_TaskUF_Entry (real_task);
+			Backend_Leave_Instrumentation ();
 			real_task (arg, wrap_task);
+			Backend_Enter_Instrumentation ();
 			Extrae_OpenMP_Notify_NewExecutedTask();
-			Extrae_OpenMP_TaskUF_Exit ();
+			Probe_OpenMP_TaskUF_Exit ();
 		}
 		else
 		{
 			fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "helper__kmpc_taskloop_substitute: ERROR! Did not find task substitution for wrap_task=%p (helper_id=%d)\n ", THREAD_LEVEL_VAR, wrap_task, helper_id);
 			exit (-1);
 		}
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -422,6 +430,7 @@ void helper__kmpc_taskloop_substitute (int arg, void *wrap_task, int helper_id)
 void
 ompc_set_num_threads(int num_threads)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME": ompc_set_num_threads enter: @=%p num_threads=(%d)\n",
 	    ompc_set_num_threads_real, num_threads);
@@ -436,11 +445,9 @@ ompc_set_num_threads(int num_threads)
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Backend_Enter_Instrumentation();
 		Probe_OpenMP_SetNumThreads_Entry(num_threads);
 		ompc_set_num_threads_real(num_threads);
 		Probe_OpenMP_SetNumThreads_Exit();
-		Backend_Leave_Instrumentation();
 	}
 	else if (ompc_set_num_threads_real != NULL)
 	{
@@ -451,14 +458,16 @@ ompc_set_num_threads(int num_threads)
 		fprintf(stderr, PACKAGE_NAME": ompc_set_num_threads: ERROR! This function is not hooked! Exiting!!\n");
 		exit(-1);
 	}
-
-#if defined(DEBUG)
+	
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME": ompc_set_num_threads exit\n");
-#endif
+	#endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_barrier (void *loc, int global_tid)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_barrier enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_barrier_real, loc, global_tid);
 #endif
@@ -467,9 +476,9 @@ void __kmpc_barrier (void *loc, int global_tid)
 
 	if (TRACE(__kmpc_barrier_real))
 	{
-		Extrae_OpenMP_Barrier_Entry ();
+		Probe_OpenMP_Barrier_Entry ();
 		__kmpc_barrier_real (loc, global_tid);
-		Extrae_OpenMP_Barrier_Exit ();
+		Probe_OpenMP_Barrier_Exit ();
 	}
 	else if (__kmpc_barrier_real != NULL)
 	{
@@ -484,10 +493,12 @@ void __kmpc_barrier (void *loc, int global_tid)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_barrier exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_critical (void *loc, int global_tid, void *crit)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_critical_real, loc, global_tid, crit);
 #endif
@@ -496,9 +507,9 @@ void __kmpc_critical (void *loc, int global_tid, void *crit)
 
 	if (TRACE(__kmpc_critical_real))
 	{
-		Extrae_OpenMP_Named_Lock_Entry ();
+		Probe_OpenMP_Named_Lock_Entry ();
 		__kmpc_critical_real (loc, global_tid, crit);
-		Extrae_OpenMP_Named_Lock_Exit (crit);
+		Probe_OpenMP_Named_Lock_Exit (crit);
 	}
 	else if (__kmpc_critical_real != NULL)
 	{
@@ -513,10 +524,12 @@ void __kmpc_critical (void *loc, int global_tid, void *crit)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_critical_with_hint (void *loc, int global_tid, void *crit, uint32_t hint)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical_with_hint enter: @=%p args=(%p %d %p %u)\n ", THREAD_LEVEL_VAR, __kmpc_critical_with_hint_real, loc, global_tid, crit, hint);
 #endif
@@ -525,9 +538,9 @@ void __kmpc_critical_with_hint (void *loc, int global_tid, void *crit, uint32_t 
 
 	if (TRACE(__kmpc_critical_with_hint_real))
 	{
-		Extrae_OpenMP_Named_Lock_Entry ();
+		Probe_OpenMP_Named_Lock_Entry ();
 		__kmpc_critical_with_hint_real (loc, global_tid, crit, hint);
-		Extrae_OpenMP_Named_Lock_Exit (crit);
+		Probe_OpenMP_Named_Lock_Exit (crit);
 	}
 	else if (__kmpc_critical_with_hint_real != NULL)
 	{
@@ -542,10 +555,12 @@ void __kmpc_critical_with_hint (void *loc, int global_tid, void *crit, uint32_t 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_critical_with_hint exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_end_critical (void *loc, int global_tid, void *crit)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_end_critical enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_end_critical_real, loc, global_tid, crit);
 #endif
@@ -554,9 +569,9 @@ void __kmpc_end_critical (void *loc, int global_tid, void *crit)
 
 	if (TRACE(__kmpc_end_critical_real))
 	{
-		Extrae_OpenMP_Named_Unlock_Entry (crit);
+		Probe_OpenMP_Named_Unlock_Entry (crit);
 		__kmpc_end_critical_real (loc, global_tid, crit);
-		Extrae_OpenMP_Named_Unlock_Exit ();
+		Probe_OpenMP_Named_Unlock_Exit ();
 	}
 	else if (__kmpc_end_critical_real != NULL)
 	{
@@ -571,10 +586,12 @@ void __kmpc_end_critical (void *loc, int global_tid, void *crit)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_end_critical exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_set_lock(void *loc, int gtid, void **user_lock)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_set_lock enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_set_lock_real, loc, gtid, user_lock);
 #endif
@@ -583,9 +600,9 @@ void __kmpc_set_lock(void *loc, int gtid, void **user_lock)
 
 	if (TRACE(__kmpc_set_lock_real))
 	{
-		Extrae_OpenMP_Named_Lock_Entry();
+		Probe_OpenMP_Named_Lock_Entry();
 		__kmpc_set_lock_real(loc, gtid, user_lock);
-		Extrae_OpenMP_Named_Lock_Exit(user_lock);
+		Probe_OpenMP_Named_Lock_Exit(user_lock);
 	}
 	else if (__kmpc_set_lock_real != NULL)
 	{
@@ -600,10 +617,12 @@ void __kmpc_set_lock(void *loc, int gtid, void **user_lock)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_set_lock exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_unset_lock(void *loc, int gtid, void **user_lock)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_unset_lock enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_unset_lock_real, loc, gtid, user_lock);
 #endif
@@ -612,9 +631,9 @@ void __kmpc_unset_lock(void *loc, int gtid, void **user_lock)
 
 	if (TRACE(__kmpc_unset_lock_real))
 	{
-		Extrae_OpenMP_Named_Unlock_Entry(user_lock);
+		Probe_OpenMP_Named_Unlock_Entry(user_lock);
 		__kmpc_unset_lock_real(loc, gtid, user_lock);
-		Extrae_OpenMP_Named_Unlock_Exit();
+		Probe_OpenMP_Named_Unlock_Exit();
 	}
 	else if (__kmpc_unset_lock_real != NULL)
 	{
@@ -629,10 +648,12 @@ void __kmpc_unset_lock(void *loc, int gtid, void **user_lock)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_unset_lock exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_dispatch_init_4 (void *loc, int gtid, int schedule, int lb, int ub, int st, int chunk)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4 enter: @=%p args=(%p %d %d %d %d %d %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_init_4_real, loc, gtid, schedule, lb, ub, st, chunk);
 #endif
@@ -651,11 +672,11 @@ void __kmpc_dispatch_init_4 (void *loc, int gtid, int schedule, int lb, int ub, 
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
 
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 
 		__kmpc_dispatch_init_4_real (loc, gtid, schedule, lb, ub, st, chunk);
   
-		Extrae_OpenMP_UF_Entry (par_uf); 
+		Probe_OpenMP_UF_Entry (par_uf); 
 	}
 	else if (__kmpc_dispatch_init_4_real != NULL)
 	{
@@ -670,10 +691,12 @@ void __kmpc_dispatch_init_4 (void *loc, int gtid, int schedule, int lb, int ub, 
 #if defined(DEBUG)
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4 exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_dispatch_init_4u(void *loc, int gtid, int schedule, unsigned int lb, unsigned int ub, int st, int chunk)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4u enter: @=%p args=(%p %d %d %u %u %d %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_init_4u_real, loc, gtid, schedule, lb, ub, st, chunk);
 #endif
@@ -692,11 +715,11 @@ void __kmpc_dispatch_init_4u(void *loc, int gtid, int schedule, unsigned int lb,
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4u: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
 
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 
 		__kmpc_dispatch_init_4u_real (loc, gtid, schedule, lb, ub, st, chunk);
 
-		Extrae_OpenMP_UF_Entry (par_uf);
+		Probe_OpenMP_UF_Entry (par_uf);
 	}
 	else if (__kmpc_dispatch_init_4u_real != NULL)
 	{
@@ -711,10 +734,12 @@ void __kmpc_dispatch_init_4u(void *loc, int gtid, int schedule, unsigned int lb,
 #if defined(DEBUG)
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4u exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_dispatch_init_8 (void *loc, int gtid, int schedule, long long lb, long long ub, long long st, long long chunk)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8 enter: @=%p args=(%p %d %d %lld %lld %lld %lld)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_init_8_real, loc, gtid, schedule, lb, ub, st, chunk);
 #endif
@@ -733,11 +758,11 @@ void __kmpc_dispatch_init_8 (void *loc, int gtid, int schedule, long long lb, lo
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
 
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 
 		__kmpc_dispatch_init_8_real (loc, gtid, schedule, lb, ub, st, chunk);
 
-		Extrae_OpenMP_UF_Entry (par_uf);
+		Probe_OpenMP_UF_Entry (par_uf);
 	}
 	else if (__kmpc_dispatch_init_8_real != NULL)
 	{
@@ -752,10 +777,12 @@ void __kmpc_dispatch_init_8 (void *loc, int gtid, int schedule, long long lb, lo
 #if defined(DEBUG)
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8 exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void __kmpc_dispatch_init_8u(void *loc, int gtid, int schedule, unsigned long long lb, unsigned long long ub, long long st, long long chunk)
 {
+	Backend_Enter_Instrumentation();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8u enter: @=%p args=(%p %d %d %llu %llu %lld %lld)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_init_8u_real, loc, gtid, schedule, lb, ub, st, chunk);
 #endif
@@ -774,11 +801,11 @@ void __kmpc_dispatch_init_8u(void *loc, int gtid, int schedule, unsigned long lo
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8u: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
 
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 
 		__kmpc_dispatch_init_8u_real (loc, gtid, schedule, lb, ub, st, chunk);
 
-		Extrae_OpenMP_UF_Entry (par_uf);
+		Probe_OpenMP_UF_Entry (par_uf);
 	}
 	else if (__kmpc_dispatch_init_8u_real != NULL)
 	{
@@ -793,10 +820,12 @@ void __kmpc_dispatch_init_8u(void *loc, int gtid, int schedule, unsigned long lo
 #if defined(DEBUG)
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8u exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 int __kmpc_dispatch_next_4 (void *loc, int gtid, int *p_last, int *p_lb, int *p_ub, int *p_st)
 {
+	Backend_Enter_Instrumentation ();
 	int res;
 
 #if defined(DEBUG)
@@ -807,14 +836,16 @@ int __kmpc_dispatch_next_4 (void *loc, int gtid, int *p_last, int *p_lb, int *p_
 
 	if (TRACE(__kmpc_dispatch_next_4_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
+		Backend_Leave_Instrumentation (); /* We're about to execute user code */
 		res = __kmpc_dispatch_next_4_real (loc, gtid, p_last, p_lb, p_ub, p_st);
-		Extrae_OpenMP_Work_Exit();
+		Backend_Enter_Instrumentation (); /* We're about to execute OpenMP code */
+		Probe_OpenMP_Work_Exit();
 
 		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_4 which seems not to be called ? */
 		{
-			Extrae_OpenMP_UF_Exit ();
-			Extrae_OpenMP_DO_Exit ();
+			Probe_OpenMP_UF_Exit ();
+			Probe_OpenMP_DO_Exit ();
 		}
 	}
 	else if (__kmpc_dispatch_next_4_real != NULL)
@@ -830,12 +861,13 @@ int __kmpc_dispatch_next_4 (void *loc, int gtid, int *p_last, int *p_lb, int *p_
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_4 exit: res=%d\n ", THREAD_LEVEL_VAR, res);
 #endif
-
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
 int __kmpc_dispatch_next_4u(void *loc, int gtid, int *p_last, unsigned int *p_lb, unsigned int *p_ub, int *p_st)
 {
+	Backend_Enter_Instrumentation ();
 	int res;
 
 #if defined(DEBUG)
@@ -846,14 +878,16 @@ int __kmpc_dispatch_next_4u(void *loc, int gtid, int *p_last, unsigned int *p_lb
 
 	if (TRACE(__kmpc_dispatch_next_4u_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
+		Backend_Leave_Instrumentation (); /* We're about to execute user code */
 		res = __kmpc_dispatch_next_4u_real (loc, gtid, p_last, p_lb, p_ub, p_st);
-		Extrae_OpenMP_Work_Exit();
+		Backend_Enter_Instrumentation (); /* We're about to execute OpenMP code */
+		Probe_OpenMP_Work_Exit();
 
 		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_4 which seems not to be called ? */
 		{
-			Extrae_OpenMP_UF_Exit ();
-			Extrae_OpenMP_DO_Exit ();
+			Probe_OpenMP_UF_Exit ();
+			Probe_OpenMP_DO_Exit ();
 		}
 	}
 	else if (__kmpc_dispatch_next_4u_real != NULL)
@@ -869,12 +903,13 @@ int __kmpc_dispatch_next_4u(void *loc, int gtid, int *p_last, unsigned int *p_lb
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_4u exit: res=%d\n ", THREAD_LEVEL_VAR, res);
 #endif
-
+	Backend_Leave_Instrumentation (); /* We're about to execute user code */
 	return res;
 }
 
 int __kmpc_dispatch_next_8 (void *loc, int gtid, int *p_last, long long *p_lb, long long *p_ub, long long *p_st)
 {
+	Backend_Enter_Instrumentation ();
 	int res;
 
 #if defined(DEBUG)
@@ -885,14 +920,14 @@ int __kmpc_dispatch_next_8 (void *loc, int gtid, int *p_last, long long *p_lb, l
 
 	if (TRACE(__kmpc_dispatch_next_8_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = __kmpc_dispatch_next_8_real (loc, gtid, p_last, p_lb, p_ub, p_st);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 
 		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_8 which seems not to be called ? */
 		{
-			Extrae_OpenMP_UF_Exit ();
-			Extrae_OpenMP_DO_Exit ();
+			Probe_OpenMP_UF_Exit ();
+			Probe_OpenMP_DO_Exit ();
 		}
 	}
 	else if (__kmpc_dispatch_next_8_real != NULL)
@@ -909,11 +944,13 @@ int __kmpc_dispatch_next_8 (void *loc, int gtid, int *p_last, long long *p_lb, l
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_8 exit: res=%d\n ", THREAD_LEVEL_VAR, res);
 #endif
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
 int __kmpc_dispatch_next_8u(void *loc, int gtid, int *p_last, unsigned long long *p_lb, unsigned long long *p_ub, long long *p_st)
 {
+	Backend_Enter_Instrumentation ();
 	int res;
 
 #if defined(DEBUG)
@@ -924,14 +961,14 @@ int __kmpc_dispatch_next_8u(void *loc, int gtid, int *p_last, unsigned long long
 
 	if (TRACE(__kmpc_dispatch_next_8u_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = __kmpc_dispatch_next_8u_real (loc, gtid, p_last, p_lb, p_ub, p_st);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 
 		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_8 which seems not to be called ? */
 		{
-			Extrae_OpenMP_UF_Exit ();
-			Extrae_OpenMP_DO_Exit ();
+			Probe_OpenMP_UF_Exit ();
+			Probe_OpenMP_DO_Exit ();
 		}
 	}
 	else if (__kmpc_dispatch_next_8u_real != NULL)
@@ -947,12 +984,13 @@ int __kmpc_dispatch_next_8u(void *loc, int gtid, int *p_last, unsigned long long
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_next_8u exit: res=%d\n ", THREAD_LEVEL_VAR, res);
 #endif
-
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
 void __kmpc_dispatch_fini_4 (void *loc, int gtid)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_4 enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_fini_4_real, loc, gtid);
 #endif
@@ -961,9 +999,9 @@ void __kmpc_dispatch_fini_4 (void *loc, int gtid)
 
 	if (TRACE(__kmpc_dispatch_fini_4_real))
 	{
-		Extrae_OpenMP_DO_Exit ();
+		Probe_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_4_real (loc, gtid);
-		Extrae_OpenMP_UF_Exit ();
+		Probe_OpenMP_UF_Exit ();
 	}
 	else if (__kmpc_dispatch_fini_4_real != NULL)
 	{
@@ -978,10 +1016,12 @@ void __kmpc_dispatch_fini_4 (void *loc, int gtid)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_4 exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void __kmpc_dispatch_fini_4u(void *loc, int gtid)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_4u enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_fini_4u_real, loc, gtid);
 #endif
@@ -990,9 +1030,9 @@ void __kmpc_dispatch_fini_4u(void *loc, int gtid)
 
 	if (TRACE(__kmpc_dispatch_fini_4u_real))
 	{
-		Extrae_OpenMP_DO_Exit ();
+		Probe_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_4u_real (loc, gtid);
-		Extrae_OpenMP_UF_Exit ();
+		Probe_OpenMP_UF_Exit ();
 	}
 	else if (__kmpc_dispatch_fini_4u_real != NULL)
 	{
@@ -1007,10 +1047,12 @@ void __kmpc_dispatch_fini_4u(void *loc, int gtid)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_4u exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void __kmpc_dispatch_fini_8 (void *loc, int gtid)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8 enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_fini_8_real, loc, gtid);
 #endif
@@ -1019,9 +1061,9 @@ void __kmpc_dispatch_fini_8 (void *loc, int gtid)
 
 	if (TRACE(__kmpc_dispatch_fini_8_real))
 	{
-		Extrae_OpenMP_DO_Exit ();
+		Probe_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_8_real (loc, gtid);
-		Extrae_OpenMP_UF_Exit ();
+		Probe_OpenMP_UF_Exit ();
 	}
 	else if (__kmpc_dispatch_fini_8_real != NULL)
 	{
@@ -1036,10 +1078,12 @@ void __kmpc_dispatch_fini_8 (void *loc, int gtid)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8 exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void __kmpc_dispatch_fini_8u(void *loc, int gtid)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8u enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_dispatch_fini_8u_real, loc, gtid);
 #endif
@@ -1048,9 +1092,9 @@ void __kmpc_dispatch_fini_8u(void *loc, int gtid)
 
 	if (TRACE(__kmpc_dispatch_fini_8u_real))
 	{
-		Extrae_OpenMP_DO_Exit ();
+		Probe_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_8u_real (loc, gtid);
-		Extrae_OpenMP_UF_Exit ();
+		Probe_OpenMP_UF_Exit ();
 	}
 	else if (__kmpc_dispatch_fini_8u_real != NULL)
 	{
@@ -1065,10 +1109,12 @@ void __kmpc_dispatch_fini_8u(void *loc, int gtid)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_fini_8u exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void __kmpc_fork_call (void *loc, int argc, void *microtask, ...)
 {
+	Backend_Enter_Instrumentation();
 	void  *args[INTEL_OMP_FUNC_ENTRIES];
 	char   kmpc_parallel_wrap_name[1024];
 	char   kmpc_parallel_sched_name[1024];
@@ -1123,7 +1169,7 @@ void __kmpc_fork_call (void *loc, int argc, void *microtask, ...)
 
 	if (EXTRAE_ON())
 	{
-		Extrae_OpenMP_ParRegion_Entry ();
+		Probe_OpenMP_ParRegion_Entry ();
 
 		snprintf(kmpc_parallel_wrap_name, sizeof(kmpc_parallel_wrap_name), "__kmpc_parallel_wrap_%d_args", argc);
 		wrap_ptr = dlsym(RTLD_DEFAULT, kmpc_parallel_wrap_name);
@@ -1138,21 +1184,25 @@ void __kmpc_fork_call (void *loc, int argc, void *microtask, ...)
 		}
 	}                      
 
+	Backend_Leave_Instrumentation ();
+
 	/* Call the scheduling routine. 
 	 * If wrap_ptr is not NULL, it will interpose a call to wrap_ptr with an extra
 	 * parameter with the real task_ptr, in order to instrument when the task
 	 * starts executing.
 	 */
 	kmpc_parallel_sched_ptr(loc, argc, task_ptr, wrap_ptr, args); 
+	Backend_Enter_Instrumentation ();
 
 	if (EXTRAE_ON())
 	{
-		Extrae_OpenMP_ParRegion_Exit ();	
+		Probe_OpenMP_ParRegion_Exit ();	
 	}
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_fork_call exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -1176,6 +1226,7 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 	va_list ap;
 	int     i = 0;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_fork_call_dyninst enter: @=%p __kmpc_fork_call_real=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_fork_call_dyninst, __kmpc_fork_call_real, loc, argc, microtask);
 #endif
@@ -1214,8 +1265,8 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 
 	if (EXTRAE_ON())
 	{
-		Extrae_OpenMP_ParRegion_Entry ();
-		Extrae_OpenMP_EmitTaskStatistics();
+		Probe_OpenMP_ParRegion_Entry ();
+		Probe_OpenMP_EmitTaskStatistics();
 
 		snprintf(kmpc_parallel_wrap_name, sizeof(kmpc_parallel_wrap_name), "__kmpc_parallel_wrap_%d_args", argc);
 		wrap_ptr = dlsym(RTLD_DEFAULT, kmpc_parallel_wrap_name);
@@ -1230,6 +1281,8 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 		}
 	}
 
+	Backend_Leave_Instrumentation ();
+
 	/* Call the scheduling routine. 
 	 * If wrap_ptr is not NULL, it will interpose a call to wrap_ptr with an extra
 	 * parameter with the real task_ptr, in order to instrument when the task
@@ -1237,18 +1290,22 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 	 */
 	kmpc_parallel_sched_ptr(loc, argc, task_ptr, wrap_ptr, args); 
 
+	Backend_Enter_Instrumentation ();
+
 	if (EXTRAE_ON())
 	{
-		Extrae_OpenMP_ParRegion_Exit ();	
-		Extrae_OpenMP_EmitTaskStatistics();
+		Probe_OpenMP_ParRegion_Exit ();	
+		Probe_OpenMP_EmitTaskStatistics();
 	}
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_fork_call_dyninst exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 int __kmpc_single (void *loc, int global_tid)
 {
+	Backend_Enter_Instrumentation ();
 	int res = 0;
 
 #if defined(DEBUG)
@@ -1259,7 +1316,7 @@ int __kmpc_single (void *loc, int global_tid)
 
 	if (TRACE(__kmpc_single_real))
 	{
-		Extrae_OpenMP_Single_Entry ();
+		Probe_OpenMP_Single_Entry ();
 
 		res = __kmpc_single_real (loc, global_tid);
 
@@ -1275,11 +1332,11 @@ int __kmpc_single (void *loc, int global_tid)
 			fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_single: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
 
-			Extrae_OpenMP_UF_Entry (par_uf); 
+			Probe_OpenMP_UF_Entry (par_uf); 
 		}
 		else
 		{
-			Extrae_OpenMP_Single_Exit ();
+			Probe_OpenMP_Single_Exit ();
 		}
 	}
 	else if (__kmpc_single_real != NULL)
@@ -1295,12 +1352,13 @@ int __kmpc_single (void *loc, int global_tid)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_single exit: res=%d\n ", THREAD_LEVEL_VAR, res);
 #endif
-
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
 void __kmpc_end_single (void *loc, int global_tid)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_end_single enter: @=%p args=(%p %d)\n ", THREAD_LEVEL_VAR, __kmpc_end_single_real, loc, global_tid);
 #endif
@@ -1310,9 +1368,9 @@ void __kmpc_end_single (void *loc, int global_tid)
 	if (TRACE(__kmpc_end_single_real))
 	{
 		/* This is only executed by the thread that entered the single region */
-		Extrae_OpenMP_UF_Exit ();
+		Probe_OpenMP_UF_Exit ();
 		__kmpc_end_single_real (loc, global_tid);
-		Extrae_OpenMP_Single_Exit ();
+		Probe_OpenMP_Single_Exit ();
 	}
 	else if (__kmpc_end_single_real != NULL)
 	{
@@ -1326,12 +1384,14 @@ void __kmpc_end_single (void *loc, int global_tid)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_end_single exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void * __kmpc_omp_task_alloc (void *loc, int gtid, int flags, size_t sizeof_kmp_task_t, size_t sizeof_shareds, void *task_entry)
 {
 	void *res = NULL;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_omp_task_alloc enter: @=%p args=(%p %d %d %d %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_omp_task_alloc_real, loc, gtid, flags, (int)sizeof_kmp_task_t, (int)sizeof_shareds, task_entry);
 #endif
@@ -1340,8 +1400,8 @@ void * __kmpc_omp_task_alloc (void *loc, int gtid, int flags, size_t sizeof_kmp_
 
 	if (TRACE(__kmpc_omp_task_alloc_real))
 	{
-		Extrae_OpenMP_Task_Entry (task_entry);
-		Extrae_OpenMP_Notify_NewInstantiatedTask();
+		Probe_OpenMP_Task_Entry (task_entry);
+		Probe_OpenMP_Notify_NewInstantiatedTask();
 		/* 
 		 * We change the task to execute to be the callback helper__kmpc_task_substitute.
 		 * The pointer to this new task (wrap_task) is associated to the real task 
@@ -1351,7 +1411,7 @@ void * __kmpc_omp_task_alloc (void *loc, int gtid, int flags, size_t sizeof_kmp_
 		 */
 		res = __kmpc_omp_task_alloc_real (loc, gtid, flags, sizeof_kmp_task_t, sizeof_shareds, helper__kmpc_task_substitute);
 		helper__kmpc_task_register (res, task_entry);
-		Extrae_OpenMP_Task_Exit ();
+		Probe_OpenMP_Task_Exit ();
 	}
 	else if (__kmpc_omp_task_alloc_real != NULL)
 	{
@@ -1367,11 +1427,13 @@ void * __kmpc_omp_task_alloc (void *loc, int gtid, int flags, size_t sizeof_kmp_
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_omp_task_alloc exit: res=%p\n ", THREAD_LEVEL_VAR, res);
 #endif
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
 void __kmpc_omp_task_begin_if0 (void *loc, int gtid, void *task)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_omp_task_begin_if0 enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_omp_task_begin_if0_real, loc, gtid, task);
 #endif
@@ -1385,8 +1447,8 @@ void __kmpc_omp_task_begin_if0 (void *loc, int gtid, void *task)
 	{
 		if (__kmpc_omp_task_begin_if0_real != NULL)
 		{
-			Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
-			Extrae_OpenMP_Notify_NewInstantiatedTask();
+			Probe_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
+			Probe_OpenMP_Notify_NewInstantiatedTask();
 			__kmpc_omp_task_begin_if0_real (loc, gtid, task);
 		}
 		else
@@ -1408,10 +1470,12 @@ void __kmpc_omp_task_begin_if0 (void *loc, int gtid, void *task)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_omp_task_begin_if0 exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void __kmpc_omp_task_complete_if0 (void *loc, int gtid, void *task)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_omp_task_complete_if0 enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_omp_task_complete_if0_real, loc, gtid, task);
 #endif
@@ -1422,7 +1486,7 @@ void __kmpc_omp_task_complete_if0 (void *loc, int gtid, void *task)
 	{
 		__kmpc_omp_task_complete_if0_real (loc, gtid, task);
 		Extrae_OpenMP_Notify_NewExecutedTask();
-		Extrae_OpenMP_TaskUF_Exit ();
+		Probe_OpenMP_TaskUF_Exit ();
 	}
 	else if (__kmpc_omp_task_complete_if0_real != NULL)
 	{
@@ -1437,10 +1501,12 @@ void __kmpc_omp_task_complete_if0 (void *loc, int gtid, void *task)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_omp_task_complete_if0 exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 int __kmpc_omp_taskwait (void *loc, int gtid)
 {
+	Backend_Enter_Instrumentation ();
 	int res;
 
 #if defined(DEBUG)
@@ -1451,11 +1517,13 @@ int __kmpc_omp_taskwait (void *loc, int gtid)
 
 	if (TRACE(__kmpc_omp_taskwait_real))
 	{
-		Extrae_OpenMP_Taskwait_Entry();
-		Extrae_OpenMP_EmitTaskStatistics();
+		Probe_OpenMP_Taskwait_Entry();
+		Probe_OpenMP_EmitTaskStatistics();
+		Backend_Leave_Instrumentation ();
 		res = __kmpc_omp_taskwait_real (loc, gtid);
-		Extrae_OpenMP_Taskwait_Exit();
-		Extrae_OpenMP_EmitTaskStatistics();
+		Backend_Enter_Instrumentation ();
+		Probe_OpenMP_Taskwait_Exit();
+		Probe_OpenMP_EmitTaskStatistics();
 	}
 	else if (__kmpc_omp_taskwait_real != NULL)
 	{
@@ -1471,6 +1539,7 @@ int __kmpc_omp_taskwait (void *loc, int gtid)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_omp_taskwait exit: res=%d\n ", THREAD_LEVEL_VAR, res);
 #endif
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -1511,6 +1580,7 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
   int helper_id = 0;	
 	void *real_task = NULL;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop enter: @=%p args=(%p %d %p %d %p %p %ld %d %d %ld %p)\n ", THREAD_LEVEL_VAR, __kmpc_taskloop_real, loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, task_dup);
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
@@ -1526,7 +1596,7 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 
 	if (TRACE(__kmpc_taskloop_real) && (getTrace_OMPTaskloop()))
 	{
-		Extrae_OpenMP_TaskLoop_Entry ();
+		Probe_OpenMP_TaskLoop_Entry ();
 
 		/* Assign a new helper for this taskloop */
 		pthread_mutex_lock(&hl__kmpc_taskloop_mtx);
@@ -1544,7 +1614,7 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 
 		/* Call the runtime */
 		__kmpc_taskloop_real(loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, task_dup);
-		Extrae_OpenMP_TaskLoop_Exit ();
+		Probe_OpenMP_TaskLoop_Exit ();
 	}
 	else if (__kmpc_taskloop_real != NULL)
 	{
@@ -1559,6 +1629,7 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, void *ub, long st, int nogroup, int sched, long grainsize, int modifier, void *task_dup)
@@ -1566,6 +1637,7 @@ void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, vo
 	int helper_id = 0;
 	void *real_task = NULL;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop_5 enter: @=%p args=(%p %d %p %d %p %p %ld %d %d %ld %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_taskloop_5_real, loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, modifier, task_dup);
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
@@ -1579,7 +1651,7 @@ void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, vo
 
 	if (TRACE(__kmpc_taskloop_5_real) && (getTrace_OMPTaskloop()))
 	{
-		Extrae_OpenMP_TaskLoop_Entry ();
+		Probe_OpenMP_TaskLoop_Entry ();
 
 		/* Assign a new helper for this taskloop */
 		pthread_mutex_lock(&hl__kmpc_taskloop_mtx);
@@ -1597,7 +1669,7 @@ void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, vo
 
 		/* Call the runtime */
 		__kmpc_taskloop_5_real(loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, modifier, task_dup);
-		Extrae_OpenMP_TaskLoop_Exit ();
+		Probe_OpenMP_TaskLoop_Exit ();
 	}
 	else if (__kmpc_taskloop_5_real != NULL)
 	{
@@ -1612,11 +1684,13 @@ void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, vo
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop_5 exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 __kmpc_taskgroup(void *loc, int global_tid)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "__kmpc_taskgroup enter: @=%p args=(%p %d)\n ",
@@ -1627,10 +1701,10 @@ __kmpc_taskgroup(void *loc, int global_tid)
 
 	if (TRACE(__kmpc_taskgroup_real))
 	{
-		Extrae_OpenMP_Taskgroup_start_Entry();
-		Extrae_OpenMP_EmitTaskStatistics();
+		Probe_OpenMP_Taskgroup_start_Entry();
+		Probe_OpenMP_EmitTaskStatistics();
 		__kmpc_taskgroup_real(loc, global_tid);
-		Extrae_OpenMP_Taskgroup_start_Exit();
+		Probe_OpenMP_Taskgroup_start_Exit();
 	}
 	else if (__kmpc_taskgroup_real != NULL)
 	{
@@ -1648,11 +1722,13 @@ __kmpc_taskgroup(void *loc, int global_tid)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "__kmpc_taskgroup exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 __kmpc_end_taskgroup(void *loc, int global_tid)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "__kmpc_end_taskgroup enter: @=%p args=(%p %d)\n ",
@@ -1663,10 +1739,10 @@ __kmpc_end_taskgroup(void *loc, int global_tid)
 
 	if (TRACE(__kmpc_end_taskgroup_real))
 	{
-		Extrae_OpenMP_Taskgroup_end_Entry();
+		Probe_OpenMP_Taskgroup_end_Entry();
 		__kmpc_end_taskgroup_real (loc, global_tid);
-		Extrae_OpenMP_Taskgroup_end_Exit();
-		Extrae_OpenMP_EmitTaskStatistics();
+		Probe_OpenMP_Taskgroup_end_Exit();
+		Probe_OpenMP_EmitTaskStatistics();
 	}
 	else if (__kmpc_end_taskgroup_real != NULL)
 	{
@@ -1684,12 +1760,13 @@ __kmpc_end_taskgroup(void *loc, int global_tid)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "__kmpc_taskgroup exit\n ", THREAD_LEVEL_VAR);
 #endif
-
+	Backend_Leave_Instrumentation ();
 }
 
 void
 __kmpc_push_num_threads(void *loc, int global_tid, int num_threads)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "__kmpc_push_num_threads enter: @=%p args=(%p %d %d)\n ",
@@ -1705,7 +1782,6 @@ __kmpc_push_num_threads(void *loc, int global_tid, int num_threads)
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Backend_Enter_Instrumentation();
 		Probe_OpenMP_SetNumThreads_Entry(num_threads);
 		__kmpc_push_num_threads_real(loc, global_tid, num_threads);
 		Probe_OpenMP_SetNumThreads_Exit();
@@ -1726,11 +1802,13 @@ __kmpc_push_num_threads(void *loc, int global_tid, int num_threads)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "__kmpc_push_num_threads exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 void
 __kmpc_omp_taskyield(void *loc, uint32_t global_tid, int end_part)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
         fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
             "__kmpc_omp_taskyield enter: @=%p args=(%p %u %d)\n ",
@@ -1741,9 +1819,9 @@ __kmpc_omp_taskyield(void *loc, uint32_t global_tid, int end_part)
 
         if (TRACE(__kmpc_omp_taskyield_real))
         {
-		Extrae_OpenMP_Taskyield_Entry();
+		Probe_OpenMP_Taskyield_Entry();
 		__kmpc_omp_taskyield_real(loc, global_tid, end_part);
-		Extrae_OpenMP_Taskyield_Exit();
+		Probe_OpenMP_Taskyield_Exit();
         }
         else if (__kmpc_omp_taskyield_real != NULL)
         {
@@ -1761,6 +1839,7 @@ __kmpc_omp_taskyield(void *loc, uint32_t global_tid, int end_part)
         fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
             "__kmpc_taskyield exit\n ", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation();
 }
 
 

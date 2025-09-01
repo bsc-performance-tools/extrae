@@ -93,22 +93,12 @@ typedef union
 
 typedef struct
 {
-	int instrumentationDepth;
 	Extrae_cuda_saved_params_union punion;
 } Extrae_cuda_saved_params_t;
 
 unsigned cuda_events_block_size = DEFAULT_CUDA_EVENTS_BLOCK_SIZE;
 
 static Extrae_cuda_saved_params_t *Extrae_CUDA_saved_params = NULL;
-void Extrae_CUDA_updateDepth_(int step)
-{
-	Extrae_CUDA_saved_params[THREADID].instrumentationDepth += step;
-}
-
-int Extrae_CUDA_getDepth()
-{
-	return Extrae_CUDA_saved_params[THREADID].instrumentationDepth;
-}
 
 static unsigned __last_tag = 0xC0DA; /* Fixed tag */
 static unsigned Extrae_CUDA_tag_generator (void)
@@ -490,7 +480,6 @@ void Extrae_cudaConfigureCall_Enter (dim3 p1, dim3 p2, size_t p3, cudaStream_t p
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ConfigureCall_Entry ();
 
 	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
@@ -516,7 +505,6 @@ void Extrae_cudaConfigureCall_Exit (void)
 	  CUDACONFIGKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0);
 
 	Probe_Cuda_ConfigureCall_Exit ();
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaLaunch_Enter (const char *p1, cudaStream_t stream)
@@ -527,7 +515,6 @@ void Extrae_cudaLaunch_Enter (const char *p1, cudaStream_t stream)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_Launch_Entry ((UINT64) p1);
 
 	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
@@ -550,7 +537,6 @@ void Extrae_cudaLaunch_Exit (void)
 	  CUDAKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0);
 
 	Probe_Cuda_Launch_Exit ();
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaMalloc_Enter(unsigned int event, void **devPtr, size_t size)
@@ -560,7 +546,6 @@ void Extrae_cudaMalloc_Enter(unsigned int event, void **devPtr, size_t size)
 	cudaGetDevice(&devid);
 	Extrae_CUDA_Initialize(devid);
 
-	Backend_Enter_Instrumentation();
 	Probe_Cuda_Malloc_Entry(event, (UINT64)devPtr, size);
 }
 
@@ -572,7 +557,6 @@ void Extrae_cudaMalloc_Exit(unsigned int event)
 	Extrae_CUDA_Initialize(devid);
 
 	Probe_Cuda_Malloc_Exit(event);
-	Backend_Leave_Instrumentation();
 }
 
 void Extrae_cudaFree_Enter(unsigned int event, void *devPtr)
@@ -582,7 +566,6 @@ void Extrae_cudaFree_Enter(unsigned int event, void *devPtr)
 	cudaGetDevice(&devid);
 	Extrae_CUDA_Initialize(devid);
 
-	Backend_Enter_Instrumentation();
 	Probe_Cuda_Free_Entry(event, (UINT64)devPtr);
 }
 
@@ -594,19 +577,16 @@ void Extrae_cudaFree_Exit(unsigned int event)
 	Extrae_CUDA_Initialize(devid);
 
 	Probe_Cuda_Free_Exit(event);
-	Backend_Leave_Instrumentation();
 }
 
 void Extrae_cudaHostAlloc_Enter(void **pHost, size_t size)
 {
-	Backend_Enter_Instrumentation();
 	Probe_Cuda_HostAlloc_Entry((UINT64)pHost, size);
 }
 
 void Extrae_cudaHostAlloc_Exit()
 {
 	Probe_Cuda_HostAlloc_Exit();
-	Backend_Leave_Instrumentation();
 }
 
 void Extrae_cudaDeviceSynchronize_Enter (void)
@@ -616,7 +596,6 @@ void Extrae_cudaDeviceSynchronize_Enter (void)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
 	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
 }
@@ -628,7 +607,6 @@ void Extrae_cudaDeviceSynchronize_Exit (void)
 	cudaGetDevice (&devid);
 
 	Probe_Cuda_ThreadBarrier_Exit ();
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaThreadSynchronize_Enter (void)
@@ -638,7 +616,6 @@ void Extrae_cudaThreadSynchronize_Enter (void)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
 }
 
@@ -650,7 +627,6 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 
 	Probe_Cuda_ThreadBarrier_Exit ();
 	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_CUDA_flush_streams ( int device_id, int stream_id )
@@ -684,7 +660,6 @@ void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
 
 	Extrae_CUDA_saved_params[THREADID].punion.csc.stream = p1;
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamCreate_Entry ();
 }
 
@@ -701,7 +676,6 @@ void Extrae_cudaStreamCreate_Exit (void)
 	  *Extrae_CUDA_saved_params[THREADID].punion.csc.stream);
 
 	Probe_Cuda_StreamCreate_Exit ();
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaStreamDestroy_Enter (cudaStream_t stream)
@@ -710,7 +684,6 @@ void Extrae_cudaStreamDestroy_Enter (cudaStream_t stream)
 
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamDestroy_Entry ();
 
 	Extrae_CUDA_saved_params[THREADID].punion.css.stream = stream;
@@ -726,7 +699,6 @@ void Extrae_cudaStreamDestroy_Exit (void)
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 
 	Probe_Cuda_StreamDestroy_Exit ();
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
@@ -744,7 +716,6 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 	strid = Extrae_CUDA_SearchStream (devid,
 	  Extrae_CUDA_saved_params[THREADID].punion.css.stream);
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
 
 	Extrae_CUDA_flush_streams(devid, strid);
@@ -775,8 +746,6 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 	}
 
 	Probe_Cuda_StreamBarrier_Exit ();
-
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4)
@@ -795,7 +764,6 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_Memcpy_Entry (p3);
 
 	tag = Extrae_CUDA_tag_generator();
@@ -864,8 +832,6 @@ void Extrae_cudaMemcpy_Exit (void)
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
 		  TASKID, Extrae_CUDA_saved_params[THREADID].punion.cm.size, tag, tag);
 	}
-
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4,cudaStream_t p5)
@@ -886,7 +852,6 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_MemcpyAsync_Entry (p3);
 
 	tag = Extrae_CUDA_tag_generator();
@@ -971,8 +936,6 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
 		  TASKID, Extrae_CUDA_saved_params[THREADID].punion.cma.size, tag, tag);
 	}
-
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaMemset_Enter(void *devPtr, size_t count)
@@ -982,7 +945,6 @@ void Extrae_cudaMemset_Enter(void *devPtr, size_t count)
 	cudaGetDevice(&devid);
 	Extrae_CUDA_Initialize(devid);
 
-	Backend_Enter_Instrumentation();
 	Probe_Cuda_Memset_Entry((UINT64)devPtr, count);
 }
 
@@ -994,7 +956,6 @@ void Extrae_cudaMemset_Exit()
 	Extrae_CUDA_Initialize(devid);
 
 	Probe_Cuda_Memset_Exit();
-	Backend_Leave_Instrumentation();
 }
 
 void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads)
@@ -1013,7 +974,6 @@ void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads)
 
 void Extrae_cudaDeviceReset_Enter (void)
 {
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_DeviceReset_Enter();
 	Extrae_CUDA_flush_streams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 }
@@ -1025,12 +985,10 @@ void Extrae_cudaDeviceReset_Exit (void)
 
 	Extrae_CUDA_deInitialize (devid);
 	Probe_Cuda_DeviceReset_Exit();
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaThreadExit_Enter (void)
 {
-	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadExit_Enter();
 }
 
@@ -1041,35 +999,37 @@ void Extrae_cudaThreadExit_Exit (void)
 
 	Extrae_CUDA_deInitialize (devid);
 	Probe_Cuda_ThreadExit_Exit();
-	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaEventRecord_Enter()
 {
-	Backend_Enter_Instrumentation();
 	Probe_Cuda_EventRecord_Entry();
 }
 
 void Extrae_cudaEventRecord_Exit()
 {
 	Probe_Cuda_EventRecord_Exit();
-	Backend_Leave_Instrumentation();
 }
 
 void Extrae_cudaEventSynchronize_Enter()
 {
-	Backend_Enter_Instrumentation();
 	Probe_Cuda_EventSynchronize_Entry();
 }
 
 void Extrae_cudaEventSynchronize_Exit()
 {
 	Probe_Cuda_EventSynchronize_Exit();
-	Backend_Leave_Instrumentation();
 }
 
+/**
+ * Performing the flush of streams events during the finalization of Extrae in the destructor call
+ * triggers CUDA calls after the CUDA library has been unloaded resulting in crashes.
+ * To solve that case we always call Extrae_CUDA_finalize with atexit and mark cudaInitialized to 0
+ * to prevent entering this routine after the return point of the main.
+ */
 void Extrae_CUDA_finalize (void)
 {
+	Backend_Enter_Instrumentation();
 	if (EXTRAE_INITIALIZED() && cudaInitialized == 1 )
 	{
 		Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
@@ -1085,4 +1045,5 @@ void Extrae_CUDA_finalize (void)
 		gpuEventList_free(&availableEvents);
 		cudaInitialized = 0;
 	}
+	Backend_Leave_Instrumentation();
 }

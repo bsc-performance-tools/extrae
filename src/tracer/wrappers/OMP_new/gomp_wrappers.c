@@ -1915,13 +1915,13 @@ XTR_WRAP_GOMP_TASKLOOP(GOMP_taskloop_ull,
  * >>>
  *    GOMP_taskwait();
  */
-XTR_WRAP_GOMP(GOMP_taskwait,
-              PROTOTYPE(),
-              NO_RETURN,
-              ENTRY_PROBE_ARGS(),
-              REAL_SYMBOL_ARGS(),
-              EXIT_PROBE_ARGS(),
-              DEBUG_ARGS(""));
+XTR_WRAP_TASKWAIT(GOMP_taskwait,
+                  PROTOTYPE(),
+                  NO_RETURN,
+                  ENTRY_PROBE_ARGS(),
+                  REAL_SYMBOL_ARGS(),
+                  EXIT_PROBE_ARGS(),
+                  DEBUG_ARGS(""));
 
 /**
  * GOMP_taskwait

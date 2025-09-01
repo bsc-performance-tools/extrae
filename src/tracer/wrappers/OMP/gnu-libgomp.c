@@ -403,6 +403,7 @@ unsigned RETRIEVE_DOACROSS_NCOUNTS()
 
 static void callme_parsections (void *parsections_helper_ptr)
 {
+	Backend_Enter_Instrumentation ();
 	struct parallel_helper_t *parsections_helper = parsections_helper_ptr;
 
 #if defined(DEBUG)
@@ -415,15 +416,17 @@ static void callme_parsections (void *parsections_helper_ptr)
 		exit (-1);
 	}
 
-	Extrae_OpenMP_UF_Entry (parsections_helper->fn);
-	Backend_setInInstrumentation (THREADID, FALSE); /* We're about to execute user code */
+	Probe_OpenMP_UF_Entry (parsections_helper->fn);
+	Backend_Leave_Instrumentation (); /* We're about to execute user code */
 	parsections_helper->fn (parsections_helper->data);
-	Backend_setInInstrumentation (THREADID, TRUE); /* We're about to execute OpenMP code */
-	Extrae_OpenMP_UF_Exit ();
+	Backend_Enter_Instrumentation (); /* We're about to execute OpenMP code */
+	Probe_OpenMP_UF_Exit ();
+	Backend_Leave_Instrumentation ();
 }
 
 static void callme_pardo (void *pardo_helper_ptr)
 {
+	Backend_Enter_Instrumentation ();
 	struct parallel_helper_t *pardo_helper = pardo_helper_ptr;
 
 #if defined(DEBUG)
@@ -436,16 +439,18 @@ static void callme_pardo (void *pardo_helper_ptr)
 		exit (-1);
 	}
 
-	Extrae_OpenMP_DO_Entry ();
-	Extrae_OpenMP_UF_Entry (pardo_helper->fn);
-	Backend_setInInstrumentation (THREADID, FALSE); /* We're about to execute user code */
+	Probe_OpenMP_DO_Entry ();
+	Probe_OpenMP_UF_Entry (pardo_helper->fn);
+	Backend_Leave_Instrumentation (); /* We're about to execute user code */
 	pardo_helper->fn (pardo_helper->data);
-	Backend_setInInstrumentation (THREADID, TRUE); /* We're about to execute OpenMP code */
-	Extrae_OpenMP_UF_Exit ();
+	Backend_Enter_Instrumentation (); /* We're about to execute OpenMP code */
+	Probe_OpenMP_UF_Exit ();
+	Backend_Leave_Instrumentation ();
 }
 
 static void callme_par (void *par_helper_ptr)
 {
+	Backend_Enter_Instrumentation ();
 	struct parallel_helper_t *par_helper = par_helper_ptr;
 
 #if defined(DEBUG)
@@ -458,20 +463,21 @@ static void callme_par (void *par_helper_ptr)
 		exit (-1);
 	}
 
-	Extrae_OpenMP_UF_Entry (par_helper->fn);
-	Backend_setInInstrumentation (THREADID, FALSE); /* We're about to execute user code */
+	Probe_OpenMP_UF_Entry (par_helper->fn);
+	Backend_Leave_Instrumentation (); /* We're about to execute user code */
 	par_helper->fn (par_helper->data);
-	Backend_setInInstrumentation (THREADID, TRUE); /* We're back to execute OpenMP code */
-	Extrae_OpenMP_UF_Exit ();
+	Backend_Enter_Instrumentation (); /* We're about to execute OpenMP code */
+	Probe_OpenMP_UF_Exit ();
 
 #if defined(DEBUG)
 	  fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_par ends\n", THREAD_LEVEL_VAR);
 #endif
-
+	Backend_Leave_Instrumentation ();
 }
 
 static void callme_task (void *task_helper_ptr)
 {
+	Backend_Enter_Instrumentation ();
 	struct task_helper_t *task_helper = *(struct task_helper_t **)task_helper_ptr;
 
 #if defined(DEBUG)
@@ -480,22 +486,27 @@ static void callme_task (void *task_helper_ptr)
 
 	if (task_helper != NULL)
 	{
-		Extrae_OpenMP_TaskUF_Entry (task_helper->fn);
+		Probe_OpenMP_TaskUF_Entry (task_helper->fn);
 		Extrae_OpenMP_TaskID (task_helper->counter, XTR_TASK_EXECUTION);
 
+		Backend_Leave_Instrumentation ();
 		task_helper->fn (task_helper->data);
+		Backend_Enter_Instrumentation ();
+
 		if (task_helper->buf != NULL)
 			xfree(task_helper->buf);
 		xfree(task_helper);
 
 		Extrae_OpenMP_Notify_NewExecutedTask();
-		Extrae_OpenMP_TaskUF_Exit ();
+		Probe_OpenMP_TaskUF_Exit ();
 	}
+	Backend_Leave_Instrumentation ();
 }
 
 
 static void callme_taskloop(void *data_trailer)
 {
+	Backend_Enter_Instrumentation ();
 	struct taskloop_helper_t *taskloop_helper = NULL;
 
 	// Search for the magic number 0xdeadbeef to locate the helper
@@ -506,16 +517,20 @@ static void callme_taskloop(void *data_trailer)
 	}
 	arg_size = i;
 	taskloop_helper = data_trailer + arg_size;
-
+	
+	Backend_Leave_Instrumentation ();
 	void (*fn)(void *) = taskloop_helper->fn;
+	Backend_Enter_Instrumentation ();
 
-	Extrae_OpenMP_TaskUF_Entry (fn);
+	Probe_OpenMP_TaskUF_Entry (fn);
 	Extrae_OpenMP_TaskLoopID (taskloop_helper->id);
 
 	fn (data_trailer);
 
         Extrae_OpenMP_Notify_NewExecutedTask();
-	Extrae_OpenMP_TaskUF_Exit ();
+	Probe_OpenMP_TaskUF_Exit ();
+
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************\
@@ -530,6 +545,7 @@ static void callme_taskloop(void *data_trailer)
 
 void GOMP_atomic_start (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_atomic_start_real);
 #endif
@@ -538,9 +554,9 @@ void GOMP_atomic_start (void)
 
 	if (TRACE(GOMP_atomic_start_real))
 	{
-		Extrae_OpenMP_Unnamed_Lock_Entry();
+		Probe_OpenMP_Unnamed_Lock_Entry();
 		GOMP_atomic_start_real();
-		Extrae_OpenMP_Unnamed_Lock_Exit();
+		Probe_OpenMP_Unnamed_Lock_Exit();
 	}
 	else if (GOMP_atomic_start_real != NULL)
 	{
@@ -555,10 +571,12 @@ void GOMP_atomic_start (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_atomic_end (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_atomic_end_real);
 #endif
@@ -567,9 +585,9 @@ void GOMP_atomic_end (void)
 
 	if (TRACE(GOMP_atomic_end_real))
 	{
-		Extrae_OpenMP_Unnamed_Unlock_Entry();
+		Probe_OpenMP_Unnamed_Unlock_Entry();
 		GOMP_atomic_end_real ();
-		Extrae_OpenMP_Unnamed_Unlock_Exit();
+		Probe_OpenMP_Unnamed_Unlock_Exit();
 	}
 	else if (GOMP_atomic_end_real != NULL)
 	{
@@ -584,10 +602,12 @@ void GOMP_atomic_end (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_atomic_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_barrier (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_barrier enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_barrier_real);
 #endif
@@ -596,9 +616,9 @@ void GOMP_barrier (void)
 
 	if (TRACE(GOMP_barrier_real))
 	{
-		Extrae_OpenMP_Barrier_Entry ();
+		Probe_OpenMP_Barrier_Entry ();
 		GOMP_barrier_real ();
-		Extrae_OpenMP_Barrier_Exit ();
+		Probe_OpenMP_Barrier_Exit ();
 	}
 	else if (GOMP_barrier_real != NULL)
 	{
@@ -613,10 +633,12 @@ void GOMP_barrier (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_barrier exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_critical_start (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_critical_start_real);
 #endif
@@ -625,9 +647,9 @@ void GOMP_critical_start (void)
 
 	if (TRACE(GOMP_critical_start_real))
 	{
-		Extrae_OpenMP_Unnamed_Lock_Entry();
+		Probe_OpenMP_Unnamed_Lock_Entry();
 		GOMP_critical_start_real();
-		Extrae_OpenMP_Unnamed_Lock_Exit();
+		Probe_OpenMP_Unnamed_Lock_Exit();
 	}
 	else if (GOMP_critical_start_real != NULL)
 	{
@@ -642,10 +664,12 @@ void GOMP_critical_start (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_critical_end (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_critical_end_real);
 #endif
@@ -654,9 +678,9 @@ void GOMP_critical_end (void)
 
 	if (TRACE(GOMP_critical_end_real))
 	{
-		Extrae_OpenMP_Unnamed_Unlock_Entry();
+		Probe_OpenMP_Unnamed_Unlock_Entry();
 		GOMP_critical_end_real ();
-		Extrae_OpenMP_Unnamed_Unlock_Exit();
+		Probe_OpenMP_Unnamed_Unlock_Exit();
 	}
 	else if (GOMP_critical_end_real != NULL)
 	{
@@ -671,10 +695,12 @@ void GOMP_critical_end (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_critical_name_start (void **pptr)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_start enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_critical_name_start_real, pptr);
 #endif
@@ -683,9 +709,9 @@ void GOMP_critical_name_start (void **pptr)
 
 	if (TRACE(GOMP_critical_name_start_real))
 	{
-		Extrae_OpenMP_Named_Lock_Entry();
+		Probe_OpenMP_Named_Lock_Entry();
 		GOMP_critical_name_start_real (pptr);
-		Extrae_OpenMP_Named_Lock_Exit(pptr);
+		Probe_OpenMP_Named_Lock_Exit(pptr);
 	}
 	else if (GOMP_critical_name_start_real != NULL)
 	{
@@ -700,10 +726,12 @@ void GOMP_critical_name_start (void **pptr)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_critical_name_end (void **pptr)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_end enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_critical_name_end_real, pptr);
 #endif
@@ -712,9 +740,9 @@ void GOMP_critical_name_end (void **pptr)
 
 	if (TRACE(GOMP_critical_name_end_real))
 	{
-		Extrae_OpenMP_Named_Unlock_Entry(pptr);
+		Probe_OpenMP_Named_Unlock_Entry(pptr);
 		GOMP_critical_name_end_real (pptr);
-		Extrae_OpenMP_Named_Unlock_Exit();
+		Probe_OpenMP_Named_Unlock_Exit();
 	}
 	else if (GOMP_critical_name_end_real != NULL)
 	{
@@ -729,12 +757,14 @@ void GOMP_critical_name_end (void **pptr)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_critical_name_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 int GOMP_loop_static_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_static_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_static_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -743,10 +773,9 @@ int GOMP_loop_static_start (long start, long end, long incr, long chunk_size, lo
 
 	if (TRACE(GOMP_loop_static_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
-		Backend_Leave_Instrumentation();
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_static_start_real != NULL)
 	{
@@ -761,6 +790,7 @@ int GOMP_loop_static_start (long start, long end, long incr, long chunk_size, lo
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_static_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -768,6 +798,7 @@ int GOMP_loop_static_start (long start, long end, long incr, long chunk_size, lo
 int GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_dynamic_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_dynamic_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -776,10 +807,9 @@ int GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, l
 
 	if (TRACE(GOMP_loop_dynamic_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
-		Backend_Leave_Instrumentation();
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_dynamic_start_real != NULL)
 	{
@@ -794,6 +824,7 @@ int GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, l
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_dynamic_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -801,6 +832,7 @@ int GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, l
 int GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_guided_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_guided_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -809,10 +841,9 @@ int GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, lo
 
 	if (TRACE(GOMP_loop_guided_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
-		Backend_Leave_Instrumentation();
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_guided_start_real != NULL)
 	{
@@ -827,6 +858,7 @@ int GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, lo
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_guided_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -834,6 +866,7 @@ int GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, lo
 int GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_runtime_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_runtime_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -842,10 +875,9 @@ int GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, l
 
 	if (TRACE(GOMP_loop_runtime_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
-		Backend_Leave_Instrumentation();
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_runtime_start_real != NULL)
 	{
@@ -860,6 +892,7 @@ int GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, l
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_runtime_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -867,6 +900,7 @@ int GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, l
 int GOMP_loop_static_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_static_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_static_next_real, istart, iend);
 #endif
@@ -875,9 +909,9 @@ int GOMP_loop_static_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_static_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_static_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_static_next_real != NULL)
 	{
@@ -892,6 +926,7 @@ int GOMP_loop_static_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_static_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -899,6 +934,7 @@ int GOMP_loop_static_next (long *istart, long *iend)
 int GOMP_loop_dynamic_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_dynamic_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_dynamic_next_real, istart, iend);
 #endif
@@ -907,9 +943,9 @@ int GOMP_loop_dynamic_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_dynamic_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_dynamic_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_dynamic_next_real != NULL)
 	{
@@ -924,6 +960,7 @@ int GOMP_loop_dynamic_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_dynamic_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -931,6 +968,7 @@ int GOMP_loop_dynamic_next (long *istart, long *iend)
 int GOMP_loop_guided_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_guided_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_guided_next_real, istart, iend);
 #endif
@@ -939,9 +977,9 @@ int GOMP_loop_guided_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_guided_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_guided_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_guided_next_real != NULL)
 	{
@@ -956,6 +994,7 @@ int GOMP_loop_guided_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_guided_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -963,6 +1002,7 @@ int GOMP_loop_guided_next (long *istart, long *iend)
 int GOMP_loop_runtime_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_runtime_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_runtime_next_real, istart, iend);
 #endif
@@ -971,9 +1011,9 @@ int GOMP_loop_runtime_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_runtime_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_runtime_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_runtime_next_real != NULL)
 	{
@@ -988,6 +1028,7 @@ int GOMP_loop_runtime_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_runtime_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -995,6 +1036,7 @@ int GOMP_loop_runtime_next (long *istart, long *iend)
 int GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_static_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_static_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -1003,9 +1045,9 @@ int GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_
 
 	if (TRACE(GOMP_loop_ordered_static_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_static_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_static_start_real != NULL)
 	{
@@ -1020,6 +1062,7 @@ int GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_static_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1027,6 +1070,7 @@ int GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_
 int GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_dynamic_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_dynamic_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -1035,9 +1079,9 @@ int GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk
 
 	if (TRACE(GOMP_loop_ordered_dynamic_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_dynamic_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_dynamic_start_real != NULL)
 	{
@@ -1052,6 +1096,7 @@ int GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_dynamic_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1059,6 +1104,7 @@ int GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk
 int GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_guided_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_guided_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -1067,9 +1113,9 @@ int GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_
 
 	if (TRACE(GOMP_loop_ordered_guided_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_guided_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_guided_start_real != NULL)
 	{
@@ -1084,6 +1130,7 @@ int GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_guided_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1091,6 +1138,7 @@ int GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_
 int GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk_size, long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_runtime_start enter: @=%p args=(%ld %ld %ld %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_runtime_start_real, start, end, incr, chunk_size, istart, iend);
 #endif
@@ -1099,9 +1147,9 @@ int GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk
 
 	if (TRACE(GOMP_loop_ordered_runtime_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_runtime_start_real (start, end, incr, chunk_size, istart, iend);
-		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
+		Probe_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_runtime_start_real != NULL)
 	{
@@ -1116,6 +1164,7 @@ int GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_runtime_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1123,6 +1172,7 @@ int GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk
 int GOMP_loop_ordered_static_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_static_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_static_next_real, istart, iend);
 #endif
@@ -1131,9 +1181,9 @@ int GOMP_loop_ordered_static_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_ordered_static_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_ordered_static_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_ordered_static_next_real != NULL)
 	{
@@ -1148,6 +1198,7 @@ int GOMP_loop_ordered_static_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_static_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1155,6 +1206,7 @@ int GOMP_loop_ordered_static_next (long *istart, long *iend)
 int GOMP_loop_ordered_dynamic_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_dynamic_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_dynamic_next_real, istart, iend);
 #endif
@@ -1163,9 +1215,9 @@ int GOMP_loop_ordered_dynamic_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_ordered_dynamic_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_ordered_dynamic_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_ordered_dynamic_next_real != NULL)
 	{
@@ -1180,6 +1232,7 @@ int GOMP_loop_ordered_dynamic_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_dynamic_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1187,6 +1240,7 @@ int GOMP_loop_ordered_dynamic_next (long *istart, long *iend)
 int GOMP_loop_ordered_guided_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_guided_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_guided_next_real, istart, iend);
 #endif
@@ -1195,9 +1249,9 @@ int GOMP_loop_ordered_guided_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_ordered_guided_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_ordered_guided_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_ordered_guided_next_real != NULL)
 	{
@@ -1212,6 +1266,7 @@ int GOMP_loop_ordered_guided_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_guided_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1219,6 +1274,7 @@ int GOMP_loop_ordered_guided_next (long *istart, long *iend)
 int GOMP_loop_ordered_runtime_next (long *istart, long *iend)
 {
 	int res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_runtime_next enter: @=%p args=(%p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_ordered_runtime_next_real, istart, iend);
 #endif
@@ -1227,9 +1283,9 @@ int GOMP_loop_ordered_runtime_next (long *istart, long *iend)
 
 	if (TRACE(GOMP_loop_ordered_runtime_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_ordered_runtime_next_real (istart, iend);
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_loop_ordered_runtime_next_real != NULL)
 	{
@@ -1244,6 +1300,7 @@ int GOMP_loop_ordered_runtime_next (long *istart, long *iend)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_ordered_runtime_next exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1251,7 +1308,8 @@ int GOMP_loop_ordered_runtime_next (long *istart, long *iend)
 void
 GOMP_parallel_loop_static_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_static_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_loop_static_start_real, fn, data, num_threads, start, end, incr, chunk_size);
@@ -1271,16 +1329,18 @@ GOMP_parallel_loop_static_start(void (*fn)(void *), void *data, unsigned num_thr
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_static_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
+		Backend_Enter_Instrumentation ();
 
 		/*
 		 * The master thread continues the execution and then calls fn
 		 */
 		if (THREADID == 0)
 		{
-			Extrae_OpenMP_DO_Entry ();
-			Extrae_OpenMP_UF_Entry(fn);
+			Probe_OpenMP_DO_Entry ();
+			Probe_OpenMP_UF_Entry(fn);
 		}
 
 		/*
@@ -1305,12 +1365,14 @@ GOMP_parallel_loop_static_start(void (*fn)(void *), void *data, unsigned num_thr
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_static_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_loop_dynamic_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_dynamic_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_loop_dynamic_start_real, fn, data, num_threads, start, end, incr, chunk_size);
@@ -1330,16 +1392,19 @@ GOMP_parallel_loop_dynamic_start(void (*fn)(void *), void *data, unsigned num_th
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_dynamic_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
+		Backend_Enter_Instrumentation ();
 
 		/*
 		 * The master thread continues the execution and then calls fn
 		 */
 		if (THREADID == 0)
 		{
-			Extrae_OpenMP_DO_Entry ();
-			Extrae_OpenMP_UF_Entry(fn);
+			Probe_OpenMP_DO_Entry ();
+			Probe_OpenMP_UF_Entry(fn);
 		}
 
 		/*
@@ -1364,12 +1429,14 @@ GOMP_parallel_loop_dynamic_start(void (*fn)(void *), void *data, unsigned num_th
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_dynamic_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_loop_guided_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_guided_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_loop_guided_start_real, fn, data, num_threads, start, end, incr, chunk_size);
@@ -1389,16 +1456,19 @@ GOMP_parallel_loop_guided_start(void (*fn)(void *), void *data, unsigned num_thr
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_guided_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
+		Backend_Enter_Instrumentation ();
 
 		/*
 		 * The master thread continues the execution and then calls fn
 		 */
 		if (THREADID == 0)
 		{
-			Extrae_OpenMP_DO_Entry ();
-			Extrae_OpenMP_UF_Entry(fn);
+			Probe_OpenMP_DO_Entry ();
+			Probe_OpenMP_UF_Entry(fn);
 		}
 
 		/*
@@ -1423,12 +1493,14 @@ GOMP_parallel_loop_guided_start(void (*fn)(void *), void *data, unsigned num_thr
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_guided_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_loop_runtime_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_runtime_start enter: @=%p args=(%p %p %u %ld %ld %ld)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_loop_runtime_start_real, fn, data, num_threads, start, end, incr);
@@ -1448,16 +1520,18 @@ GOMP_parallel_loop_runtime_start(void (*fn)(void *), void *data, unsigned num_th
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_runtime_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr);
+		Backend_Enter_Instrumentation ();
 
 		/*
 		 * The master thread continues the execution and then calls fn
 		 */
 		if (THREADID == 0)
 		{
-			Extrae_OpenMP_DO_Entry ();
-			Extrae_OpenMP_UF_Entry(fn);
+			Probe_OpenMP_DO_Entry ();
+			Probe_OpenMP_UF_Entry(fn);
 		}
 
 		/*
@@ -1482,10 +1556,12 @@ GOMP_parallel_loop_runtime_start(void (*fn)(void *), void *data, unsigned num_th
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_runtime_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_loop_end (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_loop_end_real);
 #endif
@@ -1494,10 +1570,10 @@ void GOMP_loop_end (void)
 
 	if (TRACE(GOMP_loop_end_real))
 	{
-		Extrae_OpenMP_Join_Wait_Entry();
+		Probe_OpenMP_Join_Wait_Entry();
 		GOMP_loop_end_real();
-		Extrae_OpenMP_Join_Wait_Exit();
-		Extrae_OpenMP_DO_Exit ();	
+		Probe_OpenMP_Join_Wait_Exit();
+		Probe_OpenMP_DO_Exit ();	
 	}
 	else if (GOMP_loop_end_real != NULL)
 	{
@@ -1512,10 +1588,12 @@ void GOMP_loop_end (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_loop_end_nowait (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end_nowait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_loop_end_nowait_real);
 #endif
@@ -1524,10 +1602,10 @@ void GOMP_loop_end_nowait (void)
 
 	if (TRACE(GOMP_loop_end_nowait_real))
 	{
-		Extrae_OpenMP_Join_NoWait_Entry();
+		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_loop_end_nowait_real();
-		Extrae_OpenMP_Join_NoWait_Exit();
-		Extrae_OpenMP_DO_Exit ();	
+		Probe_OpenMP_Join_NoWait_Exit();
+		Probe_OpenMP_DO_Exit ();	
 	}
 	else if (GOMP_loop_end_nowait_real != NULL)
 	{
@@ -1542,10 +1620,12 @@ void GOMP_loop_end_nowait (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_end_nowait exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_ordered_start (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_ordered_start_real);
 #endif
@@ -1554,9 +1634,9 @@ void GOMP_ordered_start (void)
 
 	if (TRACE(GOMP_ordered_start_real))
 	{
-		Extrae_OpenMP_Ordered_Wait_Entry();
+		Probe_OpenMP_Ordered_Wait_Entry();
 		GOMP_ordered_start_real ();
-		Extrae_OpenMP_Ordered_Wait_Exit();
+		Probe_OpenMP_Ordered_Wait_Exit();
 	}
 	else if (GOMP_ordered_start_real != NULL)
 	{
@@ -1571,10 +1651,12 @@ void GOMP_ordered_start (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_ordered_end (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_ordered_end_real);
 #endif
@@ -1583,9 +1665,9 @@ void GOMP_ordered_end (void)
 
 	if (TRACE(GOMP_ordered_end_real))
 	{
-		Extrae_OpenMP_Ordered_Post_Entry();
+		Probe_OpenMP_Ordered_Post_Entry();
 		GOMP_ordered_end_real();
-		Extrae_OpenMP_Ordered_Post_Exit();
+		Probe_OpenMP_Ordered_Post_Exit();
 	}
 	else if (GOMP_ordered_end_real != NULL)
 	{
@@ -1600,12 +1682,14 @@ void GOMP_ordered_end (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_ordered_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_start(void (*fn)(void *), void *data, unsigned num_threads)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_start enter: @=%p args=(%p %p %u)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_start_real, fn, data, num_threads);
@@ -1625,14 +1709,16 @@ GOMP_parallel_start(void (*fn)(void *), void *data, unsigned num_threads)
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParRegion_Entry();
+		Probe_OpenMP_ParRegion_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_start_real (callme_par, par_helper, num_threads);
-
 		/* GCC/libgomp does not execute callme_par per root thread, emit
 		   the required event here - call Backend to get a new time! */
-		Extrae_OpenMP_UF_Entry(fn);
+		Backend_Enter_Instrumentation ();
+
+		Probe_OpenMP_UF_Entry(fn);
 	}
 	else if (GOMP_parallel_start_real != NULL)
 	{
@@ -1650,12 +1736,14 @@ GOMP_parallel_start(void (*fn)(void *), void *data, unsigned num_threads)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_end(void)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_end enter: @=%p\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_end_real);
@@ -1665,9 +1753,9 @@ GOMP_parallel_end(void)
 
 	if (TRACE(GOMP_parallel_end_real))
 	{
-		Extrae_OpenMP_UF_Exit();
+		Probe_OpenMP_UF_Exit();
 		GOMP_parallel_end_real();
-		Extrae_OpenMP_ParRegion_Exit();
+		Probe_OpenMP_ParRegion_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
 
 		/*
@@ -1693,12 +1781,14 @@ GOMP_parallel_end(void)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_sections_start(void (*fn)(void *), void *data, unsigned num_threads, unsigned count)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_sections_start enter: @=%p args=(%p %p %u %u)\n",
 	    THREAD_LEVEL_VAR, GOMP_sections_start_real, fn, data, num_threads, count);
@@ -1716,13 +1806,15 @@ GOMP_parallel_sections_start(void (*fn)(void *), void *data, unsigned num_thread
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParSections_Entry();
+		Probe_OpenMP_ParSections_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_sections_start_real(callme_parsections, parsections_helper, num_threads, count);
+		Backend_Enter_Instrumentation ();
 
 		/* The master thread continues the execution and then calls parsections_helper->fn */
 		if (THREADID == 0)
 		{
-			Extrae_OpenMP_UF_Entry(fn);
+			Probe_OpenMP_UF_Entry(fn);
 		}
 	}
 	else if (GOMP_parallel_sections_start_real != NULL)
@@ -1741,11 +1833,13 @@ GOMP_parallel_sections_start(void (*fn)(void *), void *data, unsigned num_thread
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_sections_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 unsigned GOMP_sections_start (unsigned count)
 {
 	unsigned res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_start enter: @=%p args=(%u)\n", THREAD_LEVEL_VAR, GOMP_sections_start_real, count);
 #endif
@@ -1754,9 +1848,9 @@ unsigned GOMP_sections_start (unsigned count)
 
 	if (TRACE(GOMP_sections_start_real))
 	{
-		Extrae_OpenMP_Section_Entry();
+		Probe_OpenMP_Section_Entry();
 		res = GOMP_sections_start_real (count);
-		Extrae_OpenMP_Section_Exit();
+		Probe_OpenMP_Section_Exit();
 	}
 	else if (GOMP_sections_start_real != NULL)
 	{
@@ -1771,6 +1865,7 @@ unsigned GOMP_sections_start (unsigned count)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_start exit: res=%u\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -1778,6 +1873,7 @@ unsigned GOMP_sections_start (unsigned count)
 unsigned GOMP_sections_next (void)
 {
 	unsigned res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_next enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_sections_next_real);
 #endif
@@ -1786,9 +1882,9 @@ unsigned GOMP_sections_next (void)
 
 	if (TRACE(GOMP_sections_next_real))
 	{
-		Extrae_OpenMP_Work_Entry();
+		Probe_OpenMP_Work_Entry();
 		res = GOMP_sections_next_real();
-		Extrae_OpenMP_Work_Exit();
+		Probe_OpenMP_Work_Exit();
 	}
 	else if (GOMP_sections_next_real != NULL)
 	{
@@ -1803,12 +1899,14 @@ unsigned GOMP_sections_next (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_next exit: res=%u\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
 
 void GOMP_sections_end (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_sections_end_real);
 #endif
@@ -1817,9 +1915,9 @@ void GOMP_sections_end (void)
 
 	if (TRACE(GOMP_sections_end_real))
 	{
-		Extrae_OpenMP_Join_Wait_Entry();
+		Probe_OpenMP_Join_Wait_Entry();
 		GOMP_sections_end_real();
-		Extrae_OpenMP_Join_Wait_Exit();
+		Probe_OpenMP_Join_Wait_Exit();
 	}
 	else if (GOMP_sections_end_real != NULL)
 	{
@@ -1834,10 +1932,12 @@ void GOMP_sections_end (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_sections_end_nowait (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end_nowait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_sections_end_nowait_real);
 #endif
@@ -1846,9 +1946,9 @@ void GOMP_sections_end_nowait (void)
 
 	if (TRACE(GOMP_sections_end_nowait_real))
 	{
-		Extrae_OpenMP_Join_NoWait_Entry();
+		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_sections_end_nowait_real();
-		Extrae_OpenMP_Join_NoWait_Exit();
+		Probe_OpenMP_Join_NoWait_Exit();
 	}
 	else if (GOMP_sections_end_nowait_real != NULL)
 	{
@@ -1863,11 +1963,13 @@ void GOMP_sections_end_nowait (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_sections_end_nowait exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 unsigned GOMP_single_start (void)
 {
 	unsigned res = 0;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_single_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_single_start_real);
 #endif
@@ -1876,9 +1978,9 @@ unsigned GOMP_single_start (void)
 
 	if (TRACE(GOMP_single_start_real))
 	{
-		Extrae_OpenMP_Single_Entry();
+		Probe_OpenMP_Single_Entry();
 		res = GOMP_single_start_real ();
-		Extrae_OpenMP_Single_Exit();
+		Probe_OpenMP_Single_Exit();
 	}
 	else if (GOMP_single_start_real != NULL)
 	{
@@ -1893,12 +1995,14 @@ unsigned GOMP_single_start (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_single_start exit: res=%u\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
 
 void GOMP_taskwait (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskwait enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskwait_real);
 #endif
@@ -1907,10 +2011,13 @@ void GOMP_taskwait (void)
 
 	if (TRACE(GOMP_taskwait_real))
 	{
-		Extrae_OpenMP_Taskwait_Entry();
+		Probe_OpenMP_Taskwait_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
+		Backend_Leave_Instrumentation ();
 		GOMP_taskwait_real ();
-		Extrae_OpenMP_Taskwait_Exit();
+		Backend_Enter_Instrumentation ();
+
+		Probe_OpenMP_Taskwait_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (GOMP_taskwait_real != NULL)
@@ -1926,6 +2033,7 @@ void GOMP_taskwait (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskwait exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /* As of 2025-02-28, the implementation of GOMP_taskyield in the GNU OpenMP runtime is empty:
@@ -1935,6 +2043,7 @@ void GOMP_taskwait (void)
  */
 void GOMP_taskyield (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskyield enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskyield_real);
 #endif
@@ -1943,10 +2052,10 @@ void GOMP_taskyield (void)
 
 	if (TRACE(GOMP_taskyield_real))
 	{
-		Extrae_OpenMP_Taskyield_Entry();
+		Probe_OpenMP_Taskyield_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 		GOMP_taskyield_real ();
-		Extrae_OpenMP_Taskyield_Exit();
+		Probe_OpenMP_Taskyield_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (GOMP_taskyield_real != NULL)
@@ -1962,6 +2071,7 @@ void GOMP_taskyield (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskyield exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -1972,6 +2082,7 @@ void GOMP_taskyield (void)
 void
 GOMP_parallel(void (*fn)(void *), void *data, unsigned num_threads, unsigned int flags)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel enter: @=%p args=(%p %p %u %u)\n",
@@ -2003,12 +2114,14 @@ GOMP_parallel(void (*fn)(void *), void *data, unsigned num_threads, unsigned int
 		par_helper.fn = fn;
 		par_helper.data = data;
 
-		Extrae_OpenMP_ParRegion_Entry();
+		Probe_OpenMP_ParRegion_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_real(callme_par, &par_helper, num_threads, flags);
+		Backend_Enter_Instrumentation ();
 
-		Extrae_OpenMP_ParRegion_Exit();
+		Probe_OpenMP_ParRegion_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
 
 		/*
@@ -2032,12 +2145,14 @@ GOMP_parallel(void (*fn)(void *), void *data, unsigned num_threads, unsigned int
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_loop_static(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_static enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_loop_static_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
@@ -2057,9 +2172,11 @@ GOMP_parallel_loop_static(void (*fn)(void *), void *data, unsigned num_threads, 
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_static_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
-		Extrae_OpenMP_ParDO_Exit();
+		Backend_Enter_Instrumentation ();
+		Probe_OpenMP_ParDO_Exit();
 
 		/*
 		 * Return to the original number of threads only if in a library not
@@ -2083,12 +2200,14 @@ GOMP_parallel_loop_static(void (*fn)(void *), void *data, unsigned num_threads, 
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_static exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_loop_dynamic(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_dynamic enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_loop_dynamic_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
@@ -2108,9 +2227,11 @@ GOMP_parallel_loop_dynamic(void (*fn)(void *), void *data, unsigned num_threads,
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_dynamic_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
-		Extrae_OpenMP_ParDO_Exit();
+		Backend_Enter_Instrumentation ();
+		Probe_OpenMP_ParDO_Exit();
 
 		/*
 		 * Return to the original number of threads only if in a library not
@@ -2133,11 +2254,13 @@ GOMP_parallel_loop_dynamic(void (*fn)(void *), void *data, unsigned num_threads,
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_dynamic exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_loop_guided(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_guided enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n",
@@ -2158,9 +2281,11 @@ GOMP_parallel_loop_guided(void (*fn)(void *), void *data, unsigned num_threads, 
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_guided_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
-		Extrae_OpenMP_ParDO_Exit();
+		Backend_Enter_Instrumentation ();
+		Probe_OpenMP_ParDO_Exit();
 
 		/*
 		 * Return to the original number of threads only if in a library not
@@ -2184,12 +2309,14 @@ GOMP_parallel_loop_guided(void (*fn)(void *), void *data, unsigned num_threads, 
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_guided exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_loop_runtime(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_runtime enter: @=%p args=(%p %p %u %ld %ld %ld %u)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_loop_runtime_real, fn, data, num_threads, start, end, incr, flags);
@@ -2209,9 +2336,11 @@ GOMP_parallel_loop_runtime(void (*fn)(void *), void *data, unsigned num_threads,
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParDO_Entry();
+		Probe_OpenMP_ParDO_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_loop_runtime_real(callme_pardo, pardo_helper, num_threads, start, end, incr, flags);
-		Extrae_OpenMP_ParDO_Exit();
+		Backend_Enter_Instrumentation ();
+		Probe_OpenMP_ParDO_Exit();
 
 		/*
 		 * Return to the original number of threads only if in a library not
@@ -2235,12 +2364,14 @@ GOMP_parallel_loop_runtime(void (*fn)(void *), void *data, unsigned num_threads,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_loop_runtime exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void
 GOMP_parallel_sections(void (*fn) (void *), void *data, unsigned num_threads, unsigned count, unsigned flags)
 {
-#if defined(DEBUG)
+	Backend_Enter_Instrumentation ();
+	#if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_sections enter: @=%p args=(%p %p %u %u %u)\n",
 	    THREAD_LEVEL_VAR, GOMP_parallel_sections_real, fn, data, num_threads, count, flags);
@@ -2260,14 +2391,16 @@ GOMP_parallel_sections(void (*fn) (void *), void *data, unsigned num_threads, un
 		 */
 		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_ParSections_Entry();
+		Probe_OpenMP_ParSections_Entry();
+		Backend_Leave_Instrumentation ();
 		GOMP_parallel_sections_real(callme_parsections, parsections_helper, num_threads, count, flags);
-		Extrae_OpenMP_ParSections_Exit();
+		Backend_Enter_Instrumentation ();
+		Probe_OpenMP_ParSections_Exit();
 
 		/* The master thread continues the execution and then calls parsections_helper->fn */
 		if (THREADID == 0)
 		{
-			Extrae_OpenMP_UF_Entry(fn);
+			Probe_OpenMP_UF_Entry(fn);
 		}
 
 		/*
@@ -2292,11 +2425,13 @@ GOMP_parallel_sections(void (*fn) (void *), void *data, unsigned num_threads, un
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
 	    "GOMP_parallel_sections exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 
 void GOMP_taskgroup_start (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_start enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskgroup_start_real);
 #endif
@@ -2305,10 +2440,10 @@ void GOMP_taskgroup_start (void)
 
 	if (TRACE(GOMP_taskgroup_start_real))
 	{
-		Extrae_OpenMP_Taskgroup_start_Entry();
+		Probe_OpenMP_Taskgroup_start_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 		GOMP_taskgroup_start_real ();
-		Extrae_OpenMP_Taskgroup_start_Exit();
+		Probe_OpenMP_Taskgroup_start_Exit();
 	}
 	else if (GOMP_taskgroup_start_real != NULL)
 	{
@@ -2323,10 +2458,12 @@ void GOMP_taskgroup_start (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_start exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_taskgroup_end (void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_taskgroup_end_real);
 #endif
@@ -2335,9 +2472,9 @@ void GOMP_taskgroup_end (void)
 
 	if (TRACE(GOMP_taskgroup_end_real))
 	{
-		Extrae_OpenMP_Taskgroup_end_Entry();
+		Probe_OpenMP_Taskgroup_end_Entry();
 		GOMP_taskgroup_end_real ();
-		Extrae_OpenMP_Taskgroup_end_Exit();
+		Probe_OpenMP_Taskgroup_end_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (GOMP_taskgroup_end_real != NULL)
@@ -2353,6 +2490,7 @@ void GOMP_taskgroup_end (void)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskgroup_end exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -2362,6 +2500,7 @@ void GOMP_target(int device, void (*fn) (void *), const void *unused,
                  size_t mapnum, void **hostaddrs, size_t *sizes,
                  unsigned char *kinds)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_real);
@@ -2371,10 +2510,10 @@ void GOMP_target(int device, void (*fn) (void *), const void *unused,
 
 	if (TRACE(GOMP_target_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 		GOMP_target_real(device, fn, unused, mapnum, hostaddrs, sizes, kinds);
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	} else if (GOMP_target_real != NULL)
 	{
 		GOMP_target_real(device, fn, unused, mapnum, hostaddrs, sizes, kinds);
@@ -2390,6 +2529,7 @@ void GOMP_target(int device, void (*fn) (void *), const void *unused,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -2399,6 +2539,7 @@ void
 GOMP_target_data(int device, const void *unused, size_t mapnum,
                  void **hostaddrs, size_t *sizes, unsigned char *kinds)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_data_real);
@@ -2408,10 +2549,10 @@ GOMP_target_data(int device, const void *unused, size_t mapnum,
 
 	if (TRACE(GOMP_target_data_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 		GOMP_target_data_real(device, unused, mapnum, hostaddrs, sizes, kinds);
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	} else if (GOMP_target_data_real != NULL)
 	{
 		GOMP_target_data_real(device, unused, mapnum, hostaddrs, sizes, kinds);
@@ -2427,6 +2568,7 @@ GOMP_target_data(int device, const void *unused, size_t mapnum,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -2435,6 +2577,7 @@ GOMP_target_data(int device, const void *unused, size_t mapnum,
 void
 GOMP_target_end_data(void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_end_data_real);
@@ -2444,10 +2587,10 @@ GOMP_target_end_data(void)
 
 	if (TRACE(GOMP_target_end_data_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 		GOMP_target_end_data_real();
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	} else if (GOMP_target_end_data_real != NULL)
 	{
 		GOMP_target_end_data_real();
@@ -2463,6 +2606,7 @@ GOMP_target_end_data(void)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -2472,6 +2616,7 @@ void
 GOMP_target_update(int device, const void *unused, size_t mapnum,
                    void **hostaddrs, size_t *sizes, unsigned char *kinds)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_update_real);
@@ -2481,10 +2626,10 @@ GOMP_target_update(int device, const void *unused, size_t mapnum,
 
 	if (TRACE(GOMP_target_update_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 		GOMP_target_update_real(device, unused, mapnum, hostaddrs, sizes, kinds);
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	} else if (GOMP_target_update_real != NULL)
 	{
 		GOMP_target_update_real(device, unused, mapnum, hostaddrs, sizes, kinds);
@@ -2499,6 +2644,7 @@ GOMP_target_update(int device, const void *unused, size_t mapnum,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -2520,6 +2666,7 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 
 	va_start (ap, flags);
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_task enter: @=%p args=(%p %p %p %ld %ld %d %u) (GOMP version: %s)\n", THREAD_LEVEL_VAR, GOMP_task_real, fn, data, cpyfn, arg_size, arg_align, if_clause, flags, __GOMP_version);
 #endif
@@ -2528,7 +2675,7 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 
 	if (TRACE(GOMP_task_real))
 	{
-		Extrae_OpenMP_Task_Entry (fn);
+		Probe_OpenMP_Task_Entry (fn);
 		Extrae_OpenMP_Notify_NewInstantiatedTask();
 
 		/* 
@@ -2579,7 +2726,7 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 			GOMP_task_real (callme_task, &task_helper, NULL, sizeof(task_helper), arg_align, if_clause, flags, depend, priority);
 		}
 
-		Extrae_OpenMP_Task_Exit ();
+		Probe_OpenMP_Task_Exit ();
 	}
 	else if (GOMP_task_real != NULL)
 	{
@@ -2605,11 +2752,13 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_task exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 
 void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, long start, long end, long step)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_taskloop_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
@@ -2639,9 +2788,9 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 		memcpy (data_trailer, data, arg_size);
 		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
 
-		Extrae_OpenMP_TaskLoop_Entry ();
+		Probe_OpenMP_TaskLoop_Entry ();
 		GOMP_taskloop_real(callme_taskloop, data_trailer, cpyfn, arg_size + helper_size, arg_align, flags, num_tasks, priority, start, end, step);
-		Extrae_OpenMP_TaskLoop_Exit ();
+		Probe_OpenMP_TaskLoop_Exit ();
 	}
 	else if (GOMP_taskloop_real != NULL)
 	{
@@ -2652,10 +2801,12 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
 		exit (-1);
 	}
+	Backend_Leave_Instrumentation ();
 }
 
 void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long arg_align, unsigned flags, unsigned long num_tasks, int priority, unsigned long long start, unsigned long long end, unsigned long long step)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %llu %llu %llu)\n", THREAD_LEVEL_VAR, GOMP_taskloop_ull_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
@@ -2683,9 +2834,9 @@ void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long a
 		memcpy (data_trailer, data, arg_size);
 		memcpy (data_trailer + arg_size, &taskloop_helper, helper_size);
 
-		Extrae_OpenMP_TaskLoop_Entry ();
+		Probe_OpenMP_TaskLoop_Entry ();
 		GOMP_taskloop_ull_real(callme_taskloop, data_trailer, cpyfn, arg_size + helper_size, arg_align, flags, num_tasks, priority, start, end, step);
-		Extrae_OpenMP_TaskLoop_Exit ();
+		Probe_OpenMP_TaskLoop_Exit ();
 	}
 	else if (GOMP_taskloop_ull_real != NULL)
 	{
@@ -2700,11 +2851,13 @@ void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long a
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_static_start enter: @=%p args=(%u %p %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_doacross_static_start_real, ncounts, counts, chunk_size, istart, iend);
 #endif
@@ -2716,7 +2869,7 @@ int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_
 
 	if (TRACE(GOMP_loop_doacross_static_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_doacross_static_start_real (ncounts, counts, chunk_size, istart, iend);
 	}
 	else if (GOMP_loop_doacross_static_start_real != NULL)
@@ -2732,6 +2885,7 @@ int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_static_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -2739,6 +2893,7 @@ int GOMP_loop_doacross_static_start (unsigned ncounts, long *counts, long chunk_
 int GOMP_loop_doacross_dynamic_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_dynamic_start enter: @=%p args=(%u %p %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_doacross_dynamic_start_real, ncounts, counts, chunk_size, istart, iend);
 #endif
@@ -2750,7 +2905,7 @@ int GOMP_loop_doacross_dynamic_start (unsigned ncounts, long *counts, long chunk
 
 	if (TRACE(GOMP_loop_doacross_dynamic_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_doacross_dynamic_start_real (ncounts, counts, chunk_size, istart, iend);
 	}
 	else if (GOMP_loop_doacross_dynamic_start_real != NULL)
@@ -2766,6 +2921,7 @@ int GOMP_loop_doacross_dynamic_start (unsigned ncounts, long *counts, long chunk
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_dynamic_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -2773,6 +2929,7 @@ int GOMP_loop_doacross_dynamic_start (unsigned ncounts, long *counts, long chunk
 int GOMP_loop_doacross_guided_start (unsigned ncounts, long *counts, long chunk_size, long *istart, long *iend)
 {
 	int res;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_guided_start enter: @=%p args=(%u %p %ld %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_doacross_guided_start_real, ncounts, counts, chunk_size, istart, iend);
 #endif
@@ -2784,7 +2941,7 @@ int GOMP_loop_doacross_guided_start (unsigned ncounts, long *counts, long chunk_
 
 	if (TRACE(GOMP_loop_doacross_guided_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_doacross_guided_start_real (ncounts, counts, chunk_size, istart, iend);
 	}
 	else if (GOMP_loop_doacross_guided_start_real != NULL)
@@ -2800,6 +2957,7 @@ int GOMP_loop_doacross_guided_start (unsigned ncounts, long *counts, long chunk_
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_guided_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -2807,6 +2965,7 @@ int GOMP_loop_doacross_guided_start (unsigned ncounts, long *counts, long chunk_
 int GOMP_loop_doacross_runtime_start (unsigned ncounts, long *counts, long *istart, long *iend)
 {
 	int res;
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_runtime_start enter: @=%p args=(%u %p %p %p)\n", THREAD_LEVEL_VAR, GOMP_loop_doacross_runtime_start_real, ncounts, counts, istart, iend);
 #endif
@@ -2818,7 +2977,7 @@ int GOMP_loop_doacross_runtime_start (unsigned ncounts, long *counts, long *ista
 
 	if (TRACE(GOMP_loop_doacross_runtime_start_real))
 	{
-		Extrae_OpenMP_DO_Entry ();
+		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_doacross_runtime_start_real (ncounts, counts, istart, iend);
 	}
 	else if (GOMP_loop_doacross_runtime_start_real != NULL)
@@ -2834,12 +2993,14 @@ int GOMP_loop_doacross_runtime_start (unsigned ncounts, long *counts, long *ista
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_loop_doacross_runtime_start exit: res=%d\n", THREAD_LEVEL_VAR, res);
 #endif
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
 
 void GOMP_doacross_post (long *counts)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_doacross_post enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, GOMP_doacross_post_real, counts);
 #endif
@@ -2848,9 +3009,9 @@ void GOMP_doacross_post (long *counts)
 
 	if (TRACE(GOMP_doacross_post_real))
 	{
-		Extrae_OpenMP_Ordered_Post_Entry();
+		Probe_OpenMP_Ordered_Post_Entry();
 		GOMP_doacross_post_real (counts);
-		Extrae_OpenMP_Ordered_Post_Exit();
+		Probe_OpenMP_Ordered_Post_Exit();
 	}
 	else if (GOMP_doacross_post_real != NULL)
 	{
@@ -2865,6 +3026,7 @@ void GOMP_doacross_post (long *counts)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_doacross_post exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /*
@@ -2879,6 +3041,7 @@ void GOMP_doacross_wait (long first, ...)
 	long args[MAX_DOACROSS_ARGS];
 	va_list ap;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_doacross_wait enter: @=%p args=(%ld)\n", THREAD_LEVEL_VAR, GOMP_doacross_wait_real, first);
 #endif
@@ -2897,7 +3060,7 @@ void GOMP_doacross_wait (long first, ...)
 		} 
 		va_end(ap);	
 
-		Extrae_OpenMP_Ordered_Wait_Entry();
+		Probe_OpenMP_Ordered_Wait_Entry();
 
 		switch (ncounts)
 		{
@@ -2909,7 +3072,7 @@ void GOMP_doacross_wait (long first, ...)
 				break;
 		}	
 
-		Extrae_OpenMP_Ordered_Wait_Exit();
+		Probe_OpenMP_Ordered_Wait_Exit();
 	}
 	else if (GOMP_doacross_wait_real != NULL)
 	{
@@ -2939,6 +3102,7 @@ void GOMP_doacross_wait (long first, ...)
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_doacross_wait exit\n", THREAD_LEVEL_VAR);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -2948,6 +3112,7 @@ void GOMP_target_ext(int device, void (*fn) (void *), size_t mapnum,
                      void **hostaddrs, size_t *sizes, unsigned short *kinds,
                      unsigned int flags, void **depend, void **args)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_ext_real);
@@ -2957,9 +3122,9 @@ void GOMP_target_ext(int device, void (*fn) (void *), size_t mapnum,
 
 	if (TRACE(GOMP_target_ext_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		GOMP_target_ext_real(device, fn, mapnum, hostaddrs, sizes, kinds, flags, depend, args);
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	}
 	else if (GOMP_target_ext_real != NULL)
 	{
@@ -2977,6 +3142,7 @@ void GOMP_target_ext(int device, void (*fn) (void *), size_t mapnum,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -2986,6 +3152,7 @@ void
 GOMP_target_data_ext(int device, size_t mapnum, void **hostaddrs,
                      size_t *sizes, unsigned short *kinds)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_data_ext_real);
@@ -2995,9 +3162,9 @@ GOMP_target_data_ext(int device, size_t mapnum, void **hostaddrs,
 
 	if (TRACE(GOMP_target_data_ext_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		GOMP_target_data_ext_real(device, mapnum, hostaddrs, sizes, kinds);
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	}
 	else if (GOMP_target_data_ext_real != NULL)
 	{
@@ -3015,6 +3182,7 @@ GOMP_target_data_ext(int device, size_t mapnum, void **hostaddrs,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -3023,6 +3191,7 @@ GOMP_target_data_ext(int device, size_t mapnum, void **hostaddrs,
 void
 GOMP_target_end_data_ext(void)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_end_data_ext_real);
@@ -3032,9 +3201,9 @@ GOMP_target_end_data_ext(void)
 
 	if (TRACE(GOMP_target_end_data_ext_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		GOMP_target_end_data_ext_real();
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	}
 	else if (GOMP_target_end_data_ext_real != NULL)
 	{
@@ -3062,6 +3231,7 @@ GOMP_target_update_ext(int device, size_t mapnum, void **hostaddrs,
                        size_t *sizes, unsigned short *kinds,
                        unsigned int flags, void **depend)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_update_ext_real);
@@ -3071,9 +3241,9 @@ GOMP_target_update_ext(int device, size_t mapnum, void **hostaddrs,
 
 	if (TRACE(GOMP_target_update_ext_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		GOMP_target_update_ext_real(device, mapnum, hostaddrs, sizes, kinds, flags, depend);
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	}
 	else if (GOMP_target_update_ext_real != NULL)
 	{
@@ -3091,6 +3261,7 @@ GOMP_target_update_ext(int device, size_t mapnum, void **hostaddrs,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 /**
@@ -3101,6 +3272,7 @@ GOMP_target_enter_exit_data(int device, size_t mapnum, void **hostaddrs,
                             size_t *sizes, unsigned short *kinds,
                             unsigned int flags, void **depend)
 {
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s enter: @=%p\n",
 	    THREAD_LEVEL_VAR, __func__, GOMP_target_enter_exit_data_real);
@@ -3110,9 +3282,9 @@ GOMP_target_enter_exit_data(int device, size_t mapnum, void **hostaddrs,
 
 	if (TRACE(GOMP_target_enter_exit_data_real))
 	{
-		Extrae_OpenMP_Target_Entry();
+		Probe_OpenMP_Target_Entry();
 		GOMP_target_enter_exit_data_real(device, mapnum, hostaddrs, sizes, kinds, flags, depend);
-		Extrae_OpenMP_Target_Exit();
+		Probe_OpenMP_Target_Exit();
 	}
 	else if (GOMP_target_enter_exit_data_real != NULL)
 	{
@@ -3130,6 +3302,7 @@ GOMP_target_enter_exit_data(int device, size_t mapnum, void **hostaddrs,
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "%s exit\n",
 	    THREAD_LEVEL_VAR, __func__);
 #endif
+	Backend_Leave_Instrumentation ();
 }
 
 

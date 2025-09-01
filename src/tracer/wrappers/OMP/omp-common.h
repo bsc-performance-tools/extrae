@@ -29,7 +29,7 @@
 #include "config.h"
 #include "ompt-wrapper.h"
 
-#define INSTRUMENT_OMP_WRAPPER(func) ((func != NULL) && (EXTRAE_INITIALIZED()) && (EXTRAE_ON()))
+#define INSTRUMENT_OMP_WRAPPER(func) ((func != NULL) && (EXTRAE_ON()) && (Backend_Get_InstrumentationLevel() == 1))
 
 #if defined(OMPT_SUPPORT)
 #define TRACE(func) (INSTRUMENT_OMP_WRAPPER(func) && (!ompt_enabled))

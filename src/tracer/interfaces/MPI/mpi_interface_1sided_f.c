@@ -123,19 +123,19 @@ void NAME_ROUTINE_F(mpi_win_create)(void *base, void *size, MPI_Fint *disp_unit,
 void NAME_ROUTINE_C2F(mpi_win_create)(void *base, void *size, MPI_Fint *disp_unit, void *info, MPI_Fint *comm, void *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_create_F_enter, base, size, disp_unit, info, comm, win, ierror);
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_create_Fortran_Wrapper (base, size, disp_unit, info, comm, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_create)(base, size, disp_unit, info, comm, win, ierror);
 	
 	DLB(DLB_MPI_Win_create_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -146,20 +146,20 @@ void NAME_ROUTINE_F(mpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierror
 void NAME_ROUTINE_C2F(mpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_fence_F_enter, assert, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_fence_Fortran_Wrapper (assert, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_fence)(assert, win, ierror);
 		
 	DLB(DLB_MPI_Win_fence_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -170,20 +170,20 @@ void NAME_ROUTINE_F(mpi_win_start)(void *group, void *assert, void *win, MPI_Fin
 void NAME_ROUTINE_C2F(mpi_win_start)(void *group, void *assert, void *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_start_F_enter, group, assert, win, ierror);
 	
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_start_Fortran_Wrapper (group, assert, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_start)(group, assert, win, ierror);
 		
 	DLB(DLB_MPI_Win_start_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -194,20 +194,20 @@ void NAME_ROUTINE_F(mpi_win_free)(void *win, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_win_free)(void *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_free_F_enter, win, ierror);
 	
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_free_Fortran_Wrapper (win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_free)(win, ierror);
 		
 	DLB(DLB_MPI_Win_free_F_leave);
+	Backend_Leave_Instrumentation ();
 
 }
 
@@ -220,20 +220,20 @@ void NAME_ROUTINE_C2F(mpi_win_complete)(void *win, MPI_Fint *ierror)
 #endif
 {
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_complete_F_enter, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_complete_Fortran_Wrapper (win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_complete)(win, ierror);
 
 	DLB(DLB_MPI_Win_complete_F_leave);
+	Backend_Leave_Instrumentation ();
 
 }
 
@@ -246,20 +246,20 @@ void NAME_ROUTINE_C2F(mpi_win_wait)(void *win, MPI_Fint *ierror)
 #endif
 {
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_wait_F_enter, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_wait_Fortran_Wrapper (win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_wait)(win, ierror);
 
 	DLB(DLB_MPI_Win_wait_F_leave);
+	Backend_Leave_Instrumentation ();
 
 }
 
@@ -272,20 +272,20 @@ void NAME_ROUTINE_C2F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fi
 #endif
 {
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_post_F_enter, group, assert, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_post_Fortran_Wrapper (group, assert, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_post)(group, assert, win, ierror);
 
 	DLB(DLB_MPI_Win_post_F_leave);
+	Backend_Leave_Instrumentation ();
 
 }
 
@@ -302,6 +302,7 @@ void NAME_ROUTINE_C2F(mpi_get)(void *origin_addr, MPI_Fint *origin_count,
 #endif
 {
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Get_F_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win,
 		ierror);
@@ -309,10 +310,8 @@ void NAME_ROUTINE_C2F(mpi_get)(void *origin_addr, MPI_Fint *origin_count,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Get_Fortran_Wrapper (origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -320,6 +319,7 @@ void NAME_ROUTINE_C2F(mpi_get)(void *origin_addr, MPI_Fint *origin_count,
 			target_disp, target_count, target_datatype, win, ierror);
 
 	DLB(DLB_MPI_Get_F_leave);
+	Backend_Leave_Instrumentation ();
 
 }
 
@@ -336,6 +336,7 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Put_F_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win,
 		ierror);
@@ -343,10 +344,8 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Put_Fortran_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -354,6 +353,7 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 			target_disp, target_count, target_datatype, win, ierror);
 
 	DLB(DLB_MPI_Put_F_leave);
+	Backend_Leave_Instrumentation ();
 
 }
 
@@ -365,18 +365,18 @@ void NAME_ROUTINE_F(mpi_win_lock)(MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint 
 void NAME_ROUTINE_C2F(mpi_win_lock)(MPI_Fint *lock_type,MPI_Fint *rank, MPI_Fint *assert, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_lock_F_enter, lock_type, rank, assert, win, ierror);
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_lock_Fortran_Wrapper (lock_type, rank, assert, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_lock)(lock_type,rank, assert, win, ierror);
 	DLB(DLB_MPI_Win_lock_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -388,18 +388,18 @@ void NAME_ROUTINE_F(mpi_win_unlock)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ier
 void NAME_ROUTINE_C2F(mpi_win_unlock)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_unlock_F_enter, rank, win, ierror);
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_unlock_Fortran_Wrapper (rank, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77(pmpi_win_unlock)(rank, win, ierror);
 	DLB(DLB_MPI_Win_unlock_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if MPI_SUPPORTS_MPI_GET_ACCUMULATE
@@ -413,17 +413,16 @@ void NAME_ROUTINE_C2F(mpi_get_accumulate)(void *origin_addr, MPI_Fint *origin_co
 	MPI_Fint *origin_datatype, void *result_addr, MPI_Fint *result_count, MPI_Fint *result_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *op, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Get_accumulate_F_enter, origin_addr, origin_count, origin_datatype,
                 result_addr, result_count, result_datatype, target_rank, target_disp, 
                 target_count, target_datatype, op, win, ierror);
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Get_accumulate_Fortran_Wrapper (origin_addr, origin_count, origin_datatype,
                         result_addr, result_count, result_datatype, target_rank, target_disp,
  			target_count, target_datatype, op, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -431,6 +430,7 @@ void NAME_ROUTINE_C2F(mpi_get_accumulate)(void *origin_addr, MPI_Fint *origin_co
 			result_addr, result_count, result_datatype, target_rank,
 			target_disp, target_count, target_datatype, op, win, ierror);
 	DLB(DLB_MPI_Get_accumulate_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
@@ -449,13 +449,13 @@ void NAME_ROUTINE_C2F(mpi_fetch_and_op)(void *origin_addr, void *result_addr,
   MPI_Fint *op, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Fetch_and_op_F_enter, origin_addr, result_addr, datatype,
 	  target_rank, target_disp, op, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation();
 		MPI_Fetch_and_op_Fortran_Wrapper (origin_addr, result_addr, datatype,
 		  target_rank, target_disp, op, win, ierror);
 		Backend_Leave_Instrumentation();
@@ -466,6 +466,7 @@ void NAME_ROUTINE_C2F(mpi_fetch_and_op)(void *origin_addr, void *result_addr,
 		  target_rank, target_disp, op, win, ierror);
 	}
 	DLB(DLB_MPI_Fetch_and_op_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -482,16 +483,15 @@ void NAME_ROUTINE_C2F(mpi_compare_and_swap)(void *origin_addr, void *compare_add
   MPI_Fint *target_disp, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Compare_and_swap_F_enter, origin_addr, compare_addr,
 	  result_addr, datatype, target_rank, target_disp, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Compare_and_swap_Fortran_Wrapper (origin_addr, compare_addr,
 		  result_addr, datatype, target_rank, target_disp, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -500,6 +500,7 @@ void NAME_ROUTINE_C2F(mpi_compare_and_swap)(void *origin_addr, void *compare_add
 	}
 
 	DLB(DLB_MPI_Compare_and_swap_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -511,14 +512,13 @@ void NAME_ROUTINE_F(mpi_win_flush)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierr
 void NAME_ROUTINE_C2F(mpi_win_flush)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_F_enter, rank, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_flush_Fortran_Wrapper (rank, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -526,6 +526,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ie
 	}
 
 	DLB(DLB_MPI_Win_flush_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -537,14 +538,13 @@ void NAME_ROUTINE_F(mpi_win_flush_all)(MPI_Fint *win, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_win_flush_all)(MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_all_F_enter, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_flush_all_Fortran_Wrapper (win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -552,6 +552,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush_all)(MPI_Fint *win, MPI_Fint *ierror)
 	}
 
 	DLB(DLB_MPI_Win_flush_all_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -563,14 +564,13 @@ void NAME_ROUTINE_F(mpi_win_flush_local)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint
 void NAME_ROUTINE_C2F(mpi_win_flush_local)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_local_F_enter, rank, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_flush_local_Fortran_Wrapper (rank, win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -578,6 +578,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush_local)(MPI_Fint *rank, MPI_Fint *win, MPI_Fi
 	}
 
 	DLB(DLB_MPI_Win_flush_local_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -589,14 +590,13 @@ void NAME_ROUTINE_F(mpi_win_flush_local_all)(MPI_Fint *win, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_win_flush_local_all)(MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Win_flush_local_all_F_enter, win, ierror);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		MPI_Win_flush_local_all_Fortran_Wrapper (win, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	} else
 	{
@@ -604,6 +604,7 @@ void NAME_ROUTINE_C2F(mpi_win_flush_local_all)(MPI_Fint *win, MPI_Fint *ierror)
 	}
 
 	DLB(DLB_MPI_Win_flush_local_all_leave);
+	Backend_Leave_Instrumentation ();
 }
 #endif /* MPI3 */
 

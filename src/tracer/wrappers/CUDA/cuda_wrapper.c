@@ -147,6 +147,7 @@ cudaError_t cudaLaunch (const void *func)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaLaunch is at %p\n", THREADID, real_cudaLaunch);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaLaunch params %p\n", THREADID, func);
@@ -168,6 +169,7 @@ cudaError_t cudaLaunch (const void *func)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -175,6 +177,7 @@ cudaError_t cudaConfigureCall (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaConfigureCall is at %p\n", THREADID, real_cudaConfigureCall);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaConfigureCall params p1 p2 %d %d\n", THREADID, p3, p4);
@@ -196,6 +199,7 @@ cudaError_t cudaConfigureCall (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -203,6 +207,7 @@ cudaError_t cudaStreamCreate (cudaStream_t *pStream)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate is at %p\n", THREADID, real_cudaStreamCreate);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate params %p\n", THREADID, pStream);
@@ -224,6 +229,7 @@ cudaError_t cudaStreamCreate (cudaStream_t *pStream)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -231,6 +237,7 @@ cudaError_t cudaStreamCreateWithFlags (cudaStream_t *pStream, unsigned int flags
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithFlags is at %p\n", THREADID, real_cudaStreamCreateWithFlags);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithFlags params %p %u\n", THREADID, pStream, flags);
@@ -252,6 +259,7 @@ cudaError_t cudaStreamCreateWithFlags (cudaStream_t *pStream, unsigned int flags
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -259,6 +267,7 @@ cudaError_t cudaStreamCreateWithPriority (cudaStream_t *pStream, unsigned int fl
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithPriority is at %p\n", THREADID, real_cudaStreamCreateWithFlags);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithPriority params %p %u %d\n", THREADID, pStream, flags, priority);
@@ -280,6 +289,7 @@ cudaError_t cudaStreamCreateWithPriority (cudaStream_t *pStream, unsigned int fl
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -308,6 +318,7 @@ cudaError_t cudaStreamDestroy (cudaStream_t stream)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -315,6 +326,7 @@ cudaError_t cudaMemcpyAsync (void *p1, const void *p2, size_t p3, enum cudaMemcp
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpyAsync is at %p\n", THREADID, real_cudaMemcpyAsync);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpyAsync params %p %p %d %d %d\n", THREADID, p1, p2, p3, p4, p5);
@@ -336,6 +348,7 @@ cudaError_t cudaMemcpyAsync (void *p1, const void *p2, size_t p3, enum cudaMemcp
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -343,6 +356,7 @@ cudaError_t cudaMemcpy (void *p1, const void *p2, size_t p3, enum cudaMemcpyKind
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpy is at %p\n", THREADID, real_cudaMemcpy);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpy params %p %p %d %d\n", THREADID, p1, p2, p3, p4);
@@ -363,6 +377,7 @@ cudaError_t cudaMemcpy (void *p1, const void *p2, size_t p3, enum cudaMemcpyKind
 		fprintf (stderr, "Unable to find cudaMemcpy in DSOs!! Dying...\n");
 		exit (0);
 	}
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -370,6 +385,7 @@ cudaError_t cudaThreadSynchronize (void)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaThreadSynchronize is at %p\n", THREADID, real_cudaThreadSynchronize);
 #endif
@@ -390,6 +406,7 @@ cudaError_t cudaThreadSynchronize (void)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -397,6 +414,7 @@ cudaError_t cudaDeviceSynchronize (void)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaDeviceSynchronize is at %p\n", THREADID, real_cudaThreadSynchronize);
 #endif
@@ -417,6 +435,7 @@ cudaError_t cudaDeviceSynchronize (void)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -424,6 +443,7 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize is at %p\n", THREADID, real_cudaStreamSynchronize);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize params %d\n", THREADID, p1);
@@ -445,6 +465,7 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -452,6 +473,7 @@ cudaError_t cudaThreadExit (void)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaThreadExit is at %p\n", THREADID, real_cudaThreadExit);
 #endif
@@ -472,6 +494,7 @@ cudaError_t cudaThreadExit (void)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -480,6 +503,7 @@ cudaError_t cudaDeviceReset (void)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaDeviceReset is at %p\n", THREADID, real_cudaDeviceReset);
 #endif
@@ -500,6 +524,7 @@ cudaError_t cudaDeviceReset (void)
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -508,6 +533,7 @@ cudaMalloc(void **devPtr, size_t size)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -531,6 +557,7 @@ cudaMalloc(void **devPtr, size_t size)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -539,6 +566,7 @@ cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t height)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -562,6 +590,7 @@ cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t height)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -570,6 +599,7 @@ cudaFree(void *devPtr)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -593,6 +623,7 @@ cudaFree(void *devPtr)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -602,6 +633,7 @@ cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc,
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -627,6 +659,7 @@ cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc,
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -635,6 +668,7 @@ cudaFreeArray(cudaArray_t array)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -658,6 +692,7 @@ cudaFreeArray(cudaArray_t array)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -666,6 +701,7 @@ cudaMallocHost(void **ptr, size_t size)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -689,6 +725,7 @@ cudaMallocHost(void **ptr, size_t size)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -697,6 +734,7 @@ cudaFreeHost(void *ptr)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -720,6 +758,7 @@ cudaFreeHost(void *ptr)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -728,6 +767,7 @@ cudaHostAlloc(void **pHost, size_t size, unsigned int flags)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -751,6 +791,7 @@ cudaHostAlloc(void **pHost, size_t size, unsigned int flags)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -759,6 +800,7 @@ cudaMemset(void *devPtr, int value, size_t count)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -782,6 +824,7 @@ cudaMemset(void *devPtr, int value, size_t count)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -791,6 +834,7 @@ cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf(stderr,
 	  PACKAGE_NAME": THREAD %d %s is at %p\n",
@@ -814,6 +858,7 @@ cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 		exit(0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 
@@ -823,6 +868,7 @@ cudaLaunchKernel(const void* func, dim3 gridDim, dim3 blockDim, void** args, siz
 {
 	cudaError_t res;
 
+	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaLaunchKernel is at %p\n", THREADID, real_cudaLaunchKernel);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaLaunchKernel params %p %p %p %p %p %p\n", THREADID, func, gridDim, blockDim, args, sharedMem, stream);
@@ -844,6 +890,7 @@ cudaLaunchKernel(const void* func, dim3 gridDim, dim3 blockDim, void** args, siz
 		exit (0);
 	}
 
+	Backend_Leave_Instrumentation ();
 	return res;
 }
 

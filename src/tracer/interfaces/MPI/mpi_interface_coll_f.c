@@ -130,6 +130,7 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Reduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -137,10 +138,8 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Reduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                          ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -148,6 +147,7 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
                           ierror);
 
 	DLB(DLB_MPI_Reduce_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -166,6 +166,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Reduce_scatter_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -173,10 +174,8 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Reduce_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -184,6 +183,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 			comm, ierror);
 
         DLB(DLB_MPI_Reduce_scatter_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -203,6 +203,7 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Allreduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 		datatype, op, comm, ierror);
 
@@ -211,16 +212,15 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_AllReduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf,
 			count, datatype, op, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_allreduce) (sendbuf, recvbuf, count, datatype, op,
 			comm, ierror);
 	DLB(DLB_MPI_Allreduce_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -236,6 +236,7 @@ void NAME_ROUTINE_C2F(mpi_barrier) (MPI_Fint *comm, MPI_Fint *ierror)
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Barrier_F_enter, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -243,15 +244,14 @@ void NAME_ROUTINE_C2F(mpi_barrier) (MPI_Fint *comm, MPI_Fint *ierror)
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Barrier_Wrapper (comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_barrier) (comm, ierror);
 
 	DLB(DLB_MPI_Barrier_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -269,6 +269,7 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Bcast_F_enter, buffer, count, datatype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -276,15 +277,14 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_BCast_Wrapper (buffer, count, datatype, root, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_bcast) (buffer, count, datatype, root, comm, ierror);
 
 	DLB(DLB_MPI_Bcast_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -304,6 +304,7 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Alltoall_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -311,17 +312,16 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_AllToAll_Wrapper (MPI3_VOID_P_CAST sendbuf,
 			sendcount, sendtype, recvbuf, recvcount, recvtype, comm,
 			ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_alltoall) (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 	DLB(DLB_MPI_Alltoall_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -342,6 +342,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Alltoallv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -349,16 +350,15 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_AllToAllV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf,
                             MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_alltoallv) (sendbuf, sendcount, sdispls, sendtype,
 			recvbuf, recvcount, rdispls, recvtype, comm, ierror);
 	DLB(DLB_MPI_Alltoallv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -379,6 +379,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Allgather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -386,16 +387,15 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Allgather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_allgather) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, comm, ierror);
 	DLB(DLB_MPI_Allgather_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -416,6 +416,7 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Allgatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -423,18 +424,17 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Allgatherv_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, MPI3_VOID_P_CAST recvbuf, 
 			MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs,
 			recvtype, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_allgatherv) (sendbuf, sendcount, sendtype, recvbuf,
                               recvcount, displs, recvtype, comm, ierror);
 	DLB(DLB_MPI_Allgatherv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -455,6 +455,7 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Gather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -462,17 +463,16 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Gather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_gather) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, root, comm, ierror);
 	DLB(DLB_MPI_Gather_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -492,6 +492,7 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Gatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -499,11 +500,9 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_GatherV_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount,
 			MPI3_F_INT_P_CAST displs, recvtype, root, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -511,6 +510,7 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 			recvcount, displs, recvtype, root, comm, ierror);
 			
 	DLB(DLB_MPI_Gatherv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -530,6 +530,7 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Scatter_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -537,17 +538,16 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_scatter) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, root, comm, ierror);
 	DLB(DLB_MPI_Scatter_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -567,6 +567,7 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Scatterv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -574,16 +575,15 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_ScatterV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf,
                            recvcount, recvtype, root, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_scatterv) (sendbuf, sendcount, displs, sendtype,
 			recvbuf, recvcount, recvtype, root, comm, ierror);
 	DLB(DLB_MPI_Scatterv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -601,6 +601,7 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Scan_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -608,10 +609,8 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Scan_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 			datatype, op, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -619,6 +618,7 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 			ierror);
 
 	DLB(DLB_MPI_Scan_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -636,6 +636,7 @@ void NAME_ROUTINE_C2F(mpi_exscan) (void *sendbuf, void *recvbuf, MPI_Fint *count
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Exscan_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -643,10 +644,8 @@ void NAME_ROUTINE_C2F(mpi_exscan) (void *sendbuf, void *recvbuf, MPI_Fint *count
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Exscan_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 			datatype, op, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -654,6 +653,7 @@ void NAME_ROUTINE_C2F(mpi_exscan) (void *sendbuf, void *recvbuf, MPI_Fint *count
 			ierror);
 
 	DLB(DLB_MPI_Exscan_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -675,6 +675,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ireduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -682,10 +683,8 @@ void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Ireduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                          req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -693,6 +692,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *coun
                           req, ierror);
 
 	DLB(DLB_MPI_Ireduce_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -711,6 +711,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ireduce_scatter_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -718,10 +719,8 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter) (void *sendbuf, void *recvbuf,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Ireduce_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -729,6 +728,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter) (void *sendbuf, void *recvbuf,
 			comm, req, ierror);
 
 	DLB(DLB_MPI_Ireduce_scatter_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -748,6 +748,7 @@ void NAME_ROUTINE_C2F(mpi_iallreduce) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iallreduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 		datatype, op, comm, req, ierror);
 
@@ -756,10 +757,8 @@ void NAME_ROUTINE_C2F(mpi_iallreduce) (void *sendbuf, void *recvbuf,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IallReduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf,
 			count, datatype, op, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -767,6 +766,7 @@ void NAME_ROUTINE_C2F(mpi_iallreduce) (void *sendbuf, void *recvbuf,
 			comm, req, ierror);
 			
 	DLB(DLB_MPI_Iallreduce_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -782,6 +782,7 @@ void NAME_ROUTINE_C2F(mpi_ibarrier) (MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ie
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ibarrier_F_enter, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -789,15 +790,14 @@ void NAME_ROUTINE_C2F(mpi_ibarrier) (MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ie
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Ibarrier_Wrapper (comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_ibarrier) (comm, req, ierror);
 
 	DLB(DLB_MPI_Ibarrier_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -815,6 +815,7 @@ void NAME_ROUTINE_C2F(mpi_ibcast) (void *buffer, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ibcast_F_enter, buffer, count, datatype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -822,15 +823,14 @@ void NAME_ROUTINE_C2F(mpi_ibcast) (void *buffer, MPI_Fint *count,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Ibcast_Wrapper (buffer, count, datatype, root, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_ibcast) (buffer, count, datatype, root, comm, req, ierror);
 
 	DLB(DLB_MPI_Ibcast_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -850,6 +850,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ialltoall_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -857,11 +858,9 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IallToAll_Wrapper (MPI3_VOID_P_CAST sendbuf,
 			sendcount, sendtype, recvbuf, recvcount, recvtype, comm,
 			req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -869,6 +868,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
 
 	DLB(DLB_MPI_Ialltoall_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -889,6 +889,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ialltoallv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -896,9 +897,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IallToAllV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, req,  ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -906,6 +905,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 			recvbuf, recvcount, rdispls, recvtype, comm, req, ierror);
 
 	DLB(DLB_MPI_Ialltoallv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -926,6 +926,7 @@ void NAME_ROUTINE_C2F(mpi_iallgather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iallgather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -933,10 +934,8 @@ void NAME_ROUTINE_C2F(mpi_iallgather) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Iallgather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -944,6 +943,7 @@ void NAME_ROUTINE_C2F(mpi_iallgather) (void *sendbuf, MPI_Fint *sendcount,
 			recvcount, recvtype, comm, req, ierror);
 
 	DLB(DLB_MPI_Iallgather_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -964,6 +964,7 @@ void NAME_ROUTINE_C2F(mpi_iallgatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iallgatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -971,12 +972,10 @@ void NAME_ROUTINE_C2F(mpi_iallgatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Iallgatherv_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, MPI3_VOID_P_CAST recvbuf, 
 			MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs,
 			recvtype, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -984,6 +983,7 @@ void NAME_ROUTINE_C2F(mpi_iallgatherv) (void *sendbuf, MPI_Fint *sendcount,
                               recvcount, displs, recvtype, comm, req, ierror);
 
 	DLB(DLB_MPI_Iallgatherv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 
@@ -1004,6 +1004,7 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Igather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1011,11 +1012,9 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Igather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1023,6 +1022,7 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 			recvcount, recvtype, root, comm, req, ierror);
 
 	DLB(DLB_MPI_Igather_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1042,6 +1042,7 @@ void NAME_ROUTINE_C2F(mpi_igatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Igatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1049,11 +1050,9 @@ void NAME_ROUTINE_C2F(mpi_igatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IgatherV_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount,
 			MPI3_F_INT_P_CAST displs, recvtype, root, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1061,6 +1060,7 @@ void NAME_ROUTINE_C2F(mpi_igatherv) (void *sendbuf, MPI_Fint *sendcount,
 			recvcount, displs, recvtype, root, comm, req, ierror);
 
 	DLB(DLB_MPI_Igatherv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1080,6 +1080,7 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iscatter_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1087,11 +1088,9 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Iscatter_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1099,6 +1098,7 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 			recvcount, recvtype, root, comm, req, ierror);
 
 	DLB(DLB_MPI_Iscatter_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1118,6 +1118,7 @@ void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iscatterv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1125,9 +1126,7 @@ void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IscatterV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1135,6 +1134,7 @@ void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 			recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
 	DLB(DLB_MPI_Iscatterv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1152,6 +1152,7 @@ void NAME_ROUTINE_C2F(mpi_iscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iscan_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1159,10 +1160,8 @@ void NAME_ROUTINE_C2F(mpi_iscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Iscan_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 			datatype, op, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1170,6 +1169,7 @@ void NAME_ROUTINE_C2F(mpi_iscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 			req, ierror);
 
 	DLB(DLB_MPI_Iscan_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1187,6 +1187,7 @@ void NAME_ROUTINE_C2F(mpi_iexscan) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Iexscan_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1194,10 +1195,8 @@ void NAME_ROUTINE_C2F(mpi_iexscan) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Iexscan_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 			datatype, op, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1205,6 +1204,7 @@ void NAME_ROUTINE_C2F(mpi_iexscan) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 			req, ierror);
 
 	DLB(DLB_MPI_Iexscan_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1223,6 +1223,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter_block) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ireduce_scatter_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, recvcount, datatype, op, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1230,15 +1231,14 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter_block) (void *sendbuf, void *recvbuf,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Ireduce_Scatter_Block_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, recvcount, datatype, op, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_ireduce_scatter_block) (sendbuf, recvbuf, recvcount, datatype, op, comm, req, ierror);
 
 	DLB(DLB_MPI_Ireduce_scatter_block_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1257,6 +1257,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Reduce_scatter_block_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, recvcount, datatype, op, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1264,9 +1265,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_Reduce_Scatter_Block_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, recvcount, datatype, op, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1274,6 +1273,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
 			comm, ierror);
 
 	DLB(DLB_MPI_Reduce_scatter_block_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1293,6 +1293,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Alltoallw_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcounts, MPI3_F_INT_P_CAST sdispls, MPI3_F_INT_P_CAST sendtypes, recvbuf, MPI3_F_INT_P_CAST recvcounts, MPI3_F_INT_P_CAST rdispls, MPI3_F_INT_P_CAST recvtypes, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1300,16 +1301,15 @@ void NAME_ROUTINE_C2F(mpi_alltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_AllToAllW_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcounts, MPI3_F_INT_P_CAST sdispls, MPI3_F_INT_P_CAST sendtypes, recvbuf,
                             MPI3_F_INT_P_CAST recvcounts, MPI3_F_INT_P_CAST rdispls, MPI3_F_INT_P_CAST recvtypes, comm, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_alltoallw) (sendbuf, sendcounts, sdispls, sendtypes,
 			recvbuf, recvcounts, rdispls, recvtypes, comm, ierror);
 	DLB(DLB_MPI_Alltoallw_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1329,6 +1329,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ialltoallw_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcounts, MPI3_F_INT_P_CAST sdispls, MPI3_F_INT_P_CAST sendtypes, recvbuf, MPI3_F_INT_P_CAST recvcounts, MPI3_F_INT_P_CAST rdispls, MPI3_F_INT_P_CAST recvtypes, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1336,15 +1337,14 @@ void NAME_ROUTINE_C2F(mpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		PMPI_IallToAllW_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcounts, MPI3_F_INT_P_CAST sdispls, MPI3_F_INT_P_CAST sendtypes, recvbuf, MPI3_F_INT_P_CAST recvcounts, MPI3_F_INT_P_CAST rdispls, MPI3_F_INT_P_CAST recvtypes, comm, req, ierror);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_ialltoallw) (sendbuf, sendcounts, sdispls, sendtypes,
 			recvbuf, recvcounts, rdispls, recvtypes, comm, req, ierror);
 	DLB(DLB_MPI_Ialltoallw_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1359,14 +1359,13 @@ void NAME_ROUTINE_F(mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI
 void NAME_ROUTINE_C2F(mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Graph_create_F_enter, comm_old, nnodes, index, edges, reorder, comm_graph, ierr);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Graph_create_Wrapper (comm_old, nnodes, index, edges, reorder, comm_graph, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1375,6 +1374,7 @@ void NAME_ROUTINE_C2F(mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, M
 	}
 
 	DLB(DLB_MPI_Graph_create_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1389,14 +1389,13 @@ void NAME_ROUTINE_F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI
 void NAME_ROUTINE_C2F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Dist_graph_create_F_enter, comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph, ierr);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Dist_graph_create_Wrapper (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1405,6 +1404,7 @@ void NAME_ROUTINE_C2F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, M
 	}
 
 	DLB(DLB_MPI_Dist_graph_create_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1419,14 +1419,13 @@ void NAME_ROUTINE_F(mpi_dist_graph_create_adjacent) (MPI_Fint *comm_old, MPI_Fin
 void NAME_ROUTINE_C2F(mpi_dist_graph_create_adjacent) (MPI_Fint *comm_old, MPI_Fint *indegree, MPI_Fint *sources, MPI_Fint *sourceweights, MPI_Fint *outdegree, MPI_Fint *destinations, MPI_Fint *destweights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
 #endif
 {
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Dist_graph_create_adjacent_F_enter, comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph, ierr);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Dist_graph_create_adjacent_Wrapper (comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1435,6 +1434,7 @@ void NAME_ROUTINE_C2F(mpi_dist_graph_create_adjacent) (MPI_Fint *comm_old, MPI_F
 	}
 
 	DLB(DLB_MPI_Dist_graph_create_adjacent_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1451,6 +1451,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcoun
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Neighbor_allgather_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1458,9 +1459,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcoun
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Neighbor_allgather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1469,6 +1468,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcoun
 	}
 
 	DLB(DLB_MPI_Neighbor_allgather_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1485,6 +1485,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcou
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ineighbor_allgather_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1492,9 +1493,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcou
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Ineighbor_allgather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1503,6 +1502,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcou
 	}
 
 	DLB(DLB_MPI_Ineighbor_allgather_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1519,6 +1519,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcou
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Neighbor_allgatherv_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1526,9 +1527,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcou
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Neighbor_allgatherv_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1537,6 +1536,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcou
 	}
 
 	DLB(DLB_MPI_Neighbor_allgatherv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1553,6 +1553,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendco
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ineighbor_allgatherv_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1560,9 +1561,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendco
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Ineighbor_allgatherv_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1571,6 +1570,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendco
 	}
 
 	DLB(DLB_MPI_Ineighbor_allgatherv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1587,6 +1587,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Neighbor_alltoall_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1594,9 +1595,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Neighbor_alltoall_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1605,6 +1604,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount
 	}
 
 	DLB(DLB_MPI_Neighbor_alltoall_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1621,6 +1621,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcoun
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ineighbor_alltoall_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1628,9 +1629,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcoun
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Ineighbor_alltoall_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1639,6 +1638,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcoun
 	}
 
 	DLB(DLB_MPI_Ineighbor_alltoall_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1655,6 +1655,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcoun
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Neighbor_alltoallv_F_enter, sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1662,9 +1663,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcoun
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Neighbor_alltoallv_Wrapper (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1673,6 +1672,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcoun
 	}
 
 	DLB(DLB_MPI_Neighbor_alltoallv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1689,6 +1689,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcou
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ineighbor_alltoallv_F_enter, sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1696,9 +1697,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcou
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Ineighbor_alltoallv_Wrapper (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1707,6 +1706,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcou
 	}
 
 	DLB(DLB_MPI_Ineighbor_alltoallv_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1723,6 +1723,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcoun
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Neighbor_alltoallw_F_enter, sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1730,9 +1731,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcoun
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Neighbor_alltoallw_Wrapper (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1741,6 +1740,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcoun
 	}
 
 	DLB(DLB_MPI_Neighbor_alltoallw_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 /******************************************************************************
@@ -1757,6 +1757,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcou
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_Ineighbor_alltoallw_F_enter, sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request, ierr);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
@@ -1764,9 +1765,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcou
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
-		Backend_Enter_Instrumentation ();
 		PMPI_Ineighbor_alltoallw_Wrapper (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request, ierr);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE);
 	}
 	else
@@ -1775,6 +1774,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcou
 	}
 
 	DLB(DLB_MPI_Ineighbor_alltoallw_F_leave);
+	Backend_Leave_Instrumentation ();
 }
 
 #endif /* MPI3 */

@@ -95,20 +95,20 @@ int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, MPI3_CONST char * filename, in
 	int res;
 
 /*  Do not call DLB as Fortran does not call it, agreed with Victor Oct13th,2015
-	DLB(DLB_MPI_File_open_enter, comm, filename, amode, info, fh);
+DLB(DLB_MPI_File_open_enter, comm, filename, amode, info, fh);
 */
+	Backend_Enter_Instrumentation ();
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_File_open_C_Wrapper (comm, (char *)filename, amode, info, fh);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_open (comm, filename, amode, info, fh);
 
+	Backend_Leave_Instrumentation ();
 /*  Do not call DLB as Fortran does not call it, agreed with Victor Oct13th,2015
 	DLB(DLB_MPI_File_open_leave);
 */
@@ -123,21 +123,21 @@ int NAME_ROUTINE_C(MPI_File_close) (MPI_File* fh)
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_close_enter, fh);
 
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_File_close_C_Wrapper (fh);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_close (fh);
 
 	DLB(DLB_MPI_File_close_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -150,20 +150,20 @@ int NAME_ROUTINE_C(MPI_File_read) (MPI_File fh, void* buf, int count,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res =  MPI_File_read_C_Wrapper (fh, buf, count, datatype, status);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read (fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_read_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -177,20 +177,20 @@ NAME_ROUTINE_C(MPI_File_read_all) (MPI_File fh, void* buf, int count,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_all_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_all_C_Wrapper(fh, buf, count, datatype, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_all(fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_read_all_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -204,20 +204,20 @@ NAME_ROUTINE_C(MPI_File_read_all_begin)(MPI_File fh, void* buf, int count,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_all_begin_enter, fh, buf, count, datatype);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_all_begin_C_Wrapper(fh, buf, count, datatype);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_all_begin(fh, buf, count, datatype);
 
 	DLB(DLB_MPI_File_read_all_begin_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -230,20 +230,20 @@ NAME_ROUTINE_C(MPI_File_read_all_end)(MPI_File fh, void* buf, MPI_Status* status
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_all_end_enter, fh, buf, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_all_end_C_Wrapper(fh, buf, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_all_end(fh, buf, status);
 
 	DLB(DLB_MPI_File_read_all_end_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -256,20 +256,20 @@ int NAME_ROUTINE_C(MPI_File_read_at) (MPI_File fh, MPI_Offset offset, void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_at_enter, fh, offset, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_File_read_at_C_Wrapper (fh, offset, buf, count, datatype, status);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_at (fh, offset, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_read_at_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -283,21 +283,21 @@ NAME_ROUTINE_C(MPI_File_read_at_all) (MPI_File fh, MPI_Offset offset, void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_at_all_enter, fh, offset, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_at_all_C_Wrapper
 		    (fh, offset, buf, count, datatype, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_read_at_all_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -311,21 +311,21 @@ NAME_ROUTINE_C(MPI_File_read_at_all_begin) (MPI_File fh, MPI_Offset offset,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_at_all_begin_enter, fh, offset, buf, count, datatype);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_at_all_begin_C_Wrapper
 		    (fh, offset, buf, count, datatype);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_at_all_begin(fh, offset, buf, count, datatype);
 
 	DLB(DLB_MPI_File_read_at_all_begin_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -339,20 +339,20 @@ NAME_ROUTINE_C(MPI_File_read_at_all_end) (MPI_File fh, void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_at_all_end_enter, fh, buf, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_at_all_end_C_Wrapper(fh, buf, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_at_all_end(fh, buf, status);
 
 	DLB(DLB_MPI_File_read_at_all_end_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -366,20 +366,20 @@ NAME_ROUTINE_C(MPI_File_read_ordered) (MPI_File fh, void* buf, int count,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_ordered_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_ordered_C_Wrapper(fh, buf, count, datatype, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_ordered(fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_read_ordered_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -393,20 +393,20 @@ NAME_ROUTINE_C(MPI_File_read_ordered_begin) (MPI_File fh, void* buf, int count,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_ordered_begin_enter, fh, buf, count, datatype);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_ordered_begin_C_Wrapper(fh, buf, count, datatype);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_ordered_begin(fh, buf, count, datatype);
 
 	DLB(DLB_MPI_File_read_ordered_begin_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -420,20 +420,20 @@ NAME_ROUTINE_C(MPI_File_read_ordered_end) (MPI_File fh, void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_ordered_end_enter, fh, buf, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_ordered_end_C_Wrapper(fh, buf, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_ordered_end(fh, buf, status);
 
 	DLB(DLB_MPI_File_read_ordered_end_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -447,20 +447,20 @@ NAME_ROUTINE_C(MPI_File_read_shared) (MPI_File fh, void* buf, int count,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_read_shared_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_read_shared_C_Wrapper(fh, buf, count, datatype, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_read_shared(fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_read_shared_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -473,20 +473,20 @@ int NAME_ROUTINE_C(MPI_File_write) (MPI_File fh, MPI3_CONST void * buf, int coun
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_File_write_C_Wrapper (fh, MPI3_VOID_P_CAST buf, count, datatype, status);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write (fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_write_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -500,21 +500,21 @@ NAME_ROUTINE_C(MPI_File_write_all) (MPI_File fh, MPI3_CONST void* buf, int count
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_all_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_all_C_Wrapper
 		    (fh, MPI3_VOID_P_CAST buf, count, datatype, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_all(fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_write_all_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -528,21 +528,21 @@ NAME_ROUTINE_C(MPI_File_write_all_begin)(MPI_File fh, MPI3_CONST void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_all_begin_enter, fh, buf, count, datatype);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_all_begin_C_Wrapper
 		    (fh, MPI3_VOID_P_CAST buf, count, datatype);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_all_begin(fh, buf, count, datatype);
 
 	DLB(DLB_MPI_File_write_all_begin_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -556,21 +556,21 @@ NAME_ROUTINE_C(MPI_File_write_all_end)(MPI_File fh, MPI3_CONST void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_all_end_enter, fh, buf, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_all_end_C_Wrapper
 		    (fh, MPI3_VOID_P_CAST buf, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_all_end(fh, buf, status);
 
 	DLB(DLB_MPI_File_write_all_end_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -583,20 +583,20 @@ int NAME_ROUTINE_C(MPI_File_write_at) (MPI_File fh, MPI_Offset offset, MPI3_CONS
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_at_enter, fh, offset, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation ();
 		res = MPI_File_write_at_C_Wrapper (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status);
-		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_at (fh, offset, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_write_at_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -610,21 +610,21 @@ NAME_ROUTINE_C(MPI_File_write_at_all) (MPI_File fh, MPI_Offset offset,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_at_all_enter, fh, offset, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_at_all_C_Wrapper
 		    (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status);	
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_write_at_all_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -638,21 +638,21 @@ NAME_ROUTINE_C(MPI_File_write_at_all_begin) (MPI_File fh, MPI_Offset offset,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_at_all_begin_enter, fh, offset, buf, count, datatype);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_at_all_begin_C_Wrapper
 		    (fh, offset, MPI3_VOID_P_CAST buf, count, datatype);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_at_all_begin(fh, offset, buf, count, datatype);
 
 	DLB(DLB_MPI_File_write_at_all_begin_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -666,21 +666,21 @@ NAME_ROUTINE_C(MPI_File_write_at_all_end) (MPI_File fh, MPI3_CONST void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_at_all_end_enter, fh, buf, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_at_all_end_C_Wrapper
 		    (fh, MPI3_VOID_P_CAST buf, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_at_all_end(fh, buf, status);
 
 	DLB(DLB_MPI_File_write_at_all_end_leave);
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -694,20 +694,20 @@ NAME_ROUTINE_C(MPI_File_write_ordered) (MPI_File fh, MPI3_CONST void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_ordered_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_ordered_C_Wrapper(fh, buf, count, datatype, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_ordered(fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_write_ordered_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -721,20 +721,20 @@ NAME_ROUTINE_C(MPI_File_write_ordered_begin) (MPI_File fh, MPI3_CONST void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_ordered_begin_enter, fh, buf, count, datatype);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_ordered_begin_C_Wrapper(fh, buf, count, datatype);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_ordered_begin(fh, buf, count, datatype);
 
 	DLB(DLB_MPI_File_write_ordered_begin_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -748,20 +748,20 @@ NAME_ROUTINE_C(MPI_File_write_ordered_end) (MPI_File fh, MPI3_CONST void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_ordered_end_enter, fh, buf, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_ordered_end_C_Wrapper(fh, buf, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_ordered_end(fh, buf, status);
 
 	DLB(DLB_MPI_File_write_ordered_end_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }
@@ -775,20 +775,20 @@ NAME_ROUTINE_C(MPI_File_write_shared) (MPI_File fh, MPI3_CONST void* buf,
 {
 	int res;
 
+	Backend_Enter_Instrumentation ();
 	DLB(DLB_MPI_File_write_shared_enter, fh, buf, count, datatype, status);
 
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation();
 		res = MPI_File_write_shared_C_Wrapper(fh, buf, count, datatype, status);
-		Backend_Leave_Instrumentation();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		res = PMPI_File_write_shared(fh, buf, count, datatype, status);
 
 	DLB(DLB_MPI_File_write_shared_leave);
+	Backend_Leave_Instrumentation ();
 	
 	return res;
 }

@@ -607,7 +607,9 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 INTERFACE_ALIASES_C(_init,Extrae_init,(void),void)
 void Extrae_init (void)
 {
+	Backend_Enter_Instrumentation();
 	Extrae_init_Wrapper ();
+	Backend_Leave_Instrumentation();
 }
 
 INTERFACE_ALIASES_C(_is_initialized,Extrae_is_initialized,(void),extrae_init_type_t)

@@ -45,6 +45,7 @@ pid_t pid_at_constructor;
 __attribute__((constructor))
 void Extrae_auto_library_init (void)
 {
+	Backend_Enter_Instrumentation();
 	pid_at_constructor = getpid();
 
 	int skip_auto_library_init = FALSE;
@@ -79,5 +80,6 @@ void Extrae_auto_library_init (void)
 		   through atexit(3) */
 		atexit (Gateway_to_Extrae_auto_library_fini);
 	}
+	Backend_Leave_Instrumentation();
 }
 
