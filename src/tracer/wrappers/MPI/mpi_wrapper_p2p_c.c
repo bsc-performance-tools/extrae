@@ -276,6 +276,13 @@ int MPI_Ibsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 
 	ret = PMPI_Ibsend (buf, count, datatype, dest, tag, comm, request);
 
+	/**
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * See IRECV_REQ_REUSED_BY_ISEND
+	 */
+	cancelRequest(*request);
+
 	/*
 	 *   event  : IBSEND_EV                    value  : EVT_END
 	 *   target : receiver rank                size   : bytes sent
@@ -317,6 +324,28 @@ int MPI_Isend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 	TRACE_MPIEVENT (begin_time, MPI_ISEND_EV, EVT_BEGIN, receiver_world, size, tag, comm, EMPTY);
 
 	ret = PMPI_Isend (buf, count, datatype, dest, tag, comm, request);
+
+	/**
+	 * IRECV_REQ_REUSED_BY_ISEND:
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * This table is used to retrieve the source of communication for corresponding 
+	 * MPI_Irecv requests based on their associated MPI_Request handles.
+	 *
+	 * However, we encountered a case where an MPI_Irecv request was not followed 
+	 * by any MPI_Wait, and the same request handle was later reused in an MPI_Isend. 
+	 *
+	 * This caused incorrect behavior: when MPI_Wait was eventually called on the
+	 * reused handle, it looked up the request in the table of pending Irecv requests
+	 * and found the stale entry from the earlier unmatched Irecv. As a result, it
+	 * attempted to process the Isend as if it were an Irecv, incorrectly trying to
+	 * retrieve the status->MPI_SOURCE field, which is undefined for Isends 
+	 * according to the MPI standard.
+	 *
+	 * To avoid such incorrect associations, we remove send-related 
+	 * requests from the hash table.
+	 */
+	cancelRequest(*request);
 
 	/*
 	 *   event  : ISEND_EV                     value  : EVT_END
@@ -360,6 +389,13 @@ int MPI_Issend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 
 	ret = PMPI_Issend (buf, count, datatype, dest, tag, comm, request);
 
+	/**
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * See IRECV_REQ_REUSED_BY_ISEND
+	 */
+	cancelRequest(*request);
+
 	/*
 	 *   event  : ISSEND_EV                    value  : EVT_END
 	 *   target : receiver rank                size   : bytes sent
@@ -401,6 +437,13 @@ int MPI_Irsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 	TRACE_MPIEVENT (begin_time, MPI_IRSEND_EV, EVT_BEGIN, receiver_world, size, tag, comm, EMPTY);
 
 	ret = PMPI_Irsend (buf, count, datatype, dest, tag, comm, request);
+
+	/**
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * See IRECV_REQ_REUSED_BY_ISEND
+	 */
+	cancelRequest(*request);
 
 	/*
 	 *   event  : IRSEND_EV                    value  : EVT_END

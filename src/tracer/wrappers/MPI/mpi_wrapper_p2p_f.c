@@ -276,6 +276,7 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	int          receiver_world = MPI_PROC_NULL;
 	int          c_tag          = *tag;
 	MPI_Comm     c_comm         = PMPI_Comm_f2c (*comm);
+	MPI_Request  c_request    = MPI_REQUEST_NULL;
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
@@ -291,7 +292,16 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	TRACE_MPIEVENT (begin_time, MPI_IBSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_ibsend) (buf, count, datatype, dest, tag, comm, request, ierror);
-	
+
+	c_request = PMPI_Request_f2c(*request);
+
+	/**
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * See IRECV_REQ_REUSED_BY_ISEND
+	 */
+	cancelRequest(c_request);
+
 	/*
 	 *   event  : IBSEND_EV                         value  : EVT_END
 	 *   target : receiver rank                     size   : bytes sent
@@ -320,6 +330,7 @@ void PMPI_ISend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	int          receiver_world = MPI_PROC_NULL;
 	int          c_tag          = *tag;
 	MPI_Comm     c_comm         = PMPI_Comm_f2c (*comm);
+	MPI_Request  c_request    = MPI_REQUEST_NULL;
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
@@ -336,6 +347,30 @@ void PMPI_ISend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	CtoF77 (pmpi_isend) (buf, count, datatype, dest, tag, comm, request, ierror);
 
+	c_request = PMPI_Request_f2c(*request);
+
+	/**
+	 * IRECV_REQ_REUSED_BY_ISEND:
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * This table is used to retrieve the source of communication for corresponding 
+	 * MPI_Irecv requests based on their associated MPI_Request handles.
+	 *
+	 * However, we encountered a case where an MPI_Irecv request was not followed 
+	 * by any MPI_Wait, and the same request handle was later reused in an MPI_Isend. 
+	 *
+	 * This caused incorrect behavior: when MPI_Wait was eventually called on the
+	 * reused handle, it looked up the request in the table of pending Irecv requests
+	 * and found the stale entry from the earlier unmatched Irecv. As a result, it
+	 * attempted to process the Isend as if it were an Irecv, incorrectly trying to
+	 * retrieve the status->MPI_SOURCE field, which is undefined for Isends 
+	 * according to the MPI standard.
+	 *
+	 * To avoid such incorrect associations, we remove send-related 
+	 * requests from the hash table.
+	 */
+	cancelRequest(c_request);
+	
 	/*
 	 *   event  : ISEND_EV                          value  : EVT_END
 	 *   target : receiver rank                     size   : bytes sent
@@ -364,6 +399,7 @@ void PMPI_ISSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	int          receiver_world = MPI_PROC_NULL;
 	int          c_tag          = *tag;
 	MPI_Comm     c_comm         = PMPI_Comm_f2c (*comm);
+	MPI_Request  c_request    = MPI_REQUEST_NULL;
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
@@ -379,6 +415,15 @@ void PMPI_ISSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	TRACE_MPIEVENT (begin_time, MPI_ISSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_issend) (buf, count, datatype, dest, tag, comm, request, ierror);
+
+	c_request = PMPI_Request_f2c(*request);
+
+	/**
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * See IRECV_REQ_REUSED_BY_ISEND
+	 */
+	cancelRequest(c_request);
 
 	/*
 	 *   event : ISSEND_EV                     value : EVT_END
@@ -408,6 +453,7 @@ void PMPI_IRSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	int          receiver_world = MPI_PROC_NULL;
 	int          c_tag          = *tag;
 	MPI_Comm     c_comm         = PMPI_Comm_f2c (*comm);
+	MPI_Request  c_request    = MPI_REQUEST_NULL;
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
@@ -423,6 +469,15 @@ void PMPI_IRSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	TRACE_MPIEVENT (begin_time, MPI_IRSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_irsend) (buf, count, datatype, dest, tag, comm, request, ierror);
+
+	c_request = PMPI_Request_f2c(*request);
+
+	/**
+	 * Remove any request associated with a send from the request hash table.
+	 * 
+	 * See IRECV_REQ_REUSED_BY_ISEND
+	 */
+	cancelRequest(c_request);
 
 	/*
 	 *   event  : IRSEND_EV                         value  : EVT_END
@@ -460,7 +515,7 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	translateLocalToGlobalRank (c_comm, MPI_GROUP_NULL, *source, &source_world);
 
-	makeProxies_F (0, NULL, NULL, NULL, 1, status, f_local_status, &f_proxy_status);
+	makeProxies_F (0, NULL, NULL, NULL, 1, status, (MPI_Fint *)f_local_status, &f_proxy_status);
 
 	/*
 	 *   event  : RECV_EV                           value  : EVT_BEGIN    
@@ -521,7 +576,7 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	CtoF77 (pmpi_irecv) (buf, count, datatype, source, tag, comm, request, ierror);
 
-	c_request = PMPI_Request_f2c(*request);
+	c_request = PMPI_Request_f2c(*request);	
 	saveRequest(c_request, c_comm);
 
 	/*
@@ -1016,7 +1071,7 @@ void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests, MPI_Fin
 
 	mpi_testall_begin_time = LAST_READ_TIME;
 
-	makeProxies_F (*count, array_of_requests, local_array_of_requests, &proxy_array_of_requests, 
+	makeProxies_F (*count, array_of_requests, (MPI_Request *)local_array_of_requests, &proxy_array_of_requests, 
 	               *count, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
 
 	CtoF77 (pmpi_testall) (count, array_of_requests, flag, f_proxy_array_of_statuses, ierror);
@@ -1061,7 +1116,7 @@ void PMPI_TestAll_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests, MPI_Fin
 		mpi_testall_elapsed_time += (TIME - mpi_testall_begin_time);
 	}
 
-	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
+	freeProxies(local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 }
 
 
@@ -1084,8 +1139,8 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 	
 	mpi_testany_begin_time = LAST_READ_TIME;
 
-	makeProxies_F(*count, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
-	              1, status, f_local_status, &f_proxy_status);
+	makeProxies_F(*count, array_of_requests, (MPI_Request *)local_array_of_requests, &proxy_array_of_requests, 
+	              1, status, (MPI_Fint *)f_local_status, &f_proxy_status);
 
 	CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, f_proxy_status, ierror);
 
@@ -1123,7 +1178,7 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 		mpi_testany_elapsed_time += (TIME - mpi_testany_begin_time);
 	}
 
-	freeProxies(&local_array_of_requests, proxy_array_of_requests, status, f_local_status, f_proxy_status);
+	freeProxies(local_array_of_requests, proxy_array_of_requests, status, f_local_status, f_proxy_status);
 }
 
 /*****************************************************************************
@@ -1145,7 +1200,7 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint *array_of_requests,
 
     mpi_testsome_begin_time = LAST_READ_TIME;
 
-	makeProxies_F (*incount, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	makeProxies_F (*incount, array_of_requests, (MPI_Request *)local_array_of_requests, &proxy_array_of_requests, 
 	               *incount, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
 				   
 	CtoF77(pmpi_testsome) (incount, array_of_requests, outcount, array_of_indices, f_proxy_array_of_statuses, ierror);
@@ -1189,7 +1244,7 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint *array_of_requests,
 		mpi_testsome_elapsed_time += (TIME - mpi_testsome_begin_time);
 	}
 
-	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
+	freeProxies(local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 }
 
 
@@ -1246,7 +1301,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 {
 	MPI_Request  local_array_of_requests[MAX_MPI_HANDLES];
 	MPI_Request *proxy_array_of_requests = NULL;
-	MPI_Fint     f_local_array_of_statuses[MAX_MPI_HANDLES][MPI_F_STATUS_SIZE];
+	MPI_Fint     f_local_array_of_statuses[MAX_MPI_HANDLES*MPI_F_STATUS_SIZE];
 	MPI_Fint    *f_proxy_array_of_statuses = NULL;
 	iotimer_t    mpi_waitall_end_time    = 0;
 
@@ -1259,7 +1314,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 	iotimer_t begin_time = LAST_READ_TIME;
 	TRACE_MPIEVENT (begin_time, MPI_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	makeProxies_F (*count, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	makeProxies_F (*count, array_of_requests, (MPI_Request *)local_array_of_requests, &proxy_array_of_requests, 
 	               *count, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
 
 	CtoF77 (pmpi_waitall) (count, array_of_requests, f_proxy_array_of_statuses, ierror);
@@ -1276,7 +1331,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 		}
 	}
 
-	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
+	freeProxies(local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 
 	/*
 	 *   event  : WAITATLL_EV                value  : EVT_END
@@ -1310,8 +1365,8 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 	iotimer_t begin_time = LAST_READ_TIME;
 	TRACE_MPIEVENT (begin_time, MPI_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	makeProxies_F (*count, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
-	               1, status, f_local_status, &f_proxy_status);
+	makeProxies_F (*count, array_of_requests, (MPI_Request *)local_array_of_requests, &proxy_array_of_requests, 
+	               1, status, (MPI_Fint *)f_local_status, &f_proxy_status);
 
 	CtoF77 (pmpi_waitany) (count, array_of_requests, index, f_proxy_status, ierror);
 
@@ -1322,7 +1377,7 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint *array_of_requests,
 		processRequest_F (mpi_waitany_end_time, proxy_array_of_requests[*index-1], f_proxy_status);
 	}
 
-	freeProxies(&local_array_of_requests, proxy_array_of_requests, status, f_local_status, f_proxy_status);
+	freeProxies(local_array_of_requests, proxy_array_of_requests, status, f_local_status, f_proxy_status);
 
     /*
      *   event  : WAITANY_EV                 value  : EVT_END
@@ -1357,7 +1412,7 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint *array_of_requests,
 	iotimer_t begin_time = LAST_READ_TIME;
 	TRACE_MPIEVENT (begin_time, MPI_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	makeProxies_F (*incount, array_of_requests, (MPI_Request *)&local_array_of_requests, &proxy_array_of_requests, 
+	makeProxies_F (*incount, array_of_requests, (MPI_Request *)local_array_of_requests, &proxy_array_of_requests, 
 	               *incount, array_of_statuses, (MPI_Fint *)f_local_array_of_statuses, &f_proxy_array_of_statuses);
 
 	CtoF77(pmpi_waitsome) (incount, array_of_requests, outcount, array_of_indices, f_proxy_array_of_statuses, ierror);
@@ -1374,7 +1429,7 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint *array_of_requests,
 		}
 	}
 
-	freeProxies(&local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
+	freeProxies(local_array_of_requests, proxy_array_of_requests, array_of_statuses, f_local_array_of_statuses, f_proxy_array_of_statuses);
 
 	/*
 	 *   event  : WAITSOME_EV                value  : EVT_END
