@@ -280,7 +280,7 @@ void *malloc (size_t s)
  * Static buffer to return when calloc is called from within dlsym and we don't
  * have the pointer to the real calloc function
  */
-static __thread unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
+static unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
 
 static __thread int __in_free = 0;
 static __thread void *__in_free_ptr = NULL;
