@@ -109,14 +109,16 @@ CUDA_Func_Event(event_t *event, unsigned long long current_time,
     FileSet_t *fset)
 {
 	unsigned int state;
+	unsigned int EvType;
 	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(state);
 	UNREFERENCED_PARAMETER(fset);
 
+	EvType  = Get_EvEvent(event);
 	EvValue = Get_EvValue(event);
 
-	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDAFUNC_EV, EvValue);
-	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType == CUDA_KERNEL_INST_EV ? CUDA_KERNEL_INST_LINE_EV : CUDA_KERNEL_EXEC_LINE_EV, EvValue);
 
 	return 0;
 }
@@ -194,7 +196,8 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	/* Host calls */
 	{ CUDACALL_EV, CUDA_Call },
-	{ CUDAFUNC_EV, CUDA_Func_Event },
+	{ CUDA_KERNEL_EXEC_EV, CUDA_Func_Event },
+	{ CUDA_KERNEL_INST_EV, CUDA_Func_Event },
 	{ CUDA_DYNAMIC_MEM_PTR_EV, CUDA_Punctual_Event },
 	{ CUDA_DYNAMIC_MEM_SIZE_EV, CUDA_Punctual_Event },
 	{ CUDASTREAMBARRIER_THID_EV, CUDA_Punctual_Event },

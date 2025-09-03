@@ -369,7 +369,7 @@ static void traceGPUEvents(int threadid, UINT64 time, unsigned event, unsigned l
 
 	if (event == CUDAKERNEL_GPU_VAL)
 	{
-		THREAD_TRACE_MISCEVENT(threadid, time, CUDAFUNC_EV, value, 0);
+		THREAD_TRACE_MISCEVENT(threadid, time, CUDA_KERNEL_EXEC_EV, value, 0);
 	}
 
 	/* Emit communication records for memory transfer, kernel setup and kernel execution */

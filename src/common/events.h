@@ -609,11 +609,11 @@ enum {
 #define CUDA_UNTRACKED_EV             63000003
 #define CUDA_DYNAMIC_MEM_SIZE_EV      63000004
 #define CUDA_DYNAMIC_MEM_PTR_EV       63000005
-#define CUDAFUNC_EV                   63000006
-#define CUDAFUNC_LINE_EV              63000007
-
-/* To associate stream with Paraver thread */
-#define CUDASTREAMBARRIER_THID_EV     63000008
+#define CUDA_KERNEL_INST_EV           63000006
+#define CUDA_KERNEL_INST_LINE_EV      63000007
+#define CUDASTREAMBARRIER_THID_EV     63000008  /* TID of the Paraver thid of the CUDA stream being synchronized */
+#define CUDA_KERNEL_EXEC_EV           63000009
+#define CUDA_KERNEL_EXEC_LINE_EV      63000010
 
 #define OPENCL_KERNEL_NAME_EV                         64200000
 #define OPENCL_BASE_TYPE_EV                           64000000

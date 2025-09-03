@@ -642,12 +642,12 @@ static UINT64 paraver_translate_address_event (unsigned ptask, unsigned task,
 	else if (eventtype == PTHREAD_FUNC_LINE_EV)
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
-	else if (eventtype == CUDAFUNC_EV)
+	else if (eventtype == CUDA_KERNEL_INST_EV || eventtype == CUDA_KERNEL_EXEC_EV)
 	{
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_FUNCTION, get_option_merge_UniqueCallerID());
 	}
-	else if (eventtype == CUDAFUNC_LINE_EV)
+	else if (eventtype == CUDA_KERNEL_INST_LINE_EV || eventtype == CUDA_KERNEL_EXEC_LINE_EV)
 	{
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
@@ -736,7 +736,8 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				  cur->event == NEW_OMP_TASK_EXEC_NAME_EV || cur->event == NEW_OMP_TASK_EXEC_LINE_EV ||
 				  cur->event == TASKFUNC_INST_EV || cur->event == TASKFUNC_INST_LINE_EV ||
 				  cur->event == PTHREAD_FUNC_EV || cur->event == PTHREAD_FUNC_LINE_EV ||
-				  cur->event == CUDAFUNC_EV || cur->event == CUDAFUNC_LINE_EV)
+				  cur->event == CUDA_KERNEL_INST_EV || cur->event == CUDA_KERNEL_EXEC_EV || 
+				  cur->event == CUDA_KERNEL_INST_LINE_EV || cur->event == CUDA_KERNEL_EXEC_LINE_EV)
 				{
 					values[nevents] = paraver_translate_address_event (cur->ptask,
 					  cur->task, cur->event, cur->value);
@@ -799,7 +800,8 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					  (cur->event >= CALLER_EV && cur->event < CALLER_EV + MAX_CALLERS) || 
 					  (cur->event >= SAMPLING_EV && cur->event < SAMPLING_EV + MAX_CALLERS) ||
 					  cur->event == OMPFUNC_EV || cur->event == TASKFUNC_INST_EV ||
-					  cur->event == PTHREAD_FUNC_EV || cur->event == CUDAFUNC_EV)
+					  cur->event == PTHREAD_FUNC_EV || cur->event == CUDA_KERNEL_EXEC_EV ||
+					  cur->event == CUDA_KERNEL_INST_EV )
 					{
 						if (cur->value == UNRESOLVED_ID+1)
 						{
