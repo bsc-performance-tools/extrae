@@ -435,7 +435,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 					else if (MPI_TYPE == Type)
 						Enable_MPI_Operation (EvType);
 					else if (CUDA_TYPE == Type)
-						Enable_CUDA_Operation (Get_EvValue(current_event));
+						Enable_CUDA_Operation (EvType, Get_EvValue(current_event));
 					else if (OPENCL_TYPE == Type)
 						Enable_OpenCL_Operation (EvType);
 					else if (OPENSHMEM_TYPE == Type)

@@ -31,7 +31,7 @@
 # include <stdio.h>
 #endif
 
-void Enable_CUDA_Operation (int tipus);
+void Enable_CUDA_Operation (INT32 type, UINT64 value);
 void CUDAEvent_WriteEnabledOperations (FILE * fd);
 
 #if defined(PARALLEL_MERGE)

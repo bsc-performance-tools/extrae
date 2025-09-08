@@ -57,44 +57,48 @@ enum {
 
 static int inuse[MAX_CUDA_INDEX] = { FALSE };
 
-void Enable_CUDA_Operation (int type)
+void Enable_CUDA_Operation (INT32 type, UINT64 value)
 {
-	if (type == CUDALAUNCH_VAL || type == CUDAKERNEL_GPU_VAL)
-		inuse[CUDALAUNCH_INDEX] = TRUE;
-	else if (type == CUDAMEMCPY_VAL || type == CUDAMEMCPY_GPU_VAL)
-		inuse[CUDAMEMCPY_INDEX] = TRUE;
-	else if (type == CUDASTREAMBARRIER_VAL)
-		inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
-	else if (type == CUDATHREADBARRIER_VAL || type == CUDATHREADBARRIER_GPU_VAL)
-		inuse[CUDATHREADBARRIER_INDEX] = TRUE;
-	else if (type == CUDACONFIGCALL_VAL || type == CUDACONFIGKERNEL_GPU_VAL)
-		inuse[CUDACONFIGCALL_INDEX] = TRUE;
-	else if (type == CUDAMEMCPYASYNC_VAL || type == CUDAMEMCPYASYNC_GPU_VAL)
-		inuse[CUDAMEMCPYASYNC_INDEX] = TRUE;
-	else if (type == CUDADEVICERESET_VAL)
-		inuse[CUDADEVICERESET_INDEX] = TRUE;
-	else if (type == CUDATHREADEXIT_VAL)
-		inuse[CUDATHREADEXIT_INDEX] = TRUE;
-	else if (type == CUDASTREAMCREATE_VAL)
-		inuse[CUDASTREAMCREATE_INDEX] = TRUE;
-	else if (type == CUDASTREAMDESTROY_VAL)
-		inuse[CUDASTREAMDESTROY_INDEX] = TRUE;
-	else if (type == CUDAMALLOC_VAL || type == CUDAMALLOCPITCH_VAL ||
-	  type == CUDAFREE_VAL || type == CUDAMALLOCARRAY_VAL ||
-	  type == CUDAFREEARRAY_VAL || type == CUDAMALLOCHOST_VAL ||
-	  type == CUDAFREEHOST_VAL)
-		inuse[CUDAMALLOC_INDEX] = TRUE;
-	else if (type == CUDAHOSTALLOC_VAL)
-		inuse[CUDAHOSTALLOC_INDEX] = TRUE;
-	else if (type == CUDAMEMSET_VAL)
-		inuse[CUDAMEMSET_INDEX] = TRUE;
-	else if (type == CUDAEVENTRECORD_INDEX)
-		inuse[CUDAEVENTRECORD_VAL] = TRUE;
-	else if (type == CUDAEVENTSYNCHRONIZE_VAL)
-		inuse[CUDAEVENTSYNCHRONIZE_INDEX] = TRUE;
-	else if (type == CUDA_UNTRACKED_EV)
-		inuse[CUDAUNTRACKED_INDEX] = TRUE;
+	if (type == CUDA_UNTRACKED_EV){
+			inuse[CUDAUNTRACKED_INDEX] = TRUE;
+		}
+	else if(type == CUDACALL_EV || type == CUDACALLGPU_EV){
+		if (value == CUDALAUNCH_VAL || value == CUDAKERNEL_GPU_VAL)
+			inuse[CUDALAUNCH_INDEX] = TRUE;
+		else if (value == CUDAMEMCPY_VAL || value == CUDAMEMCPY_GPU_VAL)
+			inuse[CUDAMEMCPY_INDEX] = TRUE;
+		else if (value == CUDASTREAMBARRIER_VAL)
+			inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
+		else if (value == CUDATHREADBARRIER_VAL || value == CUDATHREADBARRIER_GPU_VAL)
+			inuse[CUDATHREADBARRIER_INDEX] = TRUE;
+		else if (value == CUDACONFIGCALL_VAL || value == CUDACONFIGKERNEL_GPU_VAL)
+			inuse[CUDACONFIGCALL_INDEX] = TRUE;
+		else if (value == CUDAMEMCPYASYNC_VAL || value == CUDAMEMCPYASYNC_GPU_VAL)
+			inuse[CUDAMEMCPYASYNC_INDEX] = TRUE;
+		else if (value == CUDADEVICERESET_VAL)
+			inuse[CUDADEVICERESET_INDEX] = TRUE;
+		else if (value == CUDATHREADEXIT_VAL)
+			inuse[CUDATHREADEXIT_INDEX] = TRUE;
+		else if (value == CUDASTREAMCREATE_VAL)
+			inuse[CUDASTREAMCREATE_INDEX] = TRUE;
+		else if (value == CUDASTREAMDESTROY_VAL)
+			inuse[CUDASTREAMDESTROY_INDEX] = TRUE;
+		else if (value == CUDAMALLOC_VAL || value == CUDAMALLOCPITCH_VAL ||
+			value == CUDAFREE_VAL || value == CUDAMALLOCARRAY_VAL ||
+			value == CUDAFREEARRAY_VAL || value == CUDAMALLOCHOST_VAL ||
+			value == CUDAFREEHOST_VAL)
+			inuse[CUDAMALLOC_INDEX] = TRUE;
+		else if (value == CUDAHOSTALLOC_VAL)
+			inuse[CUDAHOSTALLOC_INDEX] = TRUE;
+		else if (value == CUDAMEMSET_VAL)
+			inuse[CUDAMEMSET_INDEX] = TRUE;
+		else if (value == CUDAEVENTRECORD_VAL)
+			inuse[CUDAEVENTRECORD_INDEX] = TRUE;
+		else if (value == CUDAEVENTSYNCHRONIZE_VAL)
+			inuse[CUDAEVENTSYNCHRONIZE_INDEX] = TRUE;
+		}
 }
+
 
 #if defined(PARALLEL_MERGE)
 
@@ -126,7 +130,7 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 	if (anyused)
 	{
 		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    CUDA library call\n", 0, CUDACALL_EV);
+		             "%d    %d    CUDA library call\n", 0, CUDACALL_EV);
 		fprintf (fd, "VALUES\n"
 		             "0 End\n");
 
@@ -195,14 +199,14 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 		  inuse[CUDAMEMCPYASYNC_INDEX] || inuse[CUDAHOSTALLOC_INDEX] ||
 		  inuse[CUDAMEMSET_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
-			              "%d   %d    CUDA Dynamic memory size\n"
+			              "%d    %d    CUDA Dynamic memory size\n"
 			              "\n",
 			              0, CUDA_DYNAMIC_MEM_SIZE_EV);
 
 		if (inuse[CUDAMALLOC_INDEX] || inuse[CUDAHOSTALLOC_INDEX] ||
 		  inuse[CUDAMEMSET_INDEX])
 			fprintf(fd, "EVENT_TYPE\n"
-			            "%d   %d    CUDA Dynamic memory pointer\n"
+			            "%d    %d    CUDA Dynamic memory pointer\n"
 						"\n",
 						0, CUDA_DYNAMIC_MEM_PTR_EV);
 
@@ -214,7 +218,7 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 
 		if (inuse[CUDAUNTRACKED_INDEX])
 			fprintf(fd, "EVENT_TYPE\n"
-			  "%d\t%d\tCUDA Untracked event\n"
+			  "%d    %d\tCUDA Untracked event\n"
 			  "\n",
 			  0, CUDA_UNTRACKED_EV);
 	}

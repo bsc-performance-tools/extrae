@@ -58,6 +58,7 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 	{
 		case CUDASTREAMCREATE_VAL:
 		case CUDASTREAMDESTROY_VAL:
+		case CUDAEVENTRECORD_VAL:
 			state = STATE_OTHERS;
 			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
