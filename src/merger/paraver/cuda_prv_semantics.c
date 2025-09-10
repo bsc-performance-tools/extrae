@@ -215,7 +215,7 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 	 */
 	if (EvValue == CUDAMEMCPY_GPU_VAL || EvValue == CUDAMEMCPYASYNC_GPU_VAL)
 	{
-		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDACALL_EV, (beginEV != EVT_END) ? EvValue : EVT_END);
+		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_MEMORY_TRANSFER, (beginEV != EVT_END) ? EvValue : EVT_END);
 		if(beginEV != EVT_END)
 		{
 			trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_DYNAMIC_MEM_SIZE_EV, size);
