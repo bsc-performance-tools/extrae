@@ -219,6 +219,36 @@ def parse_network_counters(counters_list):
                       ". Please check it is typed correctly and available with 'papi_native_avail'.")
 
 
+def sort_keys_by_second_last_token(keys_dict):
+    """
+    Sort dictionary keys based on the second-to-last token when split by ':'.
+    Groups keys by that token and sorts keys alphabetically within each group.
+
+    Parameters:
+        keys_dict (dict or iterable of str): The dictionary whose keys should be sorted,
+                                             or an iterable of key strings.
+    Returns:
+        list: A list of keys sorted by the second-to-last token grouping, then alphabetically within each group.
+    """
+    # If a dictionary is provided, extract its keys; if a list (or other iterable) is provided, use it as-is.
+    if isinstance(keys_dict, dict):
+        keys = list(keys_dict.keys())
+    else:
+        keys = list(keys_dict)
+
+    # Helper function to get the second-to-last token of a key
+    def get_second_last_token(key):
+        parts = key.split(':')
+        # Ensure the key has at least two tokens; otherwise handle accordingly (e.g., return the key itself)
+        if len(parts) < 2:
+            return key
+        return parts[-2]
+
+    # Sort keys by second-to-last token, then by the full key
+    sorted_keys = sorted(keys, key=lambda k: (get_second_last_token(k), k))
+    return sorted_keys
+
+
 # Parse arguments
 parser = argparse.ArgumentParser(description='Extrae launcher')
 
@@ -359,10 +389,15 @@ if i_am_master_process():
                 remaining_sets -= 1
                 counters_per_set.append(counters_to_current_set)
 
+            # Group counters by the second-to-last token (i.e. RD, WR), 
+            # sort each group alphabetically, and then assign them to separate sets.
+            # This prevents mixing RD and WR counters within the same set, 
+            # thus avoiding intermittent PAPI errors caused by hardware limitations.
+            sorted_counters = sort_keys_by_second_last_token(ExternalCounters)
             head = 0
             for i in range(0, num_readers):
                 tail = head + counters_per_set[i] 
-                current_set = sorted(ExternalCounters.keys())[head:tail]
+                current_set = sorted_counters[head:tail]
                 head += counters_per_set[i]
                 Sets.append(current_set)
 
