@@ -155,7 +155,9 @@ cudaError_t cudaLaunch (const void *func)
 
 	if (real_cudaLaunch != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaLaunch_Enter (func, NULL);
+		Extrae_cudaLaunch_Enter(func,
+				  NULL, NULL,
+				  NULL, NULL);
 		res = real_cudaLaunch (func);
 		Extrae_cudaLaunch_Exit ();
 	}
@@ -876,7 +878,9 @@ cudaLaunchKernel(const void* func, dim3 gridDim, dim3 blockDim, void** args, siz
 
 	if (real_cudaLaunchKernel != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaLaunch_Enter(func, stream);
+		Extrae_cudaLaunch_Enter(func,
+				  NULL, NULL,
+				  NULL, stream);
 		res = real_cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
 		Extrae_cudaLaunch_Exit();
 	}

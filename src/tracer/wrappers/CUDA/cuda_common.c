@@ -37,6 +37,7 @@
 #include "threadinfo.h"
 #include "wrapper.h"
 #include "trace_macros.h"
+#include "trace_macros_gpu.h"
 #include "cuda_probe.h"
 #include "xalloc.h"
 #include "extrae_user_events.h"
@@ -343,7 +344,7 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 
 static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 	int devid, int streamid, unsigned event, unsigned long long value,
-	unsigned tag, unsigned size)
+	unsigned tag, size_t size, unsigned int blockspergrid, unsigned int threadsperblock)
 {
 	int err;
 	struct RegisteredStreams_t *registered_stream = &devices[devid].Stream[streamid];
@@ -353,7 +354,9 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 	gpu_event->event = event;
 	gpu_event->value = value;
 	gpu_event->tag = tag;
-	gpu_event->size = size;
+	gpu_event->memSize = size;
+	gpu_event->blocksPerGrid = blockspergrid;
+	gpu_event->threadsPerBlock = threadsperblock;
 	gpu_event->timetype = timetype;
 
 	err = cudaEventRecord (gpu_event->ts_event, registered_stream->stream);
@@ -362,36 +365,38 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 	gpuEventList_add(&registered_stream->gpu_event_list, gpu_event);
 }
 
-static void traceGPUEvents(int threadid, UINT64 time, unsigned event, unsigned long long value, unsigned size, unsigned tag)
+/**
+ * This routine emits GPU events into the tracing buffer and
+ * inserts communication events to connect host-side 
+ * CUDA runtime calls with their corresponding GPU kernel and memcopies executions.
+ *
+ * @param threadid          buffer thread id
+ * @param time              Timestamp of the event
+ * @param event             kind of event (CUDAKERNEL_GPU_VAL, CUDAMEMCPY_GPU_VAL...)
+ * @param value             Entry/exit (EVT_BEGIN/EVT_END)
+ * @param tag               Communication tag
+ * @param size              Size in bytes for memory operations
+ * @param blockspergrid     Grid configuration (CUDA kernels)
+ * @param threadsperblock   Block configuration (CUDA kernels)
+ */
+static void traceGPUEvents(int threadid, UINT64 time, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned blockspergrid, unsigned threadsperblock)
 {
-	/* Emit events into the tracing buffer. */
-	THREAD_TRACE_MISCEVENT (threadid, time, CUDACALLGPU_EV, event, value);
+	TRACE_GPU_EVENT(threadid, time, CUDACALLGPU_EV, event, value, size);
 
 	if (event == CUDAKERNEL_GPU_VAL)
 	{
-		THREAD_TRACE_MISCEVENT(threadid, time, CUDA_KERNEL_EXEC_EV, value, 0);
-	}
-
-	/* Emit communication records for memory transfer, kernel setup and kernel execution */
-	if (event == CUDAMEMCPY_GPU_VAL || event == CUDAMEMCPYASYNC_GPU_VAL)
-	{
-		if (value != EVT_END)
+		TRACE_GPU_KERNEL_EVENT(threadid, time, CUDA_KERNEL_EXEC_EV, value, blockspergrid, threadsperblock);
+		if(value != EVT_END) 
 		{
-			THREAD_TRACE_MISCEVENT(threadid, time, CUDA_DYNAMIC_MEM_SIZE_EV, size, 0);
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, time,USER_RECV_EV,TASKID,0, tag, tag);
 		}
-
-		if (tag > 0)
+	}
+	else
+	{
+		if ((event == CUDAMEMCPY_GPU_VAL || event == CUDAMEMCPYASYNC_GPU_VAL) && (tag > 0))
 		{
 			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, time, (value==EVT_END)?USER_RECV_EV:USER_SEND_EV, TASKID, size, tag, tag);
 		}
-	}
-	else if (event == CUDAKERNEL_GPU_VAL && value != EVT_END)
-	{
-		THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, time,USER_RECV_EV,TASKID,0, tag, tag);
-	}
-	else if (event == CUDACONFIGKERNEL_GPU_VAL && value != EVT_END)
-	{
-		THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, time, USER_RECV_EV, TASKID, 0, tag, tag);
 	}
 }
 
@@ -441,7 +446,7 @@ static void flushGPUEvents (int devid, int streamid)
 				utmp = last_time;
 			}
 
-			traceGPUEvents(threadid, utmp, gpu_event->event, gpu_event->value, gpu_event->size, gpu_event->tag);
+			traceGPUEvents(threadid, utmp, gpu_event->event, gpu_event->value, gpu_event->tag, gpu_event->memSize, gpu_event->blocksPerGrid, gpu_event->threadsPerBlock);
 
 			last_time = utmp;
 
@@ -492,7 +497,7 @@ void Extrae_cudaConfigureCall_Enter (dim3 p1, dim3 p2, size_t p3, cudaStream_t p
 	}
 	_cudaLaunch_stream = strid;
 	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-	  CUDACONFIGKERNEL_GPU_VAL, EVT_BEGIN, tag, tag);
+	  CUDACONFIGKERNEL_GPU_VAL, EVT_BEGIN, tag, tag, 0, 0);
 }
 
 void Extrae_cudaConfigureCall_Exit (void)
@@ -502,12 +507,16 @@ void Extrae_cudaConfigureCall_Exit (void)
 	cudaGetDevice (&devid);
 
 	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream, 
-	  CUDACONFIGKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0);
+	  CUDACONFIGKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0, 0, 0);
 
 	Probe_Cuda_ConfigureCall_Exit ();
 }
 
-void Extrae_cudaLaunch_Enter (const char *p1, cudaStream_t stream)
+void Extrae_cudaLaunch_Enter (const char *f,
+    unsigned int blocksPerGrid,
+    unsigned int threadsPerBlock,
+    size_t sharedMemBytes,
+    cudaStream_t stream)
 {
 	int devid;
 	unsigned tag = Extrae_CUDA_tag_generator();
@@ -515,7 +524,7 @@ void Extrae_cudaLaunch_Enter (const char *p1, cudaStream_t stream)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Probe_Cuda_Launch_Entry ((UINT64) p1);
+	Probe_Cuda_Launch_Entry ((UINT64) f);
 
 	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
 
@@ -523,7 +532,7 @@ void Extrae_cudaLaunch_Enter (const char *p1, cudaStream_t stream)
 	_cudaLaunch_stream = strid;
 
 	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream,
-	  CUDAKERNEL_GPU_VAL, (UINT64)p1, tag, tag);
+	  CUDAKERNEL_GPU_VAL, (UINT64)f, tag, sharedMemBytes, blocksPerGrid, threadsPerBlock);
 }
 
 void Extrae_cudaLaunch_Exit (void)
@@ -534,7 +543,7 @@ void Extrae_cudaLaunch_Exit (void)
 	Extrae_CUDA_Initialize (devid);
 
 	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream,
-	  CUDAKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0);
+	  CUDAKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0, 0, 0);
 
 	Probe_Cuda_Launch_Exit ();
 }
@@ -617,6 +626,7 @@ void Extrae_cudaThreadSynchronize_Enter (void)
 	Extrae_CUDA_Initialize (devid);
 
 	Probe_Cuda_ThreadBarrier_Entry ();
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
 }
 
 void Extrae_cudaThreadSynchronize_Exit (void)
@@ -626,7 +636,6 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 	cudaGetDevice (&devid);
 
 	Probe_Cuda_ThreadBarrier_Exit ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
 }
 
 void Extrae_CUDA_flush_streams ( int device_id, int stream_id )
@@ -784,12 +793,12 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	if (p4 == cudaMemcpyHostToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, 0, p3);
+		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
 	}
 	else if (p4 == cudaMemcpyDeviceToHost)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, tag, p3);
+		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, tag, p3, 0, 0);
 	}
 }
 
@@ -816,12 +825,12 @@ void Extrae_cudaMemcpy_Exit (void)
 	  Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyDeviceToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_END, tag, Extrae_CUDA_saved_params[THREADID].punion.cm.size);
+		  CUDAMEMCPY_GPU_VAL, EVT_END, tag, Extrae_CUDA_saved_params[THREADID].punion.cm.size, 0, 0);
 	}
 	else if (Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyDeviceToHost)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_END, 0, Extrae_CUDA_saved_params[THREADID].punion.cm.size);
+		  CUDAMEMCPY_GPU_VAL, EVT_END, 0, Extrae_CUDA_saved_params[THREADID].punion.cm.size, 0, 0);
 	}
 
 	Probe_Cuda_Memcpy_Exit ();
@@ -879,12 +888,12 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 	if (p4 == cudaMemcpyHostToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, 0, p3);
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
 	}
 	else if (p4 == cudaMemcpyDeviceToHost)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, tag, p3);
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, tag, p3, 0, 0);
 	}
 }
 
@@ -920,12 +929,12 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 	   Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyDeviceToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, tag, Extrae_CUDA_saved_params[THREADID].punion.cma.size);
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, tag, Extrae_CUDA_saved_params[THREADID].punion.cma.size, 0, 0);
 	}
 	else
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, 0, Extrae_CUDA_saved_params[THREADID].punion.cma.size);
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, 0, Extrae_CUDA_saved_params[THREADID].punion.cma.size, 0, 0);
 	}
 
 	Probe_Cuda_MemcpyAsync_Exit ();

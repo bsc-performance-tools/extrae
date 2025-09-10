@@ -47,11 +47,19 @@ typedef struct mpi_param_t
   INT64 aux;
 } mpi_param_t;
 
+typedef struct gpu_param_t
+{
+  UINT32 begin;
+  size_t memSize;
+  UINT32 gridSize;
+  UINT32 blockSize;
+} gpu_param_t;
 
 typedef union
 {
   struct omp_param_t omp_param;
   struct mpi_param_t mpi_param;
+  struct gpu_param_t gpu_param;
   struct misc_param_t misc_param;
 } u_param;
 
@@ -92,6 +100,10 @@ typedef struct
 #define Get_EvParam(ptr)         ((ptr)->param.omp_param.param[0])
 #define Get_EvNParam(ptr,i)      ((ptr)->param.omp_param.param[i])
 #define Get_EvMiscParam(ptr)     ((ptr)->param.misc_param.param)
+#define Get_GPUEvBegin(ptr)      ((ptr)->param.gpu_param.begin)
+#define Get_GPUEvMemSize(ptr)    ((ptr)->param.gpu_param.memSize)
+#define Get_GPUEvGridSize(ptr)   ((ptr)->param.gpu_param.gridSize)
+#define Get_GPUEvBlockSize(ptr)  ((ptr)->param.gpu_param.blockSize)
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 # define Get_EvHWCRead(ptr)      (((ptr)->HWCReadSet != 0) ? 1 : 0) /* 0 = not read, >0 = set_id + 1 */
 

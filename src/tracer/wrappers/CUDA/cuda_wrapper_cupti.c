@@ -145,9 +145,16 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 			  (cuLaunchKernel_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaLaunch_Enter(p->f, p->hStream);
+			{
+				Extrae_cudaLaunch_Enter(p->f, 
+				  p->gridDimX * p->gridDimY * p->gridDimZ,
+				  p->blockDimX * p->blockDimY * p->blockDimZ,
+				  p->sharedMemBytes, p->hStream);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
 				Extrae_cudaLaunch_Exit();
+			}
 
 			ret = 1;
 		}
@@ -187,13 +194,19 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaLaunch_v3020_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			{
 # if CUPTI_API_VERSION >= 3
-				Extrae_cudaLaunch_Enter(p->func, NULL);
+				Extrae_cudaLaunch_Enter(p->func,
+				  NULL, NULL, NULL, NULL);
 # else
-				Extrae_cudaLaunch_Enter(p->entry, NULL);
+				Extrae_cudaLaunch_Enter(p->entry,
+				  NULL, NULL, NULL, NULL);
 # endif /* CUPTI_API_VERSION >= 3 */
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
 				Extrae_cudaLaunch_Exit();
+			}
 
 			ret = 1;
 		}
@@ -594,9 +607,16 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaLaunchKernel_v7000_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaLaunch_Enter(p->func, p->stream);
+			{
+				Extrae_cudaLaunch_Enter(p->func, 
+				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
+				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
+				  p->sharedMem, p->stream);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
 				Extrae_cudaLaunch_Exit();
+			}
 
 			ret = 1;
 		}
@@ -609,9 +629,16 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaLaunchKernel_ptsz_v7000_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaLaunch_Enter(p->func, p->stream);
+			{
+				Extrae_cudaLaunch_Enter(p->func,
+				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
+				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
+				  p->sharedMem, p->stream);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
 				Extrae_cudaLaunch_Exit();
+			}
 
 			ret = 1;
 		}
@@ -626,9 +653,16 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaLaunchCooperativeKernel_v9000_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaLaunch_Enter(p->func, p->stream);
+			{
+				Extrae_cudaLaunch_Enter(p->func, 
+				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
+				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
+				  p->sharedMem, p->stream);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
 				Extrae_cudaLaunch_Exit();
+			}
 
 			ret = 1;
 		}
@@ -641,9 +675,16 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaLaunchCooperativeKernel_ptsz_v9000_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaLaunch_Enter(p->func, p->stream);
+			{
+				Extrae_cudaLaunch_Enter(p->func, 
+				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
+				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
+				  p->sharedMem, p->stream);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
 				Extrae_cudaLaunch_Exit();
+			}
 
 			ret = 1;
 		}

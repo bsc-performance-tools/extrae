@@ -105,7 +105,7 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 }
 
 static int
-CUDA_Func_Event(event_t *event, unsigned long long current_time,
+CUDA_Kernel_Inst_Event(event_t *event, unsigned long long current_time,
     unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
     FileSet_t *fset)
 {
@@ -118,8 +118,38 @@ CUDA_Func_Event(event_t *event, unsigned long long current_time,
 	EvType  = Get_EvEvent(event);
 	EvValue = Get_EvValue(event);
 
+
 	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
-	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType == CUDA_KERNEL_INST_EV ? CUDA_KERNEL_INST_LINE_EV : CUDA_KERNEL_EXEC_LINE_EV, EvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_KERNEL_INST_LINE_EV, EvValue);
+
+	return 0;
+}
+
+static int
+CUDA_Kernel_Exec_Event(event_t *event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
+{
+	unsigned int state;
+	unsigned int EvType;
+	unsigned int blocksPerGrid, threadsPerBlock;
+	UINT64 EvValue;
+	UNREFERENCED_PARAMETER(state);
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent(event);
+	EvValue = Get_EvValue(event);
+	blocksPerGrid = Get_GPUEvGridSize(event);
+	threadsPerBlock = Get_GPUEvBlockSize(event);
+
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_KERNEL_EXEC_LINE_EV, EvValue);
+
+	if(EvValue != EVT_END)
+	{
+		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_KERNEL_BLOCKS_PER_GRID, blocksPerGrid);
+		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_KERNEL_THREADS_PER_BLOCK, threadsPerBlock);
+	}
 
 	return 0;
 }
@@ -148,32 +178,30 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
     unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
     FileSet_t *fset)
 {
-	unsigned EvMisc, state;
+	unsigned state, beginEV;
+	size_t size;
 	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvValue = Get_EvValue (event);
-	EvMisc  = Get_EvMiscParam(event);
+	
+	size = Get_GPUEvMemSize(event);
+	beginEV = Get_GPUEvBegin(event);
 
 	switch (EvValue)
 	{
 		case CUDAKERNEL_GPU_VAL:
 			state = STATE_RUNNING;
-			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
-			break;
-		case CUDASTREAMBARRIER_GPU_VAL:
-		case CUDATHREADBARRIER_GPU_VAL:
-			state = STATE_BARRIER;
-			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
+			Switch_State (state, (beginEV != EVT_END), ptask, task, thread);
 			break;
 		case CUDAMEMCPYASYNC_GPU_VAL:
 		case CUDAMEMCPY_GPU_VAL:
 			state = STATE_MEMORY_XFER;
-			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
+			Switch_State (state, (beginEV != EVT_END), ptask, task, thread);
 			break;
 		case CUDACONFIGKERNEL_GPU_VAL:
 			state = STATE_CONFACCEL;
-			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
+			Switch_State (state, (beginEV != EVT_END), ptask, task, thread);
 			break;
 	}
 
@@ -185,10 +213,13 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 	 * don't emit this event so the region is marked as Useful.
 	 * XXX
 	 */
-	if (EvValue != CUDAKERNEL_GPU_VAL)
+	if (EvValue == CUDAMEMCPY_GPU_VAL || EvValue == CUDAMEMCPYASYNC_GPU_VAL)
 	{
-		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDACALL_EV,
-		  (EvMisc != EVT_END) ? EvValue : EVT_END);
+		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDACALL_EV, (beginEV != EVT_END) ? EvValue : EVT_END);
+		if(beginEV != EVT_END)
+		{
+			trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_DYNAMIC_MEM_SIZE_EV, size);
+		}
 	}
 
 	return 0;
@@ -197,8 +228,8 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	/* Host calls */
 	{ CUDACALL_EV, CUDA_Call },
-	{ CUDA_KERNEL_EXEC_EV, CUDA_Func_Event },
-	{ CUDA_KERNEL_INST_EV, CUDA_Func_Event },
+	{ CUDA_KERNEL_EXEC_EV, CUDA_Kernel_Exec_Event },
+	{ CUDA_KERNEL_INST_EV, CUDA_Kernel_Inst_Event },
 	{ CUDA_DYNAMIC_MEM_PTR_EV, CUDA_Punctual_Event },
 	{ CUDA_DYNAMIC_MEM_SIZE_EV, CUDA_Punctual_Event },
 	{ CUDASTREAMBARRIER_THID_EV, CUDA_Punctual_Event },

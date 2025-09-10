@@ -221,7 +221,7 @@ WRAPPERS_CORE = \
  wrappers/API/threadinfo.c wrappers/API/threadinfo.h \
  wrappers/API/trace_buffers.h \
  trace_macros.h trace_macros_mpi.h trace_macros_omp.h \
- trace_hwc.h
+ trace_macros_gpu.h trace_hwc.h
 
 core_SRCS = \
  calltrace.c calltrace.h                     \

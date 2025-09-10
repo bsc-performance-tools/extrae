@@ -69,7 +69,7 @@ void Enable_CUDA_Operation (INT32 type, UINT64 value)
 			inuse[CUDAMEMCPY_INDEX] = TRUE;
 		else if (value == CUDASTREAMBARRIER_VAL)
 			inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
-		else if (value == CUDATHREADBARRIER_VAL || value == CUDATHREADBARRIER_GPU_VAL)
+		else if (value == CUDATHREADBARRIER_VAL)
 			inuse[CUDATHREADBARRIER_INDEX] = TRUE;
 		else if (value == CUDACONFIGCALL_VAL || value == CUDACONFIGKERNEL_GPU_VAL)
 			inuse[CUDACONFIGCALL_INDEX] = TRUE;
@@ -215,6 +215,19 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			             "%d    %d    Synchronized stream (on thread)\n"
                          "\n",
                          0, CUDASTREAMBARRIER_THID_EV);
+
+		if (inuse[CUDALAUNCH_INDEX])
+		{
+			fprintf (fd, "EVENT_TYPE\n"
+			             "%d    %d    CUDA Kernel blocks per grid\n"
+			             "\n",
+			             0, CUDA_KERNEL_BLOCKS_PER_GRID);
+
+			fprintf (fd, "EVENT_TYPE\n"
+			             "%d    %d    CUDA Kernel threads per block\n"
+			             "\n",
+			             0, CUDA_KERNEL_THREADS_PER_BLOCK);
+		}
 
 		if (inuse[CUDAUNTRACKED_INDEX])
 			fprintf(fd, "EVENT_TYPE\n"

@@ -17,7 +17,9 @@ typedef struct gpu_event_t
 	unsigned event;                  /**< Event identifier. */
 	unsigned long long value;        /**< Event value. */
 	unsigned tag;                    /**< Event tag. */
-	unsigned size;                   /**< Event size. */
+	size_t memSize;                  /**< MemCopy size. */
+	unsigned blocksPerGrid;          /**< Kernel blocks grid size. */
+	unsigned threadsPerBlock;        /**< Kernel threads per block size. */
 	Extrae_CUDA_Time_Type timetype;  /**< CUDA timing type. */
 	gpu_event_t *next;               /**< Pointer to the next gpu_event_t in the list. */
 } gpu_event_t;

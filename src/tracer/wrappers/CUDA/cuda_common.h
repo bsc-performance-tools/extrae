@@ -74,7 +74,7 @@ struct CUDAdevices_t
 void Extrae_CUDA_flush_streams (int device_id, int stream_id);
 void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);
 void Extrae_cudaConfigureCall_Exit (void);
-void Extrae_cudaLaunch_Enter (const char*, cudaStream_t);
+void Extrae_cudaLaunch_Enter (const char *f, unsigned int blocksPerGrid, unsigned int threadsPerBlock, size_t sharedMemBytes, cudaStream_t stream);
 void Extrae_cudaLaunch_Exit (void);
 void Extrae_cudaMalloc_Enter(unsigned int, void **, size_t);
 void Extrae_cudaMalloc_Exit(unsigned int);
