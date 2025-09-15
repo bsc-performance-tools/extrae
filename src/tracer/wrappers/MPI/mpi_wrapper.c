@@ -3008,25 +3008,32 @@ void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to)
 	}
 }
 
-/******************************************************************************
- ***  Trace_MPI_Communicator
- ******************************************************************************/
+/**
+ * Trace_MPI_Communicator
+ *
+ * Record the definition of a communicator in the tracefile.
+ * - If the communicator is equivalent to MPI_COMM_WORLD or MPI_COMM_SELF,
+ *    store a well-known alias instead of enumerating all ranks.
+ * - Otherwise, store the list of participating tasks explicitly.
+ *
+ * For performance, we detect "world" and "self" using communicator size
+ * and rank checks, instead of PMPI_Comm_compare. This is fast but not
+ * 100% guaranteed in MPI_COMM_WORLD (another communicator with the same size
+ * could exist if it comes from an MPI_*comm_merge).
+ */
 void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 {
-	/* Store in the tracefile the definition of the communicator.
-	   If the communicator is self/world, store an alias, otherwise store the
-	   involved tasks
-	*/
+
 	int i, num_tasks, ierror;
-	int result, is_comm_world, is_comm_self;
+	int newcomm_size, newcomm_rank;
+	int is_comm_world, is_comm_self;
 
-	/* First check if the communicators are duplicates of comm_world or
-	   comm_self */
-	ierror = PMPI_Comm_compare (MPI_COMM_WORLD, newcomm, &result);
-	is_comm_world = result == MPI_IDENT || result == MPI_CONGRUENT;
+	PMPI_Comm_size (newcomm, &newcomm_size);
+	MPI_Comm_rank(newcomm, &newcomm_rank);
 
-	ierror = PMPI_Comm_compare (MPI_COMM_SELF, newcomm, &result);
-	is_comm_self = result == MPI_IDENT || result == MPI_CONGRUENT;
+	/* ---- Detect common communicators (world/self) ---- */
+	is_comm_world = (newcomm_size == Extrae_MPI_NumTasks());
+	is_comm_self = (newcomm_size == 1 && newcomm_rank == 0);
 
 	if (!is_comm_world && !is_comm_self)
 	{
