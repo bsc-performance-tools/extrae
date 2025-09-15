@@ -24,6 +24,7 @@
 #ifndef RECORD_H_INCLUDED
 #define RECORD_H_INCLUDED
 
+#include <stddef.h>
 #include "common.h"
 #include "num_hwc.h"
 
