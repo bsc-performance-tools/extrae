@@ -63,6 +63,7 @@ struct CUDAdevices_t
 {
 	struct RegisteredStreams_t *Stream;
 	int nstreams;
+	gpu_event_list_t availableEvents; /* available events to add to stream to obtain gpu timings */
 	int initialized;
 #if 0
 	/* To perform sampling, CUPTI */

@@ -54,8 +54,6 @@
  */
 int cudaInitialized = 0;
 
-gpu_event_list_t availableEvents;
-
 /* Structures that will hold the parameters needed for the exit parts of the
  * instrumentation code. This way we can support dyninst/ld-preload/cupti
  * instrumentation with a single file
@@ -132,7 +130,7 @@ static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
 
 	if(devices[devid].Stream[streamid].device_reference_event == NULL)
 	{
-		devices[devid].Stream[streamid].device_reference_event = gpuEventList_pop(&availableEvents);
+		devices[devid].Stream[streamid].device_reference_event = gpuEventList_pop(&devices[devid].availableEvents);
 	}
 
 	err = cudaEventRecord (devices[devid].Stream[streamid].device_reference_event->ts_event, devices[devid].Stream[streamid].stream);
@@ -217,7 +215,7 @@ void Extrae_CUDA_Initialize (int devid)
 		/* default device stream */
 		devices[devid].Stream[0].stream = (cudaStream_t) 0;
 		gpuEventList_init(&devices[devid].Stream[0].gpu_event_list, FALSE, XTR_CUDA_EVENTS_BLOCK_SIZE);
-		gpuEventList_init(&availableEvents, TRUE, XTR_CUDA_EVENTS_BLOCK_SIZE);
+		gpuEventList_init(&devices[devid].availableEvents, TRUE, XTR_CUDA_EVENTS_BLOCK_SIZE);
 
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
@@ -349,7 +347,7 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 	int err;
 	struct RegisteredStreams_t *registered_stream = &devices[devid].Stream[streamid];
 
-	gpu_event_t* gpu_event = gpuEventList_pop(&availableEvents);
+	gpu_event_t* gpu_event = gpuEventList_pop(&devices[devid].availableEvents);
 
 	gpu_event->event = event;
 	gpu_event->value = value;
@@ -452,14 +450,14 @@ static void flushGPUEvents (int devid, int streamid)
 
 			if(gpuEventList_isempty(&registered_stream->gpu_event_list))
 			{
-				gpuEventList_add(&availableEvents, registered_stream->device_reference_event);
+				gpuEventList_add(&devices[devid].availableEvents, registered_stream->device_reference_event);
 				registered_stream->device_reference_event = gpu_event;
 				registered_stream->host_reference_time = last_time;
 				gpu_event = NULL;
 			}
 			else
 			{
-				gpuEventList_add(&availableEvents, gpu_event);
+				gpuEventList_add(&devices[devid].availableEvents, gpu_event);
 				gpu_event = gpuEventList_pop(&registered_stream->gpu_event_list);
 			}
 		}
@@ -1044,6 +1042,7 @@ void Extrae_CUDA_finalize (void)
 		Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 
 		for(int i = 0; i <CUDAdevices ; ++i){
+			gpuEventList_free(&devices[i].availableEvents);
 			Extrae_CUDA_deInitialize (i);
 		}
 		xfree(devices);
@@ -1051,7 +1050,6 @@ void Extrae_CUDA_finalize (void)
 		devices = NULL;
 		CUDAdevices = 0;
 
-		gpuEventList_free(&availableEvents);
 		cudaInitialized = 0;
 	}
 	Backend_Leave_Instrumentation();
