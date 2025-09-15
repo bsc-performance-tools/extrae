@@ -1285,9 +1285,9 @@ AC_DEFUN([AX_CHECK_UNWIND],
          UNWIND_LIBS="-lunwind"
          AC_SUBST(UNWIND_LIBS)
 
-         CFLAGS="${CFLAGS} ${UNWIND_CFLAGS}"
-         LIBS="${LIBS} -lunwind"
-         LDFLAGS="${LDFLAGS} ${UNWIND_LDFLAGS}"
+         CFLAGS="${UNWIND_CFLAGS} ${CFLAGS}"
+         LIBS="-lunwind ${LIBS}"
+         LDFLAGS="${UNWIND_LDFLAGS} ${LDFLAGS}"
 
          AC_MSG_CHECKING([if libunwind works])
 
