@@ -3029,7 +3029,7 @@ void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 	int is_comm_world, is_comm_self;
 
 	PMPI_Comm_size (newcomm, &newcomm_size);
-	MPI_Comm_rank(newcomm, &newcomm_rank);
+	PMPI_Comm_rank(newcomm, &newcomm_rank);
 
 	/* ---- Detect common communicators (world/self) ---- */
 	is_comm_world = (newcomm_size == Extrae_MPI_NumTasks());
