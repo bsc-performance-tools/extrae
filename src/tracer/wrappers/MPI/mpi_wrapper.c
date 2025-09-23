@@ -3378,7 +3378,7 @@ static MPI_Status * substituteStatusIgnore_C(int count, MPI_Status *user_statuse
         int i = 0;
 
 	// Check if the user is using MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE to use an array of our own
-        MPI_Status *proxy_statuses = ((user_statuses == ((count > 1) ? MPI_STATUSES_IGNORE : MPI_STATUS_IGNORE)) ? local_statuses : user_statuses);
+	MPI_Status *proxy_statuses = ((user_statuses ==  MPI_STATUSES_IGNORE || user_statuses == MPI_STATUS_IGNORE) ? local_statuses : user_statuses);
 
 	// Check if we need to allocate memory for the status array
 	if (((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) && (proxy_statuses != user_statuses)) || (proxy_statuses == NULL))
@@ -3404,7 +3404,7 @@ static MPI_Fint * substituteStatusIgnore_F(int count, MPI_Fint *user_statuses, M
 	int i = 0;
 
 	// Check if the user is using MPI_F_STATUS_IGNORE or MPI_F_STATUSES_IGNORE to use an array of our own 
-	MPI_Fint *proxy_statuses = ((user_statuses == ((count > 1) ? MPI_F_STATUSES_IGNORE : MPI_F_STATUS_IGNORE)) ? local_statuses : user_statuses);
+	MPI_Fint *proxy_statuses = ((user_statuses == MPI_F_STATUSES_IGNORE || user_statuses == MPI_F_STATUS_IGNORE) ? local_statuses : user_statuses);
 
 	// Check if we need to allocate memory for the status array
 	if (((count > MIN(MAX_MPI_HANDLES, dynamicMPIHandlesThreshold)) && (proxy_statuses != user_statuses)) || (proxy_statuses == NULL))
