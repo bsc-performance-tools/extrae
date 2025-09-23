@@ -1017,7 +1017,7 @@ static int Extrae_IntelPEBS_enable (void)
 			pe_aux.size = sizeof(struct perf_event_attr);
 			pe_aux.config = 0x8203;
 			pe_aux.sample_type = PERF_SAMPLE_IP|PERF_SAMPLE_TID|PERF_SAMPLE_TIME|PERF_SAMPLE_ADDR|PERF_SAMPLE_ID|PERF_SAMPLE_PERIOD|PERF_SAMPLE_DATA_SRC|PERF_SAMPLE_WEIGHT_STRUCT;
-			pe_aux.read_format = PERF_FORMAT_ID|PERF_FORMAT_LOST;
+			pe_aux.read_format = PERF_FORMAT_ID; /* |PERF_FORMAT_LOST */
 			pe_aux.disabled = 1;
 			pe_aux.inherit = 1;
 			pe_aux.mmap = 1;
@@ -1044,7 +1044,12 @@ static int Extrae_IntelPEBS_enable (void)
 			pe_aux.bpf_event = 1;
 
 			aux_fd = perf_event_open (&pe_aux, 0, -1, -1, PERF_FLAG_FD_CLOEXEC);
-			fprintf (stderr, PACKAGE_NAME": Cannot open the auxiliary event 0x%x in front of the load latency event\n", pe_aux.config);
+			
+			if (aux_fd == -1)
+			{
+				fprintf (stderr, PACKAGE_NAME": Cannot open the auxiliary event 0x%x in front of the load latency event\n", pe_aux.config);
+				perror("perf_event_open");
+			}
 
 			pe.type = PERF_TYPE_RAW;
 			pe.size = sizeof(struct perf_event_attr);
@@ -1055,7 +1060,7 @@ static int Extrae_IntelPEBS_enable (void)
 					    * Or the latency threshold is set in a field of perf_event_attr structure (e.g., pe.config1?) 
 					    */
 			pe.sample_type = PERF_SAMPLE_IP|PERF_SAMPLE_TID|PERF_SAMPLE_TIME|PERF_SAMPLE_ADDR|PERF_SAMPLE_ID|PERF_SAMPLE_PERIOD|PERF_SAMPLE_DATA_SRC|PERF_SAMPLE_WEIGHT_STRUCT;
-			pe.read_format = PERF_FORMAT_ID|PERF_FORMAT_LOST;
+			pe.read_format = PERF_FORMAT_ID; /* |PERF_FORMAT_LOST */
 			pe.inherit = 1;
 			if (PEBS_load_operates_in_frequency_mode)
 			{
