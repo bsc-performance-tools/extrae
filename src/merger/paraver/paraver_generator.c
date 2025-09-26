@@ -1292,20 +1292,42 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 	if (0 == taskid)
 	{
-#ifndef HAVE_ZLIB
-		if (strlen(outName) >= 7 &&
+		/* XXX: Here we are changing the function argument outName directly
+		 *      which persists after we exit this function, and affects the 
+		 *      future name of .pcf and .row files. This is very ugly!
+		 *      Try to move all this to a single function that prepares the 3 output names.
+		 */
+		if (strlen(outName) < 4)
+		{
+			// Name is too short to contain required .prv extension, add it
+			strcat(outName, ".prv");
+			isGzip = 0;
+		}
+		else if (strlen(outName) >= 7 &&
 		    strncmp(&(outName[strlen(outName) - 7]), ".prv.gz", 7) == 0)
 		{
-			outName[strlen(outName) - 3] = (char) 0;
+#ifdef HAVE_ZLIB
+			// Given output name contains explicit .prv.gz extension,
+			// and we have zlib available, zip it
+			isGzip = 1;
+#else
+			// Given output name contains explicit .prv.gz extension, 
+			// but there's not zlib available, no zipping
+			outName[strlen(outName) - 3] = '\0';
 			isGzip = 0;
-		} else
 #endif // HAVE_ZLIB
-		if (strlen(outName) > 4 &&
+		} 
+		else if (strlen(outName) > 4 &&
+		    strncmp(&(outName[strlen(outName) - 4]), ".prv", 4) == 0)
+		{
+			// Given output name contains explicit .prv extension, no zipping
+			isGzip = 0;
+		}
+		else if (strlen(outName) > 4 &&
 		    strncmp(&(outName[strlen(outName) - 4]), ".prv", 4) != 0)
 		{
-			char *dupstr = strdup(outName);
-		    	snprintf(outName, strlen(dupstr) + 5, "%s.prv", dupstr);
-		    	free(dupstr);
+			// Given output name lacks .prv extension, add it
+		    	strcat(outName, ".prv");
 			isGzip = 0;
 		}
 
@@ -1487,7 +1509,9 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 #endif
 
 	if (0 == taskid)
-		if (error)
-			unlink (outName);
+	{
+		if (error) unlink (outName);
+	}
+
 	return 0;
 }
