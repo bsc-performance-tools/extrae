@@ -1266,7 +1266,7 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 	if (EXTRAE_ON())
 	{
 		Probe_OpenMP_ParRegion_Entry ();
-		Probe_OpenMP_EmitTaskStatistics();
+		Extrae_OpenMP_EmitTaskStatistics();
 
 		snprintf(kmpc_parallel_wrap_name, sizeof(kmpc_parallel_wrap_name), "__kmpc_parallel_wrap_%d_args", argc);
 		wrap_ptr = dlsym(RTLD_DEFAULT, kmpc_parallel_wrap_name);
@@ -1295,7 +1295,7 @@ void __kmpc_fork_call_dyninst (void *loc, int argc, void *microtask, ...)
 	if (EXTRAE_ON())
 	{
 		Probe_OpenMP_ParRegion_Exit ();	
-		Probe_OpenMP_EmitTaskStatistics();
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_fork_call_dyninst exit\n ", THREAD_LEVEL_VAR);
@@ -1401,7 +1401,7 @@ void * __kmpc_omp_task_alloc (void *loc, int gtid, int flags, size_t sizeof_kmp_
 	if (TRACE(__kmpc_omp_task_alloc_real))
 	{
 		Probe_OpenMP_Task_Entry (task_entry);
-		Probe_OpenMP_Notify_NewInstantiatedTask();
+		Extrae_OpenMP_Notify_NewInstantiatedTask();
 		/* 
 		 * We change the task to execute to be the callback helper__kmpc_task_substitute.
 		 * The pointer to this new task (wrap_task) is associated to the real task 
@@ -1448,7 +1448,7 @@ void __kmpc_omp_task_begin_if0 (void *loc, int gtid, void *task)
 		if (__kmpc_omp_task_begin_if0_real != NULL)
 		{
 			Probe_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
-			Probe_OpenMP_Notify_NewInstantiatedTask();
+			Extrae_OpenMP_Notify_NewInstantiatedTask();
 			__kmpc_omp_task_begin_if0_real (loc, gtid, task);
 		}
 		else
@@ -1518,12 +1518,12 @@ int __kmpc_omp_taskwait (void *loc, int gtid)
 	if (TRACE(__kmpc_omp_taskwait_real))
 	{
 		Probe_OpenMP_Taskwait_Entry();
-		Probe_OpenMP_EmitTaskStatistics();
+		Extrae_OpenMP_EmitTaskStatistics();
 		Backend_Leave_Instrumentation ();
 		res = __kmpc_omp_taskwait_real (loc, gtid);
 		Backend_Enter_Instrumentation ();
 		Probe_OpenMP_Taskwait_Exit();
-		Probe_OpenMP_EmitTaskStatistics();
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (__kmpc_omp_taskwait_real != NULL)
 	{
@@ -1702,7 +1702,7 @@ __kmpc_taskgroup(void *loc, int global_tid)
 	if (TRACE(__kmpc_taskgroup_real))
 	{
 		Probe_OpenMP_Taskgroup_start_Entry();
-		Probe_OpenMP_EmitTaskStatistics();
+		Extrae_OpenMP_EmitTaskStatistics();
 		__kmpc_taskgroup_real(loc, global_tid);
 		Probe_OpenMP_Taskgroup_start_Exit();
 	}
@@ -1742,7 +1742,7 @@ __kmpc_end_taskgroup(void *loc, int global_tid)
 		Probe_OpenMP_Taskgroup_end_Entry();
 		__kmpc_end_taskgroup_real (loc, global_tid);
 		Probe_OpenMP_Taskgroup_end_Exit();
-		Probe_OpenMP_EmitTaskStatistics();
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (__kmpc_end_taskgroup_real != NULL)
 	{
