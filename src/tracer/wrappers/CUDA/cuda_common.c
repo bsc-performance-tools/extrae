@@ -1042,8 +1042,10 @@ void Extrae_CUDA_finalize (void)
 		Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 
 		for(int i = 0; i <CUDAdevices ; ++i){
-			gpuEventList_free(&devices[i].availableEvents);
-			Extrae_CUDA_deInitialize (i);
+			if(devices[i].initialized == TRUE){
+				gpuEventList_free(&devices[i].availableEvents);
+				Extrae_CUDA_deInitialize (i);
+			}
 		}
 		xfree(devices);
 

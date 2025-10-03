@@ -31,6 +31,7 @@
 #endif
 #include <misc_interface.h>
 #include "auto_fini.h"
+#include "wrapper.h"
 
 static int Extrae_automatically_loaded = FALSE;
 
