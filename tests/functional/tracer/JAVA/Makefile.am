@@ -26,20 +26,20 @@ check_PROGRAMS += \
 endif
 
 JavaSimple.class$(EXEEXT): JavaSimple.java
-	$(JAVAC) JavaSimple.java
+	$(JAVAC) JavaSimple.java -d $(top_builddir)/tests/functional/tracer/JAVA
 
 JavaGC.class$(EXEEXT): JavaGC.java
-	$(JAVAC) JavaGC.java
+	$(JAVAC) JavaGC.java -d $(top_builddir)/tests/functional/tracer/JAVA
 
 JavaException.class$(EXEEXT): JavaException.java
-	$(JAVAC) JavaException.java
+	$(JAVAC) JavaException.java -d $(top_builddir)/tests/functional/tracer/JAVA
 
 JavaThreads.class$(EXEEXT): JavaThreads.java
-	$(JAVAC) JavaThreads.java
+	$(JAVAC) JavaThreads.java -d $(top_builddir)/tests/functional/tracer/JAVA
 
 if WANT_JAVA_WITH_ASPECTJ
 JavaFunction.class$(EXEEXT): JavaFunction.java
-	$(JAVAC) JavaFunction.java
+	$(JAVAC) JavaFunction.java -d $(top_builddir)/tests/functional/tracer/JAVA
 endif
 
 TESTS = \
