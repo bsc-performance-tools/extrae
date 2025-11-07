@@ -222,8 +222,8 @@ static void * pthread_create_hook (void *p1)
 	void *arg = i->arg;
 	void *res = 0;
 
-	Backend_Enter_Instrumentation ();
 	Backend_SetpThreadIdentifier (i->pthreadID);
+	Backend_Enter_Instrumentation ();
 
 	/* Wake up the calling thread */
 	pthread_barrier_wait_real(&(i->barrier));
