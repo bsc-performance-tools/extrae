@@ -399,7 +399,7 @@ MPI_F_SYMS(mpi_comm_create_group__,mpi_comm_create_group_,MPI_COMM_CREATE_GROUP,
 void NAME_ROUTINE_F(mpi_comm_create_group) (MPI_Fint *comm, MPI_Fint *group,
   MPI_Fint *tag, MPI_Fint *newcomm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
+void NAME_ROUTINE_C2F(mpi_comm_create_group) (MPI_Fint *comm, MPI_Fint *group,
   MPI_Fint *tag, MPI_Fint *newcomm, MPI_Fint *ierror)
 #endif
 {

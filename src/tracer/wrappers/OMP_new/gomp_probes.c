@@ -1226,7 +1226,7 @@ void xtr_probe_entry_GOMP_parallel()
 
 void xtr_probe_exit_GOMP_parallel()
 {
-	Extrae_OpenMP_Forking_Exit(NEW_OMP_FORK_END_VAL);
+	Extrae_OpenMP_Forking_Exit();
 	Extrae_OpenMP_Call_Exit(GOMP_PARALLEL_VAL);
 	xtr_stats_OMP_update_overhead_exit();
 }
