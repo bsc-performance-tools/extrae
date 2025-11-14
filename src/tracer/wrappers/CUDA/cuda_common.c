@@ -58,46 +58,17 @@ int cudaInitialized = 0;
  * instrumentation code. This way we can support dyninst/ld-preload/cupti
  * instrumentation with a single file
  */
-
-typedef struct 
-{
-	cudaStream_t *stream;
-} cudaStreamCreate_saved_params_t;
-
 typedef struct
 {
+	int stream_id;
 	cudaStream_t stream;
-} cudaStreamSynchronize_saved_params_t;
-
-typedef struct
-{
-	size_t size;
-	enum cudaMemcpyKind kind;
-} cudaMemcpy_saved_params_t;
-
-typedef struct
-{
-	size_t size;
-	enum cudaMemcpyKind kind;
-	cudaStream_t stream;
-} cudaMemcpyAsync_saved_params_t;
-
-typedef union
-{
-	cudaStreamCreate_saved_params_t csc;
-	cudaStreamSynchronize_saved_params_t css;
-	cudaMemcpy_saved_params_t cm;
-	cudaMemcpyAsync_saved_params_t cma;
-} Extrae_cuda_saved_params_union;
-
-typedef struct
-{
-	Extrae_cuda_saved_params_union punion;
+	enum cudaMemcpyKind memcpyKind;
+	size_t memcpySize;
 } Extrae_cuda_saved_params_t;
 
-unsigned cuda_events_block_size = DEFAULT_CUDA_EVENTS_BLOCK_SIZE;
+static __thread Extrae_cuda_saved_params_t Extrae_CUDA_saved_params;
 
-static Extrae_cuda_saved_params_t *Extrae_CUDA_saved_params = NULL;
+unsigned cuda_events_block_size = DEFAULT_CUDA_EVENTS_BLOCK_SIZE;
 
 static unsigned __last_tag = 0xC0DA; /* Fixed tag */
 static unsigned Extrae_CUDA_tag_generator (void)
@@ -133,12 +104,8 @@ static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
 		devices[devid].Stream[streamid].device_reference_event = gpuEventList_pop(&devices[devid].availableEvents);
 	}
 
-	err = cudaEventRecord (devices[devid].Stream[streamid].device_reference_event->ts_event, devices[devid].Stream[streamid].stream);
-	CHECK_CU_ERROR(err, cudaEventRecord);
-
-	err = cudaEventSynchronize (devices[devid].Stream[streamid].device_reference_event->ts_event);
-	CHECK_CU_ERROR(err, cudaEventSynchronize);
-
+	CUDA_RUNTIME_CHECK(cudaEventRecord(devices[devid].Stream[streamid].device_reference_event->ts_event, devices[devid].Stream[streamid].stream));
+	CUDA_RUNTIME_CHECK(cudaEventSynchronize (devices[devid].Stream[streamid].device_reference_event->ts_event));
 	devices[devid].Stream[streamid].host_reference_time = TIME;
 }
 
@@ -163,8 +130,7 @@ void Extrae_CUDA_Initialize (int devid)
 	/* If devices table is not initialized, create it first */
 	if (devices == NULL)
 	{
-		err = cudaGetDeviceCount (&CUDAdevices);
-		CHECK_CU_ERROR (err, cudaGetDeviceCount);
+		CUDA_RUNTIME_CHECK(cudaGetDeviceCount (&CUDAdevices));
 
 		devices = (struct CUDAdevices_t*) xmalloc (sizeof(struct CUDAdevices_t)*CUDAdevices);
 
@@ -357,8 +323,7 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
 	gpu_event->threadsPerBlock = threadsperblock;
 	gpu_event->timetype = timetype;
 
-	err = cudaEventRecord (gpu_event->ts_event, registered_stream->stream);
-	CHECK_CU_ERROR(err, cudaEventRecord);
+	CUDA_RUNTIME_CHECK(cudaEventRecord(gpu_event->ts_event, registered_stream->stream));
 
 	gpuEventList_add(&registered_stream->gpu_event_list, gpu_event);
 }
@@ -413,8 +378,7 @@ static void flushGPUEvents (int devid, int streamid)
 
 	if(last_gpu_event != NULL)
 	{
-		err = cudaEventSynchronize(last_gpu_event->ts_event);
-		CHECK_CU_ERROR(err, cudaEventSynchronize);
+		CUDA_RUNTIME_CHECK(cudaEventSynchronize(last_gpu_event->ts_event));
 		reference_event = &registered_stream->device_reference_event->ts_event;
 		reference_time = registered_stream->host_reference_time;
 
@@ -430,8 +394,7 @@ static void flushGPUEvents (int devid, int streamid)
 				* resolution of around 0.5 microseconds) -- according to
 				* https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
 				*/
-				err = cudaEventElapsedTime (&ftmp, *reference_event, gpu_event->ts_event);
-				CHECK_CU_ERROR(err, cudaEventElapsedTime);
+				CUDA_RUNTIME_CHECK(cudaEventElapsedTime (&ftmp, *reference_event, gpu_event->ts_event));
 				ftmp *= 1000000;
 				/* Time correction between CPU & GPU */
 				utmp = reference_time + (UINT64) (ftmp);
@@ -464,178 +427,6 @@ static void flushGPUEvents (int devid, int streamid)
 	}
 }
 
-/****************************************************************************/
-/* CUDA INSTRUMENTATION                                                     */
-/****************************************************************************/
-
-__thread int _cudaLaunch_stream = 0;
-
-void Extrae_cudaConfigureCall_Enter (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
-{
-	int strid;
-	int devid;
-	unsigned tag = Extrae_CUDA_tag_generator();
-
-	UNREFERENCED_PARAMETER(p1);
-	UNREFERENCED_PARAMETER(p2);
-	UNREFERENCED_PARAMETER(p3);
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Probe_Cuda_ConfigureCall_Entry ();
-
-	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
-
-	strid = Extrae_CUDA_SearchStream (devid, p4);
-	if (strid == -1)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaConfigureCall (p4=%p)\n", p4);
-		exit (-1);
-	}
-	_cudaLaunch_stream = strid;
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-	  CUDACONFIGKERNEL_GPU_VAL, EVT_BEGIN, tag, tag, 0, 0);
-}
-
-void Extrae_cudaConfigureCall_Exit (void)
-{
-	int devid;
-
-	cudaGetDevice (&devid);
-
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream, 
-	  CUDACONFIGKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0, 0, 0);
-
-	Probe_Cuda_ConfigureCall_Exit ();
-}
-
-void Extrae_cudaLaunch_Enter (const char *f,
-    unsigned int blocksPerGrid,
-    unsigned int threadsPerBlock,
-    size_t sharedMemBytes,
-    cudaStream_t stream)
-{
-	int devid;
-	unsigned tag = Extrae_CUDA_tag_generator();
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Probe_Cuda_Launch_Entry ((UINT64) f);
-
-	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
-
-	int strid = Extrae_CUDA_SearchStream (devid, stream);
-	_cudaLaunch_stream = strid;
-
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream,
-	  CUDAKERNEL_GPU_VAL, (UINT64)f, tag, sharedMemBytes, blocksPerGrid, threadsPerBlock);
-}
-
-void Extrae_cudaLaunch_Exit (void)
-{
-	int devid;
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, _cudaLaunch_stream,
-	  CUDAKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0, 0, 0);
-
-	Probe_Cuda_Launch_Exit ();
-}
-
-void Extrae_cudaMalloc_Enter(unsigned int event, void **devPtr, size_t size)
-{
-	int devid;
-
-	cudaGetDevice(&devid);
-	Extrae_CUDA_Initialize(devid);
-
-	Probe_Cuda_Malloc_Entry(event, (UINT64)devPtr, size);
-}
-
-void Extrae_cudaMalloc_Exit(unsigned int event)
-{
-	int devid;
-
-	cudaGetDevice(&devid);
-	Extrae_CUDA_Initialize(devid);
-
-	Probe_Cuda_Malloc_Exit(event);
-}
-
-void Extrae_cudaFree_Enter(unsigned int event, void *devPtr)
-{
-	int devid;
-
-	cudaGetDevice(&devid);
-	Extrae_CUDA_Initialize(devid);
-
-	Probe_Cuda_Free_Entry(event, (UINT64)devPtr);
-}
-
-void Extrae_cudaFree_Exit(unsigned int event)
-{
-	int devid;
-
-	cudaGetDevice(&devid);
-	Extrae_CUDA_Initialize(devid);
-
-	Probe_Cuda_Free_Exit(event);
-}
-
-void Extrae_cudaHostAlloc_Enter(void **pHost, size_t size)
-{
-	Probe_Cuda_HostAlloc_Entry((UINT64)pHost, size);
-}
-
-void Extrae_cudaHostAlloc_Exit()
-{
-	Probe_Cuda_HostAlloc_Exit();
-}
-
-void Extrae_cudaDeviceSynchronize_Enter (void)
-{
-	int devid;
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Probe_Cuda_ThreadBarrier_Entry ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
-}
-
-void Extrae_cudaDeviceSynchronize_Exit (void)
-{
-	int devid;
-
-	cudaGetDevice (&devid);
-
-	Probe_Cuda_ThreadBarrier_Exit ();
-}
-
-void Extrae_cudaThreadSynchronize_Enter (void)
-{
-	int devid;
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Probe_Cuda_ThreadBarrier_Entry ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
-}
-
-void Extrae_cudaThreadSynchronize_Exit (void)
-{
-	int devid;
-
-	cudaGetDevice (&devid);
-
-	Probe_Cuda_ThreadBarrier_Exit ();
-}
-
 void Extrae_CUDA_flush_streams ( int device_id, int stream_id )
 {
 	int d = 0, s = 0;
@@ -661,115 +452,207 @@ void Extrae_CUDA_flush_streams ( int device_id, int stream_id )
 	}
 }
 
+/****************************************************************************/
+/* CUDA INSTRUMENTATION                                                     */
+/****************************************************************************/
+
+void Extrae_cudaConfigureCall_Enter (void)
+{
+	Probe_Cuda_ConfigureCall_Entry ();
+}
+
+void Extrae_cudaConfigureCall_Exit (void)
+{
+	Probe_Cuda_ConfigureCall_Exit ();
+}
+
+void Extrae_cudaLaunch_Enter (const char *f,
+    unsigned int blocksPerGrid,
+    unsigned int threadsPerBlock,
+    size_t sharedMemBytes,
+    cudaStream_t stream,
+    CUcontext ctx)
+{
+	int devid, strid;
+	unsigned tag = Extrae_CUDA_tag_generator();
+
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+
+	Extrae_CUDA_Initialize (devid);
+
+	strid = Extrae_CUDA_SearchStream (devid, stream);
+	if (strid == -1)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaLaunch_Enter\n");
+		exit (-1);
+	}
+
+	Extrae_CUDA_saved_params.stream_id = strid;
+
+	Probe_Cuda_Launch_Entry ((UINT64) f);
+
+	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
+
+	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
+	  CUDAKERNEL_GPU_VAL, (UINT64)f, tag, sharedMemBytes, blocksPerGrid, threadsPerBlock);
+}
+
+void Extrae_cudaLaunch_Exit (CUcontext ctx)
+{
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+
+	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, 
+		devid,
+		Extrae_CUDA_saved_params.stream_id,
+		CUDAKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0, 0, 0);
+
+	Probe_Cuda_Launch_Exit ();
+}
+
+void Extrae_cudaMalloc_Enter(unsigned int event, void **devPtr, size_t size, CUcontext ctx)
+{
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+
+	Extrae_CUDA_Initialize(devid);
+
+	Probe_Cuda_Malloc_Entry(event, (UINT64)devPtr, size);
+}
+
+void Extrae_cudaMalloc_Exit(unsigned int event)
+{
+	Probe_Cuda_Malloc_Exit(event);
+}
+
+void Extrae_cudaFree_Enter(unsigned int event, void *devPtr, CUcontext ctx)
+{
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize(devid);
+
+	Probe_Cuda_Free_Entry(event, (UINT64)devPtr);
+}
+
+void Extrae_cudaFree_Exit(unsigned int event)
+{
+	Probe_Cuda_Free_Exit(event);
+}
+
+void Extrae_cudaHostAlloc_Enter(void **pHost, size_t size, CUcontext ctx)
+{
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize(devid);
+
+	Probe_Cuda_HostAlloc_Entry((UINT64)pHost, size);
+}
+
+void Extrae_cudaHostAlloc_Exit()
+{
+	Probe_Cuda_HostAlloc_Exit();
+}
+
+void Extrae_cudaDeviceSynchronize_Enter (CUcontext ctx)
+{
+	int devid;
+
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize (devid);
+
+	Probe_Cuda_ThreadBarrier_Entry ();
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
+}
+
+void Extrae_cudaDeviceSynchronize_Exit (void)
+{
+	Probe_Cuda_ThreadBarrier_Exit ();
+}
+
+void Extrae_cudaThreadSynchronize_Enter (CUcontext ctx)
+{
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize (devid);
+
+	Probe_Cuda_ThreadBarrier_Entry ();
+	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
+}
+
+void Extrae_cudaThreadSynchronize_Exit (void)
+{
+	Probe_Cuda_ThreadBarrier_Exit ();
+}
+
 void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
 {
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
-	Extrae_CUDA_saved_params[THREADID].punion.csc.stream = p1;
+	Extrae_CUDA_saved_params.stream = *p1;
 
 	Probe_Cuda_StreamCreate_Entry ();
 }
 
-void Extrae_cudaStreamCreate_Exit (void)
+void Extrae_cudaStreamCreate_Exit (CUcontext ctx)
 {
 	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
-	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
-
-	Extrae_CUDA_RegisterStream (devid,
-	  *Extrae_CUDA_saved_params[THREADID].punion.csc.stream);
+	Extrae_CUDA_RegisterStream (devid, Extrae_CUDA_saved_params.stream);
 
 	Probe_Cuda_StreamCreate_Exit ();
 }
 
-void Extrae_cudaStreamDestroy_Enter (cudaStream_t stream)
+void Extrae_cudaStreamDestroy_Enter (cudaStream_t stream, CUcontext ctx)
 {
 	int devid;
-
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize (devid);
 
 	Probe_Cuda_StreamDestroy_Entry ();
 
-	Extrae_CUDA_saved_params[THREADID].punion.css.stream = stream;
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Extrae_CUDA_unRegisterStream (devid, Extrae_CUDA_saved_params[THREADID].punion.css.stream);
+	Extrae_CUDA_unRegisterStream (devid, stream);
 }
 
 void Extrae_cudaStreamDestroy_Exit (void)
 {
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
 	Probe_Cuda_StreamDestroy_Exit ();
 }
 
-void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
+void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1, CUcontext ctx)
 {
-	int strid;
-	int devid;
-
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
-	Extrae_CUDA_saved_params[THREADID].punion.css.stream = p1;
-
-	cudaGetDevice (&devid);
+	int devid, strid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 	Extrae_CUDA_Initialize (devid);
 
-	strid = Extrae_CUDA_SearchStream (devid,
-	  Extrae_CUDA_saved_params[THREADID].punion.css.stream);
-
-	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
-
-	Extrae_CUDA_flush_streams(devid, strid);
-
+	strid = Extrae_CUDA_SearchStream (devid, p1);
 	if (strid == -1)
 	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaStreamSynchronize\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaStreamSynchronize_Enter\n");
 		exit (-1);
 	}
+
+	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
+	Extrae_CUDA_flush_streams(devid, strid);
 }
 
 void Extrae_cudaStreamSynchronize_Exit (void)
 {
-	int strid;
-	int devid;
-
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	strid = Extrae_CUDA_SearchStream (devid,
-	  Extrae_CUDA_saved_params[THREADID].punion.css.stream);
-	if (strid == -1)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaStreamSynchronize\n");
-		exit (-1);
-	}
-
 	Probe_Cuda_StreamBarrier_Exit ();
 }
 
-void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4)
+void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4, CUcontext ctx)
 {
-	int devid;
-	unsigned tag;
-
 	UNREFERENCED_PARAMETER(p1);
 	UNREFERENCED_PARAMETER(p2);
 
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
+	unsigned tag;
+	int devid;
 
-	Extrae_CUDA_saved_params[THREADID].punion.cm.size = p3;
-	Extrae_CUDA_saved_params[THREADID].punion.cm.kind = p4;
-
-	cudaGetDevice (&devid);
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 	Extrae_CUDA_Initialize (devid);
+
+	Extrae_CUDA_saved_params.memcpySize = p3;
+	Extrae_CUDA_saved_params.memcpyKind = p4;
 
 	Probe_Cuda_Memcpy_Entry (p3);
 
@@ -800,15 +683,14 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	}
 }
 
-void Extrae_cudaMemcpy_Exit (void)
+void Extrae_cudaMemcpy_Exit (CUcontext ctx)
 {
-	int devid;
 	unsigned tag;
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
+	enum cudaMemcpyKind kind = Extrae_CUDA_saved_params.memcpyKind;
+	size_t size = Extrae_CUDA_saved_params.memcpySize;
 
 	tag = Extrae_CUDA_tag_get();
 
@@ -819,45 +701,39 @@ void Extrae_cudaMemcpy_Exit (void)
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication arrives at this point.
 	 */
-	if (Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyHostToDevice ||
-	  Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyDeviceToDevice)
+	if (kind == cudaMemcpyHostToDevice || kind == cudaMemcpyDeviceToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_END, tag, Extrae_CUDA_saved_params[THREADID].punion.cm.size, 0, 0);
+		  CUDAMEMCPY_GPU_VAL, EVT_END, tag, size, 0, 0);
 	}
-	else if (Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyDeviceToHost)
+	else if (kind == cudaMemcpyDeviceToHost)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_END, 0, Extrae_CUDA_saved_params[THREADID].punion.cm.size, 0, 0);
+		  CUDAMEMCPY_GPU_VAL, EVT_END, tag, size, 0, 0);
 	}
 
 	Probe_Cuda_Memcpy_Exit ();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
-	if (Extrae_CUDA_saved_params[THREADID].punion.cm.kind == cudaMemcpyDeviceToHost)
+	if (kind == cudaMemcpyDeviceToHost)
 	{
-		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-		  TASKID, Extrae_CUDA_saved_params[THREADID].punion.cm.size, tag, tag);
+		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV, TASKID, size, tag, tag);
 	}
 }
 
-void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4,cudaStream_t p5)
+void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4,cudaStream_t p5, CUcontext ctx)
 {
-	int devid;
-	int strid;
-	unsigned tag;
-
 	UNREFERENCED_PARAMETER(p1);
 	UNREFERENCED_PARAMETER(p2);
 
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
-	Extrae_CUDA_saved_params[THREADID].punion.cma.size = p3;
-	Extrae_CUDA_saved_params[THREADID].punion.cma.kind = p4;
-	Extrae_CUDA_saved_params[THREADID].punion.cma.stream = p5;
-
-	cudaGetDevice (&devid);
+	int devid, strid;
+	unsigned tag;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 	Extrae_CUDA_Initialize (devid);
+
+	Extrae_CUDA_saved_params.memcpySize = p3;
+	Extrae_CUDA_saved_params.memcpyKind = p4;
+	Extrae_CUDA_saved_params.stream = p5;
 
 	Probe_Cuda_MemcpyAsync_Entry (p3);
 
@@ -876,6 +752,7 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaMemcpyAsync_Enter\n");
 		exit (-1);
 	}
+	Extrae_CUDA_saved_params.stream_id = strid;
 
 	/* If the memcpy is started at host, we use tag = 0 to indicate that we
 	 * don't want a communication at this point (this will occur at _Exit
@@ -895,26 +772,17 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 	}
 }
 
-void Extrae_cudaMemcpyAsync_Exit (void)
+void Extrae_cudaMemcpyAsync_Exit (CUcontext ctx)
 {
-	int devid;
-	int strid;
 	unsigned tag;
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 
-	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
+	int strid = Extrae_CUDA_saved_params.stream_id;
+	enum cudaMemcpyKind kind = Extrae_CUDA_saved_params.memcpyKind;
+	size_t size = Extrae_CUDA_saved_params.memcpySize;
 
 	tag = Extrae_CUDA_tag_get();
-
-	strid = Extrae_CUDA_SearchStream (devid,
-	  Extrae_CUDA_saved_params[THREADID].punion.cma.stream);
-	if (strid == -1)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaMemcpyAsync_Enter\n");
-		exit (-1);
-	}
 
 	/* THIS IS SYMMETRIC TO Extrae_cudaMemcpyAsync_Enter */
 	/* If the memcpy is started at device, we use tag = 0 to indicate that we
@@ -923,92 +791,70 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication arrives at this point.
 	 */
-	if (Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyHostToDevice ||
-	   Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyDeviceToDevice)
+	if (kind == cudaMemcpyHostToDevice || kind == cudaMemcpyDeviceToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, tag, Extrae_CUDA_saved_params[THREADID].punion.cma.size, 0, 0);
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, tag, size, 0, 0);
 	}
 	else
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, 0, Extrae_CUDA_saved_params[THREADID].punion.cma.size, 0, 0);
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, 0, size, 0, 0);
 	}
 
 	Probe_Cuda_MemcpyAsync_Exit ();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
-	if (Extrae_CUDA_saved_params[THREADID].punion.cma.kind == cudaMemcpyDeviceToHost)
+	if (kind == cudaMemcpyDeviceToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-		  TASKID, Extrae_CUDA_saved_params[THREADID].punion.cma.size, tag, tag);
+		  TASKID, size, tag, tag);
 	}
 }
 
-void Extrae_cudaMemset_Enter(void *devPtr, size_t count)
+void Extrae_cudaMemset_Enter(void *devPtr, size_t count, CUcontext ctx)
 {
 	int devid;
-
-	cudaGetDevice(&devid);
-	Extrae_CUDA_Initialize(devid);
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize (devid);
 
 	Probe_Cuda_Memset_Entry((UINT64)devPtr, count);
 }
 
 void Extrae_cudaMemset_Exit()
 {
-	int devid;
-
-	cudaGetDevice(&devid);
-	Extrae_CUDA_Initialize(devid);
-
 	Probe_Cuda_Memset_Exit();
 }
 
-void Extrae_reallocate_CUDA_info (unsigned old_threads, unsigned nthreads)
-{
-	Extrae_CUDA_saved_params = (Extrae_cuda_saved_params_t*) xrealloc (
-		Extrae_CUDA_saved_params, sizeof(Extrae_cuda_saved_params_t)*nthreads);
-
-	memset(&Extrae_CUDA_saved_params[old_threads], 0, sizeof(Extrae_cuda_saved_params_t)*(nthreads-old_threads));
-
-	if (Extrae_CUDA_saved_params == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate CUDA parameters buffers per thread!\n");
-		exit (-1);
-	}
-}
-
-void Extrae_cudaDeviceReset_Enter (void)
+void Extrae_cudaDeviceReset_Enter ()
 {
 	Probe_Cuda_DeviceReset_Enter();
 	Extrae_CUDA_flush_streams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 }
 
-void Extrae_cudaDeviceReset_Exit (void)
+void Extrae_cudaDeviceReset_Exit (CUcontext ctx)
 {
 	int devid;
-	cudaGetDevice (&devid);
-
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 	Extrae_CUDA_deInitialize (devid);
 	Probe_Cuda_DeviceReset_Exit();
 }
 
-void Extrae_cudaThreadExit_Enter (void)
+void Extrae_cudaThreadExit_Enter ()
 {
 	Probe_Cuda_ThreadExit_Enter();
 }
 
-void Extrae_cudaThreadExit_Exit (void)
+void Extrae_cudaThreadExit_Exit (CUcontext ctx)
 {
 	int devid;
-	cudaGetDevice (&devid);
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
 
 	Extrae_CUDA_deInitialize (devid);
 	Probe_Cuda_ThreadExit_Exit();
 }
 
-void Extrae_cudaEventRecord_Enter()
+void Extrae_cudaEventRecord_Enter(CUcontext ctx)
 {
 	Probe_Cuda_EventRecord_Entry();
 }
@@ -1018,7 +864,7 @@ void Extrae_cudaEventRecord_Exit()
 	Probe_Cuda_EventRecord_Exit();
 }
 
-void Extrae_cudaEventSynchronize_Enter()
+void Extrae_cudaEventSynchronize_Enter(CUcontext ctx)
 {
 	Probe_Cuda_EventSynchronize_Entry();
 }

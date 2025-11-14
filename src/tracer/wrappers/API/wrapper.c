@@ -1818,8 +1818,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 
 #if defined(CUDA_SUPPORT)
 	Extrae_CUDA_init (me);
-	/* Allocate thread info for CUDA execs */
-	Extrae_reallocate_CUDA_info (0, get_maximum_NumOfThreads());
 #endif
 
 #endif /* STANDALONE */
@@ -2054,12 +2052,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 	
 			/* Allocate thread info structure */
 			Extrae_reallocate_thread_info (get_maximum_NumOfThreads(), new_num_threads);
-	
-#if defined(CUDA_SUPPORT)
-			/* Allocate thread info for CUDA execs */
-			Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads(), new_num_threads);
-#endif
-	
+
 #if defined(PTHREAD_SUPPORT)
 			/* Allocate thread info for pthread execs */
 			Extrae_reallocate_pthread_info (new_num_threads);

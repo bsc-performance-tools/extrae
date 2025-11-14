@@ -157,9 +157,9 @@ cudaError_t cudaLaunch (const void *func)
 	{
 		Extrae_cudaLaunch_Enter(func,
 				  NULL, NULL,
-				  NULL, NULL);
+				  NULL, NULL, NULL);
 		res = real_cudaLaunch (func);
-		Extrae_cudaLaunch_Exit ();
+		Extrae_cudaLaunch_Exit (NULL);
 	}
 	else if (real_cudaLaunch != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -187,7 +187,7 @@ cudaError_t cudaConfigureCall (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
 
 	if (real_cudaConfigureCall != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaConfigureCall_Enter (p1, p2, p3, p4);
+		Extrae_cudaConfigureCall_Enter ();
 		res = real_cudaConfigureCall (p1, p2, p3, p4);
 		Extrae_cudaConfigureCall_Exit ();
 	}
@@ -219,7 +219,7 @@ cudaError_t cudaStreamCreate (cudaStream_t *pStream)
 	{
 		Extrae_cudaStreamCreate_Enter (pStream);
 		res = real_cudaStreamCreate (pStream);
-		Extrae_cudaStreamCreate_Exit ();
+		Extrae_cudaStreamCreate_Exit (NULL);
 	}
 	else if (real_cudaStreamCreate != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -249,7 +249,7 @@ cudaError_t cudaStreamCreateWithFlags (cudaStream_t *pStream, unsigned int flags
 	{
 		Extrae_cudaStreamCreate_Enter (pStream);
 		res = real_cudaStreamCreateWithFlags (pStream, flags);
-		Extrae_cudaStreamCreate_Exit ();
+		Extrae_cudaStreamCreate_Exit (NULL);
 	}
 	else if (real_cudaStreamCreateWithFlags != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -279,7 +279,7 @@ cudaError_t cudaStreamCreateWithPriority (cudaStream_t *pStream, unsigned int fl
 	{
 		Extrae_cudaStreamCreate_Enter (pStream);
 		res = real_cudaStreamCreateWithPriority (pStream, flags, priority);
-		Extrae_cudaStreamCreate_Exit ();
+		Extrae_cudaStreamCreate_Exit (NULL);
 	}
 	else if (real_cudaStreamCreateWithPriority != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -306,7 +306,7 @@ cudaError_t cudaStreamDestroy (cudaStream_t stream)
 
 	if (real_cudaStreamDestroy != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaStreamDestroy_Enter (stream);
+		Extrae_cudaStreamDestroy_Enter (stream, NULL);
 		res = real_cudaStreamDestroy (stream);
 		Extrae_cudaStreamDestroy_Exit ();
 	}
@@ -336,9 +336,9 @@ cudaError_t cudaMemcpyAsync (void *p1, const void *p2, size_t p3, enum cudaMemcp
 
 	if (real_cudaMemcpyAsync != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaMemcpyAsync_Enter (p1, p2, p3, p4, p5);
+		Extrae_cudaMemcpyAsync_Enter (p1, p2, p3, p4, p5, NULL);
 		res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
-		Extrae_cudaMemcpyAsync_Exit ();
+		Extrae_cudaMemcpyAsync_Exit (NULL);
 	}
 	else if (real_cudaMemcpyAsync != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -366,9 +366,9 @@ cudaError_t cudaMemcpy (void *p1, const void *p2, size_t p3, enum cudaMemcpyKind
 
 	if (real_cudaMemcpy != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaMemcpy_Enter (p1, p2, p3, p4);
+		Extrae_cudaMemcpy_Enter (p1, p2, p3, p4, NULL);
 		res = real_cudaMemcpy (p1, p2, p3, p4);
-		Extrae_cudaMemcpy_Exit ();
+		Extrae_cudaMemcpy_Exit (NULL);
 	}
 	else if (real_cudaMemcpy != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -394,7 +394,7 @@ cudaError_t cudaThreadSynchronize (void)
 
 	if (real_cudaThreadSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaThreadSynchronize_Enter ();
+		Extrae_cudaThreadSynchronize_Enter (NULL);
 		res = real_cudaThreadSynchronize ();
 		Extrae_cudaThreadSynchronize_Exit ();
 	}
@@ -423,7 +423,7 @@ cudaError_t cudaDeviceSynchronize (void)
 
 	if (real_cudaDeviceSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaDeviceSynchronize_Enter ();
+		Extrae_cudaDeviceSynchronize_Enter (NULL);
 		res = real_cudaDeviceSynchronize ();
 		Extrae_cudaDeviceSynchronize_Exit ();
 	}
@@ -453,7 +453,7 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 
 	if (real_cudaStreamSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaStreamSynchronize_Enter (p1);
+		Extrae_cudaStreamSynchronize_Enter (p1, NULL);
 		res = real_cudaStreamSynchronize (p1);
 		Extrae_cudaStreamSynchronize_Exit ();
 	}
@@ -484,7 +484,7 @@ cudaError_t cudaThreadExit (void)
 	{
 		Extrae_cudaThreadExit_Enter ();
 		res = real_cudaThreadExit ();
-		Extrae_cudaThreadExit_Exit ();
+		Extrae_cudaThreadExit_Exit (NULL);
 	}
 	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -514,7 +514,7 @@ cudaError_t cudaDeviceReset (void)
 	{
 		Extrae_cudaDeviceReset_Enter ();
 		res = real_cudaDeviceReset ();
-		Extrae_cudaDeviceReset_Exit ();
+		Extrae_cudaDeviceReset_Exit (NULL);
 	}
 	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -544,7 +544,7 @@ cudaMalloc(void **devPtr, size_t size)
 
 	if (real_cudaMalloc != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaMalloc_Enter(CUDAMALLOC_VAL, devPtr, size);
+		Extrae_cudaMalloc_Enter(CUDAMALLOC_VAL, devPtr, size, NULL);
 		res = real_cudaMalloc(devPtr, size);
 		Extrae_cudaMalloc_Exit(CUDAMALLOC_VAL);
 	}
@@ -577,7 +577,7 @@ cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t height)
 
 	if  (real_cudaMallocPitch != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaMalloc_Enter(CUDAMALLOCPITCH_VAL, devPtr, width * height);
+		Extrae_cudaMalloc_Enter(CUDAMALLOCPITCH_VAL, devPtr, width * height, NULL);
 		res = real_cudaMallocPitch(devPtr, pitch, width, height);
 		Extrae_cudaMalloc_Exit(CUDAMALLOCPITCH_VAL);
 	}
@@ -610,7 +610,7 @@ cudaFree(void *devPtr)
 
 	if  (real_cudaFree != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaFree_Enter(CUDAFREE_VAL, devPtr);
+		Extrae_cudaFree_Enter(CUDAFREE_VAL, devPtr, NULL);
 		res = real_cudaFree(devPtr);
 		Extrae_cudaFree_Exit(CUDAFREE_VAL);
 	}
@@ -645,7 +645,7 @@ cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc,
 	if  (real_cudaMallocArray != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaMalloc_Enter(
-		  CUDAMALLOCARRAY_VAL, (void *)array, width * height
+		  CUDAMALLOCARRAY_VAL, (void *)array, width * height, NULL
 		  );
 		res = real_cudaMallocArray(array, desc, width, height, flags);
 		Extrae_cudaMalloc_Exit(CUDAMALLOCARRAY_VAL);
@@ -679,7 +679,7 @@ cudaFreeArray(cudaArray_t array)
 
 	if  (real_cudaFreeArray != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaFree_Enter(CUDAFREEARRAY_VAL, (void *)array);
+		Extrae_cudaFree_Enter(CUDAFREEARRAY_VAL, (void *)array, NULL);
 		res = real_cudaFreeArray(array);
 		Extrae_cudaFree_Exit(CUDAFREEARRAY_VAL);
 	}
@@ -712,7 +712,7 @@ cudaMallocHost(void **ptr, size_t size)
 
 	if  (real_cudaMallocHost != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaMalloc_Enter(CUDAMALLOCHOST_VAL, ptr, size);
+		Extrae_cudaMalloc_Enter(CUDAMALLOCHOST_VAL, ptr, size, NULL);
 		res = real_cudaMallocHost(ptr, size);
 		Extrae_cudaMalloc_Exit(CUDAMALLOCHOST_VAL);
 	}
@@ -745,7 +745,7 @@ cudaFreeHost(void *ptr)
 
 	if  (real_cudaFreeHost != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaFree_Enter(CUDAFREEHOST_VAL, ptr);
+		Extrae_cudaFree_Enter(CUDAFREEHOST_VAL, ptr, NULL);
 		res = real_cudaFreeHost(ptr);
 		Extrae_cudaFree_Exit(CUDAFREEHOST_VAL);
 	}
@@ -778,7 +778,7 @@ cudaHostAlloc(void **pHost, size_t size, unsigned int flags)
 
 	if  (real_cudaHostAlloc != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaHostAlloc_Enter(pHost, size);
+		Extrae_cudaHostAlloc_Enter(pHost, size, NULL);
 		res = real_cudaHostAlloc(pHost, size, flags);
 		Extrae_cudaHostAlloc_Exit();
 	}
@@ -811,7 +811,7 @@ cudaMemset(void *devPtr, int value, size_t count)
 
 	if  (real_cudaMemset != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaMemset_Enter(devPtr, count);
+		Extrae_cudaMemset_Enter(devPtr, count, NULL);
 		res = real_cudaMemset(devPtr, value, count);
 		Extrae_cudaMemset_Exit();
 	}
@@ -845,7 +845,7 @@ cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 
 	if (real_cudaMallocManaged != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaMalloc_Enter(CUDAMALLOC_VAL, devPtr, size);
+		Extrae_cudaMalloc_Enter(CUDAMALLOC_VAL, devPtr, size, NULL);
 		res = real_cudaMallocManaged(devPtr, size, flags);
 		Extrae_cudaMalloc_Exit(CUDAMALLOC_VAL);
 	}
@@ -880,9 +880,9 @@ cudaLaunchKernel(const void* func, dim3 gridDim, dim3 blockDim, void** args, siz
 	{
 		Extrae_cudaLaunch_Enter(func,
 				  NULL, NULL,
-				  NULL, stream);
+				  NULL, stream, NULL);
 		res = real_cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
-		Extrae_cudaLaunch_Exit();
+		Extrae_cudaLaunch_Exit(NULL);
 	}
 	else if (real_cudaLaunchKernel != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{

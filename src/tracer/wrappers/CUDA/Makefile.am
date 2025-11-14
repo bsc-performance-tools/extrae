@@ -8,6 +8,7 @@ WRAPPERS_CUDA = \
 
 if HAVE_CUDA 
 WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@
+WRAPPERS_CUDA_LIBS   = -lcuda
 if HAVE_CUPTI
 WRAPPERS_CUDA += cuda_wrapper_cupti.c cuda_wrapper_cupti.h
 WRAPPERS_CUDA_CFLAGS += @CUPTI_CFLAGS@ 
@@ -33,3 +34,4 @@ libwrap_cuda_la_CFLAGS = \
 
 libwrap_cuda_la_SOURCES = $(WRAPPERS_CUDA)
 
+libwrap_cuda_la_LIBADD = $(WRAPPERS_CUDA_LIBS)
