@@ -61,6 +61,7 @@ int cudaInitialized = 0;
 typedef struct
 {
 	int stream_id;
+	cudaStream_t* stream_ptr;
 	cudaStream_t stream;
 	enum cudaMemcpyKind memcpyKind;
 	size_t memcpySize;
@@ -483,7 +484,7 @@ void Extrae_cudaLaunch_Enter (const char *f,
 	strid = Extrae_CUDA_SearchStream (devid, stream);
 	if (strid == -1)
 	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaLaunch_Enter\n");
+		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaLaunch_Enter\n",THREADID, stream);
 		exit (-1);
 	}
 
@@ -586,7 +587,7 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 
 void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
 {
-	Extrae_CUDA_saved_params.stream = *p1;
+	Extrae_CUDA_saved_params.stream_ptr = p1;
 
 	Probe_Cuda_StreamCreate_Entry ();
 }
@@ -597,7 +598,7 @@ void Extrae_cudaStreamCreate_Exit (CUcontext ctx)
 	CUDA_GET_DEVICE_SAFE(ctx, devid);
 
 	Extrae_CUDA_Initialize (devid);
-	Extrae_CUDA_RegisterStream (devid, Extrae_CUDA_saved_params.stream);
+	Extrae_CUDA_RegisterStream (devid, *Extrae_CUDA_saved_params.stream_ptr);
 
 	Probe_Cuda_StreamCreate_Exit ();
 }
@@ -627,7 +628,7 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1, CUcontext ctx)
 	strid = Extrae_CUDA_SearchStream (devid, p1);
 	if (strid == -1)
 	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaStreamSynchronize_Enter\n");
+		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaStreamSynchronize_Enter\n",THREADID, p1);
 		exit (-1);
 	}
 
@@ -749,7 +750,7 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 	strid = Extrae_CUDA_SearchStream (devid, p5);
 	if (strid == -1)
 	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in Extrae_cudaMemcpyAsync_Enter\n");
+		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaMemcpyAsync_Enter\n",THREADID, p5);
 		exit (-1);
 	}
 	Extrae_CUDA_saved_params.stream_id = strid;
