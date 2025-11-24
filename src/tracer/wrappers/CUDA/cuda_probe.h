@@ -39,7 +39,9 @@ void Probe_Cuda_Memcpy_Exit (void);
 void Probe_Cuda_MemcpyAsync_Entry (size_t size);
 void Probe_Cuda_MemcpyAsync_Exit (void);
 void Probe_Cuda_Memset_Entry(UINT64, size_t);
-void Probe_Cuda_Memset_Exit();
+void Probe_Cuda_Memset_Exit(void);
+void Probe_Cuda_MemsetAsync_Entry(UINT64, size_t);  
+void Probe_Cuda_MemsetAsync_Exit(void);
 void Probe_Cuda_ThreadBarrier_Entry (void);
 void Probe_Cuda_ThreadBarrier_Exit (void);
 void Probe_Cuda_StreamBarrier_Entry (unsigned thread);
@@ -55,9 +57,10 @@ void Probe_Cuda_StreamDestroy_Exit(void);
 
 void Probe_Cuda_EventRecord_Entry (void);
 void Probe_Cuda_EventRecord_Exit (void);
-
 void Probe_Cuda_EventSynchronize_Entry (void);
 void Probe_Cuda_EventSynchronize_Exit (void);
+void Probe_Cuda_StreamWaitEvent_Enter (void);
+void Probe_Cuda_StreamWaitEvent_Exit (void);
 
 void Extrae_set_trace_CUDA (int b);
 int Extrae_get_trace_CUDA (void);

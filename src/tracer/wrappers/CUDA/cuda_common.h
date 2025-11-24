@@ -133,6 +133,8 @@ void Extrae_cudaEventRecord_Enter (CUcontext);
 void Extrae_cudaEventRecord_Exit (void);
 void Extrae_cudaEventSynchronize_Enter (CUcontext);
 void Extrae_cudaEventSynchronize_Exit (void);
+void Extrae_cudaStreamWaitEvent_Enter(void);
+void Extrae_cudaStreamWaitEvent_Exit(void);
 void Extrae_cudaStreamCreate_Enter (cudaStream_t*);
 void Extrae_cudaStreamCreate_Exit (CUcontext);
 void Extrae_cudaStreamDestroy_Enter (cudaStream_t, CUcontext);
@@ -145,6 +147,8 @@ void Extrae_cudaMemcpyAsync_Enter (void*, const void*, size_t, enum cudaMemcpyKi
 void Extrae_cudaMemcpyAsync_Exit (CUcontext);
 void Extrae_cudaMemset_Enter(void *, size_t, CUcontext);
 void Extrae_cudaMemset_Exit();
+void Extrae_cudaMemsetAsync_Enter(void *, size_t, CUcontext);
+void Extrae_cudaMemsetAsync_Exit();
 void Extrae_cudaDeviceReset_Enter (void);
 void Extrae_cudaDeviceReset_Exit (CUcontext);
 void Extrae_cudaThreadExit_Enter (void);

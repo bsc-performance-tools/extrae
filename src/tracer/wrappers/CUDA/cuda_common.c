@@ -672,15 +672,15 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication starts at this point.
 	 */
-	if (p4 == cudaMemcpyHostToDevice)
-	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
-	}
-	else if (p4 == cudaMemcpyDeviceToHost)
+	if (p4 == cudaMemcpyDeviceToHost)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
 		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, tag, p3, 0, 0);
+	}
+	else
+	{
+		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
+		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
 	}
 }
 
@@ -702,18 +702,18 @@ void Extrae_cudaMemcpy_Exit (CUcontext ctx)
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication arrives at this point.
 	 */
-	if (kind == cudaMemcpyHostToDevice || kind == cudaMemcpyDeviceToDevice)
+	if (kind == cudaMemcpyHostToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_END, tag, size, 0, 0);
+			CUDAMEMCPY_GPU_VAL, EVT_END, tag, size, 0, 0);
 	}
-	else if (kind == cudaMemcpyDeviceToHost)
+	else
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_END, tag, size, 0, 0);
+			CUDAMEMCPY_GPU_VAL, EVT_END, 0, size, 0, 0);
 	}
-
-	Probe_Cuda_Memcpy_Exit ();
+		
+		Probe_Cuda_Memcpy_Exit ();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
 	if (kind == cudaMemcpyDeviceToHost)
@@ -761,15 +761,15 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication starts at this point.
 	 */
-	if (p4 == cudaMemcpyHostToDevice)
-	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
-	}
-	else if (p4 == cudaMemcpyDeviceToHost)
+	if (p4 == cudaMemcpyDeviceToHost)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
 		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, tag, p3, 0, 0);
+	}
+	else
+	{
+		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
 	}
 }
 
@@ -792,7 +792,7 @@ void Extrae_cudaMemcpyAsync_Exit (CUcontext ctx)
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication arrives at this point.
 	 */
-	if (kind == cudaMemcpyHostToDevice || kind == cudaMemcpyDeviceToDevice)
+	if (kind == cudaMemcpyHostToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
 		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, tag, size, 0, 0);
@@ -825,6 +825,20 @@ void Extrae_cudaMemset_Enter(void *devPtr, size_t count, CUcontext ctx)
 void Extrae_cudaMemset_Exit()
 {
 	Probe_Cuda_Memset_Exit();
+}
+
+void Extrae_cudaMemsetAsync_Enter(void *devPtr, size_t count, CUcontext ctx)
+{
+	int devid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize (devid);
+
+	Probe_Cuda_MemsetAsync_Entry((UINT64)devPtr, count);
+}
+
+void Extrae_cudaMemsetAsync_Exit()
+{
+	Probe_Cuda_MemsetAsync_Exit();
 }
 
 void Extrae_cudaDeviceReset_Enter ()
@@ -873,6 +887,16 @@ void Extrae_cudaEventSynchronize_Enter(CUcontext ctx)
 void Extrae_cudaEventSynchronize_Exit()
 {
 	Probe_Cuda_EventSynchronize_Exit();
+}
+
+void Extrae_cudaStreamWaitEvent_Enter()
+{
+	Probe_Cuda_StreamWaitEvent_Enter();
+}
+
+void Extrae_cudaStreamWaitEvent_Exit()
+{
+	Probe_Cuda_StreamWaitEvent_Exit();
 }
 
 /**

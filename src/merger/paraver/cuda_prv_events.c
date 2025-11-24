@@ -48,8 +48,10 @@ enum {
 	CUDAMALLOC_INDEX,
 	CUDAHOSTALLOC_INDEX,
 	CUDAMEMSET_INDEX,
+	CUDAMEMSETASYNC_INDEX,
 	CUDAEVENTRECORD_INDEX,
 	CUDAEVENTSYNCHRONIZE_INDEX,
+	CUDASTREAMWAITEVENT_INDEX,
 	CUDAUNTRACKED_INDEX,
 	MAX_CUDA_INDEX
 };
@@ -92,10 +94,14 @@ void Enable_CUDA_Operation (INT32 type, UINT64 value)
 			inuse[CUDAHOSTALLOC_INDEX] = TRUE;
 		else if (value == CUDAMEMSET_VAL)
 			inuse[CUDAMEMSET_INDEX] = TRUE;
+		else if (value == CUDAMEMSETASYNC_VAL)
+			inuse[CUDAMEMSETASYNC_INDEX] = TRUE;
 		else if (value == CUDAEVENTRECORD_VAL)
 			inuse[CUDAEVENTRECORD_INDEX] = TRUE;
 		else if (value == CUDAEVENTSYNCHRONIZE_VAL)
 			inuse[CUDAEVENTSYNCHRONIZE_INDEX] = TRUE;
+		else if (value == CUDASTREAMWAITEVENT_VAL)
+			inuse[CUDASTREAMWAITEVENT_INDEX] = TRUE;
 		}
 }
 
@@ -144,7 +150,7 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			fprintf (fd, "%d cudaMemcpy\n", CUDAMEMCPY_VAL);
 
 		if (inuse[CUDATHREADBARRIER_INDEX])
-			fprintf (fd, "%d cudaThreadSynchronize/cudaDeviceSynchronize\n", CUDATHREADBARRIER_VAL);
+			fprintf (fd, "%d cudaDeviceSynchronize\n", CUDATHREADBARRIER_VAL);
 
 		if (inuse[CUDASTREAMBARRIER_INDEX])
 			fprintf (fd, "%d cudaStreamSynchronize\n", CUDASTREAMBARRIER_VAL);
@@ -181,6 +187,8 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 		if (inuse[CUDAMEMSET_INDEX])
 			fprintf(fd, "%d cudaMemset\n", CUDAMEMSET_VAL);
 
+		if (inuse[CUDAMEMSETASYNC_INDEX])
+			fprintf(fd, "%d cudaMemsetAsync\n", CUDAMEMSETASYNC_VAL);
 
 		if (inuse[CUDAEVENTRECORD_INDEX])
 		{
@@ -192,6 +200,10 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			fprintf(fd, "%d cudaEventSynchronize\n", CUDAEVENTSYNCHRONIZE_VAL);
 		}
 
+		if (inuse[CUDASTREAMWAITEVENT_INDEX])
+		{
+			fprintf(fd, "%d cudaStreamWaitEvent\n", CUDASTREAMWAITEVENT_VAL);
+		}
 
 		fprintf (fd, "\n");
 
@@ -230,14 +242,14 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 
 		if (inuse[CUDAMALLOC_INDEX] || inuse[CUDAMEMCPY_INDEX] ||
 		  inuse[CUDAMEMCPYASYNC_INDEX] || inuse[CUDAHOSTALLOC_INDEX] ||
-		  inuse[CUDAMEMSET_INDEX])
+		  inuse[CUDAMEMSET_INDEX] || inuse[CUDAMEMSETASYNC_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
 			              "%d    %d    CUDA Dynamic memory size\n"
 			              "\n",
 			              0, CUDA_DYNAMIC_MEM_SIZE_EV);
 
 		if (inuse[CUDAMALLOC_INDEX] || inuse[CUDAHOSTALLOC_INDEX] ||
-		  inuse[CUDAMEMSET_INDEX])
+		  inuse[CUDAMEMSET_INDEX] || inuse[CUDAMEMSETASYNC_INDEX])
 			fprintf(fd, "EVENT_TYPE\n"
 			            "%d    %d    CUDA Dynamic memory pointer\n"
 						"\n",

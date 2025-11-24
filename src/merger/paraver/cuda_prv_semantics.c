@@ -75,12 +75,14 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 		case CUDASTREAMBARRIER_VAL:
 		case CUDATHREADBARRIER_VAL:
 		case CUDAEVENTSYNCHRONIZE_VAL:
+		case CUDASTREAMWAITEVENT_VAL:
 			state = STATE_BARRIER;
 			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
 		case CUDAMEMCPY_VAL:
 		case CUDAMEMCPYASYNC_VAL:
 		case CUDAMEMSET_VAL:
+		case CUDAMEMSETASYNC_VAL:
 			state = STATE_MEMORY_XFER;
 			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
 			break;

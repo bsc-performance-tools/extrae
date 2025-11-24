@@ -407,6 +407,21 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		}
 		break;
 
+		/* 51 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaMemsetAsync_v3020:
+		{
+			cudaMemsetAsync_v3020_params *p =
+			  (cudaMemsetAsync_v3020_params *)cbinfo->functionParams;
+
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaMemsetAsync_Enter(p->devPtr, p->count, cbinfo->context);
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaMemsetAsync_Exit();
+
+			ret = 1;
+		}
+		break;
+
 		/* 123 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020:
 		{
@@ -492,6 +507,21 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 				Extrae_cudaEventSynchronize_Enter(cbinfo->context);
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 				Extrae_cudaEventSynchronize_Exit();
+
+			ret = 1;
+		}
+		break;
+
+		/* 147 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamWaitEvent_v3020:
+		{
+			cudaStreamWaitEvent_v3020_params *p =
+			  (cudaStreamWaitEvent_v3020_params *)cbinfo->functionParams;
+
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaStreamWaitEvent_Enter();
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaStreamWaitEvent_Exit();
 
 			ret = 1;
 		}

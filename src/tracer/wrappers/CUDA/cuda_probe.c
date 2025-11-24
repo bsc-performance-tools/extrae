@@ -193,6 +193,26 @@ void Probe_Cuda_Memset_Exit()
 	}
 }
 
+void Probe_Cuda_MemsetAsync_Entry(UINT64 devPtr, size_t count)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAMEMSETASYNC_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_PTR_EV, devPtr);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, count);
+	}
+}
+
+void Probe_Cuda_MemsetAsync_Exit()
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAMEMSETASYNC_VAL, EVT_END);
+	}
+}
+
 void Probe_Cuda_ThreadBarrier_Entry(void)
 {
 	DEBUG
@@ -310,4 +330,18 @@ void Probe_Cuda_EventSynchronize_Exit (void)
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
 	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAEVENTSYNCHRONIZE_VAL, EVT_END);
+}
+
+void Probe_Cuda_StreamWaitEvent_Enter (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDASTREAMWAITEVENT_VAL, EVT_BEGIN);
+}
+
+void Probe_Cuda_StreamWaitEvent_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDASTREAMWAITEVENT_VAL, EVT_END);
 }
