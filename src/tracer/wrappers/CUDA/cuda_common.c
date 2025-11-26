@@ -869,9 +869,20 @@ void Extrae_cudaThreadExit_Exit (CUcontext ctx)
 	Probe_Cuda_ThreadExit_Exit();
 }
 
-void Extrae_cudaEventRecord_Enter(CUcontext ctx)
+void Extrae_cudaEventRecord_Enter(cudaEvent_t p1, cudaStream_t p2, CUcontext ctx)
 {
-	Probe_Cuda_EventRecord_Entry();
+	int devid, strid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize (devid);
+
+	strid = Extrae_CUDA_SearchStream (devid, p2);
+	if (strid == -1)
+	{
+		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaEventRecord_Enter\n",THREADID, p2);
+		exit (-1);
+	}
+
+	Probe_Cuda_EventRecord_Entry((UINT64)p1, devices[devid].Stream[strid].threadid);
 }
 
 void Extrae_cudaEventRecord_Exit()
@@ -879,9 +890,13 @@ void Extrae_cudaEventRecord_Exit()
 	Probe_Cuda_EventRecord_Exit();
 }
 
-void Extrae_cudaEventSynchronize_Enter(CUcontext ctx)
+void Extrae_cudaEventSynchronize_Enter(cudaEvent_t p1, CUcontext ctx)
 {
-	Probe_Cuda_EventSynchronize_Entry();
+	int devid, strid;
+	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	Extrae_CUDA_Initialize (devid);
+
+	Probe_Cuda_EventSynchronize_Entry((UINT64)p1);
 }
 
 void Extrae_cudaEventSynchronize_Exit()

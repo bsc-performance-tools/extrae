@@ -41,7 +41,7 @@ enum {
 	CUDAMEMCPYTOSYMBOL_INDEX,
 	CUDAMEMCPYFROMSYMBOL_INDEX,
 	CUDATHREADBARRIER_INDEX,
-	CUDASTREAMBARRIER_INDEX,
+	CUDASTREAMSYNCHRONIZE_INDEX,
 	CUDAMEMCPYASYNC_INDEX,
 	CUDATHREADEXIT_INDEX,
 	CUDADEVICERESET_INDEX,
@@ -75,8 +75,8 @@ void Enable_CUDA_Operation (INT32 type, UINT64 value)
 			inuse[CUDAMEMCPYTOSYMBOL_INDEX] = TRUE;
 		else if (value == CUDAMEMCPYFROMSYMBOL_VAL || value == CUDAMEMCPY_GPU_VAL)
 			inuse[CUDAMEMCPYFROMSYMBOL_INDEX] = TRUE;
-		else if (value == CUDASTREAMBARRIER_VAL)
-			inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
+		else if (value == CUDASTREAMSYNCHRONIZE_VAL)
+			inuse[CUDASTREAMSYNCHRONIZE_INDEX] = TRUE;
 		else if (value == CUDATHREADBARRIER_VAL)
 			inuse[CUDATHREADBARRIER_INDEX] = TRUE;
 		else if (value == CUDACONFIGCALL_VAL || value == CUDACONFIGKERNEL_GPU_VAL)
@@ -158,8 +158,8 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 		if (inuse[CUDATHREADBARRIER_INDEX])
 			fprintf (fd, "%d cudaDeviceSynchronize\n", CUDATHREADBARRIER_VAL);
 
-		if (inuse[CUDASTREAMBARRIER_INDEX])
-			fprintf (fd, "%d cudaStreamSynchronize\n", CUDASTREAMBARRIER_VAL);
+		if (inuse[CUDASTREAMSYNCHRONIZE_INDEX])
+			fprintf (fd, "%d cudaStreamSynchronize\n", CUDASTREAMSYNCHRONIZE_VAL);
 
 		if (inuse[CUDAMEMCPYASYNC_INDEX])
 			fprintf (fd, "%d cudaMemcpyAsync\n", CUDAMEMCPYASYNC_VAL);
@@ -219,12 +219,11 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 
 		fprintf (fd, "\n");
 
-
-		if (inuse[CUDASTREAMBARRIER_INDEX])
+		if (inuse[CUDASTREAMSYNCHRONIZE_INDEX] || inuse[CUDAEVENTRECORD_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
-			             "%d    %d    Synchronized stream (on thread)\n"
+			             "%d    %d    Stream ID destination\n"
                          "\n",
-                         0, CUDASTREAMBARRIER_THID_EV);
+                         0, CUDA_STREAM_DEST_ID_EV);
 
 		if (inuse[CUDALAUNCH_INDEX])
 		{
@@ -273,8 +272,11 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 						"\n",
 						0, CUDA_DYNAMIC_MEM_PTR_EV);
 
-
-
+		if (inuse[CUDAEVENTSYNCHRONIZE_INDEX] || inuse[CUDAEVENTRECORD_INDEX])
+			fprintf (fd, "EVENT_TYPE\n"
+			             "%d    %d    cudaEvent ID\n"
+                         "\n",
+                         0, CUDAEVENT_ID_EV);
 
 		if (inuse[CUDAUNTRACKED_INDEX])
 			fprintf(fd, "EVENT_TYPE\n"

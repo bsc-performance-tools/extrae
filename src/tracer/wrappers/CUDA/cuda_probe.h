@@ -58,10 +58,9 @@ void Probe_Cuda_StreamCreate_Entry (void);
 void Probe_Cuda_StreamCreate_Exit(void);
 void Probe_Cuda_StreamDestroy_Entry (void);
 void Probe_Cuda_StreamDestroy_Exit(void);
-
-void Probe_Cuda_EventRecord_Entry (void);
+void Probe_Cuda_EventRecord_Entry (UINT64, unsigned int);
 void Probe_Cuda_EventRecord_Exit (void);
-void Probe_Cuda_EventSynchronize_Entry (void);
+void Probe_Cuda_EventSynchronize_Entry (UINT64);
 void Probe_Cuda_EventSynchronize_Exit (void);
 void Probe_Cuda_StreamWaitEvent_Enter (void);
 void Probe_Cuda_StreamWaitEvent_Exit (void);

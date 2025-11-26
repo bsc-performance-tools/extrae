@@ -72,7 +72,7 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 			state = STATE_CONFACCEL;
 			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case CUDASTREAMBARRIER_VAL:
+		case CUDASTREAMSYNCHRONIZE_VAL:
 		case CUDATHREADBARRIER_VAL:
 		case CUDAEVENTSYNCHRONIZE_VAL:
 		case CUDASTREAMWAITEVENT_VAL:
@@ -239,7 +239,8 @@ SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	{ CUDA_KERNEL_INST_EV, CUDA_Kernel_Inst_Event },
 	{ CUDA_DYNAMIC_MEM_PTR_EV, CUDA_Punctual_Event },
 	{ CUDA_DYNAMIC_MEM_SIZE_EV, CUDA_Punctual_Event },
-	{ CUDASTREAMBARRIER_THID_EV, CUDA_Punctual_Event },
+	{ CUDA_STREAM_DEST_ID_EV, CUDA_Punctual_Event },
+	{ CUDAEVENT_ID_EV, CUDA_Punctual_Event },
 	{ CUDA_UNTRACKED_EV, CUDA_Punctual_Event },
 	/* Accelerator calls */
 	{ CUDACALLGPU_EV, CUDA_GPU_Call },
