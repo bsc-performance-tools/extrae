@@ -2381,14 +2381,6 @@ void Flush_Thread(int thread_id)
   Extrae_Flush_Wrapper( TRACING_BUFFER(thread_id) );
 }
 
-static int __Extrae_Flush_Wrapper_getCounters = TRUE;
-
-int Extrae_Flush_Wrapper_getCounters(void)
-{ return __Extrae_Flush_Wrapper_getCounters; }
-
-void Extrae_Flush_Wrapper_setCounters (int c)
-{ __Extrae_Flush_Wrapper_getCounters = c; }
-
 /**
  * Flushes the buffer to disk and marks this I/O in trace.
  * \param buffer The buffer to be flushed.
@@ -2405,14 +2397,14 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 		FlushEv_Begin.time = TIME;
 		FlushEv_Begin.event = FLUSH_EV;
 		FlushEv_Begin.value = EVT_BEGIN;
-		HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, Extrae_Flush_Wrapper_getCounters());
+		HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, TRUE);
 
 		Buffer_Flush (buffer);
 
 		FlushEv_End.time = TIME;
 		FlushEv_End.event = FLUSH_EV;
 		FlushEv_End.value = EVT_END;
-		HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, Extrae_Flush_Wrapper_getCounters());
+		HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, TRUE);
 
 		BUFFER_INSERT (THREADID, buffer, FlushEv_Begin);
 #if !defined(IS_BG_MACHINE)
@@ -2438,6 +2430,62 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 		}
 	}
 	return 1;
+}
+
+/**
+ * Flushes all buffers to disk and marks this region with flush events.
+ */ 
+static void Extrae_Flush_AllThreads_and_Close ( void )
+{
+	event_t FlushEv_Begin, FlushEv_End;
+	int check_size,thread;
+	unsigned long long current_size;
+
+	pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+
+	if (TRACING_BUFFER(0) != NULL)
+	{
+		if (!Buffer_IsClosed (TRACING_BUFFER(0)))
+		{
+			FlushEv_Begin.time = TIME;
+			FlushEv_Begin.event = FLUSH_EV;
+			FlushEv_Begin.value = EVT_BEGIN;
+			HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, TRUE);
+			Buffer_Flush (TRACING_BUFFER(0));
+		}
+	}
+
+	for (thread = 1; thread < get_maximum_NumOfThreads(); ++thread)
+	{
+		if (TRACING_BUFFER(thread) != NULL)
+		{
+			if (!Buffer_IsClosed (TRACING_BUFFER(thread)))
+			{
+				Buffer_Flush (TRACING_BUFFER(thread));
+				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
+			}
+		}
+
+	}
+
+	if (TRACING_BUFFER(0) != NULL)
+	{
+		if (!Buffer_IsClosed (TRACING_BUFFER(0)))
+		{
+			FlushEv_End.time = TIME;
+			FlushEv_End.event = FLUSH_EV;
+			FlushEv_End.value = EVT_END;
+			HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, TRUE);
+			BUFFER_INSERT (THREADID, TRACING_BUFFER(0), FlushEv_Begin);
+			BUFFER_INSERT (THREADID, TRACING_BUFFER(0), FlushEv_End);
+			TRACE_EVENT (TIME, APPL_EV, EVT_END);
+			Buffer_Flush (TRACING_BUFFER(0)); //second flush to make sure the last events are written
+			Backend_Finalize_close_mpits (getpid(), 0, FALSE);
+		}
+	}
+
+	pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+	mpitrace_on = FALSE;
 }
 
 void Backend_Finalize (void)
@@ -2528,47 +2576,7 @@ void Backend_Finalize (void)
 #endif
 		}
 
-		/* Write files back to disk , 1st part will include flushing events*/
-		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
-		{
-			// Protects race condition with Backend_Flush_pThread
-			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-
-			// If buffer was working in circular mode, change it to flush mode to dump the final data into the trace
-			if ((circular_buffering) && (!online_mode))
-			{
-		                Buffer_SetFlushCallback (TracingBuffer[thread], Extrae_Flush_Wrapper);
-			}
-
-			/* Prevent writing performance counters from another thread */
-			if (thread != THREADID)
-				Extrae_Flush_Wrapper_setCounters (FALSE);
-
-			if (TRACING_BUFFER(thread) != NULL)
-				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
-
-			Extrae_Flush_Wrapper_setCounters (TRUE);
-
-			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
-		}
-
-		/* Final write files to disk, include renaming of the filenames,
-		   do not need counters here */
-		Extrae_Flush_Wrapper_setCounters (FALSE);
-		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
-		{
-			// Protects race condition with Backend_Flush_pThread
-			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-
-			if (TRACING_BUFFER(thread) != NULL)
-			{
-				TRACE_EVENT (TIME, APPL_EV, EVT_END);
-				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
-				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
-			}
-
-			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
-		}
+		Extrae_Flush_AllThreads_and_Close();
 
 		/* Free allocated memory */
 		{
@@ -2724,8 +2732,7 @@ void Backend_Enter_Instrumentation ()
 				FlushEv_Begin.time = TIME;
 				FlushEv_Begin.event = FLUSH_EV;
 				FlushEv_Begin.value = EVT_BEGIN;
-				HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin,
-					Extrae_Flush_Wrapper_getCounters());
+				HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, TRUE);
 
 				/* Actually flush buffer */
 				Buffer_Flush(SAMPLING_BUFFER(THREADID));
@@ -2734,8 +2741,7 @@ void Backend_Enter_Instrumentation ()
 				FlushEv_End.time = TIME;
 				FlushEv_End.event = FLUSH_EV;
 				FlushEv_End.value = EVT_END;
-				HARDWARE_COUNTERS_READ (THREADID, FlushEv_End,
-					Extrae_Flush_Wrapper_getCounters());
+				HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, TRUE);
 
 				/* Add events into instrumentation buffer */
 				BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_Begin);
