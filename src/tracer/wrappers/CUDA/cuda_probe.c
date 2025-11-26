@@ -154,6 +154,44 @@ void Probe_Cuda_Memcpy_Exit (void)
 	}
 }
 
+void Probe_Cuda_MemcpyToSymbol_Entry (size_t size)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAMEMCPYTOSYMBOL_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, size);
+	}
+}
+
+void Probe_Cuda_MemcpyToSymbol_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAMEMCPYTOSYMBOL_VAL, EVT_END); 
+	}
+}
+
+void Probe_Cuda_MemcpyFromSymbol_Entry (size_t size)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDAMEMCPYFROMSYMBOL_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDA_DYNAMIC_MEM_SIZE_EV, size);
+	}
+}
+
+void Probe_Cuda_MemcpyFromSymbol_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAMEMCPYFROMSYMBOL_VAL, EVT_END); 
+	}
+}
+
 void Probe_Cuda_MemcpyAsync_Entry (size_t size)
 {
 	DEBUG

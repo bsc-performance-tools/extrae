@@ -38,6 +38,8 @@ enum {
 	CUDALAUNCH_INDEX,
 	CUDACONFIGCALL_INDEX,
 	CUDAMEMCPY_INDEX,
+	CUDAMEMCPYTOSYMBOL_INDEX,
+	CUDAMEMCPYFROMSYMBOL_INDEX,
 	CUDATHREADBARRIER_INDEX,
 	CUDASTREAMBARRIER_INDEX,
 	CUDAMEMCPYASYNC_INDEX,
@@ -69,6 +71,10 @@ void Enable_CUDA_Operation (INT32 type, UINT64 value)
 			inuse[CUDALAUNCH_INDEX] = TRUE;
 		else if (value == CUDAMEMCPY_VAL || value == CUDAMEMCPY_GPU_VAL)
 			inuse[CUDAMEMCPY_INDEX] = TRUE;
+		else if (value == CUDAMEMCPYTOSYMBOL_VAL || value == CUDAMEMCPY_GPU_VAL)
+			inuse[CUDAMEMCPYTOSYMBOL_INDEX] = TRUE;
+		else if (value == CUDAMEMCPYFROMSYMBOL_VAL || value == CUDAMEMCPY_GPU_VAL)
+			inuse[CUDAMEMCPYFROMSYMBOL_INDEX] = TRUE;
 		else if (value == CUDASTREAMBARRIER_VAL)
 			inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
 		else if (value == CUDATHREADBARRIER_VAL)
@@ -184,6 +190,12 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 		if (inuse[CUDAHOSTALLOC_INDEX])
 			fprintf(fd, "%d cudaHostAlloc\n", CUDAHOSTALLOC_VAL);
 
+		if (inuse[CUDAMEMCPYTOSYMBOL_INDEX])
+			fprintf (fd, "%d cudaMemcpyToSymbol\n", CUDAMEMCPYTOSYMBOL_VAL);
+
+		if (inuse[CUDAMEMCPYFROMSYMBOL_INDEX])
+			fprintf (fd, "%d cudaMemcpyFromSymbol\n", CUDAMEMCPYFROMSYMBOL_VAL);
+
 		if (inuse[CUDAMEMSET_INDEX])
 			fprintf(fd, "%d cudaMemset\n", CUDAMEMSET_VAL);
 
@@ -227,7 +239,8 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			             0, CUDA_KERNEL_THREADS_PER_BLOCK);
 		}
 
-		if (inuse[CUDAMEMCPYASYNC_INDEX] || inuse[CUDAMEMCPY_INDEX])
+		if (inuse[CUDAMEMCPYASYNC_INDEX] || inuse[CUDAMEMCPY_INDEX] || 
+			inuse[CUDAMEMCPYTOSYMBOL_INDEX] || inuse[CUDAMEMCPYFROMSYMBOL_INDEX])
 		{
 			fprintf (fd, "EVENT_TYPE\n"
 						 "%d    %d    CUDA memory transfer\n", 0, CUDA_MEMORY_TRANSFER);
@@ -235,14 +248,19 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 						 "0 End\n");
 
 			if (inuse[CUDAMEMCPY_INDEX])
-				fprintf (fd, "%d cudaMemcpy\n", CUDAMEMCPY_VAL);
+				fprintf (fd, "%d cudaMemcpy\n", CUDAMEMCPY_GPU_VAL);
 			if (inuse[CUDAMEMCPYASYNC_INDEX])
-				fprintf (fd, "%d cudaMemcpyAsync\n", CUDAMEMCPYASYNC_VAL);
+				fprintf (fd, "%d cudaMemcpyAsync\n", CUDAMEMCPYASYNC_GPU_VAL);
+			if (inuse[CUDAMEMCPYTOSYMBOL_INDEX])
+				fprintf (fd, "%d cudaMemcpyToSymbol\n", CUDAMEMCPYTOSYMBOL_GPU_VAL);
+			if (inuse[CUDAMEMCPYFROMSYMBOL_INDEX])
+				fprintf (fd, "%d cudaMemcpyFromSymbol\n", CUDAMEMCPYFROMSYMBOL_GPU_VAL);
 		}
 
 		if (inuse[CUDAMALLOC_INDEX] || inuse[CUDAMEMCPY_INDEX] ||
 		  inuse[CUDAMEMCPYASYNC_INDEX] || inuse[CUDAHOSTALLOC_INDEX] ||
-		  inuse[CUDAMEMSET_INDEX] || inuse[CUDAMEMSETASYNC_INDEX])
+		  inuse[CUDAMEMSET_INDEX] || inuse[CUDAMEMSETASYNC_INDEX] ||
+		  inuse[CUDAMEMCPYTOSYMBOL_INDEX] || inuse[CUDAMEMCPYFROMSYMBOL_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
 			              "%d    %d    CUDA Dynamic memory size\n"
 			              "\n",

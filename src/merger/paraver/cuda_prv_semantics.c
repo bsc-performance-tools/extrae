@@ -80,6 +80,8 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
 		case CUDAMEMCPY_VAL:
+		case CUDAMEMCPYFROMSYMBOL_VAL:
+		case CUDAMEMCPYTOSYMBOL_VAL:
 		case CUDAMEMCPYASYNC_VAL:
 		case CUDAMEMSET_VAL:
 		case CUDAMEMSETASYNC_VAL:
@@ -198,6 +200,8 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 			break;
 		case CUDAMEMCPYASYNC_GPU_VAL:
 		case CUDAMEMCPY_GPU_VAL:
+		case CUDAMEMCPYTOSYMBOL_GPU_VAL:
+		case CUDAMEMCPYFROMSYMBOL_GPU_VAL:
 			state = STATE_MEMORY_XFER;
 			Switch_State (state, (beginEV != EVT_END), ptask, task, thread);
 			break;
@@ -215,7 +219,8 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 	 * don't emit this event so the region is marked as Useful.
 	 * XXX
 	 */
-	if (EvValue == CUDAMEMCPY_GPU_VAL || EvValue == CUDAMEMCPYASYNC_GPU_VAL)
+	if (EvValue == CUDAMEMCPY_GPU_VAL || EvValue == CUDAMEMCPYASYNC_GPU_VAL ||
+		EvValue == CUDAMEMCPYTOSYMBOL_GPU_VAL || EvValue == CUDAMEMCPYFROMSYMBOL_GPU_VAL)
 	{
 		trace_paraver_event(cpu, ptask, task, thread, current_time, CUDA_MEMORY_TRANSFER, (beginEV != EVT_END) ? EvValue : EVT_END);
 		if(beginEV != EVT_END)

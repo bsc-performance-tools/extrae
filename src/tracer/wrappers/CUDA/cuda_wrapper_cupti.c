@@ -367,9 +367,51 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaMemcpy_v3020_params *)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			{
 				Extrae_cudaMemcpy_Enter(p->dst, p->src, p->count, p->kind, cbinfo->context);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
 				Extrae_cudaMemcpy_Exit(cbinfo->context);
+			}
+
+			ret = 1;
+		}
+		break;
+
+		/* 39 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyToSymbol_v3020:
+		{
+			cudaMemcpyToSymbol_v3020_params *p =
+			  (cudaMemcpyToSymbol_v3020_params *)cbinfo->functionParams;
+
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			{
+				Extrae_cudaMemcpyToSymbol_Enter(NULL, p->src, p->count, p->kind, cbinfo->context);
+			}
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				Extrae_cudaMemcpyToSymbol_Exit(cbinfo->context);
+			}
+
+			ret = 1;
+		}
+		break;
+
+		/* 40 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyFromSymbol_v3020:
+		{
+			cudaMemcpyFromSymbol_v3020_params *p =
+			  (cudaMemcpyFromSymbol_v3020_params *)cbinfo->functionParams;
+
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			{
+				Extrae_cudaMemcpyFromSymbol_Enter(p->dst, NULL, p->count, p->kind, cbinfo->context);
+			}
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				Extrae_cudaMemcpyFromSymbol_Exit(cbinfo->context);
+			}
 
 			ret = 1;
 		}

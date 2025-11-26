@@ -641,7 +641,7 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 	Probe_Cuda_StreamBarrier_Exit ();
 }
 
-void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4, CUcontext ctx)
+void _Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4, CUcontext ctx, void (*entry_probe)(size_t), unsigned long long gpu_value)
 {
 	UNREFERENCED_PARAMETER(p1);
 	UNREFERENCED_PARAMETER(p2);
@@ -655,7 +655,7 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	Extrae_CUDA_saved_params.memcpySize = p3;
 	Extrae_CUDA_saved_params.memcpyKind = p4;
 
-	Probe_Cuda_Memcpy_Entry (p3);
+	entry_probe (p3);
 
 	tag = Extrae_CUDA_tag_generator();
 
@@ -675,16 +675,16 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	if (p4 == cudaMemcpyDeviceToHost)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, tag, p3, 0, 0);
+		  gpu_value, EVT_BEGIN, tag, p3, 0, 0);
 	}
 	else
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
+		  gpu_value, EVT_BEGIN, 0, p3, 0, 0);
 	}
 }
 
-void Extrae_cudaMemcpy_Exit (CUcontext ctx)
+void _Extrae_cudaMemcpy_Exit (CUcontext ctx, void (*exit_probe)(void), unsigned long long gpu_value)
 {
 	unsigned tag;
 	int devid;
@@ -705,15 +705,15 @@ void Extrae_cudaMemcpy_Exit (CUcontext ctx)
 	if (kind == cudaMemcpyHostToDevice)
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-			CUDAMEMCPY_GPU_VAL, EVT_END, tag, size, 0, 0);
+			gpu_value, EVT_END, tag, size, 0, 0);
 	}
 	else
 	{
 		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-			CUDAMEMCPY_GPU_VAL, EVT_END, 0, size, 0, 0);
+			gpu_value, EVT_END, 0, size, 0, 0);
 	}
 		
-		Probe_Cuda_Memcpy_Exit ();
+	exit_probe ();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
 	if (kind == cudaMemcpyDeviceToHost)

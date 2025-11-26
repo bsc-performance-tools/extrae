@@ -141,8 +141,8 @@ void Extrae_cudaStreamDestroy_Enter (cudaStream_t, CUcontext);
 void Extrae_cudaStreamDestroy_Exit (void);
 void Extrae_cudaStreamSynchronize_Enter (cudaStream_t, CUcontext);
 void Extrae_cudaStreamSynchronize_Exit (void);
-void Extrae_cudaMemcpy_Enter (void*, const void*, size_t, enum cudaMemcpyKind, CUcontext);
-void Extrae_cudaMemcpy_Exit (CUcontext);
+void _Extrae_cudaMemcpy_Enter (void*, const void*, size_t, enum cudaMemcpyKind, CUcontext, void (*entry_probe)(size_t), unsigned long long gpu_evvalue);
+void _Extrae_cudaMemcpy_Exit (CUcontext, void (*exit_probe)(void), unsigned long long gpu_evvalue);
 void Extrae_cudaMemcpyAsync_Enter (void*, const void*, size_t, enum cudaMemcpyKind, cudaStream_t, CUcontext);
 void Extrae_cudaMemcpyAsync_Exit (CUcontext);
 void Extrae_cudaMemset_Enter(void *, size_t, CUcontext);
@@ -158,3 +158,21 @@ void Extrae_CUDA_finalize (void);
 
 void Extrae_CUDA_Initialize(int);
 void Extrae_CUDA_deInitialize(int);
+
+#define Extrae_cudaMemcpy_Enter(...) \
+    _Extrae_cudaMemcpy_Enter(__VA_ARGS__, Probe_Cuda_Memcpy_Entry, CUDAMEMCPY_GPU_VAL)
+
+#define Extrae_cudaMemcpy_Exit(...) \
+    _Extrae_cudaMemcpy_Exit(__VA_ARGS__, Probe_Cuda_Memcpy_Exit, CUDAMEMCPY_GPU_VAL)
+
+#define Extrae_cudaMemcpyToSymbol_Enter(...) \
+    _Extrae_cudaMemcpy_Enter(__VA_ARGS__, Probe_Cuda_MemcpyToSymbol_Entry, CUDAMEMCPYTOSYMBOL_GPU_VAL)
+
+#define Extrae_cudaMemcpyToSymbol_Exit(...) \
+    _Extrae_cudaMemcpy_Exit(__VA_ARGS__, Probe_Cuda_MemcpyToSymbol_Exit, CUDAMEMCPYTOSYMBOL_GPU_VAL)
+
+#define Extrae_cudaMemcpyFromSymbol_Enter(...) \
+    _Extrae_cudaMemcpy_Enter(__VA_ARGS__, Probe_Cuda_MemcpyFromSymbol_Entry, CUDAMEMCPYFROMSYMBOL_GPU_VAL)
+
+#define Extrae_cudaMemcpyFromSymbol_Exit(...) \
+    _Extrae_cudaMemcpy_Exit(__VA_ARGS__, Probe_Cuda_MemcpyFromSymbol_Exit, CUDAMEMCPYFROMSYMBOL_GPU_VAL)
