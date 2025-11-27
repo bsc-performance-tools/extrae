@@ -93,6 +93,7 @@ void Enable_CUDA_Operation (INT32 type, UINT64 value)
 			inuse[CUDASTREAMDESTROY_INDEX] = TRUE;
 		else if (value == CUDAMALLOC_VAL || value == CUDAMALLOCPITCH_VAL ||
 			value == CUDAFREE_VAL || value == CUDAMALLOCARRAY_VAL ||
+			value == CUDAMALLOC3D_VAL || value == CUDAMALLOC3DARRAY_VAL ||
 			value == CUDAFREEARRAY_VAL || value == CUDAMALLOCHOST_VAL ||
 			value == CUDAFREEHOST_VAL)
 			inuse[CUDAMALLOC_INDEX] = TRUE;
@@ -185,6 +186,8 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			fprintf(fd, "%d cudaFreeArray\n", CUDAFREEARRAY_VAL);
 			fprintf(fd, "%d cudaMallocHost\n", CUDAMALLOCHOST_VAL);
 			fprintf(fd, "%d cudaFreeHost\n", CUDAFREEHOST_VAL);
+			fprintf(fd, "%d cudaMalloc3D\n", CUDAMALLOC3D_VAL);
+			fprintf(fd, "%d cudaMalloc3DArray\n", CUDAMALLOC3DARRAY_VAL);
 		}
 
 		if (inuse[CUDAHOSTALLOC_INDEX])

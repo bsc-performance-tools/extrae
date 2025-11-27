@@ -566,6 +566,52 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		}
 		break;
 
+		/* 140 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaMalloc3D_v3020:
+		{
+			cudaMalloc3D_v3020_params *p =
+			  (cudaMalloc3D_v3020_params *)cbinfo->functionParams;
+
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			{
+				Extrae_cudaMalloc_Enter(
+				  CUDAMALLOC3D_VAL, NULL, 
+				    p->extent.width * p->extent.height * p->extent.depth, 
+				    cbinfo->context
+				  );
+			}
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				Extrae_cudaMalloc_Exit(CUDAMALLOC3D_VAL);
+			}
+
+			ret = 1;
+		}
+		break;
+
+		/* 141 */
+		case CUPTI_RUNTIME_TRACE_CBID_cudaMalloc3DArray_v3020:
+		{
+			cudaMalloc3DArray_v3020_params *p =
+			  (cudaMalloc3DArray_v3020_params *)cbinfo->functionParams;
+
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			{
+				Extrae_cudaMalloc_Enter(
+				  CUDAMALLOC3DARRAY_VAL, (void *)p->array, 
+				    p->extent.width * p->extent.height * p->extent.depth, 
+				    cbinfo->context
+				  );
+			}
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				Extrae_cudaMalloc_Exit(CUDAMALLOC3DARRAY_VAL);
+			}
+
+			ret = 1;
+		}
+		break;
+
 		/* 147 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamWaitEvent_v3020:
 		{

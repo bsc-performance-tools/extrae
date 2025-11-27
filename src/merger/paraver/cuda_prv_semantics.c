@@ -92,6 +92,8 @@ CUDA_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 		case CUDAMALLOCPITCH_VAL:
 		case CUDAFREE_VAL:
 		case CUDAMALLOCARRAY_VAL:
+		case CUDAMALLOC3D_VAL:
+		case CUDAMALLOC3DARRAY_VAL:
 		case CUDAFREEARRAY_VAL:
 		case CUDAMALLOCHOST_VAL:
 		case CUDAFREEHOST_VAL:
