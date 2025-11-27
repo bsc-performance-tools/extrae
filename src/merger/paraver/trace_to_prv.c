@@ -100,6 +100,7 @@
 #include "misc_prv_events.h"
 #include "opencl_prv_events.h"
 #include "cuda_prv_events.h"
+#include "hip_prv_events.h"
 #include "java_prv_events.h"
 #include "gaspi_prv_events.h"
 #include "addr2info.h"
@@ -415,7 +416,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 #endif
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
-			    Type == MPI_TYPE || Type == CUDA_TYPE || Type == OPENCL_TYPE ||
+			    Type == MPI_TYPE || Type == CUDA_TYPE || Type == HIP_TYPE || Type == OPENCL_TYPE ||
 			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE || Type == OPENACC_TYPE ||
 				Type == GASPI_TYPE)
 			{
@@ -436,6 +437,8 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 						Enable_MPI_Operation (EvType);
 					else if (CUDA_TYPE == Type)
 						Enable_CUDA_Operation (EvType, Get_EvValue(current_event));
+					else if (HIP_TYPE == Type)
+						Enable_HIP_Operation (EvType, Get_EvValue(current_event));
 					else if (OPENCL_TYPE == Type)
 						Enable_OpenCL_Operation (EvType);
 					else if (OPENSHMEM_TYPE == Type)

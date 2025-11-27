@@ -228,6 +228,26 @@ unsigned IsCUDA (unsigned EvType)
 }
 
 /******************************************************************************
+ ***  IsHIP
+ ******************************************************************************/
+#define HIP_EVENTS 8
+static unsigned hip_events[] = {
+	/* Host events */
+	HIPCALL_EV, HIPCALLGPU_EV, HIP_DYNAMIC_MEM_PTR_EV, HIP_DYNAMIC_MEM_SIZE_EV,
+	HIP_KERNEL_INST_EV, HIPSTREAMBARRIER_THID_EV, HIP_KERNEL_EXEC_EV, HIP_UNTRACKED_EV
+};
+
+unsigned IsHIP (unsigned EvType)
+{
+  unsigned evt;
+
+  for (evt = 0; evt < HIP_EVENTS; evt++)
+    if (hip_events[evt] == EvType)
+      return TRUE;
+  return FALSE;
+}
+
+/******************************************************************************
  ***  IsOpenCL
  ******************************************************************************/
 #define OPENCL_EVENTS 73
@@ -473,6 +493,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (IsCUDA(EvType))
 	{
 		*Type = CUDA_TYPE;
+		return TRUE;
+	}
+	else if (IsHIP(EvType))
+	{
+		*Type = HIP_TYPE;
 		return TRUE;
 	}
 	else if (IsOpenCL(EvType))

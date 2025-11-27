@@ -75,6 +75,7 @@
 #define TRACE_SHMEM                     ((xmlChar*) "shmem")
 #define TRACE_OPENCL                    ((xmlChar*) "opencl")
 #define TRACE_CUDA                      ((xmlChar*) "cuda")
+#define TRACE_HIP                       ((xmlChar*) "hip")
 #define TRACE_PTHREAD_LOCKS             ((xmlChar*) "locks")
 #define TRACE_PTHREAD                   ((xmlChar*) "pthread")
 #define TRACE_OMP_OMPT                  ((xmlChar*) "ompt")
@@ -184,7 +185,7 @@
 
 
 #define TRACE_CUDA_EVENTS_BUFFER_SIZE    ((xmlChar*) "buffer-size")
-
+#define TRACE_HIP_EVENTS_BUFFER_SIZE     ((xmlChar*) "buffer-size")
 
 
 short int Parse_XML_File (int rank, int world_size, const char *filename);

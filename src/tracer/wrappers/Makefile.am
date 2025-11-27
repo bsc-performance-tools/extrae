@@ -16,6 +16,10 @@ if HAVE_CUDA
 SUBDIRS += CUDA
 endif
 
+if HAVE_HIP
+SUBDIRS += HIP
+endif
+
 if WANT_OPENCL
 SUBDIRS += OPENCL
 endif

@@ -268,7 +268,7 @@ list varies depending of the instrumentation mechanism used:
 The :option:`exclude-automatic-functions` attribute is used only by the DynInst
 instrumenter. By setting this attribute to ``yes`` the instrumenter will avoid
 automatically instrumenting the routines that either call OpenMP outlined
-routines (*i.e.,* routines with OpenMP pragmas) or call CUDA kernels.
+routines (*i.e.,* routines with OpenMP pragmas), call CUDA kernels or HIP Kernels.
 
 Finally, in order to gather performance counters in these functions and also in
 those instrumented using the ``extrae_user_function`` API call, the node
@@ -633,6 +633,20 @@ XML Section: CUDA
 
 This section indicates whether the CUDA calls should be instrumented or not. If
 ``enabled`` is set to yes, CUDA calls will be instrumented, otherwise they
+will not be instrumented.
+
+
+.. _sec:XMLSectionHIP:
+
+XML Section: HIP
+-----------------
+
+.. highlight:: xml
+
+.. literalinclude:: xml/hip.xml
+
+This section indicates whether the HIP calls should be instrumented or not. If
+``enabled`` is set to yes, HIP calls will be instrumented, otherwise they
 will not be instrumented.
 
 

@@ -42,6 +42,7 @@ paraver_FILES = \
  ../paraver/pthread_prv_semantics.c ../paraver/pthread_prv_semantics.h \
  ../paraver/java_prv_semantics.c ../paraver/java_prv_semantics.h \
  ../paraver/cuda_prv_semantics.c ../paraver/cuda_prv_semantics.h \
+ ../paraver/hip_prv_semantics.c ../paraver/hip_prv_semantics.h \
  ../paraver/opencl_prv_semantics.c ../paraver/opencl_prv_semantics.h \
  ../paraver/openshmem_prv_semantics.c ../paraver/openshmem_prv_semantics.h \
  ../paraver/openacc_prv_semantics.c ../paraver/openacc_prv_semantics.h \
@@ -52,6 +53,7 @@ paraver_FILES = \
  ../paraver/misc_prv_events.c ../paraver/misc_prv_events.h \
  ../paraver/java_prv_events.c ../paraver/java_prv_events.h \
  ../paraver/cuda_prv_events.c ../paraver/cuda_prv_events.h \
+ ../paraver/hip_prv_events.c ../paraver/hip_prv_events.h \
  ../paraver/opencl_prv_events.c ../paraver/opencl_prv_events.h \
  ../paraver/openshmem_prv_events.c ../paraver/openshmem_prv_events.h \
  ../paraver/openacc_prv_events.c ../paraver/openacc_prv_events.h \

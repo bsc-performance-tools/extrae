@@ -700,6 +700,37 @@ AC_DEFUN([AX_PROG_ELFUTILS],
    AX_FLAGS_RESTORE()
 ])
 
+# AX_PROG_LLVM_TOOLS
+# --------------------
+# Check for llvm-tools installation
+AC_DEFUN([AX_PROG_LLVM_TOOLS],
+[
+   AX_FLAGS_SAVE()
+
+   AC_ARG_WITH(llvm-tools,
+      AC_HELP_STRING(
+         [--with-llvm-tools@<:@=DIR@:>@],
+         [Specify where to find llvm-tools' installation]
+      ),
+      [llvm_tools_paths="${withval}"],
+      [llvm_tools_paths="no"]
+   )
+
+   if test "${llvm_tools_paths}" != "no" ; then
+      # Search for llvm-tools installation
+      AX_FIND_INSTALLATION([LLVM_TOOLS], [${llvm_tools_paths}], [llvm-addr2line], [], [], [], [], [], [], [])
+
+      if test "${LLVM_TOOLS_INSTALLED}" != "yes" ; then
+         AC_MSG_ERROR([llvm-tools installation cannot be found. Please review --with-llvm-tools option.])
+      else
+         AC_DEFINE([HAVE_LIBADDR2LINE], [1], [Define to 1 if libaddr2line is available])
+         llvm_tools_addr2line_configure_args="--with-llvm-tools-addr2line=${llvm_tools_paths}/bin/llvm-addr2line"
+      fi
+   fi
+
+   AX_FLAGS_RESTORE()
+])
+
 # AX_PROG_BINUTILS
 # --------------------
 # Check for binutils installation
@@ -736,12 +767,13 @@ AC_DEFUN([AX_PROG_BINUTILS],
 AC_DEFUN([AX_PROG_LIBADDR2LINE],
 [
    AC_REQUIRE([AX_PROG_ELFUTILS])
+   AC_REQUIRE([AX_PROG_LLVM_TOOLS])
    AC_REQUIRE([AX_PROG_BINUTILS])
 
    LIBADDR2LINE_INSTALLED="no"
    LIBADDR2LINE_SRCDIR="\${top_srcdir}/libaddr2line/src"
    LIBADDR2LINE_CFLAGS="-I${LIBADDR2LINE_SRCDIR}"
-   if test "${ELFUTILS_INSTALLED}" = "yes" -o "${BINUTILS_INSTALLED}" = "yes" ; then
+   if test "${ELFUTILS_INSTALLED}" = "yes"  -o "${LLVM_TOOLS_INSTALLED}" = "yes" -o "${BINUTILS_INSTALLED}" = "yes" ; then
       LIBADDR2LINE_INSTALLED="yes"
       LIBADDR2LINE_BLDDIR="\${top_builddir}/libaddr2line/src"
       LIBADDR2LINE_LIBADD="${LIBADDR2LINE_BLDDIR}/libaddr2line.la ${LIBADDR2LINE_BLDDIR}/libmaps.la"

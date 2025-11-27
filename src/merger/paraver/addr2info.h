@@ -58,6 +58,7 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 UINT64 Address2Info_Translate_MemReference (unsigned ptask, unsigned task,
 	UINT64 address, int event_type, UINT64 *calleraddresses);
 void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid);
+void Address2Info_Write_HIP_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 	char *eventtype_description, int eventtype_line,
@@ -94,6 +95,8 @@ enum
 	ADDR2SAMPLE_LINE,
 	ADDR2CUDA_FUNCTION,
 	ADDR2CUDA_LINE,
+	ADDR2HIP_FUNCTION,
+	ADDR2HIP_LINE,
 	ADDR2OTHERS_FUNCTION,
 	ADDR2OTHERS_LINE,
 	ADDR2_FUNCTION_UNIQUE,
@@ -109,6 +112,7 @@ enum
 	USER_FUNCTION_TYPE,
 	SAMPLE_TYPE,
 	CUDAKERNEL_TYPE,
+	HIPKERNEL_TYPE,
 	OTHER_FUNCTION_TYPE,
 	UNIQUE_TYPE,
 	COUNT_ADDRESS_TYPES /* Must be the very last entry */

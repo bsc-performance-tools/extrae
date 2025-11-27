@@ -148,6 +148,11 @@ int detect_cuda(void *handle)
   return look_for_symbol(handle, "cudaLaunch");
 }
 
+int detect_hip(void *handle)
+{
+  return look_for_symbol(handle, "hipLaunchKernelGGL");
+}
+
 int detect_opencl(void *handle)
 {
   return look_for_symbol(handle, "clCreateBuffer");
@@ -174,6 +179,7 @@ int main(int argc, char *argv[])
   int    have_openmp   = 0;
   int    have_pthreads = 0;
   int    have_cuda     = 0;
+  int    have_hip      = 0;
   int    have_opencl   = 0;
 
   extrae_home = getenv("EXTRAE_HOME");
@@ -220,6 +226,7 @@ int main(int argc, char *argv[])
     have_pthreads = detect_pthreads(handle); 
   }
   have_cuda = detect_cuda(handle);
+  have_hip = detect_hip(handle);
   have_opencl = detect_opencl(handle);
 
   if (have_extrae == 0)

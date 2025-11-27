@@ -337,6 +337,7 @@ AX_CHECK_OPENMP
 
 AX_CUDA
 AX_CUPTI
+AX_HIP
 AX_OPENCL
 AX_PTHREAD
 
@@ -539,6 +540,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/OMP/intel-kmpc-11-intermediate/Makefile \
   src/tracer/wrappers/OMP_new/Makefile \
   src/tracer/wrappers/CUDA/Makefile \
+  src/tracer/wrappers/HIP/Makefile \
   src/tracer/wrappers/OPENCL/Makefile \
   src/tracer/wrappers/pthread/Makefile \
   src/tracer/wrappers/openshmem/Makefile \
@@ -735,7 +737,7 @@ AC_SUBST( [EXTRAE_MAJOR], extrae_major )
 AC_SUBST( [EXTRAE_MINOR], extrae_minor )
 AC_SUBST( [EXTRAE_MICRO], extrae_micro )
 
-ac_configure_args="${elfutils_addr2line_configure_args} ${binutils_addr2line_configure_args}"
+ac_configure_args="${elfutils_addr2line_configure_args} ${llvm_tools_addr2line_configure_args} ${binutils_addr2line_configure_args}"
 
 if test "${LIBADDR2LINE_INSTALLED}" = "yes" ; then
    AC_CONFIG_SUBDIRS([libaddr2line])

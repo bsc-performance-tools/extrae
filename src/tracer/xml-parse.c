@@ -91,6 +91,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include "cuda_probe.h"
 # include "cuda_common.h"
 #endif
+#if defined(HIP_SUPPORT)
+# include "hip_probe.h"
+# include "hip_common.h"
+#endif
 #if defined(GASPI_SUPPORT)
 # include "gaspi_probe.h"
 #endif
@@ -1054,6 +1058,23 @@ static void Parse_XML_CUDA (int rank, xmlNodePtr current_tag)
 		if(cu_events_block_size > 0)
 			XTR_CUDA_SET_EVENTS_BLOCK_SIZE(cu_events_block_size);
 		mfprintf (stdout, PACKAGE_NAME": Number of allocated CUDA events per block is %u \n", XTR_CUDA_EVENTS_BLOCK_SIZE);
+	}
+}
+#endif
+
+#if defined(HIP_SUPPORT)
+/* Configure HIP related parameters */
+static void Parse_XML_HIP (int rank, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	xmlChar *maxHipEvStr = xmlGetProp_env (rank, current_tag, TRACE_HIP_EVENTS_BUFFER_SIZE);
+	if (maxHipEvStr != NULL)
+	{
+		unsigned hi_events_block_size = atoi((char*)maxHipEvStr);
+		if(hi_events_block_size > 0)
+			XTR_HIP_SET_EVENTS_BLOCK_SIZE(hi_events_block_size);
+		mfprintf (stdout, PACKAGE_NAME": Number of allocated HIP events per block is %u \n", XTR_HIP_EVENTS_BLOCK_SIZE);
 	}
 }
 #endif
@@ -2049,6 +2070,26 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 #if defined(CUDA_SUPPORT)
 						else
 							Extrae_set_trace_CUDA (FALSE);
+#endif
+						XML_FREE(enabled);
+					}
+					/* HIP related configuration */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_HIP))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
+#if defined(HIP_SUPPORT)
+							Extrae_set_trace_HIP (TRUE);
+							Parse_XML_HIP(rank, current_tag);
+#else
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support HIP.\n", TRACE_HIP);
+#endif
+						}
+#if defined(HIP_SUPPORT)
+						else
+							Extrae_set_trace_HIP (FALSE);
 #endif
 						XML_FREE(enabled);
 					}

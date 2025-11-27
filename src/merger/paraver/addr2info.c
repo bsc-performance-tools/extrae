@@ -125,8 +125,9 @@ static struct address_object_table_st AddressObjectInfo;
 #define A2I_UF       2
 #define A2I_SAMPLE   3
 #define A2I_CUDA     4
-#define A2I_OTHERS   5
-#define A2I_LAST     6
+#define A2I_HIP      5
+#define A2I_OTHERS   6
+#define A2I_LAST     7
 
 // Boolean to indicate if labels should be generated per address type
 int Address2Info_Labels[A2I_LAST];
@@ -136,7 +137,7 @@ int Address2Info_Labels[A2I_LAST];
  *
  * Initialize the memory addresses translation module.
  * This function prepares the tables to store the translation of addresses.
- * These tables are categorized by the type of address (MPI, OpenMP, CUDA, etc.).
+ * These tables are categorized by the type of address (MPI, OpenMP, CUDA, HIP, etc.).
  * When the flag -unique-caller-id is set, all the addresses are stored in the 
  * same table under category 'UNIQUE_TYPE', regardless of the type of address.
  * 
@@ -159,7 +160,7 @@ int Address2Info_Labels[A2I_LAST];
  *    MEM_REFERENCE_STATIC_TYPE in corresponding enum at addr2info.h).
  * 3) Generalise the hot-addresses cache (*_HashCache_*), currently it is 
  *    only used to accelerate translations for non-data symbols, i.e., 
- *    for callstack, CUDA kernels, OpenMP outlineds, etc.
+ *    for callstack, CUDA kernels, HIP kernels, OpenMP outlineds, etc.
  */
 void Address2Info_Initialize (void)
 {
@@ -612,6 +613,12 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address, in
 			caller_address = address;
 			addr_type = uniqueID?UNIQUE_TYPE:CUDAKERNEL_TYPE;
 			break;
+		case ADDR2HIP_FUNCTION:
+		case ADDR2HIP_LINE:
+			Address2Info_Labels[A2I_HIP] = TRUE;
+			caller_address = address;
+			addr_type = uniqueID?UNIQUE_TYPE:HIPKERNEL_TYPE;
+			break;
 		case ADDR2UF_FUNCTION:
 		case ADDR2UF_LINE:
 			Address2Info_Labels[A2I_UF] = TRUE;
@@ -684,6 +691,7 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address, in
 	switch(query)
 	{
 		case ADDR2CUDA_FUNCTION:
+		case ADDR2HIP_FUNCTION:
 		case ADDR2SAMPLE_FUNCTION:
 		case ADDR2MPI_FUNCTION:
 		case ADDR2UF_FUNCTION:
@@ -692,6 +700,7 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address, in
 			result = function_id + 1;
 			break;
 		case ADDR2CUDA_LINE:
+		case ADDR2HIP_LINE:
 		case ADDR2UF_LINE:
 		case ADDR2OTHERS_LINE:
 		case ADDR2SAMPLE_LINE:
@@ -744,7 +753,7 @@ static int Address2Info_Sort_routine(const void *p1, const void *p2)
  * This operation is done when the flag -sort-addresses is set,
  * and applies to all addresses collected both via manual calls to the 
  * Extrae_register_function_address API, and via automatic instrumentation,
- * including OpenMP outlined functions, CUDA kernels, call stack, etc.
+ * including OpenMP outlined functions, CUDA kernels, HIP kernels, call stack, etc.
  * However, it does not apply to data object addresses collected via 
  * PEBS samples. 
  */
@@ -781,6 +790,10 @@ void Address2Info_Sort (int unique_ids)
 
 		base = (void*) &(AddressTable[CUDAKERNEL_TYPE]->address[1]);
 		qsort (base, AddressTable[CUDAKERNEL_TYPE]->num_addresses-1,
+		       sizeof(struct address_info), Address2Info_Sort_routine);
+
+		base = (void*) &(AddressTable[HIPKERNEL_TYPE]->address[1]);
+		qsort (base, AddressTable[HIPKERNEL_TYPE]->num_addresses-1,
 		       sizeof(struct address_info), Address2Info_Sort_routine);
 	}
 
@@ -1494,6 +1507,69 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_INST_LINE_EV, "CUDA kernel instantiation source code line");
 		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_EXEC_LINE_EV, "CUDA kernel execution source code line");
+
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0 %s\n", VALUES_LABEL, EVT_END_LBL);
+
+			for (i = 0; i < AddrTab->num_addresses; i ++)
+			{
+				char *short_label = NULL, *long_label = NULL;
+				prettify_file_line(AddrTab->address[i].module, AddrTab->address[i].file_name, AddrTab->address[i].line, &short_label, &long_label);
+				fprintf(pcf_fd, "%d %s %s%s%s\n",
+				        i + 1,
+				        short_label,
+				        (long_label != NULL ? "[" : ""),
+				        (long_label != NULL ? long_label : ""),
+				        (long_label != NULL ? "]" : ""));
+				free(short_label);
+				free(long_label);
+
+			}
+			LET_SPACES(pcf_fd);
+		}
+	}
+}
+
+void Address2Info_Write_HIP_Labels (FILE * pcf_fd, int uniqueid)
+{
+	struct address_table  * AddrTab;
+	struct function_table * FuncTab;
+	int i;
+
+	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:HIPKERNEL_TYPE];
+	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:HIPKERNEL_TYPE];
+
+	if (Address2Info_Labels[A2I_HIP]) 
+	{
+		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+		fprintf (pcf_fd, "0    %d    %s\n", HIP_KERNEL_INST_EV, "HIP kernel instantiation");
+		fprintf (pcf_fd, "0    %d    %s\n", HIP_KERNEL_EXEC_EV, "HIP kernel execution");
+
+		if (Address2Info_Initialized())
+		{
+			fprintf(pcf_fd, "%s\n0 %s\n", VALUES_LABEL, EVT_END_LBL);
+
+			for (i = 0; i < FuncTab->num_functions; i ++)
+			{
+				char *short_label = NULL, *long_label = NULL;
+				prettify_function(FuncTab->function[i], &short_label, &long_label);
+				fprintf(pcf_fd, "%d %s %s%s%s\n",
+				        i + 1,
+				        short_label,
+				        (long_label != NULL ? "[" : ""),
+				        (long_label != NULL ? long_label : ""),
+				        (long_label != NULL ? "]" : ""));
+				free(short_label);
+				free(long_label);
+			}
+			LET_SPACES(pcf_fd);
+		}
+
+		/* Then dump line-functions */
+		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+		fprintf (pcf_fd, "0    %d    %s\n", HIP_KERNEL_INST_LINE_EV, "HIP kernel instantiation source code line");
+		fprintf (pcf_fd, "0    %d    %s\n", HIP_KERNEL_EXEC_LINE_EV, "HIP kernel execution source code line");
 
 		if (Address2Info_Initialized())
 		{

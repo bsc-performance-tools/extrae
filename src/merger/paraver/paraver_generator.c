@@ -652,6 +652,16 @@ static UINT64 paraver_translate_address_event (unsigned ptask, unsigned task,
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
 	}
+	else if (eventtype == HIP_KERNEL_INST_EV || eventtype == HIP_KERNEL_EXEC_EV)
+	{
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2HIP_FUNCTION, get_option_merge_UniqueCallerID());
+	}
+	else if (eventtype == HIP_KERNEL_INST_LINE_EV || eventtype == HIP_KERNEL_EXEC_LINE_EV)
+	{
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2HIP_LINE, get_option_merge_UniqueCallerID());
+	}
 	else
 	{
 		if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -737,7 +747,9 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				  cur->event == TASKFUNC_INST_EV || cur->event == TASKFUNC_INST_LINE_EV ||
 				  cur->event == PTHREAD_FUNC_EV || cur->event == PTHREAD_FUNC_LINE_EV ||
 				  cur->event == CUDA_KERNEL_INST_EV || cur->event == CUDA_KERNEL_EXEC_EV || 
-				  cur->event == CUDA_KERNEL_INST_LINE_EV || cur->event == CUDA_KERNEL_EXEC_LINE_EV)
+				  cur->event == CUDA_KERNEL_INST_LINE_EV || cur->event == CUDA_KERNEL_EXEC_LINE_EV || 
+				  cur->event == HIP_KERNEL_INST_EV || cur->event == HIP_KERNEL_EXEC_EV || 
+				  cur->event == HIP_KERNEL_INST_LINE_EV || cur->event == HIP_KERNEL_EXEC_LINE_EV)
 				{
 					values[nevents] = paraver_translate_address_event (cur->ptask,
 					  cur->task, cur->event, cur->value);
@@ -801,7 +813,8 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					  (cur->event >= SAMPLING_EV && cur->event < SAMPLING_EV + MAX_CALLERS) ||
 					  cur->event == OMPFUNC_EV || cur->event == TASKFUNC_INST_EV ||
 					  cur->event == PTHREAD_FUNC_EV || cur->event == CUDA_KERNEL_EXEC_EV ||
-					  cur->event == CUDA_KERNEL_INST_EV )
+					  cur->event == CUDA_KERNEL_INST_EV || cur->event == HIP_KERNEL_EXEC_EV ||
+					  cur->event == HIP_KERNEL_INST_EV)
 					{
 						if (cur->value == UNRESOLVED_ID+1)
 						{

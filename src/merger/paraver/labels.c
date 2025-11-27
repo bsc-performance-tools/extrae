@@ -61,6 +61,7 @@
 #include "omp_prv_events.h"
 #include "java_prv_events.h"
 #include "cuda_prv_events.h"
+#include "hip_prv_events.h"
 #include "opencl_prv_events.h"
 #include "pthread_prv_events.h"
 #include "misc_prv_events.h"
@@ -639,6 +640,8 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 				case 'O':
 				case 'U':
 				case 'P':
+				case 'K':
+				case 'Y':
 					{
 						/* Example of line: U 0x100016d4 fA mpi_test.c 0 */
 						char fname[1024], modname[1024];
@@ -655,6 +658,8 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 							if (Type == 'O') type = OTHER_FUNCTION_TYPE;
 							else if (Type == 'U') type = USER_FUNCTION_TYPE;
 							else if (Type == 'P') type = OUTLINED_OPENMP_TYPE;
+							else if (Type == 'K') type = CUDAKERNEL_TYPE;
+							else if (Type == 'Y') type = HIPKERNEL_TYPE;
 						}
 						else type = UNIQUE_TYPE;
 
@@ -1017,6 +1022,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	WriteEnabled_pthread_Operations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
 	CUDAEvent_WriteEnabledOperations (fd);
+	HIPEvent_WriteEnabledOperations (fd);
 	JavaEvent_WriteEnabledOperations (fd);
 
 #if USE_HARDWARE_COUNTERS
@@ -1031,6 +1037,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Address2Info_Write_MPI_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_Sample_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_CUDA_Labels (fd, get_option_merge_UniqueCallerID());
+	Address2Info_Write_HIP_Labels (fd, get_option_merge_UniqueCallerID());
 
 #ifdef HAVE_LIBADDR2LINE_LIB_symtab
 	if (get_option_merge_DumpSymtab()) {

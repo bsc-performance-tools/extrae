@@ -44,6 +44,7 @@
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
 #include "cuda_prv_events.h"
+#include "hip_prv_events.h"
 #include "addr2info.h"
 #include "options.h"
 #include "xalloc.h"
@@ -706,6 +707,11 @@ void ShareTraceInformation (int numtasks, int taskid)
 		fprintf (stdout, " CUDA");
 	fflush (stdout);
 	Share_CUDA_Operations ();
+
+	if (0 == taskid)
+		fprintf (stdout, " HIP");
+	fflush (stdout);
+	Share_HIP_Operations ();
 
 #if USE_HARDWARE_COUNTERS
 	if (0 == taskid)
