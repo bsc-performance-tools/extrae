@@ -137,7 +137,7 @@ AC_PROG_INSTALL
 AC_PROG_SED
 AC_PROG_AWK
 
-if test "`basename ${CC}`" != "nvc" ; then
+if test -n "$CC" && test "`basename ${CC}`" != "nvc" ; then
 	if test "${GCC}" = "yes" ; then
 		if test "${IS_SPARC64_MACHINE}" != "yes" ; then
 			CFLAGS="${CFLAGS} -fno-optimize-sibling-calls"
