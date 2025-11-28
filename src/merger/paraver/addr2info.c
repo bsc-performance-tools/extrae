@@ -1480,8 +1480,8 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 	if (Address2Info_Labels[A2I_CUDA]) 
 	{
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_INST_EV, "CUDA kernel instantiation");
 		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_EXEC_EV, "CUDA kernel execution");
+		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_INST_EV, "CUDA kernel instantiation");
 
 		if (Address2Info_Initialized())
 		{
@@ -1505,8 +1505,8 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 
 		/* Then dump line-functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_INST_LINE_EV, "CUDA kernel instantiation source code line");
 		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_EXEC_LINE_EV, "CUDA kernel execution source code line");
+		fprintf (pcf_fd, "0    %d    %s\n", CUDA_KERNEL_INST_LINE_EV, "CUDA kernel instantiation source code line");
 
 		if (Address2Info_Initialized())
 		{
