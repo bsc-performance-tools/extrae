@@ -137,14 +137,16 @@ AC_PROG_INSTALL
 AC_PROG_SED
 AC_PROG_AWK
 
-if test "${GCC}" = "yes" ; then
-	if test "${IS_SPARC64_MACHINE}" != "yes" ; then
-		CFLAGS="${CFLAGS} -fno-optimize-sibling-calls"
-		CXXFLAGS="${CXXFLAGS} -fno-optimize-sibling-calls"
-	fi
-	if test "${Architecture}" = "arm" ; then
-		CFLAGS="${CFLAGS} -funwind-tables"
-		CXXFLAGS="${CXXFLAGS} -funwind-tables"
+if test "`basename ${CC}`" != "nvc" ; then
+	if test "${GCC}" = "yes" ; then
+		if test "${IS_SPARC64_MACHINE}" != "yes" ; then
+			CFLAGS="${CFLAGS} -fno-optimize-sibling-calls"
+			CXXFLAGS="${CXXFLAGS} -fno-optimize-sibling-calls"
+		fi
+		if test "${Architecture}" = "arm" ; then
+			CFLAGS="${CFLAGS} -funwind-tables"
+			CXXFLAGS="${CXXFLAGS} -funwind-tables"
+		fi
 	fi
 fi
 
