@@ -71,9 +71,6 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 # include "omp-common.h"
 # include "omp-probe.h"
-# if defined(OMPT_SUPPORT)
-#  include "ompt-wrapper.h"
-# endif /* OMPT_SUPPORT */
 #endif
 #if defined(NEW_OMP_SUPPORT)
 # include "omp_common.h"
@@ -902,7 +899,7 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		{
 #if defined(OMP_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			setTrace_OMPTaskloop ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+			setTrace_OpenMP_Taskloop ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 			XML_FREE(enabled);
 #endif
 		}
@@ -2182,18 +2179,6 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 #elif defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 							tracejant_omp = TRUE;
 							Parse_XML_OMP (rank, xmldoc, current_tag);
-
-							xmlChar *ompt = xmlGetProp_env (rank, current_tag, TRACE_OMP_OMPT);
-							if (ompt != NULL && !xmlStrcasecmp (ompt, xmlYES))
-							{
-# if defined(OMPT_SUPPORT)
-								ompt_enabled = TRUE;
-								mfprintf (stdout, PACKAGE_NAME": OMPT activated for OpenMP instrumentation.\n");
-# else
-								mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OMPT.\n", TRACE_OMP_OMPT);
-# endif /* OMPT_SUPPORT */
-							}
-							XML_FREE (ompt);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OpenMP.\n", TRACE_OMP);
 							tracejant_omp = FALSE;

@@ -522,17 +522,8 @@ enum {
 #define NAMEDCRIT_NAME_EV        60000032 /* Critical address name */
 #define ORDERED_EV               60000033 /* Ordered section in ordered or doacross loop */
 #define TARGET_EV                60000034
-#define OMPTASKYIELD_EV          60000035
-#define OMPT_CRITICAL_EV         60000050
-#define OMPT_ATOMIC_EV           60000051
-#define OMPT_LOOP_EV             60000052
-#define OMPT_WORKSHARE_EV        60000053
-#define OMPT_SECTIONS_EV         60000054
-#define OMPT_SINGLE_EV           60000055
-#define OMPT_MASTER_EV           60000056
-#define OMPT_TASKGROUP_IN_EV     60000057
-#define OMPT_DEPENDENCE_EV       60000058
-#define OMPT_TASKFUNC_EV         60000059
+#define TASKYIELD_EV             60000035
+
 #define OMP_STATS_EV             60000060
 
 /******************************************************************************

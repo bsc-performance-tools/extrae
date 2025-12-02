@@ -174,32 +174,26 @@ char *OMP_Call_Name[MAX_OMP_CALLS] =
 
 /* Deprecated OpenMP support */
 
-#define PAR_OMP_INDEX           0  /* PARALLEL constructs */
-#define WSH_OMP_INDEX           1  /* WORKSHARING constructs */
-#define FNC_OMP_INDEX           2  /* Pointers to routines <@> */
-#define ULCK_OMP_INDEX          3  /* Unnamed locks in use! */
-#define LCK_OMP_INDEX           4  /* Named locks in use! */
-#define WRK_OMP_INDEX           5  /* Work delivery */
-#define JOIN_OMP_INDEX          6  /* Joins */
-#define BARRIER_OMP_INDEX       7  /* Barriers */
-#define GETSETNUMTHREADS_INDEX  8  /* Set or Get num threads */
-#define TASK_INDEX              9  /* Task event */
-#define TASKWAIT_INDEX          10 /* Taskwait event */
-#define OMPT_CRITICAL_INDEX     11
-#define OMPT_ATOMIC_INDEX       12
-#define OMPT_LOOP_INDEX         13
-#define OMPT_WORKSHARE_INDEX    14
-#define OMPT_SECTIONS_INDEX     15
-#define OMPT_SINGLE_INDEX       16
-#define OMPT_MASTER_INDEX       17
-#define TASKGROUP_START_INDEX   18
-#define OMP_STATS_INDEX         19
-#define TASKLOOP_INDEX          20 /* Taskloop event */
-#define ORDERED_INDEX           21 /* Ordered section in ordered or doacross loops */
-#define TARGET_INDEX            22
-#define TASKYIELD_INDEX         23
-
-#define MAX_OMP_INDEX           24
+enum {
+  PAR_OMP_INDEX,             /* PARALLEL constructs */
+  WSH_OMP_INDEX,             /* WORKSHARING constructs */
+  FNC_OMP_INDEX,             /* Pointers to routines <@> */
+  ULCK_OMP_INDEX,            /* Unnamed locks in use! */
+  LCK_OMP_INDEX,             /* Named locks in use! */
+  WRK_OMP_INDEX,             /* Work delivery */
+  JOIN_OMP_INDEX,            /* Joins */
+  BARRIER_OMP_INDEX,         /* Barriers */
+  GETSETNUMTHREADS_INDEX,    /* Set or Get num threads */
+  TASK_INDEX,                /* Task event */
+  TASKWAIT_INDEX,            /* Taskwait event */
+  TASKGROUP_START_INDEX,
+  OMP_STATS_INDEX,
+  TASKLOOP_INDEX,            /* Taskloop event */
+  ORDERED_INDEX,             /* Ordered section in ordered or doacross loops */
+  TARGET_INDEX,
+  TASKYIELD_INDEX,
+  MAX_OMP_INDEX
+};
 
 static int inuse[MAX_OMP_INDEX] = { FALSE };
 
@@ -213,7 +207,7 @@ void OLD_Enable_OMP_Operation (int type)
 		inuse[PAR_OMP_INDEX] = TRUE;
 	else if (type == WSH_EV)
 		inuse[WSH_OMP_INDEX] = TRUE;
-	else if (type == OMPFUNC_EV || type == TASKFUNC_EV || type == OMPT_TASKFUNC_EV)
+	else if (type == OMPFUNC_EV || type == TASKFUNC_EV)
 		inuse[FNC_OMP_INDEX] = TRUE;
 	else if (type == UNNAMEDCRIT_EV)
 		inuse[ULCK_OMP_INDEX] = TRUE;
@@ -237,24 +231,10 @@ void OLD_Enable_OMP_Operation (int type)
 		inuse[ORDERED_INDEX] = TRUE;
 	else if (type == TARGET_EV)
 		inuse[TARGET_INDEX] = TRUE;
-	else if (type == OMPTASKYIELD_EV)
+	else if (type == TASKYIELD_EV)
 		inuse[TASKYIELD_INDEX] = TRUE;
-
-#define ENABLE_TYPE_IF(x,type,v) \
-	if (x ## _EV == type) \
-		v[x ## _INDEX] = TRUE;
-
-	ENABLE_TYPE_IF(OMPT_CRITICAL, type, inuse);
-	ENABLE_TYPE_IF(OMPT_ATOMIC, type, inuse);
-	ENABLE_TYPE_IF(OMPT_LOOP, type, inuse);
-	ENABLE_TYPE_IF(OMPT_WORKSHARE, type, inuse);
-	ENABLE_TYPE_IF(OMPT_SECTIONS, type, inuse);
-	ENABLE_TYPE_IF(OMPT_SINGLE, type, inuse);
-	ENABLE_TYPE_IF(OMPT_MASTER, type, inuse);
-	ENABLE_TYPE_IF(TASKGROUP_START, type, inuse);
-	if (type == OMPT_TASKGROUP_IN_EV)
-		inuse[TASKGROUP_START_INDEX] = TRUE;
-	ENABLE_TYPE_IF(OMP_STATS, type, inuse);
+	else if (type == OMP_STATS_EV)
+		inuse[OMP_STATS_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -415,55 +395,6 @@ static void OLD_OMPEvent_WriteEnabledOperations (FILE * fd)
 		fprintf(fd, "0 %d OpenMP target\n", TARGET_EV);
 		fprintf(fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
-	if (inuse[OMPT_CRITICAL_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "0 %d OMP critical\n"
-		             "VALUES\n0 End\n1 Begin\n\n",
-		         OMPT_CRITICAL_EV);
-	}
-	if (inuse[OMPT_ATOMIC_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "0 %d OMP atomic\n"
-		             "VALUES\n0 End\n1 Begin\n\n",
-		         OMPT_ATOMIC_EV);
-	}
-	if (inuse[OMPT_LOOP_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "0 %d OMP loop\n"
-		             "VALUES\n0 End\n1 Begin\n\n",
-		         OMPT_LOOP_EV);
-	}
-	if (inuse[OMPT_WORKSHARE_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "0 %d OMP workshare\n"
-		             "VALUES\n0 End\n1 Begin\n\n",
-		         OMPT_WORKSHARE_EV);
-	}
-	if (inuse[OMPT_SECTIONS_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "0 %d OMP sections\n"
-		             "VALUES\n0 End\n1 Begin\n\n",
-		         OMPT_SECTIONS_EV);
-	}
-	if (inuse[OMPT_SINGLE_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "0 %d OMP single\n"
-		             "VALUES\n0 End\n1 Begin\n\n",
-		         OMPT_SINGLE_EV);
-	}
-	if (inuse[OMPT_MASTER_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "0 %d OMP master\n"
-		             "VALUES\n0 End\n1 Begin\n\n",
-		         OMPT_MASTER_EV);
-	}
 	if (inuse[TASKGROUP_START_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
@@ -495,7 +426,7 @@ static void OLD_OMPEvent_WriteEnabledOperations (FILE * fd)
 		fprintf (fd, "EVENT_TYPE\n"
                   "0 %d OMP taskyield\n"
 		  "VALUES\n0 End\n1 Begin\n\n",
-                  OMPTASKYIELD_EV);
+                  TASKYIELD_EV);
 	}
 }
 

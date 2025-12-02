@@ -154,16 +154,6 @@ static void show_current (const event_t * c, UINT64 max_time)
 	{
 		fprintf (stdout, "free() ADDRESS: %lu\n", c->param.misc_param.param);
 	}
-	else if (c->event == OMPT_TASKFUNC_EV)
-	{
-		fprintf (stdout, "OMPT TASK FUNCTION <%lx>\n",
-		  c->param.omp_param.param[0]);
-	}
-	else if (c->event == OMPT_DEPENDENCE_EV)
-	{
-		fprintf (stdout, "OMPT TASK DEPENDENCE <%lx,%lx>\n",
-		  c->param.omp_param.param[0], c->param.omp_param.param[1]);
-	}
 	else if (c->event == OMP_STATS_EV)
 	{	fprintf (stdout, "OMP STATS: category %lu, value %lu\n",
 		  c->value, c->param.omp_param.param[0]);

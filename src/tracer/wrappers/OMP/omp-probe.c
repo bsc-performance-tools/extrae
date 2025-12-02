@@ -35,7 +35,7 @@
 #endif
 
 static int TraceOMPLocks = FALSE;
-static int TraceOMPTaskloop = FALSE;
+static int TraceOpenMP_Taskloop = FALSE;
 
 void setTrace_OMPLocks (int value)
 {
@@ -47,14 +47,14 @@ int getTrace_OMPLocks (void)
 	return TraceOMPLocks;
 }
 
-void setTrace_OMPTaskloop (int value)
+void setTrace_OpenMP_Taskloop (int value)
 {
-	TraceOMPTaskloop = value;
+	TraceOpenMP_Taskloop = value;
 }
 
-int getTrace_OMPTaskloop (void)
+int getTrace_OpenMP_Taskloop (void)
 {
-	return TraceOMPTaskloop;
+	return TraceOpenMP_Taskloop;
 }
 
 void Probe_OpenMP_Join_NoWait_Entry (void)
@@ -427,7 +427,7 @@ void Probe_OpenMP_Taskyield_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on) {
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPTASKYIELD_EV, EVT_BEGIN, EMPTY);
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKYIELD_EV, EVT_BEGIN, EMPTY);
 	}
 }
 
@@ -435,7 +435,7 @@ void Probe_OpenMP_Taskyield_Exit (void)
 {
 	DEBUG
         if (mpitrace_on)
-                TRACE_OMPEVENTANDCOUNTERS(TIME, OMPTASKYIELD_EV, EVT_END, EMPTY);
+                TRACE_OMPEVENTANDCOUNTERS(TIME, TASKYIELD_EV, EVT_END, EMPTY);
 }
 
 void Probe_OpenMP_Taskgroup_start_Entry (void)
@@ -530,151 +530,6 @@ void Probe_OpenMP_Target_Exit(void)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TARGET_EV, EVT_END, EMPTY);
 	}
-}
-
-/*
-	OMPT added probes for OMPT events that do not match the previous events
-*/
-
-
-void Probe_OMPT_Critical_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_CRITICAL_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Critical_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_CRITICAL_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_Atomic_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_ATOMIC_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Atomic_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_ATOMIC_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_Loop_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_LOOP_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Loop_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_LOOP_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_Workshare_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_WORKSHARE_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Workshare_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_WORKSHARE_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_Sections_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_SECTIONS_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Sections_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_SECTIONS_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_Single_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_SINGLE_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Single_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_SINGLE_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_Master_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_MASTER_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Master_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on && TraceOMPLocks)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_MASTER_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_Taskgroup_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKGROUP_IN_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_OMPT_Taskgroup_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKGROUP_IN_EV, EVT_END, EMPTY);
-}
-
-void Probe_OMPT_OpenMP_TaskUF_Entry (UINT64 uf, UINT64 taskid)
-{
-	DEBUG
-	if (mpitrace_on)
-	{
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKFUNC_EV, uf, taskid);
-		/*Extrae_AnnotateCPU ();*/
-	}
-}
-
-void Probe_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid)
-{
-	DEBUG
-	if (mpitrace_on)
-	{
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_TASKFUNC_EV, EVT_END, taskid);
-		/*Extrae_AnnotateCPU ();*/
-	}
-}
-
-void Probe_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENT2PARAM(TIME, OMPT_DEPENDENCE_EV, 0, pred_task_id,
-		  succ_task_id);
 }
 
 void Probe_OpenMP_Emit_numInstantiatedTasks (unsigned n)

@@ -5,8 +5,7 @@ if WANT_OPENMP_INTEL
 SUBDIRS += intel-kmpc-11-intermediate
 endif
 
-EXTRA_DIST = \
- ompt-headers
+EXTRA_DIST = 
 if WANT_OPENMP_GNU
 EXTRA_DIST += \
  gnu-libgomp-intermediate/libgomp-doacross-intermediate-switch.c
@@ -43,16 +42,6 @@ if WANT_OPENMP_IBM
 endif # ARCH_POWERPC
 endif # OS_LINUX
 endif # WANT_OPENMP_IBM
-
-# OMPT support
-if WANT_OPENMP_OMPT
-WRAPPERS_OPENMP += \
- ompt-wrapper.c ompt-wrapper.h \
- ompt-helper.h ompt-helper.c \
- ompt-target.c ompt-target.h 
-endif # WANT_OPENMP_OMPT
-
-EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -I$(WRAPPERS_DIR)/OMP/ompt-headers
 
 noinst_LTLIBRARIES  = libwrap_openmp.la
 

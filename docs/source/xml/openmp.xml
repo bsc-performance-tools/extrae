@@ -1,4 +1,4 @@
-<openmp enabled="yes" ompt="no">
+<openmp enabled="yes">
   <locks enabled="no" />
   <task dependencies="yes" />
   <taskloop enabled="yes" dependencies="yes"/>

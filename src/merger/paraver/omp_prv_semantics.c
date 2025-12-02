@@ -368,37 +368,6 @@ static int TaskGroup_Event (
 	return 0;
 }
 
-static int OMPT_event (event_t * current_event,
-	unsigned long long current_time,
-	unsigned cpu,
-	unsigned ptask,
-	unsigned task,
-	unsigned thread,
-	FileSet_t *fset)
-{
-	unsigned int EvType;
-	UINT64 EvValue;
-	UNREFERENCED_PARAMETER(fset);
-
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
-
-	switch (EvType)
-	{
-		case OMPT_CRITICAL_EV:
-		case OMPT_ATOMIC_EV:
-		case OMPT_SINGLE_EV:
-		case OMPT_MASTER_EV:
-		Switch_State (STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
-		trace_paraver_state (cpu, ptask, task, thread, current_time);
-		break;
-	}
-
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-
-	return 0;
-}
-
 static int TaskID_Event (event_t * event,
 	unsigned long long current_time,
 	unsigned cpu,
@@ -424,42 +393,6 @@ static int TaskLoopID_Event (event_t * event,
 	UNREFERENCED_PARAMETER(fset);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, TASKLOOPID_EV,
 	  Get_EvParam(event));
-	return 0;
-}
-
-static int OMPT_TaskGroup_Event (event_t *event,
-	unsigned long long time,
-	unsigned cpu,
-	unsigned ptask,
-	unsigned task,
-	unsigned thread,
-	FileSet_t *fset)
-{
-	UNREFERENCED_PARAMETER(fset);
-
-	trace_paraver_event (cpu, ptask, task, thread, time,
-	  TASKGROUP_INGROUP_DEEP_EV, Get_EvValue (event));
-
-	return 0;
-}
-
-static int OMPT_dependence_Event (event_t *event,
-	unsigned long long time,
-	unsigned cpu,
-	unsigned ptask,
-	unsigned task,
-	unsigned thread,
-	FileSet_t *fset)
-{
-	UNREFERENCED_PARAMETER(fset);
-	UNREFERENCED_PARAMETER(cpu);
-	UNREFERENCED_PARAMETER(time);
-	UNREFERENCED_PARAMETER(thread);
-
-	task_t *task_info = ObjectTree_getTaskInfo(ptask, task);
-
-	ThreadDependency_add (task_info->thread_dependencies, event);
-
 	return 0;
 }
 
@@ -524,74 +457,6 @@ static int TaskEvent_IfEmitDependencies (const void *dependency_event,
 		  tfei->time, tfei->time,
 		  0, Get_EvValue(depevent),
 		  0, 0);
-	}
-
-	return 0;
-}
-
-static int OMPT_TaskFunction_Event (
-   event_t * event,
-   unsigned long long time,
-   unsigned int cpu,
-   unsigned int ptask, 
-   unsigned int task,
-   unsigned int thread,
-   FileSet_t *fset )
-{
-	UNREFERENCED_PARAMETER(fset);
-
-#if defined(HAVE_LIBADDR2LINE)
-	/* Add the instantiated task to the list of known addresses, 
-	 * and emit its reference for matching in final tracefile 
-	 */
-	if (get_option_merge_SortAddresses())
-	{
-		AddressCollector_Add (&CollectedAddresses, ptask, task,
-		  Get_EvParam(event),ADDR2OMP_FUNCTION);
-		AddressCollector_Add (&CollectedAddresses, ptask, task,
-		  Get_EvParam(event), ADDR2OMP_LINE);
-	}
-#endif
-
-	Switch_State (STATE_RUNNING, Get_EvValue(event) != EVT_END, ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, time);
-	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_EV,
-		Get_EvValue(event));
-	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_LINE_EV,
-		Get_EvValue(event));
-
-	if (Get_EvValue(event) == EVT_END)
-	{
-		task_t * task_info = ObjectTree_getTaskInfo(ptask, task);
-		struct TaskFunction_Event_Info_EmitDependencies data;
-		data.time = time;
-		data.cpu = cpu;
-		data.ptask = ptask;
-		data.task = task;
-		data.thread = thread;
-		data.event = event;
-
-		ThreadDependency_processAll_ifMatchSetPredecessor (
-		  task_info->thread_dependencies,
-		  TaskEvent_IfSetPredecessor,
-		  &data);
-	}
-	else
-	{
-		task_t * task_info = ObjectTree_getTaskInfo(ptask, task);
-		struct TaskFunction_Event_Info_EmitDependencies data;
-		data.time = time;
-		data.cpu = cpu;
-		data.ptask = ptask;
-		data.task = task;
-		data.thread = thread;
-		data.event = event;
-
-		ThreadDependency_processAll_ifMatchDelete (
-		  task_info->thread_dependencies,
-		  TaskEvent_IfEmitDependencies,
-		  &data);
 	}
 
 	return 0;
@@ -675,7 +540,7 @@ static int TaskYield_Event (
         trace_paraver_state (cpu, ptask, task, thread, time);
 
         trace_paraver_event (cpu, ptask, task, thread, time,
-          OMPTASKYIELD_EV, EvValue);
+          TASKYIELD_EV, EvValue);
 
         return 0;
 }
@@ -927,21 +792,11 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ TASK_EV, Task_Event },
 	{ TASKWAIT_EV, Taskwait_Event },
 	{ TASKFUNC_EV, OpenMP_Function_Event },
-	{ OMPTASKYIELD_EV, TaskYield_Event },
-	{ OMPT_CRITICAL_EV, OMPT_event },
-	{ OMPT_ATOMIC_EV, OMPT_event },
-	{ OMPT_LOOP_EV, OMPT_event },
-	{ OMPT_WORKSHARE_EV, OMPT_event },
-	{ OMPT_SECTIONS_EV, OMPT_event },
-	{ OMPT_SINGLE_EV, OMPT_event },
-	{ OMPT_MASTER_EV, OMPT_event },
+	{ TASKYIELD_EV, TaskYield_Event },
 	{ TASKGROUP_START_EV, TaskGroup_Event },
 	{ TASKGROUP_END_EV, TaskGroup_Event },
 	{ TASKID_EV, TaskID_Event },
 	{ TASKLOOPID_EV, TaskLoopID_Event },
-	{ OMPT_TASKGROUP_IN_EV, OMPT_TaskGroup_Event },
-	{ OMPT_DEPENDENCE_EV, OMPT_dependence_Event },
-	{ OMPT_TASKFUNC_EV, OMPT_TaskFunction_Event },
 	{ OMP_STATS_EV, OMP_Stats_Event },
 	{ TASKLOOP_EV, TaskLoop_Event },
 	{ ORDERED_EV, Ordered_Event },

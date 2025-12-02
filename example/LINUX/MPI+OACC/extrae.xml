@@ -11,7 +11,7 @@
     <comm-calls enabled="yes" />
   </mpi>
 
-  <openmp enabled="no" ompt="no">
+  <openmp enabled="no">
     <locks enabled="no" />
     <taskloop enabled="no" />
     <counters enabled="yes" />

@@ -35,7 +35,7 @@
   </callers>
 
   <!-- Configuration of some OpenMP dependant values -->
-  <openmp enabled="yes" ompt="no">
+  <openmp enabled="yes">
     <!-- If the library instruments OpenMP, shall we gather info about locks?
          Obtaining such information can make the final trace quite large.
     -->

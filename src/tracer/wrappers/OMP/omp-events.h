@@ -92,29 +92,6 @@ void Extrae_OpenMP_Ordered_Post_Exit (void);
 void Extrae_OpenMP_Target_Entry(void);
 void Extrae_OpenMP_Target_Exit(void);
 
-/***************\
-|* OMPT probes *|
-\***************/
-void Extrae_OMPT_Critical_Entry (void);
-void Extrae_OMPT_Critical_Exit (void);
-void Extrae_OMPT_Atomic_Entry (void);
-void Extrae_OMPT_Atomic_Exit (void);
-void Extrae_OMPT_Loop_Entry (void);
-void Extrae_OMPT_Loop_Exit (void);
-void Extrae_OMPT_Workshare_Entry (void);
-void Extrae_OMPT_Workshare_Exit (void);
-void Extrae_OMPT_Sections_Entry (void);
-void Extrae_OMPT_Sections_Exit (void);
-void Extrae_OMPT_Single_Entry (void);
-void Extrae_OMPT_Single_Exit (void);
-void Extrae_OMPT_Master_Entry (void);
-void Extrae_OMPT_Master_Exit (void);
-void Extrae_OMPT_Taskgroup_Entry (void);
-void Extrae_OMPT_Taskgroup_Exit (void);
-void Extrae_OMPT_OpenMP_TaskUF_Entry (UINT64 uf, UINT64 taskid);
-void Extrae_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid);
-void Extrae_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id);
-
 void Extrae_OpenMP_Notify_NewInstantiatedTask (void);
 void Extrae_OpenMP_Notify_NewExecutedTask (void);
 void Extrae_OpenMP_EmitTaskStatistics (void);

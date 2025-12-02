@@ -6,7 +6,7 @@
  type="paraver"
 >
 
-  <openmp enabled="no" ompt="no">
+  <openmp enabled="no">
     <locks enabled="no" />
     <taskloop enabled="no" />
     <counters enabled="yes" />

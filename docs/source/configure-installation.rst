@@ -69,15 +69,6 @@ enabled or disabled. To enable them use ``--enable-X`` or ``--with-X=``
   Enable support for tracing OpenMP IBM runtime. The IBM runtime instrumentation
   is only available for Linux/PowerPC systems.
 
-* .. option:: --enable-openmp-ompt
-
-  Enables support for tracing OpenMP runtimes through the OMPT specification.
-
-  .. note::
-    Enabling this option disables the regular instrumentation system
-    available through :option:`--enable-openmp-gnu`,
-    :option:`--enable-openmp-intel` and :option:`--enable-openmp-gnu`.
-
 * .. option:: --enable-smpss
 
   Enable support for tracing SMP-superscalar.

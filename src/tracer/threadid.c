@@ -29,10 +29,6 @@
 # include <stdlib.h>
 #endif
 
-#if defined(OMPT_SUPPORT)
-# include "ompt-wrapper.h"
-#endif
-
 /*
    Default return values
    1 thread in total, and thread id is always 0
@@ -80,16 +76,7 @@ unsigned Extrae_get_thread_number (void)
 #if defined(NEW_OMP_SUPPORT)
 	return omp_get_thread_num();
 #elif defined(OMP_SUPPORT) 
-# if defined(OMPT_SUPPORT)
-	if (ompt_enabled)
-	{
-		return get_thread_num();
-	}
-	else
-# endif /* OMPT_SUPPORT */
-	{
-		return omp_get_thread_num();
-	}
+	return omp_get_thread_num();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num();
 #elif defined(PTHREAD_SUPPORT)
@@ -106,16 +93,7 @@ void * Extrae_get_thread_number_function (void)
 #if defined(NEW_OMP_SUPPORT)
 	return (void*) omp_get_thread_num;
 #elif defined(OMP_SUPPORT) 
-# if defined(OMPT_SUPPORT)
-	if (ompt_enabled)
-	{
-		return (void*) get_thread_num;
-	}
-	else
-# endif /* OMPT_SUPPORT */
-	{
-		return (void*) omp_get_thread_num;
-	}
+	return (void*) omp_get_thread_num;
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num;
 #elif defined(PTHREAD_SUPPORT)
@@ -132,16 +110,7 @@ unsigned Extrae_get_num_threads (void)
 #if defined(NEW_OMP_SUPPORT)
 	return omp_get_num_threads();
 #elif defined(OMP_SUPPORT) 
-# if defined(OMPT_SUPPORT)
-	if (ompt_enabled)
-	{
-		return get_num_threads();
-	}
-	else 
-# endif /* OMPT_SUPPORT */
-	{
-		return omp_get_num_threads();
-	}
+	return omp_get_num_threads();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_max_threads();
 #elif defined(PTHREAD_SUPPORT)

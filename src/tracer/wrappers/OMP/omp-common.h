@@ -27,15 +27,10 @@
 #include <omp.h>
 
 #include "config.h"
-#include "ompt-wrapper.h"
 
 #define INSTRUMENT_OMP_WRAPPER(func) ((func != NULL) && (EXTRAE_ON()) && (Backend_Get_InstrumentationLevel() == 1))
 
-#if defined(OMPT_SUPPORT)
-#define TRACE(func) (INSTRUMENT_OMP_WRAPPER(func) && (!ompt_enabled))
-#else
 #define TRACE(func) (INSTRUMENT_OMP_WRAPPER(func))
-#endif
 
 #define ENV_VAR_EXTRAE_OPENMP_HELPERS "EXTRAE_OPENMP_HELPERS"
 #define DEFAULT_OPENMP_HELPERS        100000

@@ -10,7 +10,7 @@
     <comm-calls enabled="yes" />
   </mpi>
 
-  <openmp enabled="yes" ompt="no">
+  <openmp enabled="yes">
     <locks enabled="no" />
     <taskloop enabled="no" />
     <counters enabled="yes" />

@@ -1583,7 +1583,7 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop enter: @=%p args=(%p %d %p %d %p %p %ld %d %d %ld %p)\n ", THREAD_LEVEL_VAR, __kmpc_taskloop_real, loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, task_dup);
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OpenMP_Taskloop() ? "enabled" : "disabled"));
 #endif
 
 	RECHECK_INIT(__kmpc_taskloop_real);
@@ -1594,7 +1594,7 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 	struct helper__kmpc_task_t *task_info = helper__kmpc_task_retrieve (task);
         real_task = task_info->real_task;
 
-	if (TRACE(__kmpc_taskloop_real) && (getTrace_OMPTaskloop()))
+	if (TRACE(__kmpc_taskloop_real) && (getTrace_OpenMP_Taskloop()))
 	{
 		Probe_OpenMP_TaskLoop_Entry ();
 
@@ -1640,7 +1640,7 @@ void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, vo
 	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop_5 enter: @=%p args=(%p %d %p %d %p %p %ld %d %d %ld %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_taskloop_5_real, loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize, modifier, task_dup);
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OpenMP_Taskloop() ? "enabled" : "disabled"));
 #endif
 
 	RECHECK_INIT(__kmpc_taskloop_5_real);
@@ -1649,7 +1649,7 @@ void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, vo
 	 * instrumented function __kmpc_omp_task_alloc */
 	real_task = helper__kmpc_task_retrieve(task);
 
-	if (TRACE(__kmpc_taskloop_5_real) && (getTrace_OMPTaskloop()))
+	if (TRACE(__kmpc_taskloop_5_real) && (getTrace_OpenMP_Taskloop()))
 	{
 		Probe_OpenMP_TaskLoop_Entry ();
 

@@ -2761,12 +2761,12 @@ void GOMP_taskloop (void *fn, void *data, void *cpyfn, long arg_size, long arg_a
 	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_taskloop_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OpenMP_Taskloop() ? "enabled" : "disabled"));
 #endif
 
 	RECHECK_INIT(GOMP_taskloop_real);
 
-	if (TRACE(GOMP_taskloop_real) && (getTrace_OMPTaskloop()))
+	if (TRACE(GOMP_taskloop_real) && (getTrace_OpenMP_Taskloop()))
 	{
 		struct taskloop_helper_t taskloop_helper;
 		long helper_size = sizeof(struct taskloop_helper_t);
@@ -2809,11 +2809,11 @@ void GOMP_taskloop_ull (void *fn, void *data, void *cpyfn, long arg_size, long a
 	Backend_Enter_Instrumentation ();
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull enter: @=%p args=(%p %p %p %ld %ld %u %lu %d %llu %llu %llu)\n", THREAD_LEVEL_VAR, GOMP_taskloop_ull_real, fn, data, cpyfn, arg_size, arg_align, flags, num_tasks, priority, start, end, step);
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OMPTaskloop() ? "enabled" : "disabled"));
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_taskloop_ull: instrumentation is %s\n", THREAD_LEVEL_VAR, (getTrace_OpenMP_Taskloop() ? "enabled" : "disabled"));
 #endif
 
 	RECHECK_INIT(GOMP_taskloop_ull_real);
-	if (TRACE(GOMP_taskloop_ull_real) && (getTrace_OMPTaskloop()))
+	if (TRACE(GOMP_taskloop_ull_real) && (getTrace_OpenMP_Taskloop()))
 	{
 		struct taskloop_helper_t taskloop_helper;
 		long helper_size = sizeof(struct taskloop_helper_t);

@@ -59,25 +59,11 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		   [enable_openmp_ibm="${enable_openmp_ibm_default}"]
 		)
 
-		# Enable OMPT support
-		AC_ARG_ENABLE(openmp-ompt,
-		   AC_HELP_STRING(
-		      [--enable-openmp-ompt],
-		      [Enable support for tracing OpenMP through OMPT interface (enabled by default)]
-		   ),
-		   [enable_openmp_ompt="${enableval}"],
-		   [enable_openmp_ompt="yes"]
-		)
-
-		if test "$enable_openmp_ompt" = "yes"; then
-			AC_DEFINE([OMPT_SUPPORT], [1], [Define if OMPT support is enabled])
-		fi
 	fi
 
 	if test "${enable_openmp_intel}" = "yes" -o \
 	        "${enable_openmp_gnu}" = "yes" -o \
-	        "${enable_openmp_ibm}" = "yes" -o \
-	        "${enable_openmp_ompt}" = "yes" ; then
+	        "${enable_openmp_ibm}" = "yes" ; then
 		enable_openmp="yes"
 	else
 		enable_openmp="no"
@@ -87,7 +73,6 @@ AC_DEFUN([AX_CHECK_OPENMP],
 	AM_CONDITIONAL(WANT_OPENMP_INTEL, test "${enable_openmp_intel}" = "yes" )
 	AM_CONDITIONAL(WANT_OPENMP_GNU, test "${enable_openmp_gnu}" = "yes" )
 	AM_CONDITIONAL(WANT_OPENMP_IBM, test "${enable_openmp_ibm}" = "yes" )
-	AM_CONDITIONAL(WANT_OPENMP_OMPT, test "${enable_openmp_ompt}" = "yes" )
 ])
 
 AC_DEFUN([AX_HAVE_SYNC_FETCH_AND_ADD],
@@ -120,7 +105,6 @@ AC_DEFUN([AX_OPENMP_SHOW_CONFIGURATION],
 		fi
 		echo -e \\\tIBM OpenMP: ${enable_openmp_ibm}
 		echo -e \\\tIntel OpenMP: ${enable_openmp_intel}
-		echo -e \\\tOMPT: ${enable_openmp_ompt}
 	else
 		echo OpenMP instrumentation: no
   fi

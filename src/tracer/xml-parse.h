@@ -78,7 +78,6 @@
 #define TRACE_HIP                       ((xmlChar*) "hip")
 #define TRACE_PTHREAD_LOCKS             ((xmlChar*) "locks")
 #define TRACE_PTHREAD                   ((xmlChar*) "pthread")
-#define TRACE_OMP_OMPT                  ((xmlChar*) "ompt")
 #define TRACE_OMP_LOCKS                 ((xmlChar*) "locks")
 #define TRACE_OMP_TASK                  ((xmlChar*) "task")
 #define TRACE_OMP_TASKLOOP              ((xmlChar*) "taskloop")
