@@ -53,14 +53,14 @@ void Extrae_OpenMP_Join_Wait_Entry (void)
 
 void Extrae_OpenMP_Join_Wait_Exit (void)
 {
-	Probe_OpenMP_Join_Wait_Exit ();	
+	Probe_OpenMP_Join_Wait_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_OpenMP_UF_Entry (const void *uf)
 {
 	Backend_Enter_Instrumentation ();
-	Probe_OpenMP_UF_Entry ((UINT64) uf);
+	Probe_OpenMP_UF_Entry (uf);
 	Backend_Leave_Instrumentation ();
 }
 
@@ -264,7 +264,7 @@ void Extrae_OpenMP_TaskLoopID (long long id)
 void Extrae_OpenMP_Task_Entry (const void* uf)
 {
 	Backend_Enter_Instrumentation ();
-	Probe_OpenMP_Task_Entry ((UINT64) uf);
+	Probe_OpenMP_Task_Entry (uf);
 }
 
 void Extrae_OpenMP_Task_Exit (void)
@@ -276,7 +276,7 @@ void Extrae_OpenMP_Task_Exit (void)
 void Extrae_OpenMP_TaskUF_Entry (const void* uf)
 {
 	Backend_Enter_Instrumentation ();
-	Probe_OpenMP_TaskUF_Entry ((UINT64) uf);
+	Probe_OpenMP_TaskUF_Entry (uf);
 	Backend_Leave_Instrumentation ();
 }
 
