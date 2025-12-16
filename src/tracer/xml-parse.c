@@ -1713,8 +1713,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	}
 	else
 	{
-		set_merge_OutputTraceName (filename);
-		set_merge_GivenTraceName (TRUE);
+		set_merge_OutputFileName (TRACE_FILENAME, filename);
 	}
 
 	XML_FREE (synchronization);

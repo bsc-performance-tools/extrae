@@ -1286,7 +1286,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 	PRVFileSet_t *prvfset = NULL;
 	unsigned long long num_of_events;
 	struct fdz_fitxer prv_fd;
-	unsigned short isGzip = 1;
+	unsigned short isGzip = get_option_merge_OutputIsGzip();
 	int error = FALSE;
 #if defined(IS_BG_MACHINE)
 	FILE *crd_fd;
@@ -1305,44 +1305,6 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 	if (0 == taskid)
 	{
-		/* XXX: Here we are changing the function argument outName directly
-		 *      which persists after we exit this function, and affects the 
-		 *      future name of .pcf and .row files. This is very ugly!
-		 *      Try to move all this to a single function that prepares the 3 output names.
-		 */
-		if (strlen(outName) < 4)
-		{
-			// Name is too short to contain required .prv extension, add it
-			strcat(outName, ".prv");
-			isGzip = 0;
-		}
-		else if (strlen(outName) >= 7 &&
-		    strncmp(&(outName[strlen(outName) - 7]), ".prv.gz", 7) == 0)
-		{
-#ifdef HAVE_ZLIB
-			// Given output name contains explicit .prv.gz extension,
-			// and we have zlib available, zip it
-			isGzip = 1;
-#else
-			// Given output name contains explicit .prv.gz extension, 
-			// but there's not zlib available, no zipping
-			outName[strlen(outName) - 3] = '\0';
-			isGzip = 0;
-#endif // HAVE_ZLIB
-		} 
-		else if (strlen(outName) > 4 &&
-		    strncmp(&(outName[strlen(outName) - 4]), ".prv", 4) == 0)
-		{
-			// Given output name contains explicit .prv extension, no zipping
-			isGzip = 0;
-		}
-		else if (strlen(outName) > 4 &&
-		    strncmp(&(outName[strlen(outName) - 4]), ".prv", 4) != 0)
-		{
-			// Given output name lacks .prv extension, add it
-		    	strcat(outName, ".prv");
-			isGzip = 0;
-		}
 
 #ifdef HAVE_ZLIB
 		if (isGzip)
@@ -1496,18 +1458,9 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 	/* FIXME must be implemented in parallel */
 	if (get_option_merge_XYZT())
 	{
-		strcpy (envName, get_OutputTraceName());
-
-		if (strlen (outName) >= 7 &&
-			strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
-			tmpName = &(envName[strlen (envName) - 7]);
-		else
-			tmpName = &(envName[strlen (envName) - 4]);
-
-		strcpy (tmpName, ".crd");
-		if ((crd_fd = fopen (envName, "w")) == NULL)
+		if ((crd_fd = fopen (get_merge_OutputFileName (CRD_FILENAME), "w")) == NULL)
 		{
-			fprintf (stderr, "mpi2prv ERROR: Creating coordinates file : %s\n", tmp);
+			fprintf (stderr, "mpi2prv ERROR: Creating coordinates file : %s\n", get_merge_OutputFileName (CRD_FILENAME));
 			return 0;
 		}
 

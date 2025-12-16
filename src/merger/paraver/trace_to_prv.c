@@ -229,57 +229,9 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	error = (fset == NULL);
 
 	Labels_loadLocalSymbols (taskid, nfiles, files, &StartingTimes, &SynchronizationTimes);
-
-	/* If no actual filename is given, use the binary name if possible */
-	if (!get_merge_GivenTraceName())
-	{
-		char *tmp = ObjectTree_getMainBinary (1, 1);
-
-		/* Duplicate the string as basename may modify it */
-		char *FirstBinaryName = NULL;
-		if (tmp != NULL)
-			FirstBinaryName = strdup (tmp);
-
-		if (FirstBinaryName != NULL)
-		{
-			char prvfile[strlen(FirstBinaryName) + 5];
-			sprintf (prvfile, "%s.prv", basename(FirstBinaryName));
-			set_merge_OutputTraceName (prvfile);
-			set_merge_GivenTraceName (TRUE);
-			xfree (FirstBinaryName);
-		}
-	}
-
-	if (__Extrae_Utils_file_exists(get_merge_OutputTraceName()) &&
-	    !get_option_merge_TraceOverwrite())
-	{
-		unsigned lastid = 0;
-		char tmp[1024];
-		do
-		{
-			lastid++;
-			if (lastid >= 10000)
-			{
-				fprintf (stderr, "Error! Automatically given ID for the tracefile surpasses 10000!\n");
-				exit (-1);
-			}
-
-			strncpy (tmp, get_merge_OutputTraceName(), sizeof(tmp));
-			if (strcmp (&tmp[strlen(tmp)-strlen(".prv")], ".prv") == 0)
-			{
-				char extra[1+4+1+3+1];
-				sprintf (extra, ".%04d.prv", lastid);
-				strncpy (&tmp[strlen(tmp)-strlen(".prv")], extra, strlen(extra));
-			}
-			else if (strcmp (&tmp[strlen(tmp)-strlen(".prv.gz")], ".prv.gz") == 0)
-			{
-				char extra[1+4+1+3+1+2+1];
-				sprintf (extra, ".%04d.prv.gz", lastid);
-				strncpy (&tmp[strlen(tmp)-strlen(".prv.gz")], extra, strlen(extra));
-			}
-		} while (__Extrae_Utils_file_exists (tmp));
-		set_merge_OutputTraceName (tmp);
-		set_merge_GivenTraceName (TRUE);
+ 	/* Generate a unique filename (use default or add suffix if needed) */
+	if (taskid == 0){
+		Extrae_GenerateOutputFileName();
 	}
 
 #if defined(PARALLEL_MERGE)
@@ -630,35 +582,16 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	}
 #endif
 
-	error = Paraver_JoinFiles (num_appl, get_merge_OutputTraceName(),
+	error = Paraver_JoinFiles (num_appl, get_merge_OutputFileName (TRACE_FILENAME),
 	  fset, current_time, NodeCPUinfo, numtasks,
 	  taskid, records_per_task, get_option_merge_TreeFanOut());
 
-	strcpy (envName, get_merge_OutputTraceName());
-#ifdef HAVE_ZLIB
-	if (strlen (envName) >= 7 && strncmp (&(envName[strlen (envName) - 7]), ".prv.gz", 7) == 0)
-	{
-		tmp = &(envName[strlen (envName) - 7]);
-	}
-	else
-#endif
-	if (strlen(envName) >= 4 && strncmp(&(envName[strlen(envName) - 4]), ".prv", 4) == 0)
-	{
-		tmp = &(envName[strlen (envName) - 4]);
-	}
-	else
-	{
-		tmp = &(envName[strlen(envName)]);
-	}
-
 	if (0 == taskid)
 	{
-		strcpy (tmp, ".pcf");
-		if (Labels_GeneratePCFfile (envName, options) == -1)
+		if (Labels_GeneratePCFfile (get_merge_OutputFileName (PCF_FILENAME), options) == -1)
 			fprintf (stderr, "mpi2prv: WARNING! Unable to create PCF file!\n");
 
-		strcpy (tmp, ".row");
-		if (GenerateROWfile (envName, NodeCPUinfo, nfiles, files) == -1)
+		if (GenerateROWfile (get_merge_OutputFileName (ROW_FILENAME), NodeCPUinfo, nfiles, files) == -1)
 			fprintf (stderr, "mpi2prv: WARNING! Unable to create ROW file!\n");
 	}
 
@@ -667,7 +600,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 		if (error == 0)
 		{
 			fprintf (stdout, "mpi2prv: Congratulations! %s has been generated.\n",
-			    get_merge_OutputTraceName());
+			    get_merge_OutputFileName (TRACE_FILENAME));
 		} else
 		{
 			fprintf (stdout, "mpi2prv: WARNING! Merge process finished with errors. Trace file may be incomplete.\n");

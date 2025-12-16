@@ -178,6 +178,9 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		fflush (stderr);
 		exit (-1);
 	}
+	if (taskid == 0) {
+		Extrae_GenerateOutputFileName();
+	}
 
 	ObjectTree_Initialize (taskid, num_appl, files, nfiles);
 
@@ -188,45 +191,6 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	fset = Create_FS (nfiles, files, taskid, TRF_SEMANTICS);
 	error = (fset == NULL);
-
-	/* If no actual filename is given, use the binary name if possible */
-	if (!get_merge_GivenTraceName())
-	{
-		char *FirstBinaryName = ObjectTree_getMainBinary (1, 1);
-		if (FirstBinaryName != NULL)
-		{
-			char prvfile[strlen(FirstBinaryName) + 5];
-			sprintf (prvfile, "%s.dim", FirstBinaryName);
-			set_merge_OutputTraceName (prvfile);
-			set_merge_GivenTraceName (TRUE);
-		}
-	}
-
-	if (__Extrae_Utils_file_exists(get_merge_OutputTraceName()) &&
-	    !get_option_merge_TraceOverwrite())
-	{
-		unsigned lastid = 0;
-		char tmp[1024];
-		do
-		{
-			lastid++;
-			if (lastid >= 10000)
-			{
-				fprintf (stderr, "Error! Automatically given ID for the tracefile surpasses 10000!\n");
-				exit (-1);
-			}
-
-			strncpy (tmp, get_merge_OutputTraceName(), sizeof(tmp));
-			if (strcmp (&tmp[strlen(tmp)-strlen(".dim")], ".dim") == 0)
-			{
-				char extra[1+4+1+3+1];
-				sprintf (extra, ".%04d.dim", lastid);
-				strncpy (&tmp[strlen(tmp)-strlen(".dim")], extra, strlen(extra));
-			}
-		} while (__Extrae_Utils_file_exists (tmp));
-		set_merge_OutputTraceName (tmp);
-		set_merge_GivenTraceName (TRUE);
-	}
 
 #if defined(PARALLEL_MERGE)
 	if (numtasks > 1)

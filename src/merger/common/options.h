@@ -24,8 +24,24 @@
 #ifndef _OPTIONS_H_INCLUDED_
 #define _OPTIONS_H_INCLUDED_
 
-#define DEFAULT_PRV_OUTPUT_NAME "EXTRAE_Paraver_trace.prv"
-#define DEFAULT_DIM_OUTPUT_NAME "EXTRAE_Dimemas_Trace.dim"
+#define DEFAULT_PRV_OUTPUT_NAME "EXTRAE_Paraver_Trace"
+#define DEFAULT_DIM_OUTPUT_NAME "EXTRAE_Dimemas_Trace"
+
+typedef enum {
+    TRACE_FILENAME = 0,
+    PCF_FILENAME,
+    ROW_FILENAME,
+    
+#if defined(IS_BG_MACHINE)
+#if defined(DEAD_CODE)
+    CRD_FILENAME
+#endif 
+#endif
+
+} outputFileName_t;
+
+const char *get_merge_OutputFileName (outputFileName_t type);
+void set_merge_OutputFileName (outputFileName_t type, const char *name);
 
 int get_option_merge_Dump (void);
 void set_option_merge_Dump (int b);
@@ -50,9 +66,6 @@ void set_option_merge_UniqueCallerID (int b);
 
 int get_option_merge_VerboseLevel (void);
 void set_option_merge_VerboseLevel (int l);
-
-char * get_merge_OutputTraceName (void);
-void set_merge_OutputTraceName (const char* s);
 
 int get_merge_GivenTraceName (void);
 void set_merge_GivenTraceName (int b);
@@ -118,5 +131,8 @@ void set_option_merge_EmitLibraryEvents (int b);
 
 int get_option_merge_TranslateDataAddresses(void);
 void set_option_merge_TranslateDataAddresses(int b);
+
+void set_option_merge_OutputIsGzip(unsigned short v);
+unsigned short get_option_merge_OutputIsGzip(void);
 
 #endif

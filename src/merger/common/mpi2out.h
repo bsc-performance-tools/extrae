@@ -68,4 +68,6 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 
 void mergerLoadFilesInEmbeddedMode(int taskid, int num_tasks, char *mpits_filename);
 
+void Extrae_GenerateOutputFileName(void);
+
 #endif

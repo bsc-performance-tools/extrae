@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "options.h"
 
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -60,14 +61,6 @@ void set_option_merge_UniqueCallerID (int b) { option_merge_UniqueCallerID = b; 
 static int option_merge_VerboseLevel = 0;
 int get_option_merge_VerboseLevel (void) { return option_merge_VerboseLevel; }
 void set_option_merge_VerboseLevel (int l) { option_merge_VerboseLevel = l; }
-
-static char OutputTraceName[1024] = "";
-char * get_merge_OutputTraceName (void) { return OutputTraceName; }
-void set_merge_OutputTraceName (const char* s) { strcpy (OutputTraceName, s); }
-
-static int option_merge_GivenTraceName = FALSE;
-int get_merge_GivenTraceName (void) { return option_merge_GivenTraceName; }
-void set_merge_GivenTraceName (int b) { option_merge_GivenTraceName = b; }
 
 static char callback_file[1024] = "";
 char * get_merge_CallbackFileName (void) { return callback_file; }
@@ -150,3 +143,57 @@ void set_option_merge_EmitLibraryEvents (int b) { option_merge_EmitLibraryEvents
 static int option_merge_TranslateDataAddresses = TRUE;
 int get_option_merge_TranslateDataAddresses(void) { return option_merge_TranslateDataAddresses; }
 void set_option_merge_TranslateDataAddresses(int b) { option_merge_TranslateDataAddresses = b; }
+
+static unsigned short merge_OutputIsGzip = 0;
+void set_option_merge_OutputIsGzip (unsigned short v) { merge_OutputIsGzip = v; }
+unsigned short get_option_merge_OutputIsGzip (void) { return merge_OutputIsGzip; }
+
+static char OutputTraceName[1024] = "";
+static char OutputPCFName[1024]   = "";
+static char OutputROWName[1024]   = "";
+#if defined(IS_BG_MACHINE)
+#if defined(DEAD_CODE)
+static char OutputCRDName[1024]   = "";
+#endif 
+#endif
+
+const char *get_merge_OutputFileName (outputFileName_t t){
+    switch (t){
+        case TRACE_FILE_: return OutputTraceName;
+        case PCF_FILENAME:   return OutputPCFName;
+        case ROW_FILENAME:   return OutputROWName;
+#if defined(IS_BG_MACHINE)
+#if defined(DEAD_CODE)
+        case CRD_FILENAME:   return OutputCRDName;
+#endif 
+#endif
+        default:           return "";
+    }
+}
+
+void set_merge_OutputFileName (outputFileName_t type, const char *name)
+{
+    switch (type) {
+        case TRACE_FILENAME:
+            strncpy(OutputTraceName, name, sizeof(OutputTraceName)-1);
+            OutputTraceName[sizeof(OutputTraceName)-1] = '\0';
+            break;
+        case PCF_FILENAME:
+            strncpy(OutputPCFName, name, sizeof(OutputPCFName)-1);
+            OutputPCFName[sizeof(OutputPCFName)-1] = '\0';
+            break;
+        case ROW_FILENAME:
+            strncpy(OutputROWName, name, sizeof(OutputROWName)-1);
+            OutputROWName[sizeof(OutputROWName)-1] = '\0';
+            break;  
+#if defined(IS_BG_MACHINE)
+#if defined(DEAD_CODE)
+        case CRD_FILENAME:
+            strncpy(OutputCRDName, name, sizeof(OutputCRDName)-1);
+            OutputCRDName[sizeof(OutputCRDName)-1] = '\0';
+            break;
+#endif 
+#endif
+
+    }
+}

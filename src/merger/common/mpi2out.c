@@ -525,20 +525,17 @@ void ProcessArgs (int rank, int argc, char *argv[])
 	{
 		set_option_merge_ParaverFormat (TRUE);
 		set_option_merge_ForceFormat (FALSE);
-		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
 	else if ((strncmp (bBinaryName, "mpi2dim", 7) == 0)
 	    || (strncmp (bBinaryName, "mpimpi2dim", 10) == 0))
 	{
 		set_option_merge_ParaverFormat (FALSE);
 		set_option_merge_ForceFormat (FALSE);
-		set_merge_OutputTraceName (DEFAULT_DIM_OUTPUT_NAME);
 	}
 	else
 	{
 		set_option_merge_ParaverFormat (TRUE);
 		set_option_merge_ForceFormat (FALSE);
-		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
 	xfree (BinaryName);
 
@@ -617,8 +614,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				set_merge_OutputTraceName (argv[CurArg]);
-				set_merge_GivenTraceName (TRUE);
+				set_merge_OutputFileName (TRACE_FILENAME,argv[CurArg]);
 			}
 			else 
 			{
@@ -1453,7 +1449,7 @@ int merger_post (int numtasks, int taskid)
 	if (taskid == 0)
 	{
 		fprintf (stdout, "mpi2prv: Checking for target directory existence...");
-		char *dirn = dirname(strdup(__Extrae_Utils_trim(get_merge_OutputTraceName())));
+		char *dirn = dirname(strdup(__Extrae_Utils_trim(get_merge_OutputFileName (TRACE_FILENAME))));
 		if (!__Extrae_Utils_directory_exists(dirn))
 		{
 			fprintf (stdout, " does not exist. Creating ...");
@@ -1474,7 +1470,7 @@ int merger_post (int numtasks, int taskid)
 		    get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 	else
-		error = Dimemas_ProcessTraceFiles (__Extrae_Utils_trim(get_merge_OutputTraceName()),
+		error = Dimemas_ProcessTraceFiles (__Extrae_Utils_trim(get_merge_OutputFileName (TRACE_FILENAME)),
 			nTraces, InputTraces, get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 
@@ -1569,4 +1565,123 @@ void mergerLoadFilesInEmbeddedMode(int taskid, int num_tasks, char *mpits_filena
 		fprintf(stdout, "mpi2prv: Executing the merge process (using %s).\n", mpits_filename);
 
 	merger_post(num_tasks, taskid);
+}
+
+/**
+ * trace_exists_for_base
+ * 
+ * Check if a trace file already exists for a given base name.
+ * It tries base+ext and base+gzext combinations and returns TRUE on success.
+ * 
+ * @param base Base name of the trace (without extension)
+ * @param ext  Trace file extension (e.g., ".prv" or ".dim")
+ * @param gzext Compressed extension (e.g., ".prv.gz" or ".dim.gz")
+ * @return TRUE if any of the files exist, FALSE otherwise
+*/
+
+static int trace_exists_for_base(const char *base, const char *ext, const char *gzext)
+{
+	char buf[PATH_MAX];
+	// base + ext
+	snprintf(buf, sizeof(buf), "%s%s", base, ext);
+	if (__Extrae_Utils_file_exists(buf)) return TRUE;
+	// base + gzext
+	snprintf(buf, sizeof(buf), "%s%s", base, gzext);
+	return __Extrae_Utils_file_exists(buf);
+}
+
+/**
+ * Extrae_GenerateOutputFileName
+ * Generate output filenames for this merge (trace + sidecars).
+ *
+ * - Base name:
+ *     * if user passed -o, use it (strip .prv/.dim and optional .gz)
+ *     * else use main binary name; if unavailable, use format default
+ * - Extensions:
+ *     * trace: .prv/.dim (or .prv.gz/.dim.gz if .gz was requested)
+ *     * sidecars: .pcf, .row (and .crd on BG builds)
+ * - Overwrite:
+ *     * if overwrite=no and target exists, append .0001, .0002, … until free
+ *
+ * @return void
+ */
+
+void Extrae_GenerateOutputFileName(void)
+{
+    unsigned lastid = 0;
+    int is_prv = get_option_merge_ParaverFormat();
+
+    const char *ext   = is_prv ? ".prv"    : ".dim";
+    const char *gzext = is_prv ? ".prv.gz" : ".dim.gz";
+    unsigned short want_gzip = 0;
+
+    /* 1) Determine base name */
+    char base[PATH_MAX];
+    const char *user_name = get_merge_OutputFileName(TRACE_FILENAME);
+
+    if (user_name && user_name[0] != '\0') {
+        size_t len = strlen(user_name);
+        if (len >= strlen(gzext) && strcmp(user_name + len - strlen(gzext), gzext) == 0) {
+            want_gzip = 1;
+            len -= strlen(gzext);
+        } else if (len >= strlen(ext) && strcmp(user_name + len - strlen(ext), ext) == 0) {
+            len -= strlen(ext);
+        }
+        memcpy(base, user_name, len);
+        base[len] = '\0';
+    } else {
+        char *binpath = ObjectTree_getMainBinary(1, 1);
+        if (binpath != NULL) {
+            snprintf(base, sizeof(base), "%s", basename(binpath));
+            xfree(binpath);
+        } 
+		else {
+            if (is_prv)
+                snprintf(base, sizeof(base), DEFAULT_PRV_OUTPUT_NAME);
+            else
+                snprintf(base, sizeof(base), DEFAULT_DIM_OUTPUT_NAME);
+        }
+    }
+
+    /* 2) Check overwrite and add suffix if needed */
+    char workbase[PATH_MAX];
+    strncpy(workbase, base, sizeof(workbase)-1);
+    workbase[sizeof(workbase)-1] = '\0';
+
+    if (!get_option_merge_TraceOverwrite()) {
+        while (trace_exists_for_base(workbase, ext, gzext)) {
+            if (++lastid >= 10000) {
+                fprintf(stderr,
+                    "Error: exhausted 10000 unique filenames based on '%s'.\n"
+                    "Hint: delete or archive older traces, "
+                    "or choose a different name with -o.\n", base);
+                exit(EXIT_FAILURE);
+            }
+            snprintf(workbase, sizeof(workbase), "%s.%04u", base, lastid);
+        }
+    }
+    /* 3) Compose and store all output filenames */
+    char tmp[PATH_MAX];
+
+#ifdef HAVE_ZLIB
+    if (want_gzip)
+        snprintf(tmp, sizeof(tmp), "%s%s", workbase, gzext);
+    else
+#endif
+        snprintf(tmp, sizeof(tmp), "%s%s", workbase, ext);
+
+	set_merge_OutputFileName (TRACE_FILE, tmp);
+
+    snprintf(tmp, sizeof(tmp), "%s.pcf", workbase);
+    set_merge_OutputFileName (PCF_FILENAME, tmp);
+	snprintf(tmp, sizeof(tmp), "%s.row", workbase);
+	set_merge_OutputFileName (ROW_FILENAME, tmp);
+	set_option_merge_OutputIsGzip(want_gzip);
+
+#if defined(IS_BG_MACHINE)
+#if defined(DEAD_CODE)
+    snprintf(tmp, sizeof(tmp), "%s.crd", workbase);
+    set_merge_OutputFileName (CRD_FILENAME, tmp);
+#endif 
+#endif
 }
