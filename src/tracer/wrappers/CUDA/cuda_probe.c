@@ -392,3 +392,16 @@ void Probe_Cuda_StreamWaitEvent_Exit (void)
 	if (mpitrace_on && Extrae_get_trace_CUDA())
 	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDASTREAMWAITEVENT_VAL, EVT_END);
 }
+void Probe_Cuda_StreamRegister_Entry (void)
+{
+    DEBUG
+    if (mpitrace_on && Extrae_get_trace_CUDA())
+        TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDA_STREAM_REGISTER_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_Cuda_StreamRegister_Exit (void)
+{
+    DEBUG
+    if (mpitrace_on && Extrae_get_trace_CUDA())
+        TRACE_MISCEVENTANDCOUNTERS(TIME, CUDA_STREAM_REGISTER_EV, EVT_END, EMPTY);
+}

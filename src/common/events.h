@@ -614,7 +614,7 @@ enum {
 #define CUDA_KERNEL_THREADS_PER_BLOCK 63000012
 #define CUDA_KERNEL_SHARED_MEM_BYTES  63000013
 #define CUDAEVENT_ID_EV               63000014
-
+#define CUDA_STREAM_REGISTER_EV       63000015
 
 #define HIPCALL_EV               63500000
 enum {
@@ -960,6 +960,7 @@ enum {
 #define STATE_FREEMEM            31
 /* Added for accelerators */
 #define STATE_CONFACCEL          32
+#define STATE_STREAM_REGISTER    33
 
 
 

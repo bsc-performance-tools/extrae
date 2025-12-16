@@ -282,11 +282,14 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define STATE_32_LBL         "Configuring accelerator"
 #define STATE_32_COLOR       { 118, 185, 0 }
 
+#define STATE_33             33
+#define STATE_33_LBL         "Stream Registration"
+#define STATE_33_COLOR       { 80, 185, 160 }
 
 #define STATES_LBL           "STATES"
 #define STATES_COLOR_LBL     "STATES_COLOR"
 
-#define STATES_NUMBER        33
+#define STATES_NUMBER        34
 extern struct color_t states_inf[STATES_NUMBER];
 
 /******************************************************************************

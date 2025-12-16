@@ -234,6 +234,21 @@ CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 	return 0;
 }
 
+static int
+CUDA_StreamRegister_Event(event_t *event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
+{
+	/* Get EVT_BEGIN or EVT_END */
+	UINT64 EvValue = Get_EvValue(event); 
+	UNREFERENCED_PARAMETER(fset);
+
+	Switch_State(STATE_STREAM_REGISTER, (EvValue == EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state(cpu, ptask, task, thread, current_time);
+	return 0;
+}
+
 SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	/* Host calls */
 	{ CUDACALL_EV, CUDA_Call },
@@ -244,6 +259,7 @@ SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	{ CUDA_STREAM_DEST_ID_EV, CUDA_Punctual_Event },
 	{ CUDAEVENT_ID_EV, CUDA_Punctual_Event },
 	{ CUDA_UNTRACKED_EV, CUDA_Punctual_Event },
+	{ CUDA_STREAM_REGISTER_EV, CUDA_StreamRegister_Event },
 	/* Accelerator calls */
 	{ CUDACALLGPU_EV, CUDA_GPU_Call },
 	{ NULL_EV, NULL }

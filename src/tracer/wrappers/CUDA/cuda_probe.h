@@ -68,4 +68,7 @@ void Probe_Cuda_StreamWaitEvent_Exit (void);
 void Extrae_set_trace_CUDA (int b);
 int Extrae_get_trace_CUDA (void);
 
+void Probe_Cuda_StreamRegister_Entry (void);
+void Probe_Cuda_StreamRegister_Exit (void);
+
 #endif

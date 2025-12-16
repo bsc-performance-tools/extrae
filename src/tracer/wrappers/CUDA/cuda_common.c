@@ -30,9 +30,12 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#include <cuda_runtime_api.h> 
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 
 #include "cuda_common.h"
-
 #include "taskid.h"
 #include "threadinfo.h"
 #include "wrapper.h"
@@ -43,6 +46,9 @@
 #include "extrae_user_events.h"
 #include "gpu_event_info.h"
 #include "trace_mode.h"
+
+#define SearchStream(device_id, stream) SearchAndRegisterStream(device_id, stream, FALSE)
+#define RegisterStream(device_id, stream) SearchAndRegisterStream(device_id, stream, TRUE)
 
 #if defined(__APPLE__)
 # define HOST_NAME_MAX 512
@@ -60,261 +66,205 @@ int cudaInitialized = 0;
  */
 typedef struct
 {
-	int stream_id;
-	cudaStream_t* stream_ptr;
+	int stream_idx;
 	cudaStream_t stream;
 	enum cudaMemcpyKind memcpyKind;
 	size_t memcpySize;
-} Extrae_cuda_saved_params_t;
+	unsigned tag;
+} CUDA_thread_args_t;
 
-static __thread Extrae_cuda_saved_params_t Extrae_CUDA_saved_params;
+static __thread CUDA_thread_args_t CUDA_thread_args;
 
 unsigned cuda_events_block_size = DEFAULT_CUDA_EVENTS_BLOCK_SIZE;
 
-static unsigned __last_tag = 0xC0DA; /* Fixed tag */
-static unsigned Extrae_CUDA_tag_generator (void)
+static unsigned lastTag = 0xC0DA; /* Fixed tag */
+
+static pthread_mutex_t lastTagMutex = PTHREAD_MUTEX_INITIALIZER;
+
+static unsigned GetCUDACommTag()
 {
-	__last_tag++;
-	return __last_tag;
+	unsigned new_tag = 0;
+
+	pthread_mutex_lock(&lastTagMutex);
+	new_tag = lastTag++;
+	pthread_mutex_unlock(&lastTagMutex);
+
+	return new_tag;
 }
 
-static unsigned Extrae_CUDA_tag_get()
+static struct DeviceInfo_t *deviceArray = NULL;
+static int deviceCount = 0;
+
+static void SynchronizeStream(int device_id, int stream_idx)
 {
-	return __last_tag;
-}
-
-static struct CUDAdevices_t *devices = NULL;
-static int CUDAdevices = 0;
-
-static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
-{
-	int err;
-
-	if (devid >= CUDAdevices)
+	if (device_id >= deviceCount)
 	{
-		fprintf (stderr, PACKAGE_NAME": Error! Invalid CUDA device id in CUDASynchronizeStream\n");
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME": Error! Invalid CUDA device id in SynchronizeStream\n");
+		exit(-1);
 	}
 
 #ifdef DEBUG
-	fprintf (stderr, "Extrae_CUDA_SynchronizeStream (devid=%d, streamid=%d, stream=%p)\n", devid, streamid, devices[devid].Stream[streamid].stream);
+	fprintf (stderr, "SynchronizeStream (device_id=%d, stream_idx=%d, stream=%p)\n", device_id, stream_idx, deviceArray[device_id].streams[stream_idx].stream);
 #endif
 
-	if(devices[devid].Stream[streamid].device_reference_event == NULL)
-	{
-		devices[devid].Stream[streamid].device_reference_event = gpuEventList_pop(&devices[devid].availableEvents);
+	if (deviceArray[device_id].streams[stream_idx].device_reference_event == NULL){
+		deviceArray[device_id].streams[stream_idx].device_reference_event = gpuEventList_pop(&deviceArray[device_id].available_events);
 	}
 
-	CUDA_RUNTIME_CHECK(cudaEventRecord(devices[devid].Stream[streamid].device_reference_event->ts_event, devices[devid].Stream[streamid].stream));
-	CUDA_RUNTIME_CHECK(cudaEventSynchronize (devices[devid].Stream[streamid].device_reference_event->ts_event));
-	devices[devid].Stream[streamid].host_reference_time = TIME;
+	CUDA_RUNTIME_CHECK(cudaEventRecord(deviceArray[device_id].streams[stream_idx].device_reference_event->ts_event, deviceArray[device_id].streams[stream_idx].stream));
+	CUDA_RUNTIME_CHECK(cudaEventSynchronize(deviceArray[device_id].streams[stream_idx].device_reference_event->ts_event));
+	deviceArray[device_id].streams[stream_idx].host_reference_time = TIME;
 }
 
-void Extrae_CUDA_deInitialize (int devid)
+static void DeinitializeDevice(int device_id)
 {
-	if (devices != NULL)
+	if (deviceArray != NULL)
 	{
-		if (devices[devid].initialized)
+		if (deviceArray[device_id].initialized)
 		{
-			xfree (devices[devid].Stream);
-			devices[devid].Stream = NULL;
-			devices[devid].initialized = FALSE;
+			xfree(deviceArray[device_id].streams);
+			deviceArray[device_id].streams = NULL;
+			deviceArray[device_id].initialized = FALSE;
 		}
 	}
 }
 
-void Extrae_CUDA_Initialize (int devid)
+static int SearchAndRegisterStream(int device_id, cudaStream_t stream, int register_stream)
 {
-	cudaError_t err;
-	int i;
+	int stream_idx = 0;
+    unsigned long long unique_stream_id = 0;
+	int i = 0;
 
-	/* If devices table is not initialized, create it first */
-	if (devices == NULL)
+	/* If deviceArray is not initialized, create it first */
+	if (deviceArray == NULL)
 	{
-		CUDA_RUNTIME_CHECK(cudaGetDeviceCount (&CUDAdevices));
+		CUDA_RUNTIME_CHECK(cudaGetDeviceCount(&deviceCount));
 
-		devices = (struct CUDAdevices_t*) xmalloc (sizeof(struct CUDAdevices_t)*CUDAdevices);
+		deviceArray = (struct DeviceInfo_t*) xmalloc(sizeof(struct DeviceInfo_t)*deviceCount);
 
-		for (i = 0; i < CUDAdevices; i++)
-			devices[i].initialized = FALSE;
+		for (i = 0; i < deviceCount; i++)
+		{
+            deviceArray[i].initialized = FALSE;
+            deviceArray[i].streams = NULL;
+            deviceArray[i].num_streams = 0;
+        }
+        /* Register finalization once, at process exit */
+        atexit(Extrae_CUDA_finalize);
+        cudaInitialized = 1;
+    }
+
+	/* Initialize per-device structures on first use */
+	if (!deviceArray[device_id].initialized){
+        gpuEventList_init(&deviceArray[device_id].available_events, TRUE, XTR_CUDA_EVENTS_BLOCK_SIZE);
+		deviceArray[device_id].initialized = TRUE;
 	}
 
-	/* If the device we're using is not initialized, create its structures */
-	if (!devices[devid].initialized)
+	/* Obtain a unique identifier for the CUDA stream */
+	CUDA_RUNTIME_CHECK(cudaStreamGetId(stream, &unique_stream_id));
+	struct RegisteredStream_t *StreamArray = deviceArray[device_id].streams;
+
+	/* Search for an already registered stream with the same identifier */
+	for (stream_idx = 0; stream_idx < deviceArray[device_id].num_streams; stream_idx++){
+		if (StreamArray[stream_idx].stream_id == unique_stream_id){
+			return stream_idx;
+		}
+	}
+
+	/* If the stream is not found, register it only if requested */
+    if (register_stream) 
 	{
-		char _threadname[THREAD_INFO_NAME_LEN];
-		char _hostname[HOST_NAME_MAX];
-		unsigned prev_threadid;
-		int found;
+		Probe_Cuda_StreamRegister_Entry();
 
-		devices[devid].nstreams = 1;
+		/* Realloc and refresh StreamArray */
+		StreamArray = deviceArray[device_id].streams = (struct RegisteredStream_t *) xrealloc(
+			StreamArray, (stream_idx + 1) * sizeof(struct RegisteredStream_t));
 
-		devices[devid].Stream = (struct RegisteredStreams_t*) xmalloc_and_zero (devices[devid].nstreams*sizeof(struct RegisteredStreams_t));
+		stream_idx = deviceArray[device_id].num_streams;
+		deviceArray[device_id].num_streams++;
 
-		/* Was the thread created before (i.e. did we executed a cudadevicereset?) */
-		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-			sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, 1, _hostname);
-		else
-			sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, 1, "unknown-host");
-		prev_threadid = Extrae_search_thread_name (_threadname, &found);
+		/*
+		* XXX Should this be Backend_getMaximumOfThreads()? If we
+		* previously increased the number of threads in another runtime,
+		* and then decreased them, we will end up with a line with mixed
+		* semantics (thread&stream).
+		*/
+		Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads() + 1);
 
-		if (found)
+		StreamArray[stream_idx].host_reference_time = 0;
+		StreamArray[stream_idx].device_reference_event = NULL;
+		StreamArray[stream_idx].thread_id = Backend_getNumberOfThreads()-1;
+		StreamArray[stream_idx].stream = stream;
+		StreamArray[stream_idx].stream_id = unique_stream_id;
+		gpuEventList_init(&StreamArray[stream_idx].gpu_event_list, FALSE, XTR_CUDA_EVENTS_BLOCK_SIZE);
+
+#ifdef DEBUG
+		fprintf(stderr, "Extrae_CUDA_RegisterStream(device_id=%d, stream=%p assigned to stream_idx => %d\n", device_id, stream, stream_idx);
+#endif
+		/* Assign a descriptive name to the thread associated with this stream */
 		{
-			/* If thread name existed, reuse its thread id */
-			devices[devid].Stream[0].threadid = prev_threadid;
-		}
-		else
-		{
-			/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
-			/*
-			 * XXX Should this be Backend_getMaximumOfThreads()? If we
-			 * previously increased the number of threads in another runtime,
-			 * and then decreased them, we will end up with a line with mixed
-			 * semantics (thread&stream).
-			 */
-			Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads() + 1);
-			devices[devid].Stream[0].threadid = Backend_getNumberOfThreads()-1;
+			char _threadname[THREAD_INFO_NAME_LEN];
+			char _hostname[HOST_NAME_MAX];
 
-			/* Set thread name */
-			Extrae_set_thread_name(devices[devid].Stream[0].threadid, _threadname);
+			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
+				sprintf(_threadname, "CUDA-D%d.S%d-%s", device_id+1, stream_idx+1, _hostname);
+			else
+				sprintf(_threadname, "CUDA-D%d.S%d-%s", device_id+1, stream_idx+1, "unknown-host");
+			Extrae_set_thread_name(StreamArray[stream_idx].thread_id, _threadname);
 		}
-
-		/* default device stream */
-		devices[devid].Stream[0].stream = (cudaStream_t) 0;
-		gpuEventList_init(&devices[devid].Stream[0].gpu_event_list, FALSE, XTR_CUDA_EVENTS_BLOCK_SIZE);
-		gpuEventList_init(&devices[devid].availableEvents, TRUE, XTR_CUDA_EVENTS_BLOCK_SIZE);
 
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-
-		devices[devid].Stream[0].device_reference_event = NULL;
-		Extrae_CUDA_SynchronizeStream (devid, 0);
+		StreamArray[stream_idx].device_reference_event = NULL;
+		SynchronizeStream(device_id, stream_idx);
 
 		/*
-		 * Necessary to change the base state of CUDA streams from NOT_TRACING
-		 * to IDLE. We manually emit a TRACING_MODE_DETAIL event because CUDA
-		 * doesn't have burst mode yet. Will need a revision when supported.
-		 */
-		THREAD_TRACE_MISCEVENT(devices[devid].Stream[0].threadid, devices[devid].Stream[0].host_reference_time, TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
-
-		devices[devid].initialized = TRUE;
-
-		/**
-		* Last flush of stream events.
-		* This initialization occurs in the callback of a CUDA call from the app,
-		* therefore this atexit corresponds to the exit point of the main from the app traced.
-		* Moving this to CUPTI initialization is not equivalent since that initialization
-		* is called from the Extrae constructor, and therefore that atexit corresponds to our library exit point.
+		* Necessary to change the base state of CUDA streams from NOT_TRACING
+		* to IDLE. We manually emit a TRACING_MODE_DETAIL event because CUDA
+		* doesn't have burst mode yet. Will need a revision when supported.
 		*/
-		atexit(Extrae_CUDA_finalize);
-		cudaInitialized = 1;
+		THREAD_TRACE_MISCEVENT(StreamArray[stream_idx].thread_id, StreamArray[stream_idx].host_reference_time, 
+			TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
+
+		Probe_Cuda_StreamRegister_Exit();
+		return stream_idx;
 	}
-}
-
-static int Extrae_CUDA_SearchStream (int devid, cudaStream_t stream)
-{
-	int i;
-
-	/* Starting from CUDA 7, CU_STREAM_LEGACY is a new stream handle that uses 
-	   an implicit stream with legacy synchronization behavior, just as the 
-	   behaviour of stream 0 (default).
-
-		 CU_STREAM_PER_THREAD is assigned to the tid 0. This is allow apps that used it
-		 to generate a trace but this could lead to overlapped kernel events if 
-		 several threads of the same parallel use CU_STREAM_PER_THREAD concurrently.
-	 */
-	if (stream == CU_STREAM_LEGACY || stream == CU_STREAM_PER_THREAD) return 0;
-
-	for (i = 0; i < devices[devid].nstreams; i++)
-		if (devices[devid].Stream[i].stream == stream)
-			return i;
-
+	/* streams not found and registration was not requested */
 	return -1;
 }
 
-static void Extrae_CUDA_unRegisterStream (int devid, cudaStream_t stream)
+static void UnregisterStream(int device_id, cudaStream_t stream)
 {
-	int stid = Extrae_CUDA_SearchStream (devid, stream);
+	int stream_idx = SearchStream(device_id, stream);
+
+	/* If the stream is not registered, there is nothing to remove */
+	if (stream_idx == -1) return;
 
 #ifdef DEBUG
-	fprintf (stderr, "Extrae_CUDA_unRegisterStream (devid=%d, stream=%p unassigned from streamid => %d/%d\n", devid, stream, stid, devices[devid].nstreams);
+	fprintf(stderr, "UnregisterStream(device_id=%d, stream=%p unassigned from stream_idx => %d/%d\n", device_id, stream, stream_idx, deviceArray[device_id].num_streams);
 #endif
 
-	Extrae_CUDA_flush_streams(devid, stid);
+	FlushStreams(device_id, stream_idx);
 
-	int nstreams = devices[devid].nstreams - 1;
+	int num_streams = deviceArray[device_id].num_streams - 1;
 
-	struct RegisteredStreams_t *rs_tmp = (struct RegisteredStreams_t*) xmalloc (nstreams*sizeof(struct RegisteredStreams_t));
+	struct RegisteredStream_t *rs_tmp = (struct RegisteredStream_t*) xmalloc(num_streams*sizeof(struct RegisteredStream_t));
 
-	memmove (rs_tmp, devices[devid].Stream, stid * sizeof(struct RegisteredStreams_t));
-	memmove (rs_tmp+stid, devices[devid].Stream + stid + 1, (devices[devid].nstreams - stid - 1)*sizeof(struct RegisteredStreams_t));
+	memmove(rs_tmp, deviceArray[device_id].streams, stream_idx * sizeof(struct RegisteredStream_t));
+	memmove(rs_tmp+stream_idx, deviceArray[device_id].streams + stream_idx + 1, (deviceArray[device_id].num_streams - stream_idx - 1)*sizeof(struct RegisteredStream_t));
 
-	devices[devid].nstreams = nstreams;
+	deviceArray[device_id].num_streams = num_streams;
 
-	xfree (devices[devid].Stream);
-	devices[devid].Stream = rs_tmp;
+	xfree(deviceArray[device_id].streams);
+	deviceArray[device_id].streams = rs_tmp;
 }
 
-static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
-{
-	int i = devices[devid].nstreams;
-
-	devices[devid].Stream = (struct RegisteredStreams_t *) xrealloc (
-	  devices[devid].Stream, (i+1)*sizeof(struct RegisteredStreams_t));
-
-	devices[devid].nstreams++;
-
-	/*
-	 * XXX Should this be Backend_getMaximumOfThreads()? If we
-	 * previously increased the number of threads in another runtime,
-	 * and then decreased them, we will end up with a line with mixed
-	 * semantics (thread&stream).
-	 */
-	Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads()+1);
-
-	devices[devid].Stream[i].host_reference_time = 0;
-	devices[devid].Stream[i].device_reference_event = NULL;
-	devices[devid].Stream[i].threadid = Backend_getNumberOfThreads()-1;
-	devices[devid].Stream[i].stream = stream;
-	gpuEventList_init(&devices[devid].Stream[i].gpu_event_list, FALSE, XTR_CUDA_EVENTS_BLOCK_SIZE);
-
-#ifdef DEBUG
-	fprintf(stderr, "Extrae_CUDA_RegisterStream (devid=%d, stream=%p assigned to streamid => %d\n", devid, stream, i);
-#endif
-
-	/* Set thread name */
-	{
-		char _threadname[THREAD_INFO_NAME_LEN];
-		char _hostname[HOST_NAME_MAX];
-
-		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-			sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, _hostname);
-		else
-			sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, "unknown-host");
-		Extrae_set_thread_name(devices[devid].Stream[i].threadid, _threadname);
-	}
-
-	/* Create an event record and process it through the stream! */
-	/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-	devices[devid].Stream[i].device_reference_event = NULL;
-	Extrae_CUDA_SynchronizeStream(devid, i);
-
-	/*
-	 * Necessary to change the base state of CUDA streams from NOT_TRACING
-	 * to IDLE. We manually emit a TRACING_MODE_DETAIL event because CUDA
-	 * doesn't have burst mode yet. Will need a revision when supported.
-	 */
-	THREAD_TRACE_MISCEVENT(devices[devid].Stream[i].threadid, devices[devid].Stream[i].host_reference_time, TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
-}
-
-static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
-	int devid, int streamid, unsigned event, unsigned long long value,
+static void AddEventToStream(Extrae_CUDA_Time_Type timetype,
+	int device_id, int stream_idx, unsigned event, unsigned long long value,
 	unsigned tag, size_t size, unsigned int blockspergrid, unsigned int threadsperblock)
 {
-	int err;
-	struct RegisteredStreams_t *registered_stream = &devices[devid].Stream[streamid];
+	struct RegisteredStream_t *registered_stream = &deviceArray[device_id].streams[stream_idx];
 
-	gpu_event_t* gpu_event = gpuEventList_pop(&devices[devid].availableEvents);
+	gpu_event_t* gpu_event = gpuEventList_pop(&deviceArray[device_id].available_events);
 
 	gpu_event->event = event;
 	gpu_event->value = value;
@@ -334,7 +284,7 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
  * inserts communication events to connect host-side 
  * CUDA runtime calls with their corresponding GPU kernel and memcopies executions.
  *
- * @param threadid          buffer thread id
+ * @param thread_id          buffer thread id
  * @param time              Timestamp of the event
  * @param event             kind of event (CUDAKERNEL_GPU_VAL, CUDAMEMCPY_GPU_VAL...)
  * @param value             Entry/exit (EVT_BEGIN/EVT_END)
@@ -343,37 +293,36 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
  * @param blockspergrid     Grid configuration (CUDA kernels)
  * @param threadsperblock   Block configuration (CUDA kernels)
  */
-static void traceGPUEvents(int threadid, UINT64 time, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned blockspergrid, unsigned threadsperblock)
+static void TraceGPUEvents(int thread_id, UINT64 time, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned blockspergrid, unsigned threadsperblock)
 {
-	TRACE_GPU_EVENT(threadid, time, CUDACALLGPU_EV, event, value, size);
+	TRACE_GPU_EVENT(thread_id, time, CUDACALLGPU_EV, event, value, size);
 
 	if (event == CUDAKERNEL_GPU_VAL)
 	{
-		TRACE_GPU_KERNEL_EVENT(threadid, time, CUDA_KERNEL_EXEC_EV, value, blockspergrid, threadsperblock);
+		TRACE_GPU_KERNEL_EVENT(thread_id, time, CUDA_KERNEL_EXEC_EV, value, blockspergrid, threadsperblock);
 		if(value != EVT_END) 
 		{
-			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, time,USER_RECV_EV,TASKID,0, tag, tag);
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(thread_id, time,USER_RECV_EV,TASKID,0, tag, tag);
 		}
 	}
 	else
 	{
 		if ((event == CUDAMEMCPY_GPU_VAL || event == CUDAMEMCPYASYNC_GPU_VAL) && (tag > 0))
 		{
-			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, time, (value==EVT_END)?USER_RECV_EV:USER_SEND_EV, TASKID, size, tag, tag);
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(thread_id, time, (value==EVT_END)?USER_RECV_EV:USER_SEND_EV, TASKID, size, tag, tag);
 		}
 	}
 }
 
-static void flushGPUEvents (int devid, int streamid)
+static void FlushGPUEvents(int device_id, int stream_idx)
 {
-	int threadid = devices[devid].Stream[streamid].threadid;
-	int err;
+	int thread_id = deviceArray[device_id].streams[stream_idx].thread_id;
 	UINT64 utmp, last_time = 0;
 	float ftmp;
 	gpu_event_t *gpu_event;
 	cudaEvent_t *reference_event;
 	UINT64 reference_time = 0;
-	struct RegisteredStreams_t *registered_stream = &devices[devid].Stream[streamid];
+	struct RegisteredStream_t *registered_stream = &deviceArray[device_id].streams[stream_idx];
 
 	gpu_event_t *last_gpu_event = gpuEventList_peek_tail(&registered_stream->gpu_event_list);
 
@@ -384,7 +333,7 @@ static void flushGPUEvents (int devid, int streamid)
 		reference_time = registered_stream->host_reference_time;
 
 		/* Translate time from GPU to CPU using .device_reference_time and .host_reference_time
-				from the RegisteredStreams_t structure */
+				from the RegisteredStream_t structure */
 
 		gpu_event = gpuEventList_pop(&registered_stream->gpu_event_list);
 		while(gpu_event != NULL)
@@ -395,7 +344,7 @@ static void flushGPUEvents (int devid, int streamid)
 				* resolution of around 0.5 microseconds) -- according to
 				* https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
 				*/
-				CUDA_RUNTIME_CHECK(cudaEventElapsedTime (&ftmp, *reference_event, gpu_event->ts_event));
+				CUDA_RUNTIME_CHECK(cudaEventElapsedTime(&ftmp, *reference_event, gpu_event->ts_event));
 				ftmp *= 1000000;
 				/* Time correction between CPU & GPU */
 				utmp = reference_time + (UINT64) (ftmp);
@@ -408,46 +357,44 @@ static void flushGPUEvents (int devid, int streamid)
 				utmp = last_time;
 			}
 
-			traceGPUEvents(threadid, utmp, gpu_event->event, gpu_event->value, gpu_event->tag, gpu_event->memSize, gpu_event->blocksPerGrid, gpu_event->threadsPerBlock);
+			traceGPUEvents(thread_id, utmp, gpu_event->event, gpu_event->value, gpu_event->tag, gpu_event->memSize, gpu_event->blocksPerGrid, gpu_event->threadsPerBlock);
 
 			last_time = utmp;
 
 			if(gpuEventList_isempty(&registered_stream->gpu_event_list))
 			{
-				gpuEventList_add(&devices[devid].availableEvents, registered_stream->device_reference_event);
+				gpuEventList_add(&deviceArray[device_id].available_events, registered_stream->device_reference_event);
 				registered_stream->device_reference_event = gpu_event;
 				registered_stream->host_reference_time = last_time;
 				gpu_event = NULL;
 			}
 			else
 			{
-				gpuEventList_add(&devices[devid].availableEvents, gpu_event);
+				gpuEventList_add(&deviceArray[device_id].available_events, gpu_event);
 				gpu_event = gpuEventList_pop(&registered_stream->gpu_event_list);
 			}
 		}
 	}
 }
 
-void Extrae_CUDA_flush_streams ( int device_id, int stream_id )
+void FlushStreams(int device_id, int stream_idx)
 {
 	int d = 0, s = 0;
 
-	if ( devices == NULL )
+	if (deviceArray != NULL)
 	{
-		return;
-	}
-
-	for ( d = (device_id == XTR_FLUSH_ALL_DEVICES ? 0: device_id);
-			  d < (device_id == XTR_FLUSH_ALL_DEVICES ? CUDAdevices: device_id+1);
-			  ++d )
-	{
-		if ( devices[d].initialized )
+		for (d = (device_id == XTR_FLUSH_ALL_DEVICES ? 0 : device_id);
+			 d < (device_id == XTR_FLUSH_ALL_DEVICES ? deviceCount : device_id+1);
+			++d)
 		{
-			for ( s = (stream_id == XTR_FLUSH_ALL_STREAMS ? 0: stream_id);
-						s < (stream_id == XTR_FLUSH_ALL_STREAMS ?  devices[d].nstreams: stream_id+1);
-						++s )
+			if (deviceArray[d].initialized)
 			{
-				flushGPUEvents (d, s);
+				for (s = (stream_idx == XTR_FLUSH_ALL_STREAMS ? 0 : stream_idx);
+					 s < (stream_idx == XTR_FLUSH_ALL_STREAMS ? deviceArray[d].num_streams : stream_idx+1);
+					 ++s)
+				{
+					FlushGPUEvents(d, s);
+				}
 			}
 		}
 	}
@@ -457,67 +404,51 @@ void Extrae_CUDA_flush_streams ( int device_id, int stream_id )
 /* CUDA INSTRUMENTATION                                                     */
 /****************************************************************************/
 
-void Extrae_cudaConfigureCall_Enter (void)
+void Extrae_cudaConfigureCall_Enter(void)
 {
-	Probe_Cuda_ConfigureCall_Entry ();
+	Probe_Cuda_ConfigureCall_Entry();
 }
 
-void Extrae_cudaConfigureCall_Exit (void)
+void Extrae_cudaConfigureCall_Exit(void)
 {
-	Probe_Cuda_ConfigureCall_Exit ();
+	Probe_Cuda_ConfigureCall_Exit();
 }
 
-void Extrae_cudaLaunch_Enter (const char *f,
-    unsigned int blocksPerGrid,
-    unsigned int threadsPerBlock,
-    size_t sharedMemBytes,
-    cudaStream_t stream,
-    CUcontext ctx)
+void Extrae_cudaLaunch_Enter(const char *f, unsigned int blocksPerGrid, unsigned int threadsPerBlock,
+                             size_t sharedMemBytes, cudaStream_t stream, CUcontext ctx)
 {
-	int devid, strid;
-	unsigned tag = Extrae_CUDA_tag_generator();
+	int device_id = -1; 
+	int stream_idx = -1;
+	unsigned tag = GetCUDACommTag();
+	CUDA_thread_args.tag = tag;
 
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
-	Extrae_CUDA_Initialize (devid);
+	stream_idx = RegisterStream(device_id, stream);
+	CUDA_thread_args.stream_idx = stream_idx;
 
-	strid = Extrae_CUDA_SearchStream (devid, stream);
-	if (strid == -1)
-	{
-		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaLaunch_Enter\n",THREADID, stream);
-		exit (-1);
-	}
+	Probe_Cuda_Launch_Entry((UINT64) f);
 
-	Extrae_CUDA_saved_params.stream_id = strid;
+	TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
 
-	Probe_Cuda_Launch_Entry ((UINT64) f);
-
-	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
-
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
+	AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
 	  CUDAKERNEL_GPU_VAL, (UINT64)f, tag, sharedMemBytes, blocksPerGrid, threadsPerBlock);
 }
 
-void Extrae_cudaLaunch_Exit (CUcontext ctx)
+void Extrae_cudaLaunch_Exit(CUcontext ctx)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	int device_id = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
+	unsigned tag = CUDA_thread_args.tag;
 
-	Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, 
-		devid,
-		Extrae_CUDA_saved_params.stream_id,
-		CUDAKERNEL_GPU_VAL, EVT_END, Extrae_CUDA_tag_get(), 0, 0, 0);
+	AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, CUDA_thread_args.stream_idx,
+		CUDAKERNEL_GPU_VAL, EVT_END, tag, 0, 0, 0);
 
-	Probe_Cuda_Launch_Exit ();
+	Probe_Cuda_Launch_Exit();
 }
 
-void Extrae_cudaMalloc_Enter(unsigned int event, void **devPtr, size_t size, CUcontext ctx)
+void Extrae_cudaMalloc_Enter(unsigned int event, void **devPtr, size_t size)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-
-	Extrae_CUDA_Initialize(devid);
-
 	Probe_Cuda_Malloc_Entry(event, (UINT64)devPtr, size);
 }
 
@@ -526,12 +457,8 @@ void Extrae_cudaMalloc_Exit(unsigned int event)
 	Probe_Cuda_Malloc_Exit(event);
 }
 
-void Extrae_cudaFree_Enter(unsigned int event, void *devPtr, CUcontext ctx)
+void Extrae_cudaFree_Enter(unsigned int event, void *devPtr)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize(devid);
-
 	Probe_Cuda_Free_Entry(event, (UINT64)devPtr);
 }
 
@@ -540,12 +467,8 @@ void Extrae_cudaFree_Exit(unsigned int event)
 	Probe_Cuda_Free_Exit(event);
 }
 
-void Extrae_cudaHostAlloc_Enter(void **pHost, size_t size, CUcontext ctx)
+void Extrae_cudaHostAlloc_Enter(void **pHost, size_t size)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize(devid);
-
 	Probe_Cuda_HostAlloc_Entry((UINT64)pHost, size);
 }
 
@@ -554,116 +477,100 @@ void Extrae_cudaHostAlloc_Exit()
 	Probe_Cuda_HostAlloc_Exit();
 }
 
-void Extrae_cudaDeviceSynchronize_Enter (CUcontext ctx)
+void Extrae_cudaDeviceSynchronize_Enter(CUcontext ctx)
 {
-	int devid;
+	int device_id = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Probe_Cuda_ThreadBarrier_Entry ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
+	Probe_Cuda_ThreadBarrier_Entry();
+	FlushStreams(device_id, XTR_FLUSH_ALL_STREAMS);
 }
 
-void Extrae_cudaDeviceSynchronize_Exit (void)
+void Extrae_cudaDeviceSynchronize_Exit(void)
 {
 	Probe_Cuda_ThreadBarrier_Exit ();
 }
 
-void Extrae_cudaThreadSynchronize_Enter (CUcontext ctx)
+void Extrae_cudaThreadSynchronize_Enter(CUcontext ctx)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
+	int device_id = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
-	Probe_Cuda_ThreadBarrier_Entry ();
-	Extrae_CUDA_flush_streams(devid, XTR_FLUSH_ALL_STREAMS);
+	Probe_Cuda_ThreadBarrier_Entry();
+	FlushStreams(device_id, XTR_FLUSH_ALL_STREAMS);
 }
 
-void Extrae_cudaThreadSynchronize_Exit (void)
+void Extrae_cudaThreadSynchronize_Exit(void)
 {
-	Probe_Cuda_ThreadBarrier_Exit ();
+	Probe_Cuda_ThreadBarrier_Exit();
 }
 
-void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
+void Extrae_cudaStreamCreate_Enter(void)
 {
-	Extrae_CUDA_saved_params.stream_ptr = p1;
-
-	Probe_Cuda_StreamCreate_Entry ();
+	Probe_Cuda_StreamCreate_Entry();
 }
 
-void Extrae_cudaStreamCreate_Exit (CUcontext ctx)
+void Extrae_cudaStreamCreate_Exit(void)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-
-	Extrae_CUDA_Initialize (devid);
-	Extrae_CUDA_RegisterStream (devid, *Extrae_CUDA_saved_params.stream_ptr);
-
-	Probe_Cuda_StreamCreate_Exit ();
+	Probe_Cuda_StreamCreate_Exit();
 }
 
-void Extrae_cudaStreamDestroy_Enter (cudaStream_t stream, CUcontext ctx)
+void Extrae_cudaStreamDestroy_Enter(cudaStream_t stream, CUcontext ctx)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
+	int device_id = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
-	Probe_Cuda_StreamDestroy_Entry ();
+	Probe_Cuda_StreamDestroy_Entry();
 
-	Extrae_CUDA_unRegisterStream (devid, stream);
+	UnregisterStream(device_id, stream);
 }
 
-void Extrae_cudaStreamDestroy_Exit (void)
+void Extrae_cudaStreamDestroy_Exit(void)
 {
-	Probe_Cuda_StreamDestroy_Exit ();
+	Probe_Cuda_StreamDestroy_Exit();
 }
 
-void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1, CUcontext ctx)
+void Extrae_cudaStreamSynchronize_Enter(cudaStream_t stream, CUcontext ctx)
 {
-	int devid, strid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
+	int device_id = -1;
+	int stream_idx = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
+	stream_idx = RegisterStream(device_id, stream);
 
-	strid = Extrae_CUDA_SearchStream (devid, p1);
-	if (strid == -1)
-	{
-		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaStreamSynchronize_Enter\n",THREADID, p1);
-		exit (-1);
-	}
-
-	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
-	Extrae_CUDA_flush_streams(devid, strid);
+	Probe_Cuda_StreamBarrier_Entry(deviceArray[device_id].streams[stream_idx].thread_id);
+	FlushStreams(device_id, stream_idx);
 }
 
-void Extrae_cudaStreamSynchronize_Exit (void)
+void Extrae_cudaStreamSynchronize_Exit(void)
 {
-	Probe_Cuda_StreamBarrier_Exit ();
+	Probe_Cuda_StreamBarrier_Exit();
 }
 
-void _Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4, CUcontext ctx, void (*entry_probe)(size_t), unsigned long long gpu_value)
+void _Extrae_cudaMemcpy_Enter(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, 
+	                           CUcontext ctx, void(*entry_probe)(size_t), unsigned long long gpu_value)
 {
-	UNREFERENCED_PARAMETER(p1);
-	UNREFERENCED_PARAMETER(p2);
+	UNREFERENCED_PARAMETER(dst);
+	UNREFERENCED_PARAMETER(src);
 
-	unsigned tag;
-	int devid;
+	int device_id = -1;
+	int stream_idx = -1;
+	unsigned tag = GetCUDACommTag();
 
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
+	CUDA_thread_args.memcpyKind = kind;
+	CUDA_thread_args.memcpySize = count;
+	CUDA_thread_args.tag = tag;
 
-	Extrae_CUDA_saved_params.memcpySize = p3;
-	Extrae_CUDA_saved_params.memcpyKind = p4;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
+	stream_idx = RegisterStream(device_id, cudaStreamDefault);
+	CUDA_thread_args.stream_idx = stream_idx;
 
-	entry_probe (p3);
-
-	tag = Extrae_CUDA_tag_generator();
+	entry_probe(count);
 
 	/* Emit communication from the host side if memcpykind refers to host to {host,device} */
-	if (p4 == cudaMemcpyHostToDevice)
+	if (kind == cudaMemcpyHostToDevice)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
-		  TASKID, p3, tag, tag);
+		  TASKID, count, tag, tag);
 	}
 
 	/* If the memcpy is started at host, we use tag = 0 to indicate that we
@@ -672,28 +579,27 @@ void _Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMem
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication starts at this point.
 	 */
-	if (p4 == cudaMemcpyDeviceToHost)
+	if (kind == cudaMemcpyDeviceToHost)
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  gpu_value, EVT_BEGIN, tag, p3, 0, 0);
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
+		  gpu_value, EVT_BEGIN, tag, count, 0, 0);
 	}
 	else
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  gpu_value, EVT_BEGIN, 0, p3, 0, 0);
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
+		  gpu_value, EVT_BEGIN, 0, count, 0, 0);
 	}
 }
 
-void _Extrae_cudaMemcpy_Exit (CUcontext ctx, void (*exit_probe)(void), unsigned long long gpu_value)
+void _Extrae_cudaMemcpy_Exit(CUcontext ctx, void (*exit_probe)(void), unsigned long long gpu_value)
 {
-	unsigned tag;
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	int device_id = -1;
+	int stream_idx = CUDA_thread_args.stream_idx;
+	enum cudaMemcpyKind kind = CUDA_thread_args.memcpyKind;
+	size_t size = CUDA_thread_args.memcpySize;
+	unsigned tag = CUDA_thread_args.tag;
 
-	enum cudaMemcpyKind kind = Extrae_CUDA_saved_params.memcpyKind;
-	size_t size = Extrae_CUDA_saved_params.memcpySize;
-
-	tag = Extrae_CUDA_tag_get();
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
 	/* THIS IS SYMMETRIC TO Extrae_cudaMemcpy_Enter */
 	/* If the memcpy is started at device, we use tag = 0 to indicate that we
@@ -704,16 +610,16 @@ void _Extrae_cudaMemcpy_Exit (CUcontext ctx, void (*exit_probe)(void), unsigned 
 	 */
 	if (kind == cudaMemcpyHostToDevice)
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
 			gpu_value, EVT_END, tag, size, 0, 0);
 	}
 	else
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, 0,
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
 			gpu_value, EVT_END, 0, size, 0, 0);
 	}
 		
-	exit_probe ();
+	exit_probe();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
 	if (kind == cudaMemcpyDeviceToHost)
@@ -722,38 +628,33 @@ void _Extrae_cudaMemcpy_Exit (CUcontext ctx, void (*exit_probe)(void), unsigned 
 	}
 }
 
-void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cudaMemcpyKind p4,cudaStream_t p5, CUcontext ctx)
+void Extrae_cudaMemcpyAsync_Enter(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream, CUcontext ctx)
 {
-	UNREFERENCED_PARAMETER(p1);
-	UNREFERENCED_PARAMETER(p2);
+	UNREFERENCED_PARAMETER(dst);
+	UNREFERENCED_PARAMETER(src);
 
-	int devid, strid;
-	unsigned tag;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
+	int device_id = -1;
+	int stream_idx = -1;
+	unsigned tag = GetCUDACommTag();
 
-	Extrae_CUDA_saved_params.memcpySize = p3;
-	Extrae_CUDA_saved_params.memcpyKind = p4;
-	Extrae_CUDA_saved_params.stream = p5;
+	CUDA_thread_args.stream = stream;
+	CUDA_thread_args.memcpyKind = kind;
+	CUDA_thread_args.memcpySize = count;
+	CUDA_thread_args.tag = tag;
 
-	Probe_Cuda_MemcpyAsync_Entry (p3);
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
-	tag = Extrae_CUDA_tag_generator();
+	Probe_Cuda_MemcpyAsync_Entry(count);
+
+	stream_idx = RegisterStream(device_id, stream);
+	CUDA_thread_args.stream_idx = stream_idx;
 
 	/* Emit communication from the host side if memcpykind refers to host to {host,device} */
-	if (p4 == cudaMemcpyHostToDevice)
+	if (kind == cudaMemcpyHostToDevice)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
-		  TASKID, p3, tag, tag);
+		  TASKID, count, tag, tag);
 	}
-
-	strid = Extrae_CUDA_SearchStream (devid, p5);
-	if (strid == -1)
-	{
-		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaMemcpyAsync_Enter\n",THREADID, p5);
-		exit (-1);
-	}
-	Extrae_CUDA_saved_params.stream_id = strid;
 
 	/* If the memcpy is started at host, we use tag = 0 to indicate that we
 	 * don't want a communication at this point (this will occur at _Exit
@@ -761,29 +662,27 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 	 * If the memcpy was started at the accelerator, we pass a tag != 0 to
 	 * indicate that the communication starts at this point.
 	 */
-	if (p4 == cudaMemcpyDeviceToHost)
+	if (kind == cudaMemcpyDeviceToHost)
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, tag, p3, 0, 0);
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, tag, count, 0, 0);
 	}
 	else
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, 0, p3, 0, 0);
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
+		  CUDAMEMCPYASYNC_GPU_VAL, EVT_BEGIN, 0, count, 0, 0);
 	}
 }
 
-void Extrae_cudaMemcpyAsync_Exit (CUcontext ctx)
+void Extrae_cudaMemcpyAsync_Exit(CUcontext ctx)
 {
-	unsigned tag;
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	int device_id = -1;
+	int stream_idx = CUDA_thread_args.stream_idx;
+	enum cudaMemcpyKind kind = CUDA_thread_args.memcpyKind;
+	size_t size = CUDA_thread_args.memcpySize;
+	unsigned tag = CUDA_thread_args.tag;
 
-	int strid = Extrae_CUDA_saved_params.stream_id;
-	enum cudaMemcpyKind kind = Extrae_CUDA_saved_params.memcpyKind;
-	size_t size = Extrae_CUDA_saved_params.memcpySize;
-
-	tag = Extrae_CUDA_tag_get();
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
 	/* THIS IS SYMMETRIC TO Extrae_cudaMemcpyAsync_Enter */
 	/* If the memcpy is started at device, we use tag = 0 to indicate that we
@@ -794,16 +693,16 @@ void Extrae_cudaMemcpyAsync_Exit (CUcontext ctx)
 	 */
 	if (kind == cudaMemcpyHostToDevice)
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
 		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, tag, size, 0, 0);
 	}
 	else
 	{
-		Extrae_CUDA_AddEventToStream(EXTRAE_CUDA_NEW_TIME, devid, strid,
+		AddEventToStream(EXTRAE_CUDA_NEW_TIME, device_id, stream_idx,
 		  CUDAMEMCPYASYNC_GPU_VAL, EVT_END, 0, size, 0, 0);
 	}
 
-	Probe_Cuda_MemcpyAsync_Exit ();
+	Probe_Cuda_MemcpyAsync_Exit();
 
 	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
 	if (kind == cudaMemcpyDeviceToHost)
@@ -813,12 +712,8 @@ void Extrae_cudaMemcpyAsync_Exit (CUcontext ctx)
 	}
 }
 
-void Extrae_cudaMemset_Enter(void *devPtr, size_t count, CUcontext ctx)
+void Extrae_cudaMemset_Enter(void *devPtr, size_t count)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
-
 	Probe_Cuda_Memset_Entry((UINT64)devPtr, count);
 }
 
@@ -827,12 +722,8 @@ void Extrae_cudaMemset_Exit()
 	Probe_Cuda_Memset_Exit();
 }
 
-void Extrae_cudaMemsetAsync_Enter(void *devPtr, size_t count, CUcontext ctx)
+void Extrae_cudaMemsetAsync_Enter(void *devPtr, size_t count)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
-
 	Probe_Cuda_MemsetAsync_Entry((UINT64)devPtr, count);
 }
 
@@ -841,48 +732,43 @@ void Extrae_cudaMemsetAsync_Exit()
 	Probe_Cuda_MemsetAsync_Exit();
 }
 
-void Extrae_cudaDeviceReset_Enter ()
+void Extrae_cudaDeviceReset_Enter()
 {
 	Probe_Cuda_DeviceReset_Enter();
-	Extrae_CUDA_flush_streams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
+	FlushStreams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 }
 
-void Extrae_cudaDeviceReset_Exit (CUcontext ctx)
+void Extrae_cudaDeviceReset_Exit(CUcontext ctx)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_deInitialize (devid);
+	int device_id = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
+
+	DeinitializeDevice(device_id);
 	Probe_Cuda_DeviceReset_Exit();
 }
 
-void Extrae_cudaThreadExit_Enter ()
+void Extrae_cudaThreadExit_Enter()
 {
 	Probe_Cuda_ThreadExit_Enter();
 }
 
-void Extrae_cudaThreadExit_Exit (CUcontext ctx)
+void Extrae_cudaThreadExit_Exit(CUcontext ctx)
 {
-	int devid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
+	int device_id = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
-	Extrae_CUDA_deInitialize (devid);
+	DeinitializeDevice(device_id);
 	Probe_Cuda_ThreadExit_Exit();
 }
 
-void Extrae_cudaEventRecord_Enter(cudaEvent_t p1, cudaStream_t p2, CUcontext ctx)
+void Extrae_cudaEventRecord_Enter(cudaEvent_t event, cudaStream_t stream, CUcontext ctx)
 {
-	int devid, strid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
+	int device_id = -1; 
+	int stream_idx = -1;
+	CUDA_GET_DEVICE_SAFE(ctx, device_id);
 
-	strid = Extrae_CUDA_SearchStream (devid, p2);
-	if (strid == -1)
-	{
-		fprintf (stderr, PACKAGE_NAME": [TID %d] Error! Cannot determine stream [%p] index in Extrae_cudaEventRecord_Enter\n",THREADID, p2);
-		exit (-1);
-	}
-
-	Probe_Cuda_EventRecord_Entry((UINT64)p1, devices[devid].Stream[strid].threadid);
+	stream_idx = RegisterStream(device_id, stream);
+	Probe_Cuda_EventRecord_Entry((UINT64)event, deviceArray[device_id].streams[stream_idx].thread_id);
 }
 
 void Extrae_cudaEventRecord_Exit()
@@ -890,13 +776,9 @@ void Extrae_cudaEventRecord_Exit()
 	Probe_Cuda_EventRecord_Exit();
 }
 
-void Extrae_cudaEventSynchronize_Enter(cudaEvent_t p1, CUcontext ctx)
+void Extrae_cudaEventSynchronize_Enter(cudaEvent_t event)
 {
-	int devid, strid;
-	CUDA_GET_DEVICE_SAFE(ctx, devid);
-	Extrae_CUDA_Initialize (devid);
-
-	Probe_Cuda_EventSynchronize_Entry((UINT64)p1);
+	Probe_Cuda_EventSynchronize_Entry((UINT64)event);
 }
 
 void Extrae_cudaEventSynchronize_Exit()
@@ -920,24 +802,22 @@ void Extrae_cudaStreamWaitEvent_Exit()
  * To solve that case we always call Extrae_CUDA_finalize with atexit and mark cudaInitialized to 0
  * to prevent entering this routine after the return point of the main.
  */
-void Extrae_CUDA_finalize (void)
+void Extrae_CUDA_finalize(void)
 {
 	Backend_Enter_Instrumentation();
-	if (EXTRAE_INITIALIZED() && cudaInitialized == 1 )
+	if (EXTRAE_INITIALIZED() && cudaInitialized == 1)
 	{
-		Extrae_CUDA_flush_streams (XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
+		FlushStreams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
 
-		for(int i = 0; i <CUDAdevices ; ++i){
-			if(devices[i].initialized == TRUE){
-				gpuEventList_free(&devices[i].availableEvents);
-				Extrae_CUDA_deInitialize (i);
+		for(int i = 0; i < deviceCount ; ++i){
+			if(deviceArray[i].initialized == TRUE){
+				gpuEventList_free(&deviceArray[i].available_events);
+				DeinitializeDevice(i);
 			}
 		}
-		xfree(devices);
-
-		devices = NULL;
-		CUDAdevices = 0;
-
+		xfree(deviceArray);
+		deviceArray = NULL;
+		deviceCount = 0;
 		cudaInitialized = 0;
 	}
 	Backend_Leave_Instrumentation();

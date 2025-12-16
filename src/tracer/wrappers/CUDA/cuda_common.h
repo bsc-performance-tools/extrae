@@ -91,73 +91,65 @@ do {                                                     \
 /* Information per stream required during tracing */
 
 
-struct RegisteredStreams_t
+struct RegisteredStream_t
 {
 	UINT64 host_reference_time;
 	gpu_event_t *device_reference_event;
-	unsigned threadid; /* In Paraver sense */
+	unsigned thread_id; /* In Paraver sense */
 	cudaStream_t stream;
+	unsigned long long stream_id;
 
 	gpu_event_list_t gpu_event_list;
 };
 
-struct CUDAdevices_t
+struct DeviceInfo_t
 {
-	struct RegisteredStreams_t *Stream;
-	int nstreams;
-	gpu_event_list_t availableEvents; /* available events to add to stream to obtain gpu timings */
+	struct RegisteredStream_t *streams;
+	int num_streams;
+	gpu_event_list_t available_events; /* available events to add to stream to obtain gpu timings */
 	int initialized;
-#if 0
-	/* To perform sampling, CUPTI */
-	CUcontext context;
-	CUdevice device;
-#endif
 };
 
-void Extrae_CUDA_flush_streams (int device_id, int stream_id);
-void Extrae_cudaConfigureCall_Enter (void);
-void Extrae_cudaConfigureCall_Exit (void);
-void Extrae_cudaLaunch_Enter (const char *f, unsigned int blocksPerGrid, unsigned int threadsPerBlock, size_t sharedMemBytes, cudaStream_t stream, CUcontext ctx);
-void Extrae_cudaLaunch_Exit (CUcontext);
-void Extrae_cudaMalloc_Enter(unsigned int, void **, size_t, CUcontext);
+void Extrae_cudaConfigureCall_Enter(void);
+void Extrae_cudaConfigureCall_Exit(void);
+void Extrae_cudaLaunch_Enter(const char *f, unsigned int blocksPerGrid, unsigned int threadsPerBlock, size_t sharedMemBytes, cudaStream_t stream, CUcontext ctx);
+void Extrae_cudaLaunch_Exit(CUcontext);
+void Extrae_cudaMalloc_Enter(unsigned int, void **, size_t);
 void Extrae_cudaMalloc_Exit(unsigned int);
-void Extrae_cudaFree_Enter(unsigned int, void *, CUcontext);
+void Extrae_cudaFree_Enter(unsigned int, void *);
 void Extrae_cudaFree_Exit(unsigned int);
-void Extrae_cudaHostAlloc_Enter(void **, size_t, CUcontext);
+void Extrae_cudaHostAlloc_Enter(void **, size_t);
 void Extrae_cudaHostAlloc_Exit();
-void Extrae_cudaThreadSynchronize_Enter (CUcontext);
-void Extrae_cudaThreadSynchronize_Exit (void);
-void Extrae_cudaDeviceSynchronize_Enter (CUcontext);
-void Extrae_cudaDeviceSynchronize_Exit (void);
+void Extrae_cudaThreadSynchronize_Enter(CUcontext);
+void Extrae_cudaThreadSynchronize_Exit(void);
+void Extrae_cudaDeviceSynchronize_Enter(CUcontext);
+void Extrae_cudaDeviceSynchronize_Exit(void);
 void Extrae_cudaEventRecord_Enter(cudaEvent_t, cudaStream_t, CUcontext);
-void Extrae_cudaEventRecord_Exit (void);
-void Extrae_cudaEventSynchronize_Enter (cudaEvent_t, CUcontext);
-void Extrae_cudaEventSynchronize_Exit (void);
+void Extrae_cudaEventRecord_Exit(void);
+void Extrae_cudaEventSynchronize_Enter(cudaEvent_t);
+void Extrae_cudaEventSynchronize_Exit(void);
 void Extrae_cudaStreamWaitEvent_Enter(void);
 void Extrae_cudaStreamWaitEvent_Exit(void);
-void Extrae_cudaStreamCreate_Enter (cudaStream_t*);
-void Extrae_cudaStreamCreate_Exit (CUcontext);
-void Extrae_cudaStreamDestroy_Enter (cudaStream_t, CUcontext);
-void Extrae_cudaStreamDestroy_Exit (void);
-void Extrae_cudaStreamSynchronize_Enter (cudaStream_t, CUcontext);
-void Extrae_cudaStreamSynchronize_Exit (void);
-void _Extrae_cudaMemcpy_Enter (void*, const void*, size_t, enum cudaMemcpyKind, CUcontext, void (*entry_probe)(size_t), unsigned long long gpu_evvalue);
-void _Extrae_cudaMemcpy_Exit (CUcontext, void (*exit_probe)(void), unsigned long long gpu_evvalue);
-void Extrae_cudaMemcpyAsync_Enter (void*, const void*, size_t, enum cudaMemcpyKind, cudaStream_t, CUcontext);
-void Extrae_cudaMemcpyAsync_Exit (CUcontext);
-void Extrae_cudaMemset_Enter(void *, size_t, CUcontext);
+void Extrae_cudaStreamCreate_Enter(void);
+void Extrae_cudaStreamCreate_Exit(void);
+void Extrae_cudaStreamDestroy_Enter(cudaStream_t, CUcontext);
+void Extrae_cudaStreamDestroy_Exit(void);
+void Extrae_cudaStreamSynchronize_Enter(cudaStream_t, CUcontext);
+void Extrae_cudaStreamSynchronize_Exit(void);
+void _Extrae_cudaMemcpy_Enter(void*, const void*, size_t, enum cudaMemcpyKind, CUcontext, void (*entry_probe)(size_t), unsigned long long gpu_evvalue);
+void _Extrae_cudaMemcpy_Exit(CUcontext, void (*exit_probe)(void), unsigned long long gpu_evvalue);
+void Extrae_cudaMemcpyAsync_Enter(void*, const void*, size_t, enum cudaMemcpyKind, cudaStream_t, CUcontext);
+void Extrae_cudaMemcpyAsync_Exit(CUcontext);
+void Extrae_cudaMemset_Enter(void *, size_t);
 void Extrae_cudaMemset_Exit();
-void Extrae_cudaMemsetAsync_Enter(void *, size_t, CUcontext);
+void Extrae_cudaMemsetAsync_Enter(void *, size_t);
 void Extrae_cudaMemsetAsync_Exit();
-void Extrae_cudaDeviceReset_Enter (void);
-void Extrae_cudaDeviceReset_Exit (CUcontext);
-void Extrae_cudaThreadExit_Enter (void);
-void Extrae_cudaThreadExit_Exit (CUcontext);
+void Extrae_cudaDeviceReset_Enter(void);
+void Extrae_cudaDeviceReset_Exit(CUcontext);
+void Extrae_cudaThreadExit_Enter(void);
+void Extrae_cudaThreadExit_Exit(CUcontext);
 
-void Extrae_CUDA_finalize (void);
-
-void Extrae_CUDA_Initialize(int);
-void Extrae_CUDA_deInitialize(int);
+void Extrae_CUDA_finalize(void);
 
 #define Extrae_cudaMemcpy_Enter(...) \
     _Extrae_cudaMemcpy_Enter(__VA_ARGS__, Probe_Cuda_Memcpy_Entry, CUDAMEMCPY_GPU_VAL)
