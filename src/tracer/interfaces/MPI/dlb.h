@@ -635,13 +635,13 @@ void DLB_MPI_File_read_at_all_end_F_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_File_read_ordered_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
-    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 	__attribute__((weak));
 void DLB_MPI_File_read_ordered_F_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_read_ordered_begin_F_enter(MPI_File *fh, void *buf,
-    MPI_Fint *count, MPI_Datatype *datatype, MPI_Fint *ierror)
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
     __attribute__((weak));
 void DLB_MPI_File_read_ordered_begin_F_leave(void)__attribute__((weak));
 
@@ -652,7 +652,7 @@ void DLB_MPI_File_read_ordered_end_F_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_read_shared_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
-    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 	__attribute__((weak));
 void DLB_MPI_File_read_shared_F_leave(void)__attribute__((weak));
 
@@ -700,13 +700,13 @@ void DLB_MPI_File_write_at_all_end_F_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_write_ordered_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
-    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 	__attribute__((weak));
 void DLB_MPI_File_write_ordered_F_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_write_ordered_begin_F_enter(MPI_File *fh, void *buf,
-    MPI_Fint *count, MPI_Datatype *datatype, MPI_Fint *ierror)
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)
     __attribute__((weak));
 void DLB_MPI_File_write_ordered_begin_F_leave(void)__attribute__((weak));
 
@@ -717,7 +717,7 @@ void DLB_MPI_File_write_ordered_end_F_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_write_shared_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
-    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 	__attribute__((weak));
 void DLB_MPI_File_write_shared_F_leave(void)__attribute__((weak));
 

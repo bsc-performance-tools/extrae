@@ -81,7 +81,7 @@ void Probe_OpenMP_Join_Wait_Exit (void)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, JOIN_EV, EVT_END, JOIN_WAIT_VAL);
 }
 
-void Probe_OpenMP_UF_Entry (const void* uf)
+void Probe_OpenMP_UF_Entry (const void *uf)
 {
 	if (mpitrace_on)
 	{
@@ -369,7 +369,7 @@ void Probe_OpenMP_TaskLoopID (long long id)
 	}
 }
 
-void Probe_OpenMP_Task_Entry (const void* uf)
+void Probe_OpenMP_Task_Entry (const void *uf)
 {
 	DEBUG
 	if (mpitrace_on)
@@ -389,7 +389,7 @@ void Probe_OpenMP_Task_Exit (void)
 	}
 }
 
-void Probe_OpenMP_TaskUF_Entry (const void* uf)
+void Probe_OpenMP_TaskUF_Entry (const void *uf)
 {
 	DEBUG
 	if (mpitrace_on)

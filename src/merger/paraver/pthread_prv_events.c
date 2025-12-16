@@ -23,9 +23,7 @@
 
 #include "common.h"
 
-#ifdef HAVE_LIBADDR2LINE
-# include "addr2info.h"
-#endif
+#include "addr2info.h" // Unprotected include to enable Address2Info_Write_OMP_Labels for user-translated addresses
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
@@ -65,8 +63,8 @@ static struct pthread_event_presency_label_st
 };
 
 int Translate_pthread_Operation (unsigned in_evttype, 
-	unsigned long long in_evtvalue, unsigned *out_evttype,
-	unsigned long long *out_evtvalue)
+	UINT64 in_evtvalue, unsigned *out_evttype,
+	UINT64 *out_evtvalue)
 {
 	unsigned u;
 

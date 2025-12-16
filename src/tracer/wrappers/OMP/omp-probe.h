@@ -30,7 +30,7 @@ int getTrace_OMPLocks (void);
 void setTrace_OpenMP_Taskloop (int value);
 int getTrace_OpenMP_Taskloop (void);
 
-void Probe_OpenMP_UF_Entry (const void* uf);
+void Probe_OpenMP_UF_Entry (const void *uf);
 void Probe_OpenMP_UF_Exit (void);
 void Probe_OpenMP_Work_Entry (void);
 void Probe_OpenMP_Work_Exit (void);
@@ -77,9 +77,9 @@ void Probe_OpenMP_SetNumThreads_Exit (void);
 
 void Probe_OpenMP_TaskID (long long id, int inst_or_exec);
 void Probe_OpenMP_TaskLoopID (long long id);
-void Probe_OpenMP_Task_Entry (const void* uf);
+void Probe_OpenMP_Task_Entry (const void *uf);
 void Probe_OpenMP_Task_Exit (void);
-void Probe_OpenMP_TaskUF_Entry (const void* uf);
+void Probe_OpenMP_TaskUF_Entry (const void *uf);
 void Probe_OpenMP_TaskUF_Exit (void);
 void Probe_OpenMP_Taskwait_Entry (void);
 void Probe_OpenMP_Taskwait_Exit (void);

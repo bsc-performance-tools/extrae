@@ -32,8 +32,8 @@
 #include "debug.h"
 #include "xalloc.h"
 #include "options.h"
+#include "addr2info.h" // Unconditionally include to provide Address2Info_Initialize()
 #if defined(HAVE_LIBADDR2LINE)
-# include "addr2info.h"
 # include "maps.h"
 #endif
 

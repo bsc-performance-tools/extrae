@@ -28,8 +28,8 @@
 
 void Enable_OpenCL_Operation (unsigned evttype);
 int Translate_OpenCL_Operation (unsigned in_evttype, 
-	unsigned long long in_evtvalue, unsigned *out_evttype,
-	unsigned long long *out_evtvalue);
+	UINT64 in_evtvalue, unsigned *out_evttype,
+	UINT64 *out_evtvalue);
 void WriteEnabled_OpenCL_Operations (FILE * fd);
 
 # if defined(PARALLEL_MERGE)
