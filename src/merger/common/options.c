@@ -159,7 +159,7 @@ static char OutputCRDName[1024]   = "";
 
 const char *get_merge_OutputFileName (outputFileName_t t){
     switch (t){
-        case TRACE_FILE_: return OutputTraceName;
+        case TRACE_FILENAME: return OutputTraceName;
         case PCF_FILENAME:   return OutputPCFName;
         case ROW_FILENAME:   return OutputROWName;
 #if defined(IS_BG_MACHINE)

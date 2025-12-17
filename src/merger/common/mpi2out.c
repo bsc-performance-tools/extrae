@@ -1670,7 +1670,7 @@ void Extrae_GenerateOutputFileName(void)
 #endif
         snprintf(tmp, sizeof(tmp), "%s%s", workbase, ext);
 
-	set_merge_OutputFileName (TRACE_FILE, tmp);
+	set_merge_OutputFileName (TRACE_FILENAME, tmp);
 
     snprintf(tmp, sizeof(tmp), "%s.pcf", workbase);
     set_merge_OutputFileName (PCF_FILENAME, tmp);
