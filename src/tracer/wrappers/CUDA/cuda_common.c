@@ -293,7 +293,7 @@ static void AddEventToStream(Extrae_CUDA_Time_Type timetype,
  * @param blockspergrid     Grid configuration (CUDA kernels)
  * @param threadsperblock   Block configuration (CUDA kernels)
  */
-static void TraceGPUEvents(int thread_id, UINT64 time, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned blockspergrid, unsigned threadsperblock)
+static void traceGPUEvents(int thread_id, UINT64 time, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned blockspergrid, unsigned threadsperblock)
 {
 	TRACE_GPU_EVENT(thread_id, time, CUDACALLGPU_EV, event, value, size);
 
