@@ -24,34 +24,34 @@
 #ifndef TRACE_MACROS_GPU_H_INCLUDED
 #define TRACE_MACROS_GPU_H_INCLUDED
 
-#define TRACE_GPU_EVENT(thread, evttime, evttype, evtvalue, evtbegin, evtsize) \
+#define TRACE_GPU_EVENT(_thread, _evttime, _evttype, _evtvalue, _evtbegin, _evtsize) \
 {                                                                              \
-    int thread_id = thread;                                                    \
-    event_t evt;                                                               \
+    int _thread_id = _thread;                                                  \
+    event_t _evt;                                                              \
     if (tracejant && TracingBitmap[TASKID])                                    \
     {                                                                          \
-        evt.time = evttime;                                                    \
-        evt.event = evttype;                                                   \
-        evt.value = evtvalue;                                                  \
-        evt.param.gpu_param.begin = evtbegin;                                  \
-        evt.param.gpu_param.memSize = evtsize;                                 \
-        HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);                         \
-        BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);              \
+        _evt.time = _evttime;                                                  \
+        _evt.event = _evttype;                                                 \
+        _evt.value = _evtvalue;                                                \
+        _evt.param.gpu_param.begin = _evtbegin;                                \
+        _evt.param.gpu_param.memSize = _evtsize;                               \
+        HARDWARE_COUNTERS_READ(_thread_id, _evt, FALSE);                       \
+        BUFFER_INSERT(_thread_id, TRACING_BUFFER(_thread_id), _evt);           \
     }                                                                          \
 }
 
-#define TRACE_GPU_KERNEL_EVENT(thread, evttime, evttype, evtvalue, blockspergrid, threadsperblock) \
+#define TRACE_GPU_KERNEL_EVENT(_thread, _evttime, _evttype, _evtvalue, _blockspergrid, _threadsperblock) \
 {                                                                              \
-    event_t evt;                                                               \
+    event_t _evt;                                                              \
     if (tracejant && TracingBitmap[TASKID])                                    \
     {                                                                          \
-        evt.time = evttime;                                                    \
-        evt.event = evttype;                                                   \
-        evt.value = evtvalue;                                                  \
-        evt.param.gpu_param.gridSize = blockspergrid;                          \
-        evt.param.gpu_param.blockSize = threadsperblock;                       \
-        HARDWARE_COUNTERS_READ(thread, evt, FALSE);                            \
-        BUFFER_INSERT(thread, TRACING_BUFFER(thread), evt);                    \
+        _evt.time = _evttime;                                                  \
+        _evt.event = _evttype;                                                 \
+        _evt.value = _evtvalue;                                                \
+        _evt.param.gpu_param.gridSize = _blockspergrid;                        \
+        _evt.param.gpu_param.blockSize = _threadsperblock;                     \
+        HARDWARE_COUNTERS_READ(_thread, _evt, FALSE);                          \
+        BUFFER_INSERT(_thread, TRACING_BUFFER(_thread), _evt);                 \
     }                                                                          \
 }
 
