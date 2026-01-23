@@ -307,7 +307,7 @@ static void traceGPUEvents(int thread_id, UINT64 time, unsigned event, unsigned 
 	}
 	else
 	{
-		if ((event == CUDAMEMCPY_GPU_VAL || event == CUDAMEMCPYASYNC_GPU_VAL) && (tag > 0))
+		if (tag > 0)
 		{
 			THREAD_TRACE_USER_COMMUNICATION_EVENT(thread_id, time, (value==EVT_END)?USER_RECV_EV:USER_SEND_EV, TASKID, size, tag, tag);
 		}
