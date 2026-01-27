@@ -141,9 +141,9 @@
                     (NOT_IN_NESTED),                                            \
                     NOOP_BEFORE_ENTRY_PROBE,                                    \
                     ARGS(entry_probe_args),                                     \
-                    CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation(); fprintf(stderr, "ol before real sym \n");),  \
+                    CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation();),  \
                     ARGS(real_symbol_args),                                     \
-                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation();fprintf(stderr, "ol after real sym \n");),   \
+                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation()),    \
                     ARGS(exit_probe_args),                                      \
                     NOOP_AFTER_EXIT_PROBE )
 
@@ -189,10 +189,10 @@
                       }                                                                                             \
                     ),                                                                                              \
                     ARGS(entry_probe_args),                                                                         \
-                    CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation(); fprintf(stderr, "fork before real sym \n");),  \
+                    CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation();),                                      \
                     /* Call our XTR_WRAP_GOMP_PARALLEL_OL and pass real fn/data through helper to it  */            \
                     REAL_SYMBOL_ARGS(REPLACE_ARGS_FN_DATA(symbol ## _OL, &helper, real_symbol_args)),               \
-                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation();fprintf(stderr, "fork after real sym \n"); ),   \
+                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation();),                                       \
                     ARGS(exit_probe_args),                                                                          \
                     CODE_AFTER_EXIT_PROBE(                                                                          \
                       if (level == 0)                                                                               \
