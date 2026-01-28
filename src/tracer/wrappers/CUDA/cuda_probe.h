@@ -62,7 +62,7 @@ void Probe_Cuda_EventRecord_Entry (UINT64, unsigned int);
 void Probe_Cuda_EventRecord_Exit (void);
 void Probe_Cuda_EventSynchronize_Entry (UINT64);
 void Probe_Cuda_EventSynchronize_Exit (void);
-void Probe_Cuda_StreamWaitEvent_Enter (void);
+void Probe_Cuda_StreamWaitEvent_Enter (UINT64 cudaEvent);
 void Probe_Cuda_StreamWaitEvent_Exit (void);
 
 void Extrae_set_trace_CUDA (int b);

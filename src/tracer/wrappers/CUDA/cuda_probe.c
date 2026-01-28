@@ -377,12 +377,13 @@ void Probe_Cuda_EventSynchronize_Exit (void)
 	    TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACALL_EV, CUDAEVENTSYNCHRONIZE_VAL, EVT_END);
 }
 
-void Probe_Cuda_StreamWaitEvent_Enter (void)
+void Probe_Cuda_StreamWaitEvent_Enter (UINT64 cudaEvent)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACALL_EV, CUDASTREAMWAITEVENT_VAL, EVT_BEGIN);
+		TRACE_EVENT(LAST_READ_TIME, CUDAEVENT_ID_EV, cudaEvent);
 	}
 }
 

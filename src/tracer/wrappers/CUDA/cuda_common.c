@@ -786,9 +786,9 @@ void Extrae_cudaEventSynchronize_Exit()
 	Probe_Cuda_EventSynchronize_Exit();
 }
 
-void Extrae_cudaStreamWaitEvent_Enter()
+void Extrae_cudaStreamWaitEvent_Enter(cudaEvent_t event)
 {
-	Probe_Cuda_StreamWaitEvent_Enter();
+	Probe_Cuda_StreamWaitEvent_Enter((UINT64)event);
 }
 
 void Extrae_cudaStreamWaitEvent_Exit()

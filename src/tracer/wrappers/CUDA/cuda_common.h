@@ -128,7 +128,7 @@ void Extrae_cudaEventRecord_Enter(cudaEvent_t, cudaStream_t, CUcontext);
 void Extrae_cudaEventRecord_Exit(void);
 void Extrae_cudaEventSynchronize_Enter(cudaEvent_t);
 void Extrae_cudaEventSynchronize_Exit(void);
-void Extrae_cudaStreamWaitEvent_Enter(void);
+void Extrae_cudaStreamWaitEvent_Enter(cudaEvent_t event);
 void Extrae_cudaStreamWaitEvent_Exit(void);
 void Extrae_cudaStreamCreate_Enter(void);
 void Extrae_cudaStreamCreate_Exit(void);

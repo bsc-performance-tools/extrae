@@ -612,7 +612,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaStreamWaitEvent_v3020_params *)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamWaitEvent_Enter();
+				Extrae_cudaStreamWaitEvent_Enter(p->event);
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 				Extrae_cudaStreamWaitEvent_Exit();
 
