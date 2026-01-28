@@ -143,7 +143,7 @@
                     ARGS(entry_probe_args),                                     \
                     CODE_BEFORE_REAL_SYMBOL(Backend_Leave_Instrumentation();),  \
                     ARGS(real_symbol_args),                                     \
-                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation()),    \
+                    CODE_BEFORE_EXIT_PROBE(Backend_Enter_Instrumentation();),   \
                     ARGS(exit_probe_args),                                      \
                     NOOP_AFTER_EXIT_PROBE )
 
