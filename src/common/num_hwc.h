@@ -27,17 +27,21 @@
 #include <config.h>
 
 /* This should be done automatically by configure! */
-#if defined(HETEROGENEOUS_SUPPORT)
-# define MAX_HWC 8
+#if defined(CONFIG_MAX_HWC)
+# define MAX_HWC CONFIG_MAX_HWC
 #else
-# if defined(IS_BGL_MACHINE)
-#  define MAX_HWC 8
-# elif defined (ARCH_IA64)
-#  define MAX_HWC 8
-# elif defined (ARCH_PPC)
+# if defined(HETEROGENEOUS_SUPPORT)
 #  define MAX_HWC 8
 # else
-#  define MAX_HWC 8
+#  if defined(IS_BGL_MACHINE)
+#   define MAX_HWC 8
+#  elif defined (ARCH_IA64)
+#   define MAX_HWC 8
+#  elif defined (ARCH_PPC)
+#   define MAX_HWC 8
+#  else
+#   define MAX_HWC 8
+#  endif
 # endif
 #endif
 

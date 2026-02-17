@@ -987,6 +987,23 @@ AC_DEFUN([AX_PROG_PAPI],
       [papi_paths="not_set"] dnl List of possible default paths
    )
 
+   if test "${papi_paths}" != "no" -a "${papi_paths}" != "not_set"; then
+      AC_ARG_WITH(max-hwc,
+        AC_HELP_STRING(
+	   [--with-max-hwc@<:@=ARG@:@],
+	   [specify the maximum number of hardware counters in an event record.]
+	),
+	[max_hwc="${withval}"],
+	[max_hwc=8]
+      )
+   fi
+   
+   if test "${max_hwc}" -gt 8; then
+      max_hwc=8
+   fi
+      
+   AC_DEFINE_UNQUOTED([CONFIG_MAX_HWC], [${max_hwc}], [Maximum number of hardware counters in a record.])
+
    if test "${IS_SPARC64_MACHINE}" = "yes" ; then
       if test -z "${papi_paths}" ; then
          AC_MSG_ERROR([Error PAPI was not found but was enabled at configure time!])
