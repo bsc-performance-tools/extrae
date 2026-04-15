@@ -431,8 +431,7 @@ void xtr_burst_parallel_OL_exit()
  */
 void xtr_burst_finalize (void)
 {
-  if( !burst_initialized )
-    return;
+  if( !burst_initialized ) return;
 
   burst_initialized = FALSE;
 
@@ -442,7 +441,7 @@ void xtr_burst_finalize (void)
     {
       trace_statistics(stats_at_last_traced, stats_at_burst_begin, delta_stats, threadid, burst_info[threadid].last_traced_region == PARALLEL_REGION, burst_info[threadid].last_traced_time, burst_info[threadid].burst_begin_time);
 
-      TRACE_EVENTAND_ACCUMULATEDCOUNTERS(burst_info[threadid].burst_begin_time, CPU_BURST_EV, EVT_BEGIN);
+      THREAD_TRACE_EVENTAND_ACCUMULATEDCOUNTERS(threadid, burst_info[threadid].burst_begin_time, CPU_BURST_EV, EVT_END);
       ACCUMULATED_COUNTERS_RESET(threadid);
     }
   }
@@ -474,8 +473,12 @@ void xtr_burst_emit_statistics (void)
     {
       trace_statistics(stats_at_last_traced, stats_at_burst_begin, delta_stats, threadid, burst_info[threadid].last_traced_region == PARALLEL_REGION, burst_info[threadid].last_traced_time, burst_info[threadid].burst_begin_time);
 
-      TRACE_EVENTAND_ACCUMULATEDCOUNTERS(burst_info[threadid].burst_begin_time, CPU_BURST_EV, EVT_BEGIN);
+      THREAD_TRACE_EVENTAND_ACCUMULATEDCOUNTERS(threadid, burst_info[threadid].burst_begin_time, CPU_BURST_EV, EVT_END);
       ACCUMULATED_COUNTERS_RESET(threadid);
+
+      burst_info[threadid].last_traced_region = BURST_REGION;
+      burst_info[threadid].last_traced_time = burst_info[threadid].burst_begin_time;
+      xtr_stats_copyto(stats_at_burst_begin, stats_at_last_traced); 
     }
   }
 }

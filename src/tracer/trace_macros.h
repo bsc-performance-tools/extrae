@@ -235,6 +235,19 @@
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);       \
 	} \
 }
+
+#define THREAD_TRACE_EVENTAND_ACCUMULATEDCOUNTERS(thread_id, evttime, evttype, evtvalue) \
+{ \
+	event_t evt;                                                      \
+	if (tracejant && TracingBitmap[TASKID] )                          \
+	{                                                                 \
+		COPY_ACCUMULATED_COUNTERS_HERE(thread_id, evt);                 \
+		evt.time = evttime;                                             \
+		evt.event = evttype;                                            \
+		evt.value = evtvalue;                                           \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);       \
+	}                                                                 \
+}
 #else
 #define TRACE_EVENTANDCOUNTERS(evttime,evttype,evtvalue,hwc_filter) \
 	{ \
@@ -244,6 +257,18 @@
 #define TRACE_EVENTAND_ACCUMULATEDCOUNTERS(evttime,evttype,evtvalue) \
 	{ \
 		TRACE_EVENT(evttime,evttype,evtvalue); \
+	}
+
+#define THREAD_TRACE_EVENTAND_ACCUMULATEDCOUNTERS(thread_id, evttime, evttype, evtvalue) \
+	{ \
+		event_t evt; \
+		if (tracejant && TracingBitmap[TASKID]) \
+		{ \
+			evt.time = evttime; \
+			evt.event = evttype; \
+			evt.value = evtvalue; \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+		} \
 	}
 #endif
 
