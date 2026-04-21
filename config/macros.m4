@@ -996,13 +996,13 @@ AC_DEFUN([AX_PROG_PAPI],
 	[max_hwc="${withval}"],
 	[max_hwc=8]
       )
-   fi
-   
-   if test "${max_hwc}" -gt 8; then
-      max_hwc=8
-   fi
+
+      if test "${max_hwc}" -gt 8; then
+         max_hwc=8
+      fi
       
-   AC_DEFINE_UNQUOTED([CONFIG_MAX_HWC], [${max_hwc}], [Maximum number of hardware counters in a record.])
+      AC_DEFINE_UNQUOTED([CONFIG_MAX_HWC], [${max_hwc}], [Maximum number of hardware counters in a record.])
+   fi
 
    if test "${IS_SPARC64_MACHINE}" = "yes" ; then
       if test -z "${papi_paths}" ; then
