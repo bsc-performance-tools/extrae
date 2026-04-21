@@ -998,16 +998,19 @@ static int Extrae_IntelPEBS_enable (void)
 	owner.type = F_OWNER_TID;
 	owner.pid = syscall(SYS_gettid);
 
+	int aux_fd = -1;
+
 	if (PEBS_load_enabled && get_latency_load_event (&hwc) >= 0)
 	{
-		int aux_fd = -1;
 		struct perf_event_attr pe_aux;
 		xmemset (&pe_aux, 0, sizeof(struct perf_event_attr));
 		xmemset (&pe, 0, sizeof(struct perf_event_attr));
 
 		if (detect_processor() == PROCESSOR_SAPPHIRERAPIDS)
 		{
-			/*
+			/* 
+			 * MareNostrum 5
+			 *
 			 * In Sapphire Rapids, the load latency event requires an auxiliary event 0x8203
 			 * See: https://github.com/torvalds/linux/blob/master/arch/x86/events/intel/core.c
 			 *
@@ -1016,12 +1019,15 @@ static int Extrae_IntelPEBS_enable (void)
 			pe_aux.type = PERF_TYPE_RAW;
 			pe_aux.size = sizeof(struct perf_event_attr);
 			pe_aux.config = 0x8203;
-			pe_aux.sample_type = PERF_SAMPLE_IP|PERF_SAMPLE_TID|PERF_SAMPLE_TIME|PERF_SAMPLE_ADDR|PERF_SAMPLE_ID|PERF_SAMPLE_PERIOD|PERF_SAMPLE_DATA_SRC|PERF_SAMPLE_WEIGHT_STRUCT;
-			pe_aux.read_format = PERF_FORMAT_ID; /* |PERF_FORMAT_LOST */
+			pe_aux.sample_type = LOAD_SAMPLE_TYPE;		
 			pe_aux.disabled = 1;
-			pe_aux.inherit = 1;
+			pe_aux.inherit = 0;
 			pe_aux.mmap = 1;
-			pe_aux.comm = 1;
+			pe_aux.precise_ip = 3; /* must have 0 skid */
+			pe_aux.mmap_data = 1;
+			pe_aux.exclude_guest = 1;
+			pe_aux.mmap2 = 1;
+			pe_aux.enable_on_exec = 0;		
 			if (PEBS_load_operates_in_frequency_mode)
 			{
 				pe_aux.freq = 1;
@@ -1032,36 +1038,24 @@ static int Extrae_IntelPEBS_enable (void)
 				pe_aux.freq = 0;
 				pe_aux.sample_period = PEBS_load_period;
 			}
-			pe_aux.enable_on_exec = 1;
-			pe_aux.task = 1;
-			pe_aux.precise_ip = 3; /* must have 0 skid */
-			pe_aux.mmap_data = 1;
-			pe_aux.sample_id_all = 1;
-			pe_aux.exclude_guest = 1;
-			pe_aux.mmap2 = 1;
-			pe_aux.comm_exec = 1;
-			pe_aux.ksymbol = 1;
-			pe_aux.bpf_event = 1;
 
 			aux_fd = perf_event_open (&pe_aux, 0, -1, -1, PERF_FLAG_FD_CLOEXEC);
-			
-			if (aux_fd == -1)
-			{
+			if (aux_fd < 0) {
 				fprintf (stderr, PACKAGE_NAME": Cannot open the auxiliary event 0x%x in front of the load latency event\n", pe_aux.config);
-				perror("perf_event_open");
+				return -1;
 			}
 
 			pe.type = PERF_TYPE_RAW;
 			pe.size = sizeof(struct perf_event_attr);
-			pe.config = 0x1cd; /* XXX: Not clear how to select the threshold latency.
-					    * "perf list" shows variants of the event with an implicit threshold: 
-					    * mem_trans_retired.load_latency_gt_[4|8|16|32|64|128|256|512]
-					    * Does the event code change depending on the specific event?
-					    * Or the latency threshold is set in a field of perf_event_attr structure (e.g., pe.config1?) 
-					    */
-			pe.sample_type = PERF_SAMPLE_IP|PERF_SAMPLE_TID|PERF_SAMPLE_TIME|PERF_SAMPLE_ADDR|PERF_SAMPLE_ID|PERF_SAMPLE_PERIOD|PERF_SAMPLE_DATA_SRC|PERF_SAMPLE_WEIGHT_STRUCT;
-			pe.read_format = PERF_FORMAT_ID; /* |PERF_FORMAT_LOST */
-			pe.inherit = 1;
+			pe.config = 0x1cd;
+			pe.sample_type = LOAD_SAMPLE_TYPE;
+			pe.disabled = 1;
+			pe.inherit = 0;
+			pe.mmap = 1;
+			pe.precise_ip = 2; /* requested to have 0 skid */
+			pe.exclude_guest = 1;
+			pe.mmap2 = 1;
+			pe.enable_on_exec = 0;	
 			if (PEBS_load_operates_in_frequency_mode)
 			{
 				pe.freq = 1;
@@ -1072,13 +1066,10 @@ static int Extrae_IntelPEBS_enable (void)
 				pe.freq = 0;
 				pe.sample_period = PEBS_load_period;
 			}
-			pe.precise_ip = 2; /* requested to have 0 skid */
-			pe.sample_id_all = 1;
-			pe.exclude_guest = 1;
 		}
 		else 
 		{
-			// Former setup prior to MN5
+			// MareNostrum 4 and before
 			pe.config = hwc;
 			pe.type = PERF_TYPE_RAW;
 			pe.config1 = PEBS_minimumLoadLatency;
@@ -1102,7 +1093,7 @@ static int Extrae_IntelPEBS_enable (void)
 			}
 		}	
 
-		group_fd[thread_id] = perf_pebs_fd[thread_id][LOAD_INDEX] = perf_event_open (&pe, 0, -1, aux_fd, 0);
+		group_fd[thread_id] = perf_pebs_fd[thread_id][LOAD_INDEX] = perf_event_open (&pe, 0, -1, aux_fd, (aux_fd != -1 ? PERF_FLAG_FD_CLOEXEC : 0));
 		if (perf_pebs_fd[thread_id][LOAD_INDEX] < 0)
 		{
 			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for loads\n");
@@ -1110,7 +1101,7 @@ static int Extrae_IntelPEBS_enable (void)
 		}
 
 		extrae_intel_pebs_mmap[thread_id][LOAD_INDEX] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
-		  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[thread_id][LOAD_INDEX], 0);
+			PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[thread_id][LOAD_INDEX], 0);
 		if (extrae_intel_pebs_mmap[thread_id][LOAD_INDEX] == MAP_FAILED)
 		{
 			fprintf (stderr, PACKAGE_NAME": Cannot mmap for load events\n");
@@ -1274,11 +1265,28 @@ static int Extrae_IntelPEBS_enable (void)
 	// Start sampling on the given counter -- which is a group leader.
 	if (!_PEBS_sampling_paused)
 	{
-		ret = ioctl (group_fd[thread_id], PERF_EVENT_IOC_REFRESH, 1);
-		if (ret < 0)
+		if (aux_fd != -1) 
 		{
-			fprintf (stderr, PACKAGE_NAME": Cannot enable the PEBS sampling file descriptor\n");
-			return -1;
+			// MareNostrum 5
+			if (ioctl(aux_fd, PERF_EVENT_IOC_RESET, PERF_IOC_FLAG_GROUP) == -1)
+			{
+				fprintf(stderr, PACKAGE_NAME": PERF_EVENT_IOC_RESET failed on fd %d: %s\n", aux_fd, strerror(errno));
+				return -1;
+			}
+			if (ioctl(aux_fd, PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP) == -1)
+			{
+				fprintf(stderr, PACKAGE_NAME": PERF_EVENT_IOC_ENABLE failed on fd %d: %s\n", aux_fd, strerror(errno));
+				return -1;
+			}
+		}
+		else
+		{
+			// MareNostrum 4 and before
+			if (ioctl (group_fd[thread_id], PERF_EVENT_IOC_REFRESH, 1) == -1)
+			{
+				fprintf (stderr, PACKAGE_NAME": PERF_EVENT_IOC_REFRESH failed on fd %d: %s\n", group_fd[thread_id], strerror(errno));
+				return -1;
+			}
 		}
 	}
 
