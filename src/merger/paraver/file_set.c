@@ -78,6 +78,7 @@
 #include "trace_to_prv.h"
 #include "communication_queues.h"
 #include "intercommunicators.h"
+#include "options.h"
 
 #define EVENTS_FOR_NUM_GLOBAL_OPS(x) \
   IsMPICollective(x)
@@ -910,53 +911,95 @@ paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset)
 	paraver_rec_t *minimum = NULL, *current = NULL;
 	PRVFileItem_t *sfile;
 	unsigned int fminimum = 0, i;
-	
-	/* Check if we have to reload any files */
-	for (i = 0; i < fset->nfiles; i++)
-		if (fset->files[i].current_p == fset->files[i].last_mapped_p)
-			if (fset->files[i].remaining_records > 0)
+
+	if (get_option_merge_SortTrace() == FALSE)
+	{
+		/* Reads records file by file in blocks without sorting them */
+		PRVFileItem_t *minimum_sfile;
+
+		for (i = 0; i < fset->nfiles; i++)
+		{
+			sfile = &(fset->files[i]);
+			if (sfile->remaining_records == -1)
 			{
-#if defined(PARALLEL_MERGE)
-				/* This can only happen for task = 0 and parallel merger */
-				if (fset->files[i].type == REMOTE)
-					Read_PRV_RemoteFile (&(fset->files[i]));
-				else
-#endif
-					Read_PRV_LocalFile (&(fset->files[i]), fset->records_per_block);
+				continue;
 			}
 
-	for (i = 0; i < fset->nfiles; i++)
-	{
-		sfile = &(fset->files[i]);
-
-		current = (sfile->current_p == sfile->last_mapped_p) ? NULL : sfile->current_p;
-
-		if (!(minimum) && current)
-		{
-			minimum = current;
-			fminimum = i;
+			if (sfile->current_p == sfile->last_mapped_p)
+			{
+				if (sfile->remaining_records == 0)
+				{
+					sfile->remaining_records = -1;
+					continue;
+				}
+				/* If we still have records to read, load a new block */
+# if defined(PARALLEL_MERGE)
+				if (fset->files[i].type == REMOTE)
+				{
+					Read_PRV_RemoteFile(sfile);
+				} else
+# endif // PARALLEL_MERGE
+				{
+					Read_PRV_LocalFile(sfile, fset->records_per_block);
+				}
+			}
+			current=sfile->current_p;
+			minimum=sfile->current_p;
+			minimum_sfile=sfile;
+			break;
 		}
-		else if (minimum && current)
+		if (!minimum) return NULL;
+
+		minimum_sfile->current_p++;
+	} else
+	{
+		/* Check if we still have records to read or we do have to request a new block */
+		for (i = 0; i < fset->nfiles; i++)
+			if (fset->files[i].current_p == fset->files[i].last_mapped_p)
+				if (fset->files[i].remaining_records > 0)
+				{
+#if defined(PARALLEL_MERGE)
+					/* This can only happen for task = 0 and parallel merger */
+					if (fset->files[i].type == REMOTE)
+						Read_PRV_RemoteFile (&(fset->files[i]));
+					else
+#endif
+						Read_PRV_LocalFile (&(fset->files[i]), fset->records_per_block);
+				}
+		/* Sort records along all files by minimum time */
+		for (i = 0; i < fset->nfiles; i++)
 		{
-			if (minimum->time > current->time)
+			sfile = &(fset->files[i]);
+
+			current = (sfile->current_p == sfile->last_mapped_p) ? NULL : sfile->current_p;
+
+			if (!(minimum) && current)
 			{
 				minimum = current;
 				fminimum = i;
 			}
-			else if (minimum->time == current->time)
+			else if (minimum && current)
 			{
-				if (minimum->type < current->type)
+				if (minimum->time > current->time)
 				{
 					minimum = current;
 					fminimum = i;
 				}
+				else if (minimum->time == current->time)
+				{
+					if (minimum->type < current->type)
+					{
+						minimum = current;
+						fminimum = i;
+					}
+				}
 			}
 		}
-	}
 
 	sfile = &(fset->files[fminimum]);
 	if (sfile->current_p != sfile->last_mapped_p)
 		sfile->current_p++;
+	}
 
 	return minimum;
 }

@@ -962,6 +962,16 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			set_option_merge_TranslateDataAddresses(FALSE);
 			continue;
 		}
+		if (!strcmp (argv[CurArg], "-sort-trace"))
+		{
+			set_option_merge_SortTrace(TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-sort-trace"))
+		{
+			set_option_merge_SortTrace(FALSE);
+			continue;
+		}
 		if (!strcmp (argv[CurArg], "--"))
 		{
 			if (!found_SYM_for_current_ptask && found_MPITS_for_current_ptask && rank == 0)

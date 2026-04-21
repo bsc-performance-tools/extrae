@@ -132,6 +132,9 @@ void set_option_merge_EmitLibraryEvents (int b);
 int get_option_merge_TranslateDataAddresses(void);
 void set_option_merge_TranslateDataAddresses(int b);
 
+int get_option_merge_SortTrace(void);
+void set_option_merge_SortTrace(int b);
+
 void set_option_merge_OutputIsGzip(unsigned short v);
 unsigned short get_option_merge_OutputIsGzip(void);
 

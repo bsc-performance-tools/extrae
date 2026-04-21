@@ -144,6 +144,10 @@ static int option_merge_TranslateDataAddresses = TRUE;
 int get_option_merge_TranslateDataAddresses(void) { return option_merge_TranslateDataAddresses; }
 void set_option_merge_TranslateDataAddresses(int b) { option_merge_TranslateDataAddresses = b; }
 
+static int option_merge_SortTrace = TRUE;
+int get_option_merge_SortTrace(void) { return option_merge_SortTrace; }
+void set_option_merge_SortTrace(int b) { option_merge_SortTrace = b; }
+
 static unsigned short merge_OutputIsGzip = 0;
 void set_option_merge_OutputIsGzip (unsigned short v) { merge_OutputIsGzip = v; }
 unsigned short get_option_merge_OutputIsGzip (void) { return merge_OutputIsGzip; }
