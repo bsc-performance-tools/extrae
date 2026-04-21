@@ -95,6 +95,33 @@ static unsigned GetCUDACommTag()
 static struct DeviceInfo_t *deviceArray = NULL;
 static int deviceCount = 0;
 
+static char* get_CUDA_uuid(unsigned int device_id)
+{
+	int pos = 0;
+	struct cudaDeviceProp CUDAprop;
+
+	cudaGetDeviceProperties(&CUDAprop, device_id);
+#if defined(USE_FULL_GPU_UUID)
+	char uuid_str[37]; // 32 chars for the device uuid + 4 dashes + \0
+	for (int i = 0; i < 16; i++) // Use all 16 bytes
+#else
+	char uuid_str[9]; // First 4 bytes of the device UUID + \0
+	for (int i = 0; i < 4; i ++) // We only use the first 4 bytes
+#endif
+	{
+		pos += snprintf(uuid_str + pos, sizeof(uuid_str) - pos, "%02x", (unsigned char)CUDAprop.uuid.bytes[i]);
+#if defined(USE_FULL_GPU_UUID)
+		/* No need to add dashes if we only print the first 4 bytes */
+		if (i == 3 || i == 5 || i == 7 || i == 9)
+		{
+			pos += snprintf(uuid_str + pos, sizeof(uuid_str) - pos, "-");
+		}
+#endif
+	}
+
+	return strdup(uuid_str);
+}
+
 static void SynchronizeStream(int device_id, int stream_idx)
 {
 	if (device_id >= deviceCount)
@@ -144,14 +171,14 @@ static int SearchAndRegisterStream(int device_id, cudaStream_t stream, int regis
 
 		for (i = 0; i < deviceCount; i++)
 		{
-            deviceArray[i].initialized = FALSE;
-            deviceArray[i].streams = NULL;
-            deviceArray[i].num_streams = 0;
-        }
-        /* Register finalization once, at process exit */
-        atexit(Extrae_CUDA_finalize);
-        cudaInitialized = 1;
-    }
+			deviceArray[i].initialized = FALSE;
+			deviceArray[i].streams = NULL;
+			deviceArray[i].num_streams = 0;
+		}
+		/* Register finalization once, at process exit */
+		atexit(Extrae_CUDA_finalize);
+		cudaInitialized = 1;
+	}
 
 	/* Initialize per-device structures on first use */
 	if (!deviceArray[device_id].initialized){
@@ -197,20 +224,15 @@ static int SearchAndRegisterStream(int device_id, cudaStream_t stream, int regis
 		StreamArray[stream_idx].stream_id = unique_stream_id;
 		gpuEventList_init(&StreamArray[stream_idx].gpu_event_list, FALSE, XTR_CUDA_EVENTS_BLOCK_SIZE);
 
+		char *uuid_str = get_CUDA_uuid(device_id);
 #ifdef DEBUG
-		fprintf(stderr, "Extrae_CUDA_RegisterStream(device_id=%d, stream=%p assigned to stream_idx => %d\n", device_id, stream, stream_idx);
+		fprintf(stderr, "Extrae_CUDA_RegisterStream(device_uuid=%s, stream=%p assigned to stream_idx => %d\n", uuid_str, stream, stream_idx);
 #endif
 		/* Assign a descriptive name to the thread associated with this stream */
-		{
-			char _threadname[THREAD_INFO_NAME_LEN];
-			char _hostname[HOST_NAME_MAX];
+		char _threadname[THREAD_INFO_NAME_LEN];
 
-			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-				sprintf(_threadname, "CUDA-D%d.S%d-%s", device_id+1, stream_idx+1, _hostname);
-			else
-				sprintf(_threadname, "CUDA-D%d.S%d-%s", device_id+1, stream_idx+1, "unknown-host");
-			Extrae_set_thread_name(StreamArray[stream_idx].thread_id, _threadname);
-		}
+		sprintf(_threadname, "GPU %s.%d", uuid_str, stream_idx+1);
+		Extrae_set_thread_name(StreamArray[stream_idx].thread_id, _threadname);
 
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
@@ -226,6 +248,9 @@ static int SearchAndRegisterStream(int device_id, cudaStream_t stream, int regis
 			TRACING_MODE_EV, TRACE_MODE_DETAIL, 0);
 
 		Probe_Cuda_StreamRegister_Exit();
+
+		free(uuid_str);
+		
 		return stream_idx;
 	}
 	/* streams not found and registration was not requested */
