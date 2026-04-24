@@ -42,7 +42,6 @@ struct HWC_Set_t
     pm_prog_t pmprog;
     int group;
 #endif
-    int counters[MAX_HWC];
     int num_counters;
     unsigned long long change_at;
     enum ChangeType_t change_type;
@@ -51,6 +50,7 @@ struct HWC_Set_t
     int *OverflowCounter;
     int NumOverflows;
 #endif
+    int counters[MAX_HWC];
 };
 
 // Define a safe default if PAPI is not available
