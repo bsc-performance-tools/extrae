@@ -24,7 +24,7 @@
 #ifndef __NUM_HWC_H__
 #define __NUM_HWC_H__
 
-#include <config.h>
+#include "config.h"
 
 /* This should be done automatically by configure! */
 #if defined(CONFIG_MAX_HWC)

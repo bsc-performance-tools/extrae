@@ -54,7 +54,9 @@ src/tracer/sampling/common/Makefile.in
 src/tracer/sampling/intel-pebs/Makefile.in
 src/tracer/sampling/timer/Makefile.in
 src/tracer/stats/Makefile.in
+src/tracer/wrappers/GPU/Makefile.in
 src/tracer/wrappers/CUDA/Makefile.in
+src/tracer/wrappers/HIP/Makefile.in
 src/tracer/wrappers/IO/Makefile.in
 src/tracer/wrappers/JAVA/Makefile.in
 src/tracer/wrappers/MALLOC/Makefile.in

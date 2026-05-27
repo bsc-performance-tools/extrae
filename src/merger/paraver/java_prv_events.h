@@ -24,7 +24,7 @@
 #ifndef JAVA_PRV_EVENTS_H
 #define JAVA_PRV_EVENTS_H
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

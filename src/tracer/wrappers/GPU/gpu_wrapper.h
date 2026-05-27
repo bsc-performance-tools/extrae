@@ -21,10 +21,14 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef CUDA_WRAPPER_H_
-#define CUDA_WRAPPER_H_
+#ifndef GPU_WRAPPER_H_
+#define GPU_WRAPPER_H_
 
-void Extrae_CUDA_init (int rank);
+#if defined(CUDA_SUPPORT)
+void Extrae_CUDA_init(int rank);
+#elif defined(HIP_SUPPORT)
+void Extrae_HIP_init(int rank);
+#endif
 
 #endif
 

@@ -24,7 +24,7 @@
 #ifndef __ADDR2INFO_H__
 #define __ADDR2INFO_H__
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

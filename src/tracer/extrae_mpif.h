@@ -26,7 +26,7 @@
 
 #if defined(FORTRAN_SYMBOLS)
 
-#include <config.h>
+#include "config.h"
 
 #include "defines.h"
 

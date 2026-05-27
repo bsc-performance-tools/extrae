@@ -28,7 +28,7 @@
 # error "This should not be included"
 #endif
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_MPI_H
 # include <mpi.h>

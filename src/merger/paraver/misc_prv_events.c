@@ -23,7 +23,7 @@
 
 #include "common.h"
 
-#include <config.h>
+#include "config.h"
 
 #if defined(HAVE_STDLIB_H)
 # include <stdlib.h>

@@ -24,7 +24,7 @@
 #ifndef _FILE_SET_H
 #define _FILE_SET_H
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

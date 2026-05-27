@@ -72,15 +72,19 @@ HIP_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 			state = STATE_CONFACCEL;
 			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
-		case HIPSTREAMBARRIER_VAL:
+		case HIPSTREAMSYNCHRONIZE_VAL:
 		case HIPTHREADBARRIER_VAL:
 		case HIPEVENTSYNCHRONIZE_VAL:
+		case HIPSTREAMWAITEVENT_VAL:
 			state = STATE_BARRIER;
 			Switch_State(state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
 		case HIPMEMCPY_VAL:
+		case HIPMEMCPYFROMSYMBOL_VAL:
+		case HIPMEMCPYTOSYMBOL_VAL:
 		case HIPMEMCPYASYNC_VAL:
 		case HIPMEMSET_VAL:
+		case HIPMEMSETASYNC_VAL:
 			state = STATE_MEMORY_XFER;
 			Switch_State (state, (EvMisc != EVT_END), ptask, task, thread);
 			break;
@@ -88,6 +92,8 @@ HIP_Call(event_t *event, unsigned long long current_time, unsigned int cpu,
 		case HIPMALLOCPITCH_VAL:
 		case HIPFREE_VAL:
 		case HIPMALLOCARRAY_VAL:
+		case HIPMALLOC3D_VAL:
+		case HIPMALLOC3DARRAY_VAL:
 		case HIPFREEARRAY_VAL:
 		case HIPMALLOCHOST_VAL:
 		case HIPFREEHOST_VAL:
@@ -196,6 +202,8 @@ HIP_GPU_Call (event_t *event, unsigned long long current_time,
 			break;
 		case HIPMEMCPYASYNC_GPU_VAL:
 		case HIPMEMCPY_GPU_VAL:
+		case HIPMEMCPYTOSYMBOL_GPU_VAL:
+		case HIPMEMCPYFROMSYMBOL_GPU_VAL:
 			state = STATE_MEMORY_XFER;
 			Switch_State (state, (beginEV != EVT_END), ptask, task, thread);
 			break;
@@ -213,7 +221,8 @@ HIP_GPU_Call (event_t *event, unsigned long long current_time,
 	 * don't emit this event so the region is marked as Useful.
 	 * XXX
 	 */
-	if (EvValue == HIPMEMCPY_GPU_VAL || EvValue == HIPMEMCPYASYNC_GPU_VAL)
+	if (EvValue == HIPMEMCPY_GPU_VAL || EvValue == HIPMEMCPYASYNC_GPU_VAL ||
+		EvValue == HIPMEMCPYTOSYMBOL_GPU_VAL || EvValue == HIPMEMCPYFROMSYMBOL_GPU_VAL)
 	{
 		trace_paraver_event(cpu, ptask, task, thread, current_time, HIP_MEMORY_TRANSFER, (beginEV != EVT_END) ? EvValue : EVT_END);
 		if(beginEV != EVT_END)
@@ -225,6 +234,21 @@ HIP_GPU_Call (event_t *event, unsigned long long current_time,
 	return 0;
 }
 
+static int
+HIP_StreamRegister_Event(event_t *event, unsigned long long current_time,
+    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+    FileSet_t *fset)
+{
+	/* Get EVT_BEGIN or EVT_END */
+	UINT64 EvValue = Get_EvValue(event); 
+	UNREFERENCED_PARAMETER(fset);
+
+	Switch_State(STATE_STREAM_REGISTER, (EvValue == EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state(cpu, ptask, task, thread, current_time);
+	return 0;
+}
+
 SingleEv_Handler_t PRV_HIP_Event_Handlers[] = {
 	/* Host calls */
 	{ HIPCALL_EV, HIP_Call },
@@ -232,8 +256,10 @@ SingleEv_Handler_t PRV_HIP_Event_Handlers[] = {
 	{ HIP_KERNEL_INST_EV, HIP_Kernel_Inst_Event },
 	{ HIP_DYNAMIC_MEM_PTR_EV, HIP_Punctual_Event },
 	{ HIP_DYNAMIC_MEM_SIZE_EV, HIP_Punctual_Event },
-	{ HIPSTREAMBARRIER_THID_EV, HIP_Punctual_Event },
+	{ HIP_STREAM_DEST_ID_EV, HIP_Punctual_Event },
+	{ HIPEVENT_ID_EV, HIP_Punctual_Event },
 	{ HIP_UNTRACKED_EV, HIP_Punctual_Event },
+	{ HIP_STREAM_REGISTER_EV, HIP_StreamRegister_Event },
 	/* Accelerator calls */
 	{ HIPCALLGPU_EV, HIP_GPU_Call },
 	{ NULL_EV, NULL }

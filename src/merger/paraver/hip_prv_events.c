@@ -38,8 +38,10 @@ enum {
 	HIPLAUNCH_INDEX,
 	HIPCONFIGCALL_INDEX,
 	HIPMEMCPY_INDEX,
+	HIPMEMCPYTOSYMBOL_INDEX,
+	HIPMEMCPYFROMSYMBOL_INDEX,
 	HIPTHREADBARRIER_INDEX,
-	HIPSTREAMBARRIER_INDEX,
+	HIPSTREAMSYNCHRONIZE_INDEX,
 	HIPMEMCPYASYNC_INDEX,
 	HIPTHREADEXIT_INDEX,
 	HIPDEVICERESET_INDEX,
@@ -48,9 +50,12 @@ enum {
 	HIPMALLOC_INDEX,
 	HIPHOSTALLOC_INDEX,
 	HIPMEMSET_INDEX,
+	HIPMEMSETASYNC_INDEX,
 	HIPEVENTRECORD_INDEX,
 	HIPEVENTSYNCHRONIZE_INDEX,
+	HIPSTREAMWAITEVENT_INDEX,
 	HIPUNTRACKED_INDEX,
+	HIPSTREAMREGISTER_INDEX,
 	MAX_HIP_INDEX
 };
 
@@ -67,8 +72,12 @@ void Enable_HIP_Operation (INT32 type, UINT64 value)
 			inuse[HIPLAUNCH_INDEX] = TRUE;
 		else if (value == HIPMEMCPY_VAL || value == HIPMEMCPY_GPU_VAL)
 			inuse[HIPMEMCPY_INDEX] = TRUE;
-		else if (value == HIPSTREAMBARRIER_VAL)
-			inuse[HIPSTREAMBARRIER_INDEX] = TRUE;
+		else if (value == HIPMEMCPYTOSYMBOL_VAL || value == HIPMEMCPY_GPU_VAL)
+			inuse[HIPMEMCPYTOSYMBOL_INDEX] = TRUE;
+		else if (value == HIPMEMCPYFROMSYMBOL_VAL || value == HIPMEMCPY_GPU_VAL)
+			inuse[HIPMEMCPYFROMSYMBOL_INDEX] = TRUE;
+		else if (value == HIPSTREAMSYNCHRONIZE_VAL)
+			inuse[HIPSTREAMSYNCHRONIZE_INDEX] = TRUE;
 		else if (value == HIPTHREADBARRIER_VAL)
 			inuse[HIPTHREADBARRIER_INDEX] = TRUE;
 		else if (value == HIPCONFIGCALL_VAL || value == HIPCONFIGKERNEL_GPU_VAL)
@@ -85,6 +94,7 @@ void Enable_HIP_Operation (INT32 type, UINT64 value)
 			inuse[HIPSTREAMDESTROY_INDEX] = TRUE;
 		else if (value == HIPMALLOC_VAL || value == HIPMALLOCPITCH_VAL ||
 			value == HIPFREE_VAL || value == HIPMALLOCARRAY_VAL ||
+			value == HIPMALLOC3D_VAL || value == HIPMALLOC3DARRAY_VAL ||
 			value == HIPFREEARRAY_VAL || value == HIPMALLOCHOST_VAL ||
 			value == HIPFREEHOST_VAL)
 			inuse[HIPMALLOC_INDEX] = TRUE;
@@ -92,10 +102,16 @@ void Enable_HIP_Operation (INT32 type, UINT64 value)
 			inuse[HIPHOSTALLOC_INDEX] = TRUE;
 		else if (value == HIPMEMSET_VAL)
 			inuse[HIPMEMSET_INDEX] = TRUE;
+		else if (value == HIPMEMSETASYNC_VAL)
+			inuse[HIPMEMSETASYNC_INDEX] = TRUE;
 		else if (value == HIPEVENTRECORD_VAL)
 			inuse[HIPEVENTRECORD_INDEX] = TRUE;
 		else if (value == HIPEVENTSYNCHRONIZE_VAL)
 			inuse[HIPEVENTSYNCHRONIZE_INDEX] = TRUE;
+		else if (value == HIPSTREAMWAITEVENT_VAL)
+			inuse[HIPSTREAMWAITEVENT_INDEX] = TRUE;
+		else if (value == HIP_STREAM_REGISTER_EV)
+			inuse[HIPSTREAMREGISTER_INDEX] = TRUE;
 		}
 }
 
@@ -144,10 +160,10 @@ void HIPEvent_WriteEnabledOperations (FILE * fd)
 			fprintf (fd, "%d hipMemcpy\n", HIPMEMCPY_VAL);
 
 		if (inuse[HIPTHREADBARRIER_INDEX])
-			fprintf (fd, "%d hipThreadSynchronize/hipDeviceSynchronize\n", HIPTHREADBARRIER_VAL);
+			fprintf (fd, "%d hipDeviceSynchronize\n", HIPTHREADBARRIER_VAL);
 
-		if (inuse[HIPSTREAMBARRIER_INDEX])
-			fprintf (fd, "%d hipStreamSynchronize\n", HIPSTREAMBARRIER_VAL);
+		if (inuse[HIPSTREAMSYNCHRONIZE_INDEX])
+			fprintf (fd, "%d hipStreamSynchronize\n", HIPSTREAMSYNCHRONIZE_VAL);
 
 		if (inuse[HIPMEMCPYASYNC_INDEX])
 			fprintf (fd, "%d hipMemcpyAsync\n", HIPMEMCPYASYNC_VAL);
@@ -173,14 +189,24 @@ void HIPEvent_WriteEnabledOperations (FILE * fd)
 			fprintf(fd, "%d hipFreeArray\n", HIPFREEARRAY_VAL);
 			fprintf(fd, "%d hipMallocHost\n", HIPMALLOCHOST_VAL);
 			fprintf(fd, "%d hipFreeHost\n", HIPFREEHOST_VAL);
+			fprintf(fd, "%d hipMalloc3D\n", HIPMALLOC3D_VAL);
+			fprintf(fd, "%d hipMalloc3DArray\n", HIPMALLOC3DARRAY_VAL);
 		}
 
 		if (inuse[HIPHOSTALLOC_INDEX])
 			fprintf(fd, "%d hipHostAlloc\n", HIPHOSTALLOC_VAL);
 
+		if (inuse[HIPMEMCPYTOSYMBOL_INDEX])
+			fprintf (fd, "%d hipMemcpyToSymbol\n", HIPMEMCPYTOSYMBOL_VAL);
+
+		if (inuse[HIPMEMCPYFROMSYMBOL_INDEX])
+			fprintf (fd, "%d hipMemcpyFromSymbol\n", HIPMEMCPYFROMSYMBOL_VAL);
+
 		if (inuse[HIPMEMSET_INDEX])
 			fprintf(fd, "%d hipMemset\n", HIPMEMSET_VAL);
 
+		if (inuse[HIPMEMSETASYNC_INDEX])
+			fprintf(fd, "%d hipMemsetAsync\n", HIPMEMSETASYNC_VAL);
 
 		if (inuse[HIPEVENTRECORD_INDEX])
 		{
@@ -192,15 +218,54 @@ void HIPEvent_WriteEnabledOperations (FILE * fd)
 			fprintf(fd, "%d hipEventSynchronize\n", HIPEVENTSYNCHRONIZE_VAL);
 		}
 
+		if (inuse[HIPSTREAMWAITEVENT_INDEX])
+		{
+			fprintf(fd, "%d hipStreamWaitEvent\n", HIPSTREAMWAITEVENT_VAL);
+		}
 
 		fprintf (fd, "\n");
 
-
-		if (inuse[HIPSTREAMBARRIER_INDEX])
+		if (inuse[HIPMEMCPYASYNC_INDEX] || inuse[HIPMEMCPY_INDEX] || 
+			inuse[HIPMEMCPYTOSYMBOL_INDEX] || inuse[HIPMEMCPYFROMSYMBOL_INDEX])
+		{
 			fprintf (fd, "EVENT_TYPE\n"
-			             "%d    %d    Synchronized stream (on thread)\n"
+						 "%d    %d    HIP memory transfer\n", 0, HIP_MEMORY_TRANSFER);
+			fprintf (fd, "VALUES\n"
+						 "0 End\n");
+
+			if (inuse[HIPMEMCPY_INDEX])
+				fprintf (fd, "%d hipMemcpy\n", HIPMEMCPY_GPU_VAL);
+			if (inuse[HIPMEMCPYASYNC_INDEX])
+				fprintf (fd, "%d hipMemcpyAsync\n", HIPMEMCPYASYNC_GPU_VAL);
+			if (inuse[HIPMEMCPYTOSYMBOL_INDEX])
+				fprintf (fd, "%d hipMemcpyToSymbol\n", HIPMEMCPYTOSYMBOL_GPU_VAL);
+			if (inuse[HIPMEMCPYFROMSYMBOL_INDEX])
+				fprintf (fd, "%d hipMemcpyFromSymbol\n", HIPMEMCPYFROMSYMBOL_GPU_VAL);
+
+			fprintf (fd, "\n");
+		}
+
+		if (inuse[HIPMALLOC_INDEX] || inuse[HIPMEMCPY_INDEX] ||
+		  inuse[HIPMEMCPYASYNC_INDEX] || inuse[HIPHOSTALLOC_INDEX] ||
+		  inuse[HIPMEMSET_INDEX] || inuse[HIPMEMSETASYNC_INDEX] ||
+		  inuse[HIPMEMCPYTOSYMBOL_INDEX] || inuse[HIPMEMCPYFROMSYMBOL_INDEX])
+			fprintf (fd, "EVENT_TYPE\n"
+			              "%d    %d    HIP Dynamic memory size\n"
+			              "\n",
+			              0, HIP_DYNAMIC_MEM_SIZE_EV);
+
+		if (inuse[HIPMALLOC_INDEX] || inuse[HIPHOSTALLOC_INDEX] ||
+		  inuse[HIPMEMSET_INDEX] || inuse[HIPMEMSETASYNC_INDEX])
+			fprintf(fd, "EVENT_TYPE\n"
+			            "%d    %d    HIP Dynamic memory pointer\n"
+						"\n",
+						0, HIP_DYNAMIC_MEM_PTR_EV);
+
+		if (inuse[HIPSTREAMSYNCHRONIZE_INDEX] || inuse[HIPEVENTRECORD_INDEX])
+			fprintf (fd, "EVENT_TYPE\n"
+			             "%d    %d    Stream ID destination\n"
                          "\n",
-                         0, HIPSTREAMBARRIER_THID_EV);
+                         0, HIP_STREAM_DEST_ID_EV);
 
 		if (inuse[HIPLAUNCH_INDEX])
 		{
@@ -215,36 +280,11 @@ void HIPEvent_WriteEnabledOperations (FILE * fd)
 			             0, HIP_KERNEL_THREADS_PER_BLOCK);
 		}
 
-		if (inuse[HIPMEMCPYASYNC_INDEX] || inuse[HIPMEMCPY_INDEX])
-		{
+		if (inuse[HIPEVENTSYNCHRONIZE_INDEX] || inuse[HIPEVENTRECORD_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
-						 "%d    %d    HIP memory transfer\n", 0, HIP_MEMORY_TRANSFER);
-			fprintf (fd, "VALUES\n"
-						 "0 End\n");
-
-			if (inuse[HIPMEMCPY_INDEX])
-				fprintf (fd, "%d hipMemcpy\n", HIPMEMCPY_VAL);
-			if (inuse[HIPMEMCPYASYNC_INDEX])
-				fprintf (fd, "%d hipMemcpyAsync\n", HIPMEMCPYASYNC_VAL);
-		}
-
-		if (inuse[HIPMALLOC_INDEX] || inuse[HIPMEMCPY_INDEX] ||
-		  inuse[HIPMEMCPYASYNC_INDEX] || inuse[HIPHOSTALLOC_INDEX] ||
-		  inuse[HIPMEMSET_INDEX])
-			fprintf (fd, "EVENT_TYPE\n"
-			              "%d    %d    HIP Dynamic memory size\n"
-			              "\n",
-			              0, HIP_DYNAMIC_MEM_SIZE_EV);
-
-		if (inuse[HIPMALLOC_INDEX] || inuse[HIPHOSTALLOC_INDEX] ||
-		  inuse[HIPMEMSET_INDEX])
-			fprintf(fd, "EVENT_TYPE\n"
-			            "%d    %d    HIP Dynamic memory pointer\n"
-						"\n",
-						0, HIP_DYNAMIC_MEM_PTR_EV);
-
-
-
+			             "%d    %d    HIPEvent ID\n"
+                         "\n",
+                         0, HIPEVENT_ID_EV);
 
 		if (inuse[HIPUNTRACKED_INDEX])
 			fprintf(fd, "EVENT_TYPE\n"

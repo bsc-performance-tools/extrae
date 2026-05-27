@@ -337,9 +337,16 @@ AX_PROG_LIBADDR2LINE
 
 AX_CHECK_OPENMP
 
-AX_CUDA
 AX_CUPTI
-AX_HIP
+AX_ROCTRACER
+AM_CONDITIONAL([HAVE_GPU],
+  [test "${CUDA_INSTALLED}" = "yes" -o "${HIP_INSTALLED}" = "yes"])
+use_legacy_gpu_wrapper=no
+AS_IF([test "${CUDA_INSTALLED}" = "yes" -a "${CUPTI_INSTALLED}" != "yes"],
+  [use_legacy_gpu_wrapper=yes])
+AS_IF([test "${HIP_INSTALLED}" = "yes" -a "${ROCTRACER_INSTALLED}" != "yes"],
+  [use_legacy_gpu_wrapper=yes])
+AM_CONDITIONAL([USE_LEGACY_GPU_WRAPPER], [test "${use_legacy_gpu_wrapper}" = "yes"])
 AX_OPENCL
 AX_PTHREAD
 
@@ -533,14 +540,15 @@ AC_CONFIG_FILES([
   src/common/MPI/Makefile \
   src/tracer/Makefile \
   src/tracer/clocks/Makefile \
-  src/tracer/interfaces/Makefile 
+  src/tracer/interfaces/Makefile \
   src/tracer/interfaces/API/Makefile \
   src/tracer/interfaces/MPI/Makefile \
-  src/tracer/wrappers/Makefile 
+  src/tracer/wrappers/Makefile \
   src/tracer/wrappers/MPI/Makefile \
   src/tracer/wrappers/OMP/Makefile \
   src/tracer/wrappers/OMP/intel-kmpc-11-intermediate/Makefile \
   src/tracer/wrappers/OMP_new/Makefile \
+  src/tracer/wrappers/GPU/Makefile \
   src/tracer/wrappers/CUDA/Makefile \
   src/tracer/wrappers/HIP/Makefile \
   src/tracer/wrappers/OPENCL/Makefile \

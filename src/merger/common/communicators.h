@@ -24,7 +24,7 @@
 #ifndef _COMMUNICATORS_H_
 #define _COMMUNICATORS_H_
 
-#include <config.h>
+#include "config.h"
 
 #include "record.h"
 #include "file_set.h"

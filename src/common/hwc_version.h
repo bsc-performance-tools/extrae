@@ -24,7 +24,7 @@
 #ifndef __HWC_VERSION__
 #define __HWC_VERSION__
 
-#include <config.h>
+#include "config.h"
 
 #if defined(HETEROGENEOUS_SUPPORT)
 # define PAPIv3

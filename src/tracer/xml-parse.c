@@ -85,12 +85,12 @@ static char UNUSED rcsid[] = "$Id$";
 # include "opencl_probe.h"
 #endif
 #if defined(CUDA_SUPPORT)
-# include "cuda_probe.h"
-# include "cuda_common.h"
+# include "gpu_common.h"
+# include "gpu_probe.h"
 #endif
 #if defined(HIP_SUPPORT)
-# include "hip_probe.h"
-# include "hip_common.h"
+# include "gpu_common.h"
+# include "gpu_probe.h"
 #endif
 #if defined(GASPI_SUPPORT)
 # include "gaspi_probe.h"
@@ -1044,34 +1044,34 @@ static void Parse_XML_PTHREAD (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 
 #if defined(CUDA_SUPPORT)
 /* Configure CUDA related parameters */
-static void Parse_XML_CUDA (int rank, xmlNodePtr current_tag)
+static void Parse_XML_CUDA(int rank, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
 
-	xmlChar *maxCudaEvStr = xmlGetProp_env (rank, current_tag, TRACE_CUDA_EVENTS_BUFFER_SIZE);
+	xmlChar* maxCudaEvStr = xmlGetProp_env(rank, current_tag, TRACE_CUDA_EVENTS_BUFFER_SIZE);
 	if (maxCudaEvStr != NULL)
 	{
 		unsigned cu_events_block_size = atoi((char*)maxCudaEvStr);
 		if(cu_events_block_size > 0)
-			XTR_CUDA_SET_EVENTS_BLOCK_SIZE(cu_events_block_size);
-		mfprintf (stdout, PACKAGE_NAME": Number of allocated CUDA events per block is %u \n", XTR_CUDA_EVENTS_BLOCK_SIZE);
+			XTR_GPU_SET_EVENTS_BLOCK_SIZE(cu_events_block_size);
+		mfprintf (stdout, PACKAGE_NAME": Number of allocated CUDA events per block is %u \n", XTR_GPU_EVENTS_BLOCK_SIZE);
 	}
 }
 #endif
 
 #if defined(HIP_SUPPORT)
 /* Configure HIP related parameters */
-static void Parse_XML_HIP (int rank, xmlNodePtr current_tag)
+static void Parse_XML_HIP(int rank, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
 
-	xmlChar *maxHipEvStr = xmlGetProp_env (rank, current_tag, TRACE_HIP_EVENTS_BUFFER_SIZE);
+	xmlChar* maxHipEvStr = xmlGetProp_env(rank, current_tag, TRACE_HIP_EVENTS_BUFFER_SIZE);
 	if (maxHipEvStr != NULL)
 	{
 		unsigned hi_events_block_size = atoi((char*)maxHipEvStr);
 		if(hi_events_block_size > 0)
-			XTR_HIP_SET_EVENTS_BLOCK_SIZE(hi_events_block_size);
-		mfprintf (stdout, PACKAGE_NAME": Number of allocated HIP events per block is %u \n", XTR_HIP_EVENTS_BLOCK_SIZE);
+			XTR_GPU_SET_EVENTS_BLOCK_SIZE(hi_events_block_size);
+		mfprintf (stdout, PACKAGE_NAME": Number of allocated HIP events per block is %u \n", XTR_GPU_EVENTS_BLOCK_SIZE);
 	}
 }
 #endif
@@ -2065,7 +2065,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(CUDA_SUPPORT)
-							Extrae_set_trace_CUDA (TRUE);
+							Extrae_set_trace_GPU(TRUE);
 							Parse_XML_CUDA(rank, current_tag);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support CUDA.\n", TRACE_CUDA);
@@ -2073,7 +2073,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						}
 #if defined(CUDA_SUPPORT)
 						else
-							Extrae_set_trace_CUDA (FALSE);
+							Extrae_set_trace_GPU(FALSE);
 #endif
 						XML_FREE(enabled);
 					}
@@ -2085,7 +2085,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(HIP_SUPPORT)
-							Extrae_set_trace_HIP (TRUE);
+							Extrae_set_trace_GPU(TRUE);
 							Parse_XML_HIP(rank, current_tag);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support HIP.\n", TRACE_HIP);
@@ -2093,7 +2093,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						}
 #if defined(HIP_SUPPORT)
 						else
-							Extrae_set_trace_HIP (FALSE);
+							Extrae_set_trace_GPU(FALSE);
 #endif
 						XML_FREE(enabled);
 					}

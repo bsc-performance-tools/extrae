@@ -25,7 +25,7 @@
 #ifndef CUDA_WRAPPER_CUPTI_H_
 #define CUDA_WRAPPER_CUPTI_H_
 
-#include <config.h>
+#include "config.h"
 
 /*
  * cudaConfigureCall_v3020, cudaLaunch_v3020 and cudaStreamDestroy_v3020 were
@@ -55,7 +55,7 @@ typedef struct cudaStreamDestroy_v3020_params_st {
 } cudaStreamDestroy_v3020_params;
 #endif /* HAVE_CUDASTREAMDESTROY_v3020 */
 
-void Extrae_CUDA_init (int rank);
+void Extrae_CUDA_init(int rank);
 
 #endif
 

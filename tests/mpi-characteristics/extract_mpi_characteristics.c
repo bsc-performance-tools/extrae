@@ -21,7 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#include <config.h>
+#include "config.h"
 
 #include <mpi.h>
 

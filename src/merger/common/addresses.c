@@ -21,7 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#include <common.h>
+#include "common.h"
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>

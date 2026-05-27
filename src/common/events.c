@@ -227,11 +227,12 @@ unsigned IsCUDA (unsigned EvType)
 /******************************************************************************
  ***  IsHIP
  ******************************************************************************/
-#define HIP_EVENTS 8
+#define HIP_EVENTS 10
 static unsigned hip_events[] = {
 	/* Host events */
 	HIPCALL_EV, HIPCALLGPU_EV, HIP_DYNAMIC_MEM_PTR_EV, HIP_DYNAMIC_MEM_SIZE_EV,
-	HIP_KERNEL_INST_EV, HIPSTREAMBARRIER_THID_EV, HIP_KERNEL_EXEC_EV, HIP_UNTRACKED_EV
+	HIP_KERNEL_INST_EV, HIP_STREAM_DEST_ID_EV, HIP_KERNEL_EXEC_EV, HIPEVENT_ID_EV, 
+	HIP_UNTRACKED_EV, HIP_STREAM_REGISTER_EV
 };
 
 unsigned IsHIP (unsigned EvType)
@@ -243,6 +244,7 @@ unsigned IsHIP (unsigned EvType)
       return TRUE;
   return FALSE;
 }
+
 
 /******************************************************************************
  ***  IsOpenCL

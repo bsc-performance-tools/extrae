@@ -24,7 +24,7 @@
 #ifndef _NEW_QUEUE_H_
 #define _NEW_QUEUE_H_
 
-#include <config.h>
+#include "config.h"
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif

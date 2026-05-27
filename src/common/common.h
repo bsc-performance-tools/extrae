@@ -24,7 +24,7 @@
 #ifndef COMMON_H_INCLUDED
 #define COMMON_H_INCLUDED
 
-#include <config.h>
+#include "config.h"
 
 #include "types.h"
 

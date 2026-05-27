@@ -35,24 +35,32 @@ AC_DEFUN([AX_CUPTI],
 
     AC_ARG_WITH(cupti,
       AC_HELP_STRING(
-        [--with-cupti],
-        [Enable support for tracing CUDA through CUPTI interface]
+        [--with-cupti@<:@=DIR@:>@],
+        [Enable CUPTI-based CUDA tracing. Without DIR, searches the native path
+         (CUDA_HOME/extras/CUPTI). Use --with-cupti=DIR for a custom location,
+         or --without-cupti to disable CUPTI and fall back to wrapper instrumentation.]
       ),
       [cuda_cupti_path="${withval}"],
-      [cuda_cupti_path="${CUDA_HOME}/extras/CUPTI"]
+      [cuda_cupti_path="auto"]
     )
 
-    if test "$cuda_cupti_path" != "no"; then
+    if test "${cuda_cupti_path}" = "auto"; then
+      cuda_cupti_native="${CUDA_HOME}/extras/CUPTI"
+      AX_FIND_INSTALLATION([CUPTI], [${cuda_cupti_native}], [], [], [cupti.h cupti_events.h], [], [cupti], [],
+        [ AC_MSG_NOTICE([CUDA tracing support enabled through CUPTI interface]) ],
+        [ AC_MSG_ERROR([CUPTI not found at native path '${cuda_cupti_native}'. Specify a custom path with --with-cupti=DIR, or use --without-cupti to disable CUPTI and fall back to wrapper instrumentation.]) ]
+      )
+    elif test "${cuda_cupti_path}" != "no"; then
       AX_FIND_INSTALLATION([CUPTI], [${cuda_cupti_path}], [], [], [cupti.h cupti_events.h], [], [cupti], [],
         [ AC_MSG_NOTICE([CUDA tracing support enabled through CUPTI interface]) ],
-        [ AC_MSG_ERROR([CUPTI tracing support is enabled but could not find valid CUPTI installation. Check that CUPTI is available for the CUDA installation pointed by --with-cuda.]) ]
+        [ AC_MSG_ERROR([CUPTI not found at specified path '${cuda_cupti_path}'. Check the directory passed to --with-cupti.]) ]
       )
     fi
   fi
 
-# Checks for deprecated CUPTI calls to define their parameter structures if not
-# found. This is to allow compatibility with older CUDA versions even if Extrae
-# is compiled with a newer one.
+  # Checks for deprecated CUPTI calls to define their parameter structures if not
+  # found. This is to allow compatibility with older CUDA versions even if Extrae
+  # is compiled with a newer one.
   AC_MSG_CHECKING([for cudaConfigureCall_v3020_params definition])
   if test "${CUPTI_INSTALLED}" = "yes"; then
     AC_COMPILE_IFELSE(
@@ -111,6 +119,7 @@ AC_DEFUN([AX_CUPTI],
   fi
 
   AM_CONDITIONAL(HAVE_CUPTI, test "${CUPTI_INSTALLED}" = "yes")
+
   AX_FLAGS_RESTORE()
 ])
 
@@ -124,8 +133,10 @@ AC_DEFUN([AX_CUDA_SHOW_CONFIGURATION],
 		echo -e \\\tCUPTI: ${CUPTI_HOME}
 	else
 		if test "${CUDA_INSTALLED}" = "yes" ; then
-			echo CUDA instrumentation: yes, through wrappers
+			echo CUDA instrumentation: yes, through wrappers \(DEPRECATED\)
 			echo -e \\\tCUDA: ${CUDA_HOME}
+			echo -e \\\tWARNING: GPU wrapper instrumentation is deprecated and may be removed in a future release.
+			echo -e \\\t         Enable CUPTI for full GPU tracing support: --with-cupti=DIR
 		else
 			echo CUDA instrumentation: no
 		fi

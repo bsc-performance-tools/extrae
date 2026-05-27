@@ -126,11 +126,12 @@
 # include <external/upc.h>
 #endif
 #if defined(CUDA_SUPPORT)
-# include "cuda_wrapper.h"
-# include "cuda_common.h"
+#include "gpu_wrapper.h"
+#include "gpu_common.h"
 #endif
 #if defined(HIP_SUPPORT)
-# include "hip_common.h"
+#include "gpu_wrapper.h"
+#include "gpu_common.h"
 #endif
 #if defined(OPENCL_SUPPORT)
 # include "opencl_wrapper.h"
@@ -1812,13 +1813,11 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 #endif /* OMP_SUPPORT || defined(NEW_OMP_SUPPORT) */
 
 #if defined(CUDA_SUPPORT)
-	Extrae_CUDA_init (me);
+	Extrae_CUDA_init(me);
 #endif
 
 #if defined(HIP_SUPPORT)
-	Extrae_HIP_init (me);
-	/* Allocate thread info for HIP execs */
-	Extrae_reallocate_HIP_info (0, get_maximum_NumOfThreads());
+	Extrae_HIP_init(me);
 #endif
 
 #endif /* STANDALONE */
@@ -2053,11 +2052,6 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 	
 			/* Allocate thread info structure */
 			Extrae_reallocate_thread_info (get_maximum_NumOfThreads(), new_num_threads);
-
-#if defined(HIP_SUPPORT)
-			/* Allocate thread info for HIP execs */
-			Extrae_reallocate_HIP_info (get_maximum_NumOfThreads(), new_num_threads);
-#endif
 
 #if defined(PTHREAD_SUPPORT)
 			/* Allocate thread info for pthread execs */
@@ -2536,12 +2530,8 @@ void Backend_Finalize (void)
 	Extrae_IntelPEBS_stopSampling();
 #endif
 
-#if defined(CUDA_SUPPORT)
-	Extrae_CUDA_finalize ();
-#endif
-
-#if defined(HIP_SUPPORT)
-	Extrae_HIP_finalize ();
+#if defined(CUDA_SUPPORT) || defined(HIP_SUPPORT)
+	Extrae_gpuFinalize();
 #endif
 
 #if defined(OPENCL_SUPPORT)

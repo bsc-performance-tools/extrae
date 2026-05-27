@@ -41,8 +41,8 @@
 #include "wrapper.h"
 
 #include <cupti.h>
-#include "cuda_common.h"
-#include "cuda_probe.h"
+#include "gpu_common.h"
+#include "gpu_probe.h"
 
 #define LOG_UNTRACKED_CALLBACKS 0
 #define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 0
@@ -95,11 +95,11 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaHostAlloc_Enter(p->pp, p->bytesize);
+				Probe_Gpu_HostAlloc_Entry(p->pp, p->bytesize);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaHostAlloc_Exit();
+				Probe_Gpu_HostAlloc_Exit();
 			}
 			ret = 1;
 		}
@@ -112,11 +112,11 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaStreamCreate_Enter();
+				Probe_Gpu_StreamCreate_Entry();
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaStreamCreate_Exit();
+				Probe_Gpu_StreamCreate_Exit();
 			}
 			ret = 1;
 		}
@@ -129,11 +129,12 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaStreamSynchronize_Enter(p->hStream, cbinfo->context);
+				Probe_Gpu_StreamBarrier_Entry(p->hStream, 
+					cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaStreamSynchronize_Exit();
+				Probe_Gpu_StreamBarrier_Exit();
 			}
 			ret = 1;
 		}
@@ -146,14 +147,14 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaLaunch_Enter(p->f, 
-				  p->gridDimX * p->gridDimY * p->gridDimZ,
-				  p->blockDimX * p->blockDimY * p->blockDimZ,
-				  p->sharedMemBytes, p->hStream, cbinfo->context);
+				Probe_Gpu_Launch_Entry(p->f, 
+				  	p->gridDimX * p->gridDimY * p->gridDimZ,
+				  	p->blockDimX * p->blockDimY * p->blockDimZ,
+					p->sharedMemBytes, p->hStream, cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaLaunch_Exit(cbinfo->context);
+				Probe_Gpu_Launch_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -173,14 +174,15 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		/* 8 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020:
 		{
-			cudaConfigureCall_v3020_params *p =
-			  (cudaConfigureCall_v3020_params*)cbinfo->functionParams;
-
+			cudaConfigureCall_v3020_params *p = (cudaConfigureCall_v3020_params*)cbinfo->functionParams;
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaConfigureCall_Enter();
+			{
+				Probe_Gpu_ConfigureCall_Entry();
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaConfigureCall_Exit();
-
+			{
+				Probe_Gpu_ConfigureCall_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -194,16 +196,24 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
 # if CUPTI_API_VERSION >= 3
-				Extrae_cudaLaunch_Enter(p->func,
-				  NULL, NULL, NULL, NULL, cbinfo->context);
-# else
-				Extrae_cudaLaunch_Enter(p->entry,
-				  NULL, NULL, NULL, NULL);
+				Probe_Gpu_Launch_Entry(p->func,
+					NULL, 
+					NULL, 
+					NULL, 
+					NULL, 
+					cbinfo->context);
+#else
+				Probe_Gpu_Launch_Entry(p->entry,
+					NULL, 
+					NULL, 
+					NULL, 
+					NULL, 
+					cbinfo->context);
 # endif /* CUPTI_API_VERSION >= 3 */
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaLaunch_Exit(cbinfo->context);
+				Probe_Gpu_Launch_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -218,11 +228,11 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMalloc_Enter(CUDAMALLOC_VAL, p->devPtr, p->size);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOC_VAL, p->devPtr, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMalloc_Exit(CUDAMALLOC_VAL);
+				Probe_Gpu_Malloc_Exit(CUDAMALLOC_VAL);
 			}
 			ret = 1;
 		}
@@ -236,12 +246,12 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMalloc_Enter(
-				  CUDAMALLOCPITCH_VAL, p->devPtr, p->width * p->height);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOCPITCH_VAL, 
+                    p->devPtr, p->width * p->height);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMalloc_Exit(CUDAMALLOCPITCH_VAL);
+				Probe_Gpu_Malloc_Exit(CUDAMALLOCPITCH_VAL);
 			}
 			ret = 1;
 		}
@@ -255,11 +265,11 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaFree_Enter(CUDAFREE_VAL, p->devPtr);
+				Probe_Gpu_Free_Entry(CUDAFREE_VAL, p->devPtr);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaFree_Exit(CUDAFREE_VAL);
+				Probe_Gpu_Free_Exit(CUDAFREE_VAL);
 			}
 			ret = 1;
 		}
@@ -273,12 +283,12 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMalloc_Enter(
-				  CUDAMALLOCARRAY_VAL, (void *)p->array, p->width * p->height);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOCARRAY_VAL, 
+					(void *)p->array, p->width * p->height);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMalloc_Exit(CUDAMALLOCARRAY_VAL);
+				Probe_Gpu_Malloc_Exit(CUDAMALLOCARRAY_VAL);
 			}
 			ret = 1;
 		}
@@ -292,11 +302,11 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaFree_Enter(CUDAFREEARRAY_VAL, (void *)p->array);
+				Probe_Gpu_Free_Entry(CUDAFREEARRAY_VAL, (void*)p->array);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaFree_Exit(CUDAFREEARRAY_VAL);
+				Probe_Gpu_Free_Exit(CUDAFREEARRAY_VAL);
 			}
 			ret = 1;
 		}
@@ -310,12 +320,11 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMalloc_Enter(
-				  CUDAMALLOCHOST_VAL, p->ptr, p->size);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOCHOST_VAL, p->ptr, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMalloc_Exit(CUDAMALLOCHOST_VAL);
+				Probe_Gpu_Malloc_Exit(CUDAMALLOCHOST_VAL);
 			}
 			ret = 1;
 		}
@@ -329,11 +338,11 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaFree_Enter(CUDAFREEHOST_VAL, p->ptr);
+				Probe_Gpu_Free_Entry(CUDAFREEHOST_VAL, p->ptr);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaFree_Exit(CUDAFREEHOST_VAL);
+				Probe_Gpu_Free_Exit(CUDAFREEHOST_VAL);
 			}
 			ret = 1;
 		}
@@ -343,15 +352,15 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaHostAlloc_v3020:
 		{
 			cudaHostAlloc_v3020_params *p =
-			  (cudaHostAlloc_v3020_params*)cbinfo->functionParams;
+				(cudaHostAlloc_v3020_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaHostAlloc_Enter(p->pHost, p->size);
+				Probe_Gpu_HostAlloc_Entry(p->pHost, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaHostAlloc_Exit();
+				Probe_Gpu_HostAlloc_Exit();
 			}
 			ret = 1;
 		}
@@ -365,11 +374,11 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMemcpy_Enter(p->dst, p->src, p->count, p->kind, cbinfo->context);
+				Probe_gpuMemcpy_Enter(p->dst, p->src, p->count, p->kind, cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMemcpy_Exit(cbinfo->context);
+				Probe_gpuMemcpy_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -384,11 +393,15 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMemcpyToSymbol_Enter(NULL, p->src, p->count, p->kind, cbinfo->context);
+				Probe_gpuMemcpyToSymbol_Enter(NULL, 
+					p->src, 
+					p->count, 
+					p->kind, 
+					cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMemcpyToSymbol_Exit(cbinfo->context);
+				Probe_gpuMemcpyToSymbol_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -403,11 +416,15 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMemcpyFromSymbol_Enter(p->dst, NULL, p->count, p->kind, cbinfo->context);
+				Probe_gpuMemcpyFromSymbol_Enter(p->dst, 
+					NULL, 
+					p->count, 
+					p->kind, 
+					cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMemcpyFromSymbol_Exit(cbinfo->context);
+				Probe_gpuMemcpyFromSymbol_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -417,16 +434,21 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		/* 41 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyAsync_v3020:
 		{
-			cudaMemcpyAsync_v3020_params *p =
-			  (cudaMemcpyAsync_v3020_params*)cbinfo->functionParams;
-
+			cudaMemcpyAsync_v3020_params *p = 
+				(cudaMemcpyAsync_v3020_params*)cbinfo->functionParams;
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaMemcpyAsync_Enter(
-				  p->dst, p->src, p->count, p->kind, p->stream, cbinfo->context
-				  );
+			{
+				Probe_Gpu_MemcpyAsync_Entry(p->dst, 
+					p->src, 
+					p->count, 
+					p->kind, 
+					p->stream, 
+					cbinfo->context);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaMemcpyAsync_Exit(cbinfo->context);
-
+			{
+				Probe_Gpu_MemcpyAsync_Exit(cbinfo->context);
+			}
 			ret = 1;
 		}
 		break;
@@ -438,10 +460,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaMemset_v3020_params *)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaMemset_Enter(p->devPtr, p->count);
+			{
+				Probe_Gpu_Memset_Entry(p->devPtr, p->count);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaMemset_Exit();
-
+			{
+				Probe_Gpu_Memset_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -453,10 +478,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaMemsetAsync_v3020_params *)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaMemsetAsync_Enter(p->devPtr, p->count);
+			{
+				Probe_Gpu_MemsetAsync_Entry(p->devPtr, p->count);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaMemsetAsync_Exit();
-
+			{
+				Probe_Gpu_MemsetAsync_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -465,10 +493,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020:
 		{
 			if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaThreadExit_Exit(cbinfo->context);
+			{
+				Probe_Gpu_ThreadExit_Exit(cbinfo->context);
+			}
 			else
-				Extrae_cudaThreadExit_Enter();
-
+			{
+				Probe_Gpu_ThreadExit_Entry();
+			}
 			ret = 1;
 		}
 		break;
@@ -477,10 +508,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaThreadSynchronize_v3020:
 		{
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaThreadSynchronize_Enter(cbinfo->context);
+			{
+				Probe_Gpu_ThreadBarrier_Entry(cbinfo->context);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaThreadSynchronize_Exit();
-
+			{
+				Probe_Gpu_ThreadBarrier_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -489,12 +523,16 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020:
 		{
 			cudaStreamCreate_v3020_params *p =
-			  (cudaStreamCreate_v3020_params*)cbinfo->functionParams;
+				(cudaStreamCreate_v3020_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamCreate_Enter();
+			{
+				Probe_Gpu_StreamCreate_Entry();
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaStreamCreate_Exit();
+			{
+				Probe_Gpu_StreamCreate_Exit();
+			}
 
 			ret = 1;
 		}
@@ -504,13 +542,16 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v3020:
 		{
 			cudaStreamDestroy_v3020_params *p =
-			  (cudaStreamDestroy_v3020_params*)cbinfo->functionParams;
+				(cudaStreamDestroy_v3020_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamDestroy_Enter (p->stream, cbinfo->context);
+			{
+				Probe_Gpu_StreamDestroy_Entry(p->stream, cbinfo->context);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaStreamDestroy_Exit();
-
+			{
+				Probe_Gpu_StreamDestroy_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -519,10 +560,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020:
 		{
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaDeviceSynchronize_Enter(cbinfo->context);
+			{
+				Probe_Gpu_ThreadBarrier_Entry(cbinfo->context);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaDeviceSynchronize_Exit();
-
+			{
+				Probe_Gpu_ThreadBarrier_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -533,14 +577,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			cudaEventRecord_v3020_params *p =
 			  (cudaEventRecord_v3020_params *)cbinfo->functionParams;
 
-			if (p != NULL)
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				if (cbinfo->callbackSite == CUPTI_API_ENTER)
-					Extrae_cudaEventRecord_Enter(p->event, p->stream, cbinfo->context);
-				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-					Extrae_cudaEventRecord_Exit();
+				Probe_Gpu_EventRecord_Entry(p->event, p->stream, cbinfo->context);
 			}
-
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				Probe_Gpu_EventRecord_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -551,14 +595,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			cudaEventSynchronize_v3020_params *p =
 			  (cudaEventSynchronize_v3020_params *)cbinfo->functionParams;
 
-			if (p != NULL)
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				if (cbinfo->callbackSite == CUPTI_API_ENTER)
-					Extrae_cudaEventSynchronize_Enter(p->event);
-				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-					Extrae_cudaEventSynchronize_Exit();
+				Probe_Gpu_EventSynchronize_Entry(p->event);
 			}
-
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				Probe_Gpu_EventSynchronize_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -571,13 +615,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMalloc_Enter(
-				  CUDAMALLOC3D_VAL, NULL, 
-				    p->extent.width * p->extent.height * p->extent.depth);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOC3D_VAL, 
+					NULL, 
+					p->extent.width * p->extent.height * p->extent.depth);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMalloc_Exit(CUDAMALLOC3D_VAL);
+				Probe_Gpu_Malloc_Exit(CUDAMALLOC3D_VAL);
 			}
 
 			ret = 1;
@@ -592,13 +636,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMalloc_Enter(
-				  CUDAMALLOC3DARRAY_VAL, (void *)p->array, 
+				Probe_Gpu_Malloc_Entry(CUDAMALLOC3DARRAY_VAL, 
+					(void*)p->array, 
 				    p->extent.width * p->extent.height * p->extent.depth);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMalloc_Exit(CUDAMALLOC3DARRAY_VAL);
+				Probe_Gpu_Malloc_Exit(CUDAMALLOC3DARRAY_VAL);
 			}
 
 			ret = 1;
@@ -609,13 +653,16 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamWaitEvent_v3020:
 		{
 			cudaStreamWaitEvent_v3020_params *p =
-			  (cudaStreamWaitEvent_v3020_params *)cbinfo->functionParams;
+			  (cudaStreamWaitEvent_v3020_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamWaitEvent_Enter(p->event);
+			{
+				Probe_Gpu_StreamWaitEvent_Entry(p->event);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaStreamWaitEvent_Exit();
-
+			{
+				Probe_Gpu_StreamWaitEvent_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -624,10 +671,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020:
 		{
 			if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaDeviceReset_Exit(cbinfo->context);
-			else
-				Extrae_cudaDeviceReset_Enter();
-
+			{
+				Probe_Gpu_DeviceReset_Exit(cbinfo->context);
+			}
+			else if (cbinfo->callbackSite == CUPTI_API_ENTER)
+			{
+				Probe_Gpu_DeviceReset_Entry();
+			}
 			ret = 1;
 		}
 		break;
@@ -638,14 +688,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			cudaStreamSynchronize_v3020_params *p =
 			  (cudaStreamSynchronize_v3020_params *)cbinfo->functionParams;
 
-			if (p != NULL)
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				if (cbinfo->callbackSite == CUPTI_API_ENTER)
-					Extrae_cudaStreamSynchronize_Enter(p->stream, cbinfo->context);
-				else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-					Extrae_cudaStreamSynchronize_Exit();
+				Probe_Gpu_StreamBarrier_Entry(p->stream, cbinfo->context);
 			}
-
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			{
+				Probe_Gpu_StreamBarrier_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -658,10 +708,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaStreamCreateWithFlags_v5000_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamCreate_Enter();
+			{
+				Probe_Gpu_StreamCreate_Entry();
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaStreamCreate_Exit();
+			{
+				Probe_Gpu_StreamCreate_Exit();
 
+			}
 			ret = 1;
 		}
 		break;
@@ -675,9 +729,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaStreamDestroy_v5050_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamDestroy_Enter(p->stream, cbinfo->context);
+			{
+				Probe_Gpu_StreamDestroy_Entry(p->stream, cbinfo->context);
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaStreamDestroy_Exit();
+			{
+				Probe_Gpu_StreamDestroy_Exit();
+			}
 
 			ret = 1;
 		}
@@ -690,10 +748,13 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			  (cudaStreamCreateWithPriority_v5050_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamCreate_Enter();
+			{
+				Probe_Gpu_StreamCreate_Entry();
+			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaStreamCreate_Exit();
-
+			{
+				Probe_Gpu_StreamCreate_Exit();
+			}
 			ret = 1;
 		}
 		break;
@@ -708,11 +769,11 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaMalloc_Enter(CUDAMALLOC_VAL, p->devPtr, p->size);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOC_VAL, p->devPtr, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaMalloc_Exit(CUDAMALLOC_VAL);
+				Probe_Gpu_Malloc_Exit(CUDAMALLOC_VAL);
 			}
 
 			ret = 1;
@@ -729,14 +790,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaLaunch_Enter(p->func, 
-				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
-				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
-				  p->sharedMem, p->stream, cbinfo->context);
+				Probe_Gpu_Launch_Entry(p->func, 
+					p->gridDim.x * p->gridDim.y * p->gridDim.z,
+					p->blockDim.x * p->blockDim.y * p->blockDim.z,
+					p->sharedMem, p->stream, cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaLaunch_Exit(cbinfo->context);
+				Probe_Gpu_Launch_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -751,14 +812,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaLaunch_Enter(p->func,
-				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
-				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
-				  p->sharedMem, p->stream, cbinfo->context);
+				Probe_Gpu_Launch_Entry(p->func,
+					p->gridDim.x * p->gridDim.y * p->gridDim.z,
+					p->blockDim.x * p->blockDim.y * p->blockDim.z,
+					p->sharedMem, p->stream, cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaLaunch_Exit(cbinfo->context);
+				Probe_Gpu_Launch_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -775,14 +836,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaLaunch_Enter(p->func, 
-				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
-				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
-				  p->sharedMem, p->stream, cbinfo->context);
+				Probe_Gpu_Launch_Entry(p->func, 
+					p->gridDim.x * p->gridDim.y * p->gridDim.z,
+					p->blockDim.x * p->blockDim.y * p->blockDim.z,
+					p->sharedMem, p->stream, cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaLaunch_Exit(cbinfo->context);
+				Probe_Gpu_Launch_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -797,14 +858,14 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Extrae_cudaLaunch_Enter(p->func, 
-				  p->gridDim.x * p->gridDim.y * p->gridDim.z,
-				  p->blockDim.x * p->blockDim.y * p->blockDim.z,
-				  p->sharedMem, p->stream, cbinfo->context);
+				Probe_Gpu_Launch_Entry(p->func, 
+					p->gridDim.x * p->gridDim.y * p->gridDim.z,
+					p->blockDim.x * p->blockDim.y * p->blockDim.z,
+					p->sharedMem, p->stream, cbinfo->context);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
-				Extrae_cudaLaunch_Exit(cbinfo->context);
+				Probe_Gpu_Launch_Exit(cbinfo->context);
 			}
 
 			ret = 1;
@@ -821,8 +882,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
  * call is, jump to the specific callback management function.
  */
 static void
-CUPTIAPI Extrae_CUPTI_callback(void *udata, CUpti_CallbackDomain domain,
-    CUpti_CallbackId cbid, const CUpti_CallbackData *cbinfo)
+CUPTIAPI Extrae_CUPTI_callback(void *udata, CUpti_CallbackDomain domain, CUpti_CallbackId cbid, const CUpti_CallbackData *cbinfo)
 {
 	UNREFERENCED_PARAMETER(udata);
 	UNREFERENCED_PARAMETER(domain);
@@ -837,7 +897,7 @@ CUPTIAPI Extrae_CUPTI_callback(void *udata, CUpti_CallbackDomain domain,
 		Backend_Enter_Instrumentation();
 	}
 
-	if (EXTRAE_ON() && Extrae_get_trace_CUDA())
+	if (EXTRAE_ON() && Extrae_get_trace_GPU())
 	{
 		if( Backend_Get_InstrumentationLevel() == 1)
 		{
@@ -889,8 +949,8 @@ CUPTIAPI Extrae_CUPTI_callback(void *udata, CUpti_CallbackDomain domain,
 	}
 }
 
-void Extrae_CUDA_init (int rank)
-{
+void Extrae_CUDA_init(int rank) {
+
 	CUpti_SubscriberHandle subscriber;
 
 	UNREFERENCED_PARAMETER(rank);

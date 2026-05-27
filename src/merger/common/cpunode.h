@@ -24,7 +24,7 @@
 #ifndef CPUNODE_H
 #define CPUNODE_H
 
-#include <config.h>
+#include "config.h"
 
 #include "mpi2out.h" /* per input_t */
 

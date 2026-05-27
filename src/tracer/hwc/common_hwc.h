@@ -24,7 +24,7 @@
 #ifndef __COMMON_HWC_H__
 #define __COMMON_HWC_H__
 
-#include <config.h>
+#include "config.h"
 #include "sampling-common.h"
 #include "sampling-timer.h"
 #include "num_hwc.h"

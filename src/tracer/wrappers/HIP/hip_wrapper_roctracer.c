@@ -42,23 +42,21 @@
 
 #include <roctracer/roctracer.h>
 #include <roctracer/roctracer_hip.h>
-#include "hip_common.h"
-#include "hip_probe.h"
+#include "gpu_common.h"
+#include "gpu_probe.h"
 
-#define LOG_UNTRACKED_CALLBACKS 1
-#define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 1
+#define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 0
 
 #include "hip_wrapper_roctracer.h"
 
 #define MAX_HIP_API_ID 1024
-static uint8_t cid_filter[MAX_HIP_API_ID / 8] = {0};
+static bool cid_filter[MAX_HIP_API_ID] = {false};
 
-#define SET_CID_FILTER(cid)   (cid_filter[(cid) / 8] |= (1 << ((cid) % 8)))
-#define CLEAR_CID_FILTER(cid) (cid_filter[(cid) / 8] &= ~(1 << ((cid) % 8)))
-#define IS_CID_FILTERED(cid)  (cid_filter[(cid) / 8] &  (1 << ((cid) % 8)))
+#define SET_CID_FILTER(cid)   (cid_filter[cid] = true)
+#define IS_CID_FILTERED(cid)  (cid_filter[cid])
 
-static void Extrae_HIP_API_disable_calls(void)
-{
+static void 
+Extrae_HIP_API_disable_calls(void) {
     SET_CID_FILTER(HIP_API_ID___hipPushCallConfiguration);
     SET_CID_FILTER(HIP_API_ID___hipPopCallConfiguration);
     SET_CID_FILTER(HIP_API_ID_hipRuntimeGetVersion);
@@ -76,7 +74,6 @@ static void Extrae_HIP_API_disable_calls(void)
     SET_CID_FILTER(HIP_API_ID_hipFuncGetAttribute);
     SET_CID_FILTER(HIP_API_ID_hipFuncGetAttributes);
     SET_CID_FILTER(HIP_API_ID_hipDeviceComputeCapability);
-    SET_CID_FILTER(HIP_API_ID_hipStreamWaitEvent);
     SET_CID_FILTER(HIP_API_ID_hipPointerGetAttributes);
     SET_CID_FILTER(HIP_API_ID_hipModuleGetGlobal);
     SET_CID_FILTER(HIP_API_ID_hipModuleLoadData);
@@ -84,378 +81,605 @@ static void Extrae_HIP_API_disable_calls(void)
     SET_CID_FILTER(HIP_API_ID_hipModuleUnload);
     SET_CID_FILTER(HIP_API_ID_hipModuleOccupancyMaxPotentialBlockSize);
     SET_CID_FILTER(HIP_API_ID_hipGetSymbolAddress);
-    SET_CID_FILTER(HIP_API_ID_hipDeviceReset);
     SET_CID_FILTER(HIP_API_ID_hipModuleLaunchCooperativeKernel);
     SET_CID_FILTER(HIP_API_ID_hipExtLaunchKernel);
+    SET_CID_FILTER(HIP_API_ID_hipSetDevice);
 }
 
-static int 
-Extrae_HIP_API_callback(const hip_api_data_t* p, uint32_t cid, const void* callback_data, void* arg) 
-{
-    int ret = 0;
-
-    switch (cid)
-    {
-        case HIP_API_ID_hipMalloc:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMalloc_Enter(HIPMALLOC_VAL, p->args.hipMalloc.ptr, p->args.hipMalloc.size);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMalloc_Exit(HIPMALLOC_VAL);
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipHostMalloc:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMalloc_Enter(HIPMALLOC_VAL, p->args.hipHostMalloc.ptr, p->args.hipHostMalloc.size);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMalloc_Exit(HIPMALLOC_VAL);
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipHostAlloc:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipHostAlloc_Enter(p->args.hipHostAlloc.ptr, p->args.hipHostAlloc.size);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipHostAlloc_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipMemcpy:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMemcpy_Enter(p->args.hipMemcpy.dst, 
-                    p->args.hipMemcpy.src, 
-                    p->args.hipMemcpy.sizeBytes, 
-                    p->args.hipMemcpy.kind);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMemcpy_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipMemcpyAsync:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMemcpyAsync_Enter(p->args.hipMemcpyAsync.dst, 
-                    p->args.hipMemcpyAsync.src,
-                    p->args.hipMemcpyAsync.sizeBytes,
-                    p->args.hipMemcpyAsync.kind,
-                    p->args.hipMemcpyAsync.stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMemcpyAsync_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipMemcpyHtoD:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMemcpyHtoD_Enter(p->args.hipMemcpyHtoD.dst, 
-                    p->args.hipMemcpyHtoD.src, 
-                    p->args.hipMemcpyHtoD.sizeBytes);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMemcpyHtoD_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipMemcpyHtoDAsync:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMemcpyHtoDAsync_Enter(p->args.hipMemcpyHtoDAsync.dst, 
-                    p->args.hipMemcpyHtoDAsync.src, 
-                    p->args.hipMemcpyHtoDAsync.sizeBytes,
-                    p->args.hipMemcpyHtoDAsync.stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMemcpyHtoDAsync_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipMemcpyDtoH:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMemcpyDtoH_Enter(p->args.hipMemcpyHtoD.dst, 
-                    p->args.hipMemcpyHtoD.src, 
-                    p->args.hipMemcpyHtoD.sizeBytes);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMemcpyDtoH_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipMemcpyDtoHAsync:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMemcpyDtoHAsync_Enter(p->args.hipMemcpyHtoDAsync.dst, 
-                    p->args.hipMemcpyHtoDAsync.src, 
-                    p->args.hipMemcpyHtoDAsync.sizeBytes,
-                    p->args.hipMemcpyHtoDAsync.stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMemcpyDtoHAsync_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipFree:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipFree_Enter(HIPFREE_VAL, p->args.hipFree.ptr);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipFree_Exit(HIPFREE_VAL);
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipMemset:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipMemset_Enter(p->args.hipMemset.dst, p->args.hipMemset.sizeBytes);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipMemset_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipEventRecord:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipEventRecord_Enter();
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipEventRecord_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipEventSynchronize:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipEventSynchronize_Enter();
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipEventSynchronize_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipStreamCreate:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipStreamCreate_Enter(p->args.hipStreamCreate.stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipStreamCreate_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipStreamDestroy:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipStreamDestroy_Enter(p->args.hipStreamDestroy.stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipStreamDestroy_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipStreamSynchronize:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipStreamSynchronize_Enter(p->args.hipStreamSynchronize.stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipStreamSynchronize_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipDeviceSynchronize:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                Extrae_hipDeviceSynchronize_Enter();
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipDeviceSynchronize_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipModuleGetFunction:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_EXIT) 
-            {
-                hipFunction_t* outp = (hipFunction_t*) p->args.hipModuleGetFunction.function;
-                hipFunction_t f     = outp ? *outp : NULL;
-                const char*   k     = (const char*) p->args.hipModuleGetFunction.kname;
-                if(f)
-                {
-                    hipmap_put_safe(f, k);
-                }
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipModuleLaunchKernel:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                hipFunction_t f = (hipFunction_t)p->args.hipModuleLaunchKernel.f;
-                unsigned gridDim = (int)p->args.hipModuleLaunchKernel.gridDimX * (int)p->args.hipModuleLaunchKernel.gridDimY * (int)p->args.hipModuleLaunchKernel.gridDimZ;
-                unsigned blockDim = (int)p->args.hipModuleLaunchKernel.blockDimX * (int)p->args.hipModuleLaunchKernel.blockDimY * (int)p->args.hipModuleLaunchKernel.blockDimZ;
-                size_t sharedMemBytes = (size_t)p->args.hipModuleLaunchKernel.sharedMemBytes;
-                hipStream_t stream = (hipStream_t)p->args.hipModuleLaunchKernel.stream;
-                Extrae_hipModuleLaunchKernel_Enter(f, gridDim, blockDim, sharedMemBytes, stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipModuleLaunchKernel_Exit();
-            }
-            ret = 1;
-        }
-        break;
-        case HIP_API_ID_hipLaunchKernel:
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                char* address = (char*)p->args.hipLaunchKernel.function_address;
-                dim3 dimBlocks = (dim3)p->args.hipLaunchKernel.dimBlocks;
-                dim3 numBlocks = (dim3)p->args.hipLaunchKernel.numBlocks;
-                unsigned gridDim = dimBlocks.x * dimBlocks.y * dimBlocks.z;
-                unsigned blockDim = numBlocks.x * numBlocks.y * numBlocks.z;
-                size_t sharedMemBytes = (size_t)p->args.hipLaunchKernel.sharedMemBytes;
-                hipStream_t stream = (hipStream_t)p->args.hipLaunchKernel.stream;
-                Extrae_hipLaunchKernel_Enter(address, gridDim, blockDim, sharedMemBytes, stream);
-            }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                Extrae_hipLaunchKernel_Exit();
-            }
-            ret = 1;
-        }
-        break;
-    }
-    return ret;  
-}
-
-#define Extrae_HIP_updateDepth(p) Extrae_HIP_updateDepth_((p->phase == ACTIVITY_API_PHASE_ENTER)?1:((p->phase == ACTIVITY_API_PHASE_EXIT)?-1:0))
-
-static void
-Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_data, void* arg)
+static void 
+Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_data, void* arg) 
 {
 
-	UNREFERENCED_PARAMETER(domain);
+    UNREFERENCED_PARAMETER(arg);
     UNREFERENCED_PARAMETER(callback_data);
 
-    if (IS_CID_FILTERED(cid)) return; 
-
-	int ret = 0;
-
-    if (!mpitrace_on || !Extrae_get_trace_HIP() || callback_data == NULL) 
+    if (!mpitrace_on || !Extrae_get_trace_GPU() || callback_data == NULL || IS_CID_FILTERED(cid))
         return;
 
-    const hip_api_data_t* p = (const hip_api_data_t*) callback_data;
-    const char* name = roctracer_op_string(domain, cid, 0);
+    int ret = 0;
+    const hip_api_data_t* p = (const hip_api_data_t*)callback_data;
 
-	if((p->phase == ACTIVITY_API_PHASE_ENTER))
-		Extrae_HIP_updateDepth(p);
+    if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+        Backend_Enter_Instrumentation();
 
-	if((Extrae_HIP_getDepth() <= 1))
-	{
-        switch (domain)
-        {
-            case ACTIVITY_DOMAIN_HIP_API:
-                ret = Extrae_HIP_API_callback(p, cid, callback_data, arg);
-                break;
+    if (EXTRAE_ON() && Extrae_get_trace_GPU() && Backend_Get_InstrumentationLevel() == 1) {
+        switch (cid) {
+            // DriverAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaHostAlloc_v3020 equivalent
+            // CUPTI_DRIVER_TRACE_CBID_cuMemHostAlloc equivalent
+            case HIP_API_ID_hipHostAlloc:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_HostAlloc_Entry(p->args.hipHostAlloc.ptr, 
+                        p->args.hipHostAlloc.size);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
+                {
+                    Probe_Gpu_HostAlloc_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // DriverAPI on cuda
+            // CUPTI_DRIVER_TRACE_CBID_cuStreamCreate equivalent
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020 equivalent
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithFlags_v5000 equivalent
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithPriority_v5050 equivalent
+            case HIP_API_ID_hipStreamCreateWithFlags:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_StreamCreate_Entry();
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_StreamCreate_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // DriverAPI on cuda
+            // CUPTI_DRIVER_TRACE_CBID_cuStreamSynchronize equivalent
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020 equivalent
+            case HIP_API_ID_hipStreamSynchronize:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_StreamBarrier_Entry(p->args.hipStreamSynchronize.stream, NULL);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_StreamBarrier_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020 equivalent
+            case HIP_API_ID_hipConfigureCall:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_ConfigureCall_Entry();
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
+                {
+                    Probe_Gpu_ConfigureCall_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaMalloc_v3020 equivalent
+            case HIP_API_ID_hipMalloc:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_Malloc_Entry(HIPMALLOC_VAL, p->args.hipMalloc.ptr, p->args.hipMalloc.size);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
+                {
+                    Probe_Gpu_Malloc_Exit(HIPMALLOC_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaMallocPitch_v3020 equivalent
+            case HIP_API_ID_hipMallocPitch:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Malloc_Entry(HIPMALLOCPITCH_VAL, 
+                        p->args.hipMallocPitch.ptr, 
+                        p->args.hipMallocPitch.width * p->args.hipMallocPitch.height);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Malloc_Exit(HIPMALLOCPITCH_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaFree_v3020 equivalent
+            case HIP_API_ID_hipFree:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Free_Entry(HIPFREE_VAL, 
+                        p->args.hipFree.ptr);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Free_Exit(HIPFREE_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaMallocArray_v3020 equivalent
+            case HIP_API_ID_hipMallocArray: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_Malloc_Entry(HIPMALLOCPITCH_VAL, 
+                        p->args.hipMallocPitch.ptr, 
+                        p->args.hipMallocPitch.width * p->args.hipMallocPitch.height);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Malloc_Exit(HIPMALLOCPITCH_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaFreeArray_v3020 equivalent
+            case HIP_API_ID_hipFreeArray: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Free_Entry(HIPFREEARRAY_VAL, 
+                        (void*)p->args.hipFreeArray.array);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Free_Exit(HIPFREEARRAY_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaMallocHost_v3020 equivalent
+            case HIP_API_ID_hipHostMalloc: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_Malloc_Entry(HIPMALLOCHOST_VAL, 
+                        p->args.hipHostMalloc.ptr, 
+                        p->args.hipHostMalloc.size);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
+                {
+                    Probe_Gpu_Malloc_Exit(HIPMALLOCHOST_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaFreeHost_v3020 equivalent
+            case HIP_API_ID_hipHostFree: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_Free_Entry(HIPFREEHOST_VAL, 
+                        p->args.hipHostFree.ptr);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
+                {
+                    Probe_Gpu_Free_Exit(HIPFREEHOST_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaMemcpy_v3020 equivalent
+            case HIP_API_ID_hipMemcpy:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_gpuMemcpy_Enter(p->args.hipMemcpy.dst,
+                        p->args.hipMemcpy.src,
+                        p->args.hipMemcpy.sizeBytes,
+                        p->args.hipMemcpy.kind,
+                        NULL);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_gpuMemcpy_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyToSymbol_v3020 equivalent
+            case HIP_API_ID_hipMemcpyToSymbol: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_gpuMemcpyToSymbol_Enter(NULL, 
+                        p->args.hipMemcpyToSymbol.src, 
+                        p->args.hipMemcpyToSymbol.sizeBytes, 
+                        p->args.hipMemcpyToSymbol.kind, 
+                        NULL);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_gpuMemcpyToSymbol_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyFromSymbol_v3020 equivalent
+            case HIP_API_ID_hipMemcpyFromSymbol: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_gpuMemcpyFromSymbol_Enter(p->args.hipMemcpyFromSymbol.dst, 
+                        NULL, 
+                        p->args.hipMemcpyFromSymbol.sizeBytes, 
+                        p->args.hipMemcpyFromSymbol.kind, 
+                        NULL);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_gpuMemcpyFromSymbol_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyAsync_v3020 equivalent
+            case HIP_API_ID_hipMemcpyAsync:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_MemcpyAsync_Entry(p->args.hipMemcpyAsync.dst, 
+                        p->args.hipMemcpyAsync.src,
+                        p->args.hipMemcpyAsync.sizeBytes, 
+                        p->args.hipMemcpyAsync.kind,
+                        p->args.hipMemcpyAsync.stream, 
+                        NULL);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_MemcpyAsync_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaMemset_v3020 equivalent
+            case HIP_API_ID_hipMemset:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Memset_Entry(p->args.hipMemset.dst, 
+                        p->args.hipMemset.sizeBytes);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Memset_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaMemsetAsync_v3020 equivalent
+            case HIP_API_ID_hipMemsetAsync:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_MemsetAsync_Entry(p->args.hipMemsetAsync.dst, p->args.hipMemsetAsync.sizeBytes);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_MemsetAsync_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020 equivalent
+            case HIP_API_ID_hipDeviceSynchronize:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_ThreadBarrier_Entry(NULL);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_ThreadBarrier_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_DRIVER_TRACE_CBID_cuStreamCreate equivalent
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020 equivalent
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithFlags_v5000 equivalent
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithPriority_v5050 equivalent
+            case HIP_API_ID_hipStreamCreate:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_StreamCreate_Entry();
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_StreamCreate_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v3020 / v5050 equivalent
+            case HIP_API_ID_hipStreamDestroy:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_StreamDestroy_Entry((hipStream_t)p->args.hipStreamDestroy.stream, 
+                        NULL);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_StreamDestroy_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaEventRecord_v3020 equivalent
+            case HIP_API_ID_hipEventRecord:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_EventRecord_Entry((hipEvent_t)p->args.hipEventRecord.event, 
+                        (hipStream_t)p->args.hipEventRecord.stream, 
+                        NULL);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
+                {
+                    Probe_Gpu_EventRecord_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaEventSynchronize_v3020 equivalent
+            case HIP_API_ID_hipEventSynchronize:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_EventSynchronize_Entry((hipEvent_t)p->args.hipEventSynchronize.event);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_EventSynchronize_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaMalloc3D_v3020 equivalent
+            case HIP_API_ID_hipMalloc3D: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Malloc_Entry(HIPMALLOC3D_VAL, NULL, p->args.hipMalloc3D.extent.width * p->args.hipMalloc3D.extent.height * p->args.hipMalloc3D.extent.depth);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Malloc_Exit(HIPMALLOC3D_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            //CUPTI_RUNTIME_TRACE_CBID_cudaMalloc3DArray_v3020 equivalent
+            case HIP_API_ID_hipMalloc3DArray: 
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_Malloc_Entry(HIPMALLOC3DARRAY_VAL, 
+                        (void*)p->args.hipMalloc3DArray.array, 
+                        p->args.hipMalloc3DArray.extent.width * p->args.hipMalloc3DArray.extent.height * p->args.hipMalloc3DArray.extent.depth);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Malloc_Exit(HIPMALLOC3DARRAY_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020 equivalent
+            case HIP_API_ID_hipDeviceReset:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_DeviceReset_Exit(NULL);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_DeviceReset_Entry();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamWaitEvent_v3020 equivalent
+            case HIP_API_ID_hipStreamWaitEvent:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_StreamWaitEvent_Entry(p->args.hipStreamWaitEvent.event);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_StreamWaitEvent_Exit();
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithPriority_v5050 equivalent
+            case HIP_API_ID_hipStreamCreateWithPriority:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_StreamCreate_Entry();
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_StreamCreate_Exit();
+                }
+                ret = 1;
+            }
+            break;
+            
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaMallocManaged_v6000 equivalent
+            case HIP_API_ID_hipMallocManaged:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Malloc_Entry(HIPMALLOC_VAL, p->args.hipMallocManaged.dev_ptr, p->args.hipMallocManaged.size);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Malloc_Exit(HIPMALLOC_VAL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // DriverAPI on cuda
+            // CUPTI_DRIVER_TRACE_CBID_cuLaunchKernel equivalent
+            case HIP_API_ID_hipModuleLaunchKernel:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Launch_Entry(p->args.hipModuleLaunchKernel.f,
+                        p->args.hipModuleLaunchKernel.gridDimX * p->args.hipModuleLaunchKernel.gridDimY * p->args.hipModuleLaunchKernel.gridDimZ,
+                        p->args.hipModuleLaunchKernel.blockDimX * p->args.hipModuleLaunchKernel.blockDimY * p->args.hipModuleLaunchKernel.blockDimZ,
+                        p->args.hipModuleLaunchKernel.sharedMemBytes,
+                        p->args.hipModuleLaunchKernel.stream,
+                        NULL);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Launch_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
+
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaLaunchKernel_v7000 equivalent
+            case HIP_API_ID_hipLaunchKernel:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                {
+                    Probe_Gpu_Launch_Entry(p->args.hipLaunchKernel.function_address, 
+                        p->args.hipLaunchKernel.numBlocks.x * p->args.hipLaunchKernel.numBlocks.y * p->args.hipLaunchKernel.numBlocks.z,
+                        p->args.hipLaunchKernel.dimBlocks.x * p->args.hipLaunchKernel.dimBlocks.y * p->args.hipLaunchKernel.dimBlocks.z,
+                        p->args.hipLaunchKernel.sharedMemBytes, 
+                        p->args.hipLaunchKernel.stream, 
+                        NULL);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Launch_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
+            
+            // RUNTIMEAPI on cuda
+            // CUPTI_RUNTIME_TRACE_CBID_cudaLaunchCooperativeKernel_v9000 equivalent
+            case HIP_API_ID_hipLaunchCooperativeKernel:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Launch_Entry(p->args.hipLaunchCooperativeKernel.f,
+                        p->args.hipLaunchCooperativeKernel.gridDim.x * p->args.hipLaunchCooperativeKernel.gridDim.y * p->args.hipLaunchCooperativeKernel.gridDim.z,
+                        p->args.hipLaunchCooperativeKernel.blockDimX.x * p->args.hipLaunchCooperativeKernel.blockDimX.y * p->args.hipLaunchCooperativeKernel.blockDimX.z,
+                        p->args.hipLaunchCooperativeKernel.sharedMemBytes,
+                        p->args.hipLaunchCooperativeKernel.stream,
+                        NULL);
+                } 
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Launch_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
             default:
+            {
                 #if LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS
-                    fprintf(stderr, "Untracked Domain HIP event (domain = %d cid = %d  name = %s)\n", domain, cid, name);
-                    fflush(stderr);
-                    fprintf(stderr, "Untracked HIP ret = %d\n", ret);
+                    const char* name = roctracer_op_string(domain, cid, 0);
+                    fprintf(stderr, "Untracked Domain HIP event (domain=%u cid=%u name=%s)\n", domain, cid, name);
                     fflush(stderr);
                 #endif
                 ret = -1;
-        }
-        if (ret == 0)
-        {
-            if (p->phase == ACTIVITY_API_PHASE_ENTER)
-            {
-                #if LOG_UNTRACKED_CALLBACKS
-                    fprintf(stderr, "%s HIP call enter (domain = %d cid = %d)\n", name, domain, cid);
-                    fflush(stderr);
-                #endif
-                TRACE_EVENT(LAST_READ_TIME, HIP_UNTRACKED_EV, cid);
             }
-            else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-            {
-                #if LOG_UNTRACKED_CALLBACKS
-                    fprintf(stderr, "%s HIP call exit (domain = %d cid = %d)\n", name, domain, cid);
-                    fflush(stderr);
-                #endif
-                TRACE_EVENT(TIME, HIP_UNTRACKED_EV, EVT_END);
-            }
+            break;
         }
     }
-	if((p->phase == ACTIVITY_API_PHASE_EXIT))
-		Extrae_HIP_updateDepth(p);
+
+    if (p->phase == ACTIVITY_API_PHASE_EXIT)
+        Backend_Leave_Instrumentation();
+
 }
 
-void Extrae_HIP_init (int rank)
-{
+void Extrae_HIP_init(int rank) {
+
     UNREFERENCED_PARAMETER(rank);
+
     Extrae_HIP_API_disable_calls();
+
+    /* Equivalent to cuptiEnableAllDomains(...) + disable calls: Here we enable HIP API domain callback and apply cid filter above. */
     roctracer_enable_domain_callback(ACTIVITY_DOMAIN_HIP_API, Extrae_ROCTRACER_callback, NULL);
+
 }

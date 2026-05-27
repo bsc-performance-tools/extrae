@@ -24,7 +24,7 @@
 #ifndef __OPENSHMEM_PRV_EVENTS_H__
 #define __OPENSHMEM_PRV_EVENTS_H__
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

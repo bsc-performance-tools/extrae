@@ -21,6 +21,11 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#include <config.h>
+#ifndef HIP_WRAPPER_ROCTRACER_H_
+#define HIP_WRAPPER_ROCTRACER_H_
+
+#include "config.h"
 
 void Extrae_HIP_init(int rank);
+
+#endif

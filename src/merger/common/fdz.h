@@ -24,7 +24,7 @@
 #ifndef FDZ_H
 #define FDZ_H
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_ZLIB
 

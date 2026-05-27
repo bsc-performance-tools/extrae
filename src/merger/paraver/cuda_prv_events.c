@@ -111,7 +111,7 @@ void Enable_CUDA_Operation (INT32 type, UINT64 value)
 		else if (value == CUDASTREAMWAITEVENT_VAL)
 			inuse[CUDASTREAMWAITEVENT_INDEX] = TRUE;
 		else if (value == CUDA_STREAM_REGISTER_EV)
-			inuse[CUDASTREAMREGISTER_INDEX] == TRUE;
+			inuse[CUDASTREAMREGISTER_INDEX] = TRUE;
 		}
 }
 

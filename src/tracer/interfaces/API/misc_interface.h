@@ -24,7 +24,7 @@
 #ifndef MPI_INTERFACE_H_INCLUDED
 #define MPI_INTERFACE_H_INCLUDED
 
-#include <config.h>
+#include "config.h"
 
 /**** Create synonims of the very same routine using replication of code! ****/
 

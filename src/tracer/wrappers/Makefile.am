@@ -12,11 +12,15 @@ if HAVE_MPI
 SUBDIRS += MPI
 endif
 
-if HAVE_CUDA
+if HAVE_GPU
+SUBDIRS += GPU
+endif
+
+if HAVE_CUPTI
 SUBDIRS += CUDA
 endif
 
-if HAVE_HIP
+if HAVE_ROCTRACER
 SUBDIRS += HIP
 endif
 

@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include <config.h>
+#include "config.h"
 #include "events.h"
 
 struct GASPI_event_label_t

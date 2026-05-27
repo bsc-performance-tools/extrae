@@ -24,7 +24,7 @@
 #ifndef PARALLEL_MERGE_AUX_H
 #define PARALLEL_MERGE_AUX_H
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>

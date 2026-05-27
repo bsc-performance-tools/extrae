@@ -24,7 +24,7 @@
 #ifndef OMP_PRV_EVENTS_H
 #define OMP_PRV_EVENTS_H
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

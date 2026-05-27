@@ -1,18 +1,9 @@
 include $(top_srcdir)/PATHS
 
-# Wrappers for HIP instrumentation
-WRAPPERS_HIP = \
- hip_probe.c hip_probe.h \
- hip_common.c hip_common.h \
- gpu_event_info.c gpu_event_info.h
-
-WRAPPERS_HIP_CFLAGS = @HIP_CFLAGS@
-WRAPPERS_HIP += hip_wrapper_roctracer.c hip_wrapper_roctracer.h
-
-
-noinst_LTLIBRARIES  = libwrap_hip.la
+noinst_LTLIBRARIES = libwrap_hip.la
 
 libwrap_hip_la_CFLAGS = \
+ -I$(COMMON_GPU_DIR) \
  -I$(COMMON_MPI_DIR) \
  -I$(TRACER_INC) \
  -I$(HWC_INC) \
@@ -23,8 +14,15 @@ libwrap_hip_la_CFLAGS = \
  -I$(top_srcdir)/include \
  -I$(COMMON_INC) \
  $(UNWIND_CFLAGS) \
- $(WRAPPERS_HIP_CFLAGS)
+ @HIP_CFLAGS@ @ROCTRACER_CFLAGS@ \
+ -D__HIP_PLATFORM_AMD__ -DHIP_SUPPORT
 
-libwrap_hip_la_CFLAGS += -D__HIP_PLATFORM_AMD__
-libwrap_hip_la_SOURCES = $(WRAPPERS_HIP)
+libwrap_hip_la_SOURCES = \
+ hip_wrapper_roctracer.c hip_wrapper_roctracer.h
 
+libwrap_hip_la_LIBADD = \
+  ../GPU/libwrap_gpu.la \
+  @ROCTRACER_LDFLAGS_RPATH@
+
+libwrap_hip_la_DEPENDENCIES = \
+  ../GPU/libwrap_gpu.la

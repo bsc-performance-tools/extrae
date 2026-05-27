@@ -24,7 +24,7 @@
 #ifndef _COMMUNICATION_QUEUES_H_
 #define _COMMUNICATION_QUEUES_H_
 
-#include <config.h>
+#include "config.h"
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif

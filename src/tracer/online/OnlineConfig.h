@@ -24,7 +24,7 @@
 #ifndef __ONLINE_CONFIG_H__
 #define __ONLINE_CONFIG_H__
 
-#include <config.h>
+#include "config.h"
 
 #define DEFAULT_ANALYSIS_FREQUENCY 60
 #define DEFAULT_TOPOLOGY           "auto"
