@@ -647,24 +647,28 @@ static void Gather_Nodes_Info (void)
 /******************************************************************************
  ***  MPI_Generate_Task_File_List
  ******************************************************************************/
+#define MPITS_WRITE_BUF_SIZE (16 * 1024 * 1024)
+
 int MPI_Generate_Task_File_List ()
 {
 	int filedes, ierror;
-	unsigned u, ret, thid;
+	unsigned u, thid;
+	char   *write_buf     = NULL;
+	size_t  write_buf_pos = 0;
 	char tmpname[2048];
 	unsigned *buffer = NULL;
 	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
 	MPI_Comm cparent = MPI_COMM_NULL;
 	int isSpawned = 0;
 
+	/* ── Step 1: Gather pid/nthreads/taskid ──────────────────────────────── */
 	if (TASKID == 0)
 	{
 		buffer = (unsigned *) xmalloc (sizeof(unsigned) * Extrae_get_num_tasks() * 3);
 		/* we store pid, nthreads and taskid on each position */
-
 	}
 
-	tmp[0] = TASKID; 
+	tmp[0] = TASKID;
 	tmp[1] = getpid();
 	tmp[2] = Backend_getMaximumOfThreads();
 
@@ -672,59 +676,99 @@ int MPI_Generate_Task_File_List ()
 	ierror = PMPI_Gather (&tmp, 3, MPI_UNSIGNED, buffer, 3, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 	MPI_CHECK(ierror, PMPI_Gather);
 
-#if MPI_SUPPORTS_MPI_COMM_SPAWN
+	/* ── Step 2: Each rank saves their own thread names ───────────────────── */
+	int my_nthreads = Backend_getMaximumOfThreads();
+	char *my_names  = (char *) xmalloc (my_nthreads * THREAD_INFO_NAME_LEN * sizeof(char));
+
+	for (u = 0; u < (unsigned)my_nthreads; u++)
+		memcpy (&my_names[u * THREAD_INFO_NAME_LEN], Extrae_get_thread_name(u), THREAD_INFO_NAME_LEN);
+
+	/* ── Step 3: Rank 0 calculates recvcounts[] and displs[] for Gatherv ──── */
+	int  *recvcounts    = NULL;
+	int  *displs        = NULL;
+	char *all_names_buf = NULL;
+	int   total_chars   = 0;
+
+	if (TASKID == 0)
+	{
+		recvcounts = (int *) xmalloc (Extrae_get_num_tasks() * sizeof(int));
+		displs     = (int *) xmalloc (Extrae_get_num_tasks() * sizeof(int));
+
+		for (u = 0; u < Extrae_get_num_tasks(); u++)
+		{
+			unsigned NTHREADS_u = buffer[u*3+2];
+			recvcounts[u] = (int)(NTHREADS_u * THREAD_INFO_NAME_LEN);
+			displs[u]     = total_chars;
+			total_chars  += recvcounts[u];
+		}
+
+		all_names_buf = (char *) xmalloc (total_chars * sizeof(char));
+	}
+
+	/* ── Step 4: Single collective operation — O(log n) ─────────────────── */
+	ierror = PMPI_Gatherv (
+		my_names,      my_nthreads * THREAD_INFO_NAME_LEN, MPI_CHAR,
+		all_names_buf, recvcounts, displs,                  MPI_CHAR,
+		0, MPI_COMM_WORLD
+	);
+	MPI_CHECK(ierror, PMPI_Gatherv);
+
+	xfree (my_names);
+
+	/* ── Step 5: Only rank 0 writes the files ────────────────────────────── */
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
 #endif
 	isSpawned = (cparent != MPI_COMM_NULL);
 
-	/* If I haven't been MPI_Comm_Spawned, let's clean all the *-%d.mpits we
-	   have created in earlier execes */
-	if (TASKID == 0 && !isSpawned)
+	if (TASKID == 0)
 	{
-		if (Extrae_core_get_mpits_file_name() == NULL)
+		/* If I haven't been MPI_Comm_Spawned, clean all *-%d.mpits from earlier executions */
+		if (!isSpawned)
 		{
-			int next = TRUE;
-			unsigned count = 1;
-			do
+			if (Extrae_core_get_mpits_file_name() == NULL)
 			{
-				if (count > 1)
-					sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, count, EXT_MPITS);
-				else
-					sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
-
-				/* If the file exists, remove it and its associated .spawn file */
-				if ( __Extrae_Utils_file_exists(tmpname) )
+				int next = TRUE;
+				unsigned count = 1;
+				do
 				{
-					if (unlink (tmpname) != 0)
-						fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
-
 					if (count > 1)
-						sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, count, EXT_SPAWN);
+						sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, count, EXT_MPITS);
 					else
-						sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_SPAWN);
+						sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 
-					if (__Extrae_Utils_file_exists(tmpname))
+					/* If the file exists, remove it and its associated .spawn file */
+					if ( __Extrae_Utils_file_exists(tmpname) )
+					{
 						if (unlink (tmpname) != 0)
 							fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
 
-					next = TRUE;
-				}
-				else
-					next = FALSE;
+						if (count > 1)
+							sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, count, EXT_SPAWN);
+						else
+							sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_SPAWN);
 
-				count++;
-			} while (next);
+						if (__Extrae_Utils_file_exists(tmpname))
+							if (unlink (tmpname) != 0)
+								fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
+
+						next = TRUE;
+					}
+					else
+						next = FALSE;
+
+					count++;
+				} while (next);
+			}
 		}
-	}
 
-	if (TASKID == 0)
-	{
+		/* Open file */
 		if (Extrae_core_get_mpits_file_name() == NULL)
 		{
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 			do
 			{
-				SpawnGroup ++;
+				SpawnGroup++;
 				if (SpawnGroup > 1)
 					sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, SpawnGroup, EXT_MPITS);
 				else
@@ -737,104 +781,85 @@ int MPI_Generate_Task_File_List ()
 			filedes = open (tmpname, O_RDWR | O_CREAT | O_TRUNC, 0644);
 			if (filedes == -1)
 			{
+				xfree(all_names_buf); xfree(recvcounts); xfree(displs);
 				return -1;
 			}
 #endif
-			MpitsFileName = strdup( tmpname );
+			MpitsFileName = strdup (tmpname);
 		}
 		else
 		{
 			filedes = open (MpitsFileName, O_RDWR | O_CREAT | O_TRUNC, 0644);
-			if (filedes == -1) 
+			if (filedes == -1)
 			{
+				xfree(all_names_buf); xfree(recvcounts); xfree(displs);
 				return -1;
 			}
 		}
 
+		write_buf = (char *) xmalloc (MPITS_WRITE_BUF_SIZE);
+
+		/* Write entries — now using local buffer, no communication needed */
 		for (u = 0; u < Extrae_get_num_tasks(); u++)
 		{
-			char tmpline[4096];
-			unsigned TID = buffer[u*3+0];
-			unsigned PID = buffer[u*3+1];
+			unsigned TID      = buffer[u*3+0];
+			unsigned PID      = buffer[u*3+1];
 			unsigned NTHREADS = buffer[u*3+2];
 
-			if (u == 0)
+			/* Pointer to this rank's name block in the global buffer */
+			char *rank_names = &all_names_buf[displs[u]];
+
+			for (thid = 0; thid < NTHREADS; thid++)
 			{
-				/* If Im processing MASTER, I know my threads and their names */
-				for (thid = 0; thid < NTHREADS; thid++)
+				char tmpline[4096];
+				char *tname = &rank_names[thid * THREAD_INFO_NAME_LEN];
+
+				FileName_PTT (tmpname, Get_FinalDir(TID), appl_name,
+				              TasksNodes[u], PID, TID, thid, EXT_MPIT);
+				sprintf (tmpline, "%s named %s\n", tmpname, tname);
+
 				{
-					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
-					  TasksNodes[u], PID, TID, thid, EXT_MPIT);
-					sprintf (tmpline, "%s named %s\n", tmpname,
-					  Extrae_get_thread_name(thid));
-					ret = write (filedes, tmpline, strlen (tmpline));
-					if (ret != strlen (tmpline))
+					size_t line_len = strlen (tmpline);
+					if (write_buf_pos + line_len > MPITS_WRITE_BUF_SIZE)
 					{
-						close (filedes);
-						return -1;
+						ssize_t flushed = write (filedes, write_buf, write_buf_pos);
+						if ((size_t) flushed != write_buf_pos)
+						{
+							xfree (write_buf);
+							close (filedes);
+							xfree(all_names_buf); xfree(recvcounts); xfree(displs);
+							return -1;
+						}
+						write_buf_pos = 0;
 					}
+					memcpy (write_buf + write_buf_pos, tmpline, line_len);
+					write_buf_pos += line_len;
 				}
-			}
-			else
-			{
-				/* If Im not processing MASTER, I have to ask for threads and their names */
-
-				int foo;
-				MPI_Status s;
-				char *tmp = (char*)xmalloc (NTHREADS*THREAD_INFO_NAME_LEN*sizeof(char));
-
-				/* Ask to slave */
-				PMPI_Send (&foo, 1, MPI_INT, TID, 123456, MPI_COMM_WORLD);
-
-				/* Send master info */
-				PMPI_Recv (tmp, NTHREADS*THREAD_INFO_NAME_LEN, MPI_CHAR, TID, 123457,
-				  MPI_COMM_WORLD, &s);
-
-				for (thid = 0; thid < NTHREADS; thid++)
-				{
-					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
-					  TasksNodes[u], PID, TID, thid, EXT_MPIT);
-					sprintf (tmpline, "%s named %s\n", tmpname,
-					  &tmp[thid*THREAD_INFO_NAME_LEN]);
-					ret = write (filedes, tmpline, strlen (tmpline));
-					if (ret != strlen (tmpline))
-					{
-						close (filedes);
-						return -1;
-					}
-				}
-				xfree (tmp);
 			}
 		}
+		if (write_buf_pos > 0)
+		{
+			ssize_t flushed = write (filedes, write_buf, write_buf_pos);
+			if ((size_t) flushed != write_buf_pos)
+			{
+				xfree (write_buf);
+				close (filedes);
+				xfree(all_names_buf); xfree(recvcounts); xfree(displs);
+				return -1;
+			}
+		}
+		xfree (write_buf);
 		close (filedes);
-	}
-	else
-	{
-		MPI_Status s;
-		int foo;
 
-		char *tmp = (char*)xmalloc (Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char));
-		for (u = 0; u < Backend_getMaximumOfThreads(); u++)
-			memcpy (&tmp[u*THREAD_INFO_NAME_LEN], Extrae_get_thread_name(u), THREAD_INFO_NAME_LEN);
-
-		/* Wait for master to ask */
-		PMPI_Recv (&foo, 1, MPI_INT, 0, 123456, MPI_COMM_WORLD, &s);
-
-		/* Send master info */
-		PMPI_Send (tmp, Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN,
-		  MPI_CHAR, 0, 123457, MPI_COMM_WORLD);
-
-		xfree (tmp);
-	}
-
-	if (TASKID == 0)
-	{
+		xfree (all_names_buf);
+		xfree (recvcounts);
+		xfree (displs);
 		xfree (buffer);
 	}
 
+	/* ── Step 6: Broadcast the .mpits filename to all ranks ─────────────── */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-	/* Pass the name of the .mpits file to all tasks (the embedded merger needs to know!) */
-	PMPI_Bcast(&SpawnGroup, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	PMPI_Bcast (&SpawnGroup, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	if (SpawnGroup > 1)
 		sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, SpawnGroup, EXT_MPITS);
 	else
@@ -843,11 +868,12 @@ int MPI_Generate_Task_File_List ()
 	sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 #endif
 
-	MpitsFileName = strdup( tmpname );
-
+	xfree(MpitsFileName);
+	MpitsFileName = strdup (tmpname);
 	return 0;
 }
 
+#undef MPITS_WRITE_BUF_SIZE
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
@@ -3740,4 +3766,3 @@ MPI_Comm processMessage(MPI_Message message, MPI_Request *request)
 }
 
 #endif /* MPI3 */
-
