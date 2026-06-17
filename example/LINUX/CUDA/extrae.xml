@@ -5,16 +5,42 @@
  initial-mode="detail"
  type="paraver"
 >
+      <!--
+        CUDA PAPI counter example.
 
+        Look for available CUDA counters with the PAPI library that will be used
+        at run time, on a compute node with a GPU:
+
+          papi_native_avail -c cuda
+
+        Use the exact counter name and qualifiers printed by PAPI. The names can
+        change between PAPI/CUDA/GPU versions. To avoid profiling problems,
+        select counters reported with Numpass=1.
+
+        The enabled set below reads CUDA counters for device 0.
+        To read another GPU, change the N in ':device=N'.
+      -->
   <counters enabled="yes">
     <cpu enabled="yes" starting-set-distribution="1">
-      <set enabled="yes" domain="all" changeat-time="0">
+
+      <set enabled="yes" changeat-time="0">
+        cuda:::dram__bytes:stat=sum:device=0,
+        cuda:::dram__bytes_read:stat=sum:device=0,
+        cuda:::dram__bytes_write:stat=sum:device=0,
+        cuda:::sm__cycles_active:stat=avg:device=0,
+        cuda:::gr__ctas_launched:stat=sum:device=0,
+        cuda:::sm__inst_executed:stat=sum:device=0,
+        cuda:::sm__warps_active:stat=avg:device=0,
+        cuda:::lts__t_sectors:stat=sum:device=0
+      </set>
+
+        <!-- CPU/core PAPI counters must be in a separate set from CUDA counters.
+        Do not mix CPU/core and GPU counters in the same set. -->
+
+      <!-- <set enabled="yes" domain="all" changeat-time="0">
         PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM,PAPI_L2_DCM,PAPI_L3_TCM,PAPI_BR_INS,PAPI_BR_MSP,RESOURCE_STALLS
-      </set>
-      <set enabled="yes" domain="all" changeat-time="0">
-        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_VEC_SP,PAPI_SR_INS,PAPI_LD_INS,PAPI_FP_INS
-        <sampling enabled="no" period="1000000000">PAPI_TOT_CYC</sampling>
-      </set>
+      </set> -->
+
     </cpu>
     <network enabled="no" />
     <resource-usage enabled="no" />
@@ -40,7 +66,7 @@
 
   <others enabled="yes">
     <minimum-time enabled="no">10M</minimum-time>
-    <finalize-on-signal enabled="yes" 
+    <finalize-on-signal enabled="yes"
       SIGUSR1="no" SIGUSR2="no" SIGINT="yes"
       SIGQUIT="yes" SIGTERM="yes" SIGXCPU="yes"
       SIGFPE="yes" SIGSEGV="yes" SIGABRT="yes"
@@ -61,7 +87,7 @@
 
   <syscall enabled="no" />
 
-  <merge enabled="yes" 
+  <merge enabled="yes"
     synchronization="default"
     tree-fan-out="16"
     max-memory="512"

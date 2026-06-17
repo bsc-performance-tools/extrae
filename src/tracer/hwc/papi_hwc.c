@@ -213,11 +213,13 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 		*/
 		char *counter_last_position = &(counters[i][strlen(counters[i])]);
 		char *strtoul_check;
+		int counter_is_name;
 
 		HWC_sets[num_set].counters[HWC_sets[num_set].num_counters] = 
 			strtoul (counters[i], &strtoul_check, 16);
+		counter_is_name = (strtoul_check != counter_last_position);
 
-		if (strtoul_check != counter_last_position)
+		if (counter_is_name)
 		{
 			int EventCode;
 			if (PAPI_event_name_to_code(counters[i], &EventCode) != PAPI_OK)
@@ -247,11 +249,20 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 
 			HWC_sets[num_set].counters[HWC_sets[num_set].num_counters] = NO_COUNTER;
 		}
-		else 
+		else
 		{
 			if (rank == 0)
+			{
+				char counter_name[PAPI_MAX_STR_LEN];
+				const char *counter_label = info.symbol;
+
+				if (PAPI_event_code_to_name (HWC_sets[num_set].counters[HWC_sets[num_set].num_counters],
+					counter_name) == PAPI_OK)
+					counter_label = counter_name;
+
 				HWCBE_PAPI_AddDefinition (HWC_sets[num_set].counters[HWC_sets[num_set].num_counters],
-					info.symbol, (info.event_code & PAPI_PRESET_MASK)?info.short_descr:info.long_descr);
+					counter_label, (info.event_code & PAPI_PRESET_MASK)?info.short_descr:info.long_descr);
+			}
 
 			HWC_sets[num_set].num_counters++;
 		}
@@ -576,7 +587,6 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 {
 	int i, j, rc;
-	PAPI_option_t options;
 
 	if (HWC_num_sets <= 0)
 		return FALSE;
@@ -597,8 +607,6 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 
 	//if (!forked)
 	{
-		xmemset (&options, 0, sizeof(options));
-
 		for (i = 0; i < HWC_num_sets; i++)
 		{
 			/* Create the eventset. Each thread will create its own eventset */
@@ -672,12 +680,28 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 				xfree (HWCid);
 			}
 
-			/* Set the domain for these eventsets */
-			options.domain.eventset = HWC_sets[i].eventsets[threadid];
-			options.domain.domain = HWC_sets[i].domain;
-			rc = PAPI_set_opt (PAPI_DOMAIN, &options);
-			if (rc != PAPI_OK)
-				fprintf (stderr, PACKAGE_NAME": Error when setting domain for eventset %d\n", i+1);
+			/* PAPI domains only apply to the CPU perf_event component. */
+#if defined(PAPI_VERSION) && (PAPI_VERSION_MAJOR(PAPI_VERSION) >= 4)
+			{
+				int cid = PAPI_get_eventset_component(HWC_sets[i].eventsets[threadid]);
+				const PAPI_component_info_t *info = PAPI_get_component_info(cid);
+
+				if (strcmp(info->name, "perf_event") != 0)
+					continue;
+			}
+#endif
+			/* Only CPU perf_event sets reach this point. Keep options local
+			 * because it is only needed for the domain setup. */
+			{
+				PAPI_option_t options;
+
+				xmemset (&options, 0, sizeof(options));
+				options.domain.eventset = HWC_sets[i].eventsets[threadid];
+				options.domain.domain = HWC_sets[i].domain;
+				rc = PAPI_set_opt (PAPI_DOMAIN, &options);
+				if (rc != PAPI_OK)
+					fprintf (stderr, PACKAGE_NAME": Error when setting domain for eventset %d\n", i+1);
+			}
 		}
 	} /* forked */ 
 
@@ -744,4 +768,3 @@ int HWCBE_PAPI_Accum (unsigned int tid, long long *store_buffer)
 	}
 	return 1;
 }
-
