@@ -263,7 +263,7 @@ WRAPPERS_CORE = \
  wrappers/API/threadinfo.c wrappers/API/threadinfo.h \
  wrappers/API/trace_buffers.h \
  trace_macros.h trace_macros_mpi.h trace_macros_omp.h \
- trace_macros_gpu.h trace_hwc.h
+ trace_hwc.h
 
 core_SRCS = \
  calltrace.c calltrace.h                     \
@@ -316,6 +316,8 @@ libptmpigaspitrace_la_SOURCES = $(libmpigaspitrace_la_SOURCES)
 libptgaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES)
 libcudampigaspitrace_la_SOURCES = $(libmpigaspitrace_la_SOURCES) $(WRAPPERS_CUDA)
 libcudagaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES) $(WRAPPERS_CUDA)
+libhipmpigaspitrace_la_SOURCES = $(libmpigaspitrace_la_SOURCES) $(WRAPPERS_HIP)
+libhipgaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES) $(WRAPPERS_HIP)
 liboclmpigaspitrace_la_SOURCES = $(libmpigaspitrace_la_SOURCES) $(WRAPPERS_OCL)
 liboclgaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES) $(WRAPPERS_OCL)
 libnanosmpigaspitrace_la_SOURCES = $(libmpigaspitrace_la_SOURCES)
@@ -611,6 +613,8 @@ libptmpigaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITI
 libptgaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_PTHREAD_LIBS)
 libcudampigaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_CUDA_LIBS)
 libcudagaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_CUDA_LIBS)
+libhipmpigaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_HIP_LIBS)
+libhipgaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_HIP_LIBS)
 liboclmpigaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_OPENCL_LIBS)
 liboclgaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_OPENCL_LIBS)
 libnanosmpigaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB)
@@ -814,6 +818,8 @@ libptmpigaspitrace_la_CFLAGS = $(libmpigaspitrace_la_CFLAGS) -DPTHREAD_SUPPORT $
 libptgaspitrace_la_CFLAGS = $(libgaspitrace_la_CFLAGS) -DPTHREAD_SUPPORT $(PTHREAD_CFLAGS)
 libcudampigaspitrace_la_CFLAGS = $(libmpigaspitrace_la_CFLAGS) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 libcudagaspitrace_la_CFLAGS = $(libgaspitrace_la_CFLAGS) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
+libhipmpigaspitrace_la_CFLAGS = $(libmpigaspitrace_la_CFLAGS) -DHIP_SUPPORT $(WRAPPERS_HIP_CFLAGS)
+libhipgaspitrace_la_CFLAGS = $(libgaspitrace_la_CFLAGS) -DHIP_SUPPORT $(WRAPPERS_HIP_CFLAGS)
 liboclmpigaspitrace_la_CFLAGS = $(libmpigaspitrace_la_CFLAGS) -DOPENCL_SUPPORT $(WRAPPERS_OCL_CFLAGS)
 liboclgaspitrace_la_CFLAGS = $(libgaspitrace_la_CFLAGS) -DOPENCL_SUPPORT $(WRAPPERS_OCL_CFLAGS)
 libnanosmpigaspitrace_la_CFLAGS = $(libmpigaspitrace_la_CFLAGS) -DNANOS_SUPPORT
@@ -1002,6 +1008,8 @@ libptmpigaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(PTHREAD_LIBS)
 libptgaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(PTHREAD_LIBS)
 libcudampigaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libcudagaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libhipmpigaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libhipgaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 liboclmpigaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 liboclgaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libnanosmpigaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)

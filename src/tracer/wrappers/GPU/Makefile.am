@@ -2,6 +2,7 @@ include $(top_srcdir)/PATHS
 
 # Common GPU wrapper code shared by CUDA/HIP
 WRAPPERS_GPU = \
+ gpu_macros.h \
  gpu_probe.h gpu_probe.c \
  gpu_common.h gpu_common.c
 
