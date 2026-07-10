@@ -33,7 +33,6 @@
 #define DEFAULT_GPU_EVENTS_BLOCK_SIZE 1024
 
 #define XTR_FLUSH_ALL_DEVICES -1
-#define XTR_FLUSH_ALL_STREAMS -1
 
 #define SearchStream(device_id, stream) SearchAndRegisterStream(device_id, stream, FALSE)
 #define RegisterStream(device_id, stream) SearchAndRegisterStream(device_id, stream, TRUE)
@@ -96,7 +95,7 @@ extern pthread_mutex_t lastTagMutex;
 extern pthread_rwlock_t kernel_map_rwlock;
 
 typedef struct {
-	int stream_idx;
+	struct RegisteredStream_t* stream_ptr;
 	GPU_STREAM_T stream;
 	GPU_MEMCPY_KIND_T memcpyKind;
 	size_t memcpySize;
@@ -107,9 +106,9 @@ extern __thread GPU_thread_args_t GPU_thread_args;
 
 unsigned GetGPUCommTag(void);
 void DeinitializeDevice(int device_id);
-int SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_stream);
+struct RegisteredStream_t *SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_stream);
 void UnregisterStream(int device_id, GPU_STREAM_T stream);
-void AddEventToStream(Extrae_GPU_Time_Type timetype, int device_id, int stream_idx, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned int blockspergrid, unsigned int threadsperblock);
+void AddEventToStream(Extrae_GPU_Time_Type timetype, int device_id, struct RegisteredStream_t *registered_stream, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned int blockspergrid, unsigned int threadsperblock);
 
 /**************************************gpu_event_info**************************************/
 void gpuEventList_init(gpu_event_list_t*, int, size_t);
@@ -121,5 +120,5 @@ int gpuEventList_isempty(gpu_event_list_t*);
 void gpuEventList_free(gpu_event_list_t*);
 /******************************************************************************************/
 
-void FlushStreams(int, int);
+void FlushStreams(int device_id, struct RegisteredStream_t *stream_ptr);
 void Extrae_gpuFinalize(void);

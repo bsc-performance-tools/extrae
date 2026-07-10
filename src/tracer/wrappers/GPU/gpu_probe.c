@@ -33,7 +33,6 @@ int trace_gpu = TRUE;
 
 void Extrae_set_trace_GPU(int b) { trace_gpu = b; }
 int Extrae_get_trace_GPU(void) { return trace_gpu; }
-static struct DeviceInfo_t *deviceArray = NULL;
 
 #if 0
 #define DEBUG fprintf(stdout, "THREAD %d: %s\n", THREADID, __FUNCTION__)
@@ -59,7 +58,7 @@ void Probe_Gpu_Launch_Entry(GPU_FUNCTION_T p1, unsigned int blocksPerGrid, unsig
 {
 
 	int device_id = -1;
-	int stream_idx = -1;
+	struct RegisteredStream_t *stream_ptr = NULL;
 
 	if (GPU_PROBE_ACTIVE())
 	{
@@ -71,12 +70,12 @@ void Probe_Gpu_Launch_Entry(GPU_FUNCTION_T p1, unsigned int blocksPerGrid, unsig
 	GPU_thread_args.tag = tag;
 
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
-	stream_idx = RegisterStream(device_id, stream);
-	GPU_thread_args.stream_idx = stream_idx;
+	stream_ptr = RegisterStream(device_id, stream);
+	GPU_thread_args.stream_ptr = stream_ptr;
 
 	TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
 
-	AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, GPUEV(KERNEL_GPU_VAL), (UINT64)p1, tag, sharedMemBytes, blocksPerGrid, threadsPerBlock);
+	AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, GPUEV(KERNEL_GPU_VAL), (UINT64)p1, tag, sharedMemBytes, blocksPerGrid, threadsPerBlock);
 
 }
 
@@ -86,7 +85,7 @@ void Probe_Gpu_Launch_Exit(GPU_CONTEXT_T ctx)
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
 	unsigned tag = GPU_thread_args.tag;
 
-	AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, GPU_thread_args.stream_idx, GPUEV(KERNEL_GPU_VAL), EVT_END, tag, 0, 0, 0);
+	AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, GPU_thread_args.stream_ptr, GPUEV(KERNEL_GPU_VAL), EVT_END, tag, 0, 0, 0);
 
 	if (GPU_PROBE_ACTIVE())
 	{
@@ -194,7 +193,7 @@ void Probe_Gpu_MemcpyAsync_Entry(void *dst, const void *src, size_t size, GPU_ME
 	UNREFERENCED_PARAMETER(src);
 
 	int device_id = -1;
-	int stream_idx = -1;
+	struct RegisteredStream_t *stream_ptr = NULL;
 
 	if (GPU_PROBE_ACTIVE())
 	{
@@ -211,16 +210,16 @@ void Probe_Gpu_MemcpyAsync_Entry(void *dst, const void *src, size_t size, GPU_ME
 
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
 
-	stream_idx = RegisterStream(device_id, stream);
-	GPU_thread_args.stream_idx = stream_idx;
+	stream_ptr = RegisterStream(device_id, stream);
+	GPU_thread_args.stream_ptr = stream_ptr;
 
 	if (kind == GPU_MEMCPY_H2D_T)
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV, TASKID, size, tag, tag);
 
 	if (kind == GPU_MEMCPY_D2H_T)
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_BEGIN, tag, size, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_BEGIN, tag, size, 0, 0);
 	else
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_BEGIN, 0, size, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_BEGIN, 0, size, 0, 0);
 
 }
 
@@ -228,7 +227,7 @@ void Probe_Gpu_MemcpyAsync_Exit(GPU_CONTEXT_T ctx)
 {
 
 	int device_id = -1;
-	int stream_idx = GPU_thread_args.stream_idx;
+	struct RegisteredStream_t *stream_ptr = GPU_thread_args.stream_ptr;
 	GPU_MEMCPY_KIND_T kind = GPU_thread_args.memcpyKind;
 	size_t size = GPU_thread_args.memcpySize;
 	unsigned tag = GPU_thread_args.tag;
@@ -236,9 +235,9 @@ void Probe_Gpu_MemcpyAsync_Exit(GPU_CONTEXT_T ctx)
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
 
 	if (kind == GPU_MEMCPY_H2D_T)
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_END, tag, size, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_END, tag, size, 0, 0);
 	else
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_END, 0, size, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, GPUEV(MEMCPYASYNC_GPU_VAL), EVT_END, 0, size, 0, 0);
 
 	if (GPU_PROBE_ACTIVE())
 		TRACE_MISCEVENTANDCOUNTERS(TIME, GPUEV(CALL_EV), GPUEV(MEMCPYASYNC_VAL), EVT_END);
@@ -287,7 +286,7 @@ void Probe_Gpu_ThreadBarrier_Entry(GPU_CONTEXT_T ctx)
 
 	int device_id = -1;
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
-	FlushStreams(device_id, XTR_FLUSH_ALL_STREAMS);
+	FlushStreams(device_id, NULL);
 }
 
 void Probe_Gpu_ThreadBarrier_Exit(void)
@@ -299,14 +298,13 @@ void Probe_Gpu_ThreadBarrier_Exit(void)
 void Probe_Gpu_StreamBarrier_Entry(GPU_STREAM_T stream, GPU_CONTEXT_T ctx)
 {
 	int device_id = -1;
-	int stream_idx = -1;
+	struct RegisteredStream_t *stream_ptr = NULL;
 	if (GPU_PROBE_ACTIVE()) {
 		GPU_GET_DEVICE_SAFE(ctx, device_id);
-		stream_idx = RegisterStream(device_id, stream);
+		stream_ptr = RegisterStream(device_id, stream);
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, GPUEV(CALL_EV), GPUEV(STREAMSYNCHRONIZE_VAL), EVT_BEGIN);
-		int threadid = deviceArray[device_id].streams[stream_idx].thread_id;
-		TRACE_EVENT(LAST_READ_TIME, GPUEV(_STREAM_DEST_ID_EV), threadid + 1);
-		FlushStreams(device_id, stream_idx);
+		TRACE_EVENT(LAST_READ_TIME, GPUEV(_STREAM_DEST_ID_EV), stream_ptr->thread_id + 1);
+		FlushStreams(device_id, stream_ptr);
 	}
 }
 
@@ -320,7 +318,7 @@ void Probe_Gpu_DeviceReset_Entry(void)
 {
 	if (GPU_PROBE_ACTIVE())
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, GPUEV(CALL_EV), GPUEV(DEVICERESET_VAL), EVT_BEGIN);
-	FlushStreams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
+	FlushStreams(XTR_FLUSH_ALL_DEVICES, NULL);
 }
 
 void Probe_Gpu_DeviceReset_Exit(GPU_CONTEXT_T ctx)
@@ -389,10 +387,10 @@ void Probe_Gpu_StreamRegister_Exit(void)
 void Probe_Gpu_EventRecord_Entry(GPU_EVENT_T event, GPU_STREAM_T stream, GPU_CONTEXT_T ctx)
 {
 	int device_id = -1;
-	int stream_idx = -1;
+	struct RegisteredStream_t *stream_ptr = NULL;
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
-	stream_idx = RegisterStream(device_id, stream);
-	int threadid = deviceArray[device_id].streams[stream_idx].thread_id;
+	stream_ptr = RegisterStream(device_id, stream);
+	int threadid = stream_ptr->thread_id;
 	if (GPU_PROBE_ACTIVE())
 	{
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, GPUEV(CALL_EV), GPUEV(EVENTRECORD_VAL), EVT_BEGIN);
@@ -444,7 +442,7 @@ void _Probe_gpuMemcpy_Enter(void *dst, const void *src, size_t count, GPU_MEMCPY
 	UNREFERENCED_PARAMETER(src);
 
 	int device_id = -1;
-	int stream_idx = -1;
+	struct RegisteredStream_t *stream_ptr = NULL;
 	unsigned tag = GetGPUCommTag();
 
 	GPU_thread_args.memcpyKind = kind;
@@ -452,8 +450,8 @@ void _Probe_gpuMemcpy_Enter(void *dst, const void *src, size_t count, GPU_MEMCPY
 	GPU_thread_args.tag = tag;
 
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
-	stream_idx = RegisterStream(device_id, GPU_STREAM_DEFAULT);
-	GPU_thread_args.stream_idx = stream_idx;
+	stream_ptr = RegisterStream(device_id, GPU_STREAM_DEFAULT);
+	GPU_thread_args.stream_ptr = stream_ptr;
 
 	entry_probe(count);
 
@@ -461,14 +459,14 @@ void _Probe_gpuMemcpy_Enter(void *dst, const void *src, size_t count, GPU_MEMCPY
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV, TASKID, count, tag, tag);
 
 	if (kind == GPU_MEMCPY_D2H_T)
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, gpu_value, EVT_BEGIN, tag, count, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, gpu_value, EVT_BEGIN, tag, count, 0, 0);
 	else
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, gpu_value, EVT_BEGIN, 0, count, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, gpu_value, EVT_BEGIN, 0, count, 0, 0);
 }
 
 void _Probe_gpuMemcpy_Exit(GPU_CONTEXT_T ctx, void (*exit_probe)(void), unsigned long long gpu_value) {
 	int device_id = -1;
-	int stream_idx = GPU_thread_args.stream_idx;
+	struct RegisteredStream_t *stream_ptr = GPU_thread_args.stream_ptr;
 	GPU_MEMCPY_KIND_T kind = GPU_thread_args.memcpyKind;
 	size_t size = GPU_thread_args.memcpySize;
 	unsigned tag = GPU_thread_args.tag;
@@ -476,9 +474,9 @@ void _Probe_gpuMemcpy_Exit(GPU_CONTEXT_T ctx, void (*exit_probe)(void), unsigned
 	GPU_GET_DEVICE_SAFE(ctx, device_id);
 
 	if (kind == GPU_MEMCPY_H2D_T)
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, gpu_value, EVT_END, tag, size, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, gpu_value, EVT_END, tag, size, 0, 0);
 	else
-		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_idx, gpu_value, EVT_END, 0, size, 0, 0);
+		AddEventToStream(EXTRAE_GPU_NEW_TIME, device_id, stream_ptr, gpu_value, EVT_END, 0, size, 0, 0);
 
 	exit_probe();
 

@@ -201,8 +201,14 @@ unsigned GetGPUCommTag(void)
 	return new_tag;
 }
 
-static void SynchronizeStream(int device_id, int stream_idx)
+static void SynchronizeStream(int device_id, struct RegisteredStream_t *registered_stream)
 {
+	if (registered_stream == NULL)
+	{
+		fprintf(stderr, PACKAGE_NAME ": Error! NULL registered_stream in SynchronizeStream\n");
+		exit(-1);
+	}
+
 	if (device_id >= deviceCount)
 	{
 		fprintf(stderr, PACKAGE_NAME ": Error! Invalid GPU device id in SynchronizeStream\n");
@@ -210,18 +216,17 @@ static void SynchronizeStream(int device_id, int stream_idx)
 	}
 
 #ifdef DEBUG
-	fprintf(stderr, "SynchronizeStream (device_id=%d, stream_idx=%d, stream=%p)\n",
-			device_id, stream_idx,
-			deviceArray[device_id].streams[stream_idx].stream);
+	fprintf(stderr, "SynchronizeStream (device_id=%d, stream=%p)\n",
+			device_id, registered_stream->stream);
 #endif
 
-	if (deviceArray[device_id].streams[stream_idx].device_reference_event == NULL)
-		deviceArray[device_id].streams[stream_idx].device_reference_event = gpuEventList_pop(&deviceArray[device_id].available_events);
+	if (registered_stream->device_reference_event == NULL)
+		registered_stream->device_reference_event = gpuEventList_pop(&deviceArray[device_id].available_events);
 
-	GPU_RUNTIME_CHECK(GPU_EVENT_RECORD(deviceArray[device_id].streams[stream_idx].device_reference_event->ts_event, deviceArray[device_id].streams[stream_idx].stream));
-	GPU_RUNTIME_CHECK(GPU_EVENT_SYNCHRONIZE(deviceArray[device_id].streams[stream_idx].device_reference_event->ts_event));
+	GPU_RUNTIME_CHECK(GPU_EVENT_RECORD(registered_stream->device_reference_event->ts_event, registered_stream->stream));
+	GPU_RUNTIME_CHECK(GPU_EVENT_SYNCHRONIZE(registered_stream->device_reference_event->ts_event));
 
-	deviceArray[device_id].streams[stream_idx].host_reference_time = TIME;
+	registered_stream->host_reference_time = TIME;
 }
 
 void DeinitializeDevice(int device_id)
@@ -240,6 +245,9 @@ void DeinitializeDevice(int device_id)
 /* ══════════════════════════════════════════════════════════════════════════
  * SearchAndRegisterStream
  *
+ * Returns the stream pointer that was found or registered.
+ * When (register_stream == FALSE) a miss returns NULL.
+ *
  * NOTE: This function intentionally keeps two separate #ifdef blocks for
  * stream identity lookup because HIP and CUDA use fundamentally different
  * mechanisms:
@@ -252,7 +260,7 @@ void DeinitializeDevice(int device_id)
  * There is no common abstraction that preserves this semantic difference,
  * so the #ifdef is correct here and should NOT be removed.
  * ══════════════════════════════════════════════════════════════════════════ */
-int SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_stream)
+struct RegisteredStream_t *SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_stream)
 {
 	int stream_idx = 0;
 	unsigned long long unique_stream_id = 0;
@@ -295,7 +303,7 @@ int SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_str
 	for (stream_idx = 0; stream_idx < deviceArray[device_id].num_streams; stream_idx++)
 	{
 		if (StreamArray[stream_idx].stream_id == unique_stream_id)
-			return stream_idx;
+			return &StreamArray[stream_idx];
 	}
 #endif
 #if defined(HIP_SUPPORT)
@@ -306,13 +314,13 @@ int SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_str
 	for (stream_idx = 0; stream_idx < deviceArray[device_id].num_streams; stream_idx++)
 	{
 		if (StreamArray[stream_idx].stream == stream)
-			return stream_idx;
+			return &StreamArray[stream_idx];
 	}
 #endif
 
 	/* Stream not found — register only if requested */
 	if (!register_stream)
-		return -1;
+		return NULL;
 
 	Probe_Gpu_StreamRegister_Entry();
 
@@ -357,7 +365,7 @@ int SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_str
 	/* Record a reference timestamp on the new stream */
 	/* FIX: CU_EVENT_BLOCKING_SYNC may be harmful — keep under review */
 	StreamArray[stream_idx].device_reference_event = NULL;
-	SynchronizeStream(device_id, stream_idx);
+	SynchronizeStream(device_id, &StreamArray[stream_idx]);
 
 	/*
 	 * Transition the GPU stream base state from NOT_TRACING to IDLE.
@@ -367,7 +375,7 @@ int SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_str
 
 	Probe_Gpu_StreamRegister_Exit();
 
-	return stream_idx;
+	return &StreamArray[stream_idx];
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -403,15 +411,20 @@ static void traceGPUEvents(int thread_id, UINT64 time, unsigned event, unsigned 
 	}
 }
 
-static void FlushGPUEvents(int device_id, int stream_idx)
+static void FlushGPUEvents(int device_id, struct RegisteredStream_t *registered_stream)
 {
-	int thread_id = deviceArray[device_id].streams[stream_idx].thread_id;
+	if (registered_stream == NULL)
+	{
+		fprintf(stderr, PACKAGE_NAME ": Error! NULL registered_stream in FlushGPUEvents\n");
+		exit(-1);
+	}
+
+	int thread_id = registered_stream->thread_id;
 	UINT64 utmp, last_time = 0;
 	float ftmp;
 	gpu_event_t *gpu_event;
 	GPU_EVENT_T *reference_event;
 	UINT64 reference_time = 0;
-	struct RegisteredStream_t *registered_stream = &deviceArray[device_id].streams[stream_idx];
 
 	gpu_event_t *last_gpu_event = gpuEventList_peek_tail(&registered_stream->gpu_event_list);
 
@@ -459,50 +472,79 @@ static void FlushGPUEvents(int device_id, int stream_idx)
 	}
 }
 
-void FlushStreams(int device_id, int stream_idx)
+/* ══════════════════════════════════════════════════════════════════════════
+ * FlushStreams
+ *
+ * Flushes the pending GPU events of registered streams. The target is selected
+ * by stream_ptr:
+ *
+ *   - stream_ptr != NULL : flush that single, already-registered stream on
+ *                          device_id.
+ *   - stream_ptr == NULL : flush every stream. When device_id is
+ *                          XTR_FLUSH_ALL_DEVICES all devices are flushed,
+ *                          otherwise only the streams of device_id.
+ * ══════════════════════════════════════════════════════════════════════════ */
+void FlushStreams(int device_id, struct RegisteredStream_t *stream_ptr)
 {
-	int d, s;
 	if (deviceArray == NULL)
 		return;
 
-	for (d = (device_id == XTR_FLUSH_ALL_DEVICES ? 0 : device_id); d < (device_id == XTR_FLUSH_ALL_DEVICES ? deviceCount : device_id + 1); ++d)
+	/* Flush a single, already-registered stream on a specific device */
+	if (stream_ptr != NULL)
+	{
+		if (deviceArray[device_id].initialized)
+			FlushGPUEvents(device_id, stream_ptr);
+		return;
+	}
+
+	/* stream_ptr == NULL: flush every stream, either on one device or on all of them */
+	int first_device = (device_id == XTR_FLUSH_ALL_DEVICES) ? 0 : device_id;
+	int last_device  = (device_id == XTR_FLUSH_ALL_DEVICES) ? deviceCount : device_id + 1;
+
+	for (int d = first_device; d < last_device; ++d)
 	{
 		if (!deviceArray[d].initialized)
 			continue;
-		for (s = (stream_idx == XTR_FLUSH_ALL_STREAMS ? 0 : stream_idx); s < (stream_idx == XTR_FLUSH_ALL_STREAMS ? deviceArray[d].num_streams : stream_idx + 1); ++s)
-		{
-			FlushGPUEvents(d, s);
-		}
+		for (int s = 0; s < deviceArray[d].num_streams; ++s)
+			FlushGPUEvents(d, &deviceArray[d].streams[s]);
 	}
 }
 
 void UnregisterStream(int device_id, GPU_STREAM_T stream)
 {
-	int stream_idx = SearchStream(device_id, stream);
-	if (stream_idx == -1)
+	struct RegisteredStream_t *stream_ptr = SearchStream(device_id, stream);
+	if (stream_ptr == NULL)
 		return;
+
+	/* Position of the stream to remove within the device's stream array */
+	int stream_idx = stream_ptr - deviceArray[device_id].streams;
 
 #ifdef DEBUG
 	fprintf(stderr, "UnregisterStream(device_id=%d, stream=%p) unassigned from stream_idx=%d/%d\n",
 			device_id, stream, stream_idx, deviceArray[device_id].num_streams);
 #endif
 
-	FlushStreams(device_id, stream_idx);
+	FlushStreams(device_id, stream_ptr);
 
 	int num_streams = deviceArray[device_id].num_streams - 1;
 	struct RegisteredStream_t *rs_tmp = (struct RegisteredStream_t *)xmalloc(num_streams * sizeof(struct RegisteredStream_t));
 
+	/* Copy the streams before and after the removed one, closing the gap */
 	memmove(rs_tmp, deviceArray[device_id].streams, stream_idx * sizeof(struct RegisteredStream_t));
-	memmove(rs_tmp + stream_idx, deviceArray[device_id].streams + stream_idx + 1, (deviceArray[device_id].num_streams - stream_idx - 1) * sizeof(struct RegisteredStream_t));
+	memmove(rs_tmp + stream_idx, stream_ptr + 1, (deviceArray[device_id].num_streams - stream_idx - 1) * sizeof(struct RegisteredStream_t));
 
 	deviceArray[device_id].num_streams = num_streams;
 	xfree(deviceArray[device_id].streams);
 	deviceArray[device_id].streams = rs_tmp;
 }
 
-void AddEventToStream(Extrae_GPU_Time_Type timetype, int device_id, int stream_idx, unsigned event, unsigned long long value, unsigned tag, size_t size,	unsigned int blockspergrid, unsigned int threadsperblock)
+void AddEventToStream(Extrae_GPU_Time_Type timetype, int device_id, struct RegisteredStream_t *registered_stream, unsigned event, unsigned long long value, unsigned tag, size_t size,	unsigned int blockspergrid, unsigned int threadsperblock)
 {
-	struct RegisteredStream_t *registered_stream = &deviceArray[device_id].streams[stream_idx];
+	if (registered_stream == NULL)
+	{
+		fprintf(stderr, PACKAGE_NAME ": Error! NULL registered_stream in AddEventToStream\n");
+		exit(-1);
+	}
 
 	gpu_event_t *gpu_event = gpuEventList_pop(&deviceArray[device_id].available_events);
 
@@ -546,7 +588,7 @@ void Extrae_gpuFinalize(void)
 			}
 		}
 
-		FlushStreams(XTR_FLUSH_ALL_DEVICES, XTR_FLUSH_ALL_STREAMS);
+		FlushStreams(XTR_FLUSH_ALL_DEVICES, NULL);
 
 		for (int i = 0; i < deviceCount; ++i)
 		{
