@@ -76,7 +76,7 @@ static int Get_NodeId (char *node)
 	TotalNodes ++;
 	NodeList = (char **)xrealloc(NodeList, TotalNodes * sizeof(char *));
 	NodeList[TotalNodes - 1] = (char *)xmalloc(strlen(node) + 1);
-	strcpy (NodeList[TotalNodes - 1], node);
+	snprintf (NodeList[TotalNodes - 1], strlen(node) + 1, "%s", node);
 
 	return TotalNodes - 1;
 }
