@@ -1379,11 +1379,28 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 			if (hwc_enabled != NULL && !xmlStrcasecmp(hwc_enabled, xmlYES))
 			{
 #if USE_HARDWARE_COUNTERS
+				unsigned topdown_level = TOPDOWN_DISABLED;
+				xmlChar *hwc_topdown = xmlGetProp_env (rank, tag, TRACE_TOPDOWN);
+
+				if (hwc_topdown != NULL)
+				{
+					int topdown_value = atoi ((char *)hwc_topdown);
+
+					if (topdown_value == TOPDOWN_LEVEL_1 || topdown_value == TOPDOWN_LEVEL_2)
+						topdown_level = (unsigned)topdown_value;
+					else
+						mfprintf (stderr, PACKAGE_NAME": invalid topdown=\"%s\" (allowed 1|2) in <%s>\n",
+							hwc_topdown, TRACE_CPU);
+					XML_FREE(hwc_topdown);
+				}
 				HWC_Initialize (0);
 
 				Parse_XML_Counters_CPU (rank, xmldoc, tag);
 				if (hwc_startset != NULL)
 					HWC_Parse_XML_Config (rank, world_size, hwc_startset);
+
+				if (topdown_level != TOPDOWN_DISABLED)
+					EnableTopDownCounters (topdown_level, rank);
 #else
 				mfprintf (stdout, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support CPU HW.\n", TRACE_CPU, TRACE_COUNTERS);
 #endif

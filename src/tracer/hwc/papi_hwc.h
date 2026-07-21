@@ -44,6 +44,9 @@ int HWCBE_PAPI_Accum (unsigned int tid, long long *store_buffer);
 
 void HWCBE_PAPI_CleanUp (unsigned nthreads);
 
+int HWCBE_PAPI_Add_TopDown_Set(unsigned level, int rank);
+int HWCBE_PAPI_Emit_TopDown_Counters(unsigned int tid, UINT64 time);
+
 HWC_Definition_t *HWCBE_PAPI_GetCounterDefinitions(unsigned *count);
 
 /*------------------------------------------------ Useful Macros ------------*/
@@ -74,4 +77,3 @@ HWC_Definition_t *HWCBE_PAPI_GetCounterDefinitions(unsigned *count);
 #define HWCEVTSET(tid) (HWC_sets[HWC_Get_Current_Set(tid)].eventsets[tid])
 
 #endif /* __PAPI_HWC_H__ */
-

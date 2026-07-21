@@ -70,6 +70,55 @@
 static HWC_Definition_t *hwc_used = NULL;
 static unsigned num_hwc_used = 0;
 
+static unsigned topdown_level_global = TOPDOWN_DISABLED;
+static unsigned topdown_num_counters = 0;
+
+static const char *top_down_l1[TOPDOWN_NUM_COUNTERS_LVL1] = {
+	"TOPDOWN_RETIRING_PERC", "TOPDOWN_BAD_SPEC_PERC",
+	"TOPDOWN_FE_BOUND_PERC", "TOPDOWN_BE_BOUND_PERC"
+};
+
+static const char *top_down_l2[TOPDOWN_NUM_COUNTERS_LVL2] = {
+	"TOPDOWN_HEAVY_OPS_PERC", "TOPDOWN_LIGHT_OPS_PERC",
+	"TOPDOWN_BR_MISPREDICT_PERC", "TOPDOWN_MACHINE_CLEARS_PERC",
+	"TOPDOWN_FETCH_LAT_PERC", "TOPDOWN_FETCH_BAND_PERC",
+	"TOPDOWN_MEM_BOUND_PERC", "TOPDOWN_CORE_BOUND_PERC"
+};
+
+/* Identify the TopDown set by its first counter. */
+static int HWCBE_PAPI_Is_TopDown_Set(char **counters)
+{
+	return topdown_level_global != TOPDOWN_DISABLED &&
+	       counters != NULL && strcmp(counters[0], top_down_l1[0]) == 0;
+}
+
+/* Select the TopDown level and add its counters through the normal HWC set path. */
+int HWCBE_PAPI_Add_TopDown_Set(unsigned level, int rank)
+{
+	char *topdown_counters[TOPDOWN_NUM_COUNTERS] = { NULL };
+	unsigned i = 0;
+
+	topdown_level_global =
+		(level == TOPDOWN_LEVEL_1 || level == TOPDOWN_LEVEL_2) ? level : TOPDOWN_DISABLED;
+	topdown_num_counters = (topdown_level_global == TOPDOWN_LEVEL_2) ? TOPDOWN_NUM_COUNTERS :
+		(topdown_level_global == TOPDOWN_LEVEL_1) ? TOPDOWN_NUM_COUNTERS_LVL1 : 0;
+
+	if (topdown_level_global == TOPDOWN_DISABLED)
+		return 0;
+
+	for (i = 0; i < TOPDOWN_NUM_COUNTERS_LVL1; i++)
+		topdown_counters[i] = (char *) top_down_l1[i];
+
+	if (topdown_level_global == TOPDOWN_LEVEL_2)
+	{
+		for (i = 0; i < TOPDOWN_NUM_COUNTERS_LVL2; i++)
+			topdown_counters[TOPDOWN_NUM_COUNTERS_LVL1 + i] = (char *) top_down_l2[i];
+	}
+
+	return HWCBE_PAPI_Add_Set(HWC_num_sets + 1, rank, topdown_num_counters,
+		topdown_counters, NULL, NULL, NULL, 0, NULL, NULL);
+}
+
 static void HWCBE_PAPI_AddDefinition (unsigned event_code, char *code, char *description)
 {
 	int found = FALSE;
@@ -171,8 +220,10 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	int num_overflows, char **overflow_counters, unsigned long long *overflow_values)
 {
 	int i, rc, num_set = HWC_num_sets;
+	int is_topdown_set = HWCBE_PAPI_Is_TopDown_Set(counters);
+	/* Keep normal sets limited to MAX_HWC and allow the full TopDown set. */
+	int max_counters = is_topdown_set ? MAX_HWC_IN_SET : MAX_HWC;
 	PAPI_event_info_t info;
-
 #if !defined(PAPI_SAMPLING_SUPPORT)
 	UNREFERENCED_PARAMETER(num_overflows);
 	UNREFERENCED_PARAMETER(overflow_counters);
@@ -182,10 +233,10 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	if (ncounters == 0 || counters == NULL)
 		return 0;
 	
-	if (ncounters > MAX_HWC)
+	if (ncounters > max_counters)
 	{
-		fprintf (stderr, PACKAGE_NAME": You cannot provide more HWC counters than %d (see set %d)\n", MAX_HWC, pretended_set);
-		ncounters = MAX_HWC;
+		fprintf (stderr, PACKAGE_NAME": You cannot provide more HWC counters than %d (see set %d)\n", max_counters, pretended_set);
+		ncounters = max_counters;
 	}
 	
 	HWC_sets = (struct HWC_Set_t *) xrealloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
@@ -199,7 +250,8 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	HWC_sets[num_set].NumOverflows = 0;
 #endif
 
-	for (i = 0; i < MAX_HWC; i++)
+	/* Initialize every counter position as unused before adding the set. */
+	for (i = 0; i < MAX_HWC_IN_SET; i++)
 	{
 		HWC_sets[num_set].counters[i] = NO_COUNTER;
 	}
@@ -275,6 +327,15 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 		return 0;
 	}
 
+	/* Require all TopDown metrics because the merger labels them by fixed position. */
+	if (is_topdown_set && HWC_sets[num_set].num_counters != ncounters)
+	{
+		if (rank == 0)
+			fprintf (stderr, PACKAGE_NAME": TopDown requires all %d counters; disabling TopDown\n", ncounters);
+		HWC_sets[num_set].num_counters = 0;
+		return 0;
+	}
+
 	/* Just check if the user wants us to change the counters in some manner */
 	if (change_at_time != NULL)
 	{
@@ -339,6 +400,12 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	}
 
 	HWCBE_PAPI_Allocate_eventsets_per_thread (num_set, 0, Backend_getNumberOfThreads());
+
+	if (is_topdown_set)
+	{
+		/* Store the TopDown set index so it can remain active during rotation. */
+		TopDown_set_index = num_set;
+	}
 
 	/* We validate this set */
 	HWC_num_sets++;
@@ -460,7 +527,7 @@ int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int thread
 
 int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 {
-	long long values[MAX_HWC];
+	long long values[MAX_HWC_IN_SET] = { 0 };
 	int rc;
 
 	UNREFERENCED_PARAMETER(time);
@@ -484,30 +551,27 @@ int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 
 void HWCBE_PAPI_CleanUp (unsigned nthreads)
 {
-	UNREFERENCED_PARAMETER(nthreads);
-
 	if (PAPI_is_initialized())
 	{
 		int state;
 		int i;
 		unsigned t;
 
-		if (PAPI_state (HWCEVTSET(THREADID), &state) == PAPI_OK)
-		{
-			if (state & PAPI_RUNNING)
-			{
-				long long tmp[MAX_HWC];
-				PAPI_stop (HWCEVTSET(THREADID), tmp);
-			}
-		}
-
 		for (i = 0; i < HWC_num_sets; i++)
 		{
 			for (t = 0; t < nthreads; t++)
 			{
-				/* Remove all events in the eventset and destroy the eventset */
-				PAPI_cleanup_eventset(HWC_sets[i].eventsets[t]);
-				PAPI_destroy_eventset(&HWC_sets[i].eventsets[t]);
+				/* Some threads may not have created this EventSet, so skip invalid entries. */
+				if (HWC_sets[i].eventsets[t] != PAPI_NULL)
+				{
+					/* Stop each running EventSet, including TopDown, before destroying it. */
+					if (PAPI_state (HWC_sets[i].eventsets[t], &state) == PAPI_OK &&
+						(state & PAPI_RUNNING))
+						PAPI_stop (HWC_sets[i].eventsets[t], NULL);
+
+					PAPI_cleanup_eventset (HWC_sets[i].eventsets[t]);
+					PAPI_destroy_eventset (&HWC_sets[i].eventsets[t]);
+				}
 			}
 			xfree (HWC_sets[i].eventsets);
 		}
@@ -586,20 +650,26 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 
 int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 {
-	int i, j, rc;
+	int i = 0;
+	int j = 0;
+	int rc = PAPI_OK;
 
 	if (HWC_num_sets <= 0)
 		return FALSE;
 
+	/* A forked child must recreate the PAPI EventSets inherited from its parent. */
 	if (forked)
 	{
-		PAPI_stop (HWCEVTSET(threadid), NULL);
-
 		for (i = 0; i < HWC_num_sets; i++)
 		{
-			rc = PAPI_cleanup_eventset (HWC_sets[i].eventsets[threadid]);
-			if (rc == PAPI_OK)
-				PAPI_destroy_eventset (&HWC_sets[i].eventsets[threadid]);
+			/* Recreate each inherited EventSet after fork because PAPI cannot reuse it. */
+			if (HWC_sets[i].eventsets[threadid] != PAPI_NULL)
+			{
+				PAPI_stop (HWC_sets[i].eventsets[threadid], NULL);
+				rc = PAPI_cleanup_eventset (HWC_sets[i].eventsets[threadid]);
+				if (rc == PAPI_OK)
+					PAPI_destroy_eventset (&HWC_sets[i].eventsets[threadid]);
+			}
 
 			HWC_sets[i].eventsets[threadid] = PAPI_NULL;
 		}
@@ -630,6 +700,13 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 						PAPI_event_code_to_name (HWC_sets[i].counters[j], EventName);
 						fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (task %d, thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, TASKID, threadid);
 						fprintf (stderr, "PAPI error %d: %s\n", rc, PAPI_strerror(rc));
+						if (i == TopDown_set_index)
+						{
+							/* Disable only this thread's TopDown EventSet without changing the shared counter layout. */
+							PAPI_cleanup_eventset (HWC_sets[i].eventsets[threadid]);
+							PAPI_destroy_eventset (&HWC_sets[i].eventsets[threadid]);
+							break;
+						}
 						HWC_sets[i].counters[j] = NO_COUNTER;
 
 						/* If a counter fails to enter the EventSet, we can't just mark it
@@ -649,18 +726,23 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 						                 |_ First counter that fails to enter the EventSet 
 						 */
 
-						/* Move all counters to the right of 'j' to the left, and set the last to NO_COUNTER */
+						/* Remove the failed counter by shifting later entries left within the set capacity. */
 						int k = 0;
-						for (k = j; k < MAX_HWC - 1; k++) {
+						int max_cnt = (i == TopDown_set_index) ? MAX_HWC_IN_SET : MAX_HWC;
+						for (k = j; k < max_cnt - 1; k++) {
 							
 							HWC_sets[i].counters[k] = HWC_sets[i].counters[k+1];
 						}
-						HWC_sets[i].counters[MAX_HWC-1] = NO_COUNTER; 
+						HWC_sets[i].counters[max_cnt-1] = NO_COUNTER;
 						HWC_sets[i].num_counters --;
 						j --;
 					}
 				}
 			}
+
+			/* Skip this EventSet if it was not created. */
+			if (HWC_sets[i].eventsets[threadid] == PAPI_NULL)
+				continue;
 
 			// This used to be in Backend_preInitialize for the main thread to emit the HWC_DEF_EV events,
 			// right before the call to HWC_Start_Counters that ends up here. 
@@ -670,7 +752,8 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 			// happen somewhere in the middle. 
 			// FIXME: The emission should happen from the common interface, not from
 			// the PAPI backend (missing for PMAPI).
-			if (threadid == 0)
+			/* Do not write internal TopDown counters as a normal HWC definition set. */
+			if (threadid == 0 && i != TopDown_set_index)
 			{
 			  /* Write hardware counters set definitions (i.e. those that were
 			   * succesfully added into PAPI EventSets) into the .mpit files*/
@@ -705,7 +788,29 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 		}
 	} /* forked */ 
 
-	HWC_Thread_Initialized[threadid] = HWCBE_PAPI_Start_Set (0, time, HWC_current_set[threadid], threadid);
+	if (HWC_TopDown_Enabled())
+	{
+		/* Start the permanent TopDown EventSet for this thread. */
+		int topdown_eventset = HWC_sets[TopDown_set_index].eventsets[threadid];
+
+		if (topdown_eventset != PAPI_NULL)
+		{
+			rc = PAPI_start (topdown_eventset);
+			if (rc != PAPI_OK)
+			{
+				/* Discard the EventSet if it cannot be started. */
+				fprintf (stderr, PACKAGE_NAME": Error starting TopDown PAPI EventSet for task %d, thread %d (%s)\n", TASKID, threadid, PAPI_strerror(rc));
+				PAPI_cleanup_eventset (topdown_eventset);
+				PAPI_destroy_eventset (&HWC_sets[TopDown_set_index].eventsets[threadid]);
+			}
+		}
+	}
+	/* Start the rotating set only when normal counters are configured. */
+	if (HWC_num_rotating_sets > 0)
+		HWC_Thread_Initialized[threadid] = HWCBE_PAPI_Start_Set (0, time, HWC_current_set[threadid], threadid);
+	else
+		HWC_Thread_Initialized[threadid] = HWC_TopDown_Enabled() &&
+			(HWC_sets[TopDown_set_index].eventsets[threadid] != PAPI_NULL);
 
 #if defined(ENABLE_PEBS_SAMPLING)                                               
 	    Extrae_IntelPEBS_startSampling();                                              
@@ -714,29 +819,107 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 	return HWC_Thread_Initialized[threadid];
 }
 
+/* Read TopDown counters and emit their packed events. */
+int HWCBE_PAPI_Emit_TopDown_Counters (unsigned int tid, UINT64 time)
+{
+	int topdown_eventset = PAPI_NULL;
+	long long raw_values[MAX_HWC_IN_SET] = { 0 };
+	long long scaled_values[MAX_HWC_IN_SET];
+	int counter = 0;
+	int num_counters = 0;
+	int topdown_level = TOPDOWN_DISABLED;
+
+	if (!HWC_TopDown_Enabled())
+		return TRUE;
+
+	/* Zero is a valid percentage; NO_COUNTER marks unused slots for the merger. */
+	for (counter = 0; counter < MAX_HWC_IN_SET; counter++)
+		scaled_values[counter] = NO_COUNTER;
+
+	topdown_eventset = HWC_sets[TopDown_set_index].eventsets[tid];
+	if (topdown_eventset == PAPI_NULL)
+		return FALSE;
+
+	if (PAPI_read(topdown_eventset, raw_values) != PAPI_OK)
+	{
+		fprintf (stderr, PACKAGE_NAME": TopDown PAPI_read failed for thread %d evtset %d\n",
+			tid, topdown_eventset);
+		return FALSE;
+	}
+	num_counters = HWC_sets[TopDown_set_index].num_counters;
+	for (counter = 0; counter < num_counters; counter++)
+	{
+		double val = 0.0;
+
+		/* WARNING: PAPI stores TopDown percentages as double bits in long long slots; a cast is incorrect. */
+		memcpy(&val, &raw_values[counter], sizeof(val));
+		if (val < 0.0)
+			val = 0.0;
+		else if (val > 100.0)
+			val = 100.0;
+		scaled_values[counter] = (long long)(val * 1000.0);
+	}
+
+	topdown_level = (num_counters == TOPDOWN_NUM_COUNTERS) ? TOPDOWN_LEVEL_2 : TOPDOWN_LEVEL_1;
+	/* Always emit the 4 Level-1 metrics as one packed internal event. */
+	TRACE_EVENT_AND_GIVEN_COUNTERS(time, TOPDOWN_PACKED_L1_EV, topdown_level,
+		TOPDOWN_NUM_COUNTERS_LVL1, scaled_values);
+
+	if (topdown_level == TOPDOWN_LEVEL_2)
+	{
+		/* Emit the 8 Level-2 metrics as a second packed internal event. */
+		TRACE_EVENT_AND_GIVEN_COUNTERS(time, TOPDOWN_PACKED_L2_EV, topdown_level,
+			TOPDOWN_NUM_COUNTERS_LVL2, (scaled_values + TOPDOWN_NUM_COUNTERS_LVL1));
+	}
+
+	return TRUE;
+}
+
 #if defined(IS_BG_MACHINE)
 int __in_PAPI_read_BG = FALSE;
 #endif
+/* Read the current rotating counter set. */
 int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 {
-	int EventSet = HWCEVTSET(tid);
-
 #if !defined(IS_BG_MACHINE)
-	if (PAPI_read(EventSet, store_buffer) != PAPI_OK)
+	int rotating_counters_valid = TRUE;
+	int i = 0;
+
+	/* TopDown-only configurations have no normal rotating EventSet to read. */
+	if (HWC_num_rotating_sets > 0)
 	{
-		fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
-			tid, EventSet, __FILE__, __LINE__);
-		return 0;
-	}
-	return 1;
-#else
-	if (!__in_PAPI_read_BG)
-	{
-		__in_PAPI_read_BG = TRUE;
-		if (PAPI_read(EventSet, store_buffer) != PAPI_OK)
+		int rotating_eventset = HWCEVTSET(tid);
+
+		if (PAPI_read(rotating_eventset, store_buffer) != PAPI_OK)
 		{
 			fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
-				tid, EventSet, __FILE__, __LINE__);
+				tid, rotating_eventset, __FILE__, __LINE__);
+			for (i = 0; i < MAX_HWC; i++)
+				store_buffer[i] = NO_COUNTER;
+			rotating_counters_valid = FALSE;
+		}
+	}
+	else
+	{
+		/* Keep the normal HWC buffer explicit in TopDown-only mode. */
+		for (i = 0; i < MAX_HWC; i++)
+			store_buffer[i] = NO_COUNTER;
+	}
+
+	return rotating_counters_valid;
+#else
+	int rotating_eventset = PAPI_NULL;
+
+	if (HWC_num_rotating_sets > 0)
+		rotating_eventset = HWCEVTSET(tid);
+
+	if (rotating_eventset != PAPI_NULL && !__in_PAPI_read_BG)
+	{
+		__in_PAPI_read_BG = TRUE;
+		if (PAPI_read(rotating_eventset, store_buffer) != PAPI_OK)
+		{
+			fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
+				tid, rotating_eventset, __FILE__, __LINE__);
 			return 0;
 		}
 		__in_PAPI_read_BG = FALSE;
@@ -749,17 +932,24 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 
 int HWCBE_PAPI_Reset (unsigned int tid)
 {
-	if (PAPI_reset(HWCEVTSET(tid)) != PAPI_OK)
+	int reset_succeeded = TRUE;
+
+	/* Reset the normal rotating EventSet only when it exists. */
+	if (HWC_num_rotating_sets > 0 && PAPI_reset(HWCEVTSET(tid)) != PAPI_OK)
 	{
 		fprintf (stderr, PACKAGE_NAME": PAPI_reset failed for thread %d evtset %d (%s:%d)\n", \
 			tid, HWCEVTSET(tid), __FILE__, __LINE__);
-		return 0;
+		reset_succeeded = FALSE;
 	}
-	return 1;
+	return reset_succeeded;
 }
 
+/* Accumulation is only valid for the normal rotating EventSet. */
 int HWCBE_PAPI_Accum (unsigned int tid, long long *store_buffer)
 {
+	if (HWC_num_rotating_sets <= 0)
+		return FALSE;
+
 	if (PAPI_accum(HWCEVTSET(tid), store_buffer) != PAPI_OK)
 	{
 		fprintf (stderr, PACKAGE_NAME": PAPI_accum failed for thread %d evtset %d (%s:%d)\n", \

@@ -125,6 +125,8 @@ unsigned IsMISC (unsigned EvType)
         return TRUE;
     if (EvType>=OMP_BURST_STATS_BASE && EvType<=OMP_BURST_STATS_BASE+MAX_CALLERS)
         return TRUE;
+    if (EvType == TOPDOWN_PACKED_L1_EV || EvType == TOPDOWN_PACKED_L2_EV)
+        return TRUE;
     for (evt = 0; evt < MISC_EVENTS; evt++)
 		{
         if (misc_events[evt] == EvType)

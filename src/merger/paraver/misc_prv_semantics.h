@@ -28,6 +28,10 @@
 #include "semantics.h"
 #include "file_set.h"
 
+/* Track whether TopDown events exist and how many labels the .pcf file needs. */
+extern int TopDown_Events_Found;
+extern unsigned TopDown_Max_Idx;
+
 extern int MPI_Caller_Multiple_Levels_Traced;
 extern int *MPI_Caller_Labels_Used;
 

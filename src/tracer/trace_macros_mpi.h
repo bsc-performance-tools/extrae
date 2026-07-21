@@ -41,6 +41,23 @@
 	}                                                \
 }
 
+/* Emit companion events after the main event has been inserted. */
+#if USE_HARDWARE_COUNTERS
+#define TRACE_COMPANION_EVENTS(thread_id,buffer,event,caller_offset,emit_topdown) \
+{                                                                                  \
+	if ((caller_offset) > 0)                                                         \
+		TRACE_MPI_CALLER((event).time, EVT_BEGIN, caller_offset);                    \
+	if (emit_topdown)                                                               \
+		HWC_Emit_TopDown_Counters(thread_id, (event).time);                          \
+}
+#else
+#define TRACE_COMPANION_EVENTS(thread_id,buffer,event,caller_offset,emit_topdown) \
+{                                                                                  \
+	if ((caller_offset) > 0)                                                         \
+		TRACE_MPI_CALLER((event).time, EVT_BEGIN, caller_offset);                    \
+}
+#endif
+
 #define TRACE_MPIINITEV(evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux) \
 {                                                           \
 	event_t evt;                                              \
@@ -57,6 +74,7 @@
 	/* HWC 1st read */                                        \
 	HARDWARE_COUNTERS_READ(thread_id, evt, TRUE);             \
 	BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+	TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, 0, TRUE); \
 }
 
 #if defined(HAVE_BURST)
@@ -169,7 +187,8 @@
 				ACCUMULATED_COUNTERS_RESET(thread_id);                  \
 			}                                                         \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
-			TRACE_MPI_CALLER (evt.time,evtvalue,offset)               \
+			TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, \
+				((evtvalue) == EVT_BEGIN) ? (offset) : 0, TRACING_HWC_MPI);   \
 		}                                                           \
 	}                                                             \
 }

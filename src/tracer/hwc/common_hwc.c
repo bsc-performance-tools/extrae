@@ -51,6 +51,9 @@
 #if defined(ENABLE_PEBS_SAMPLING)
 # include "sampling-intel-pebs.h"
 #endif
+#if defined(PAPI_COUNTERS)
+# include "papi_hwc.h"
+#endif
 
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
@@ -88,7 +91,14 @@ enum ChangeType_t HWC_current_changetype = CHANGE_NEVER;
 enum ChangeTo_t HWC_current_changeto = CHANGE_SEQUENTIAL;
 int HWC_num_sets = 0;
 int * HWC_current_set;
+/* Count only the sets that rotate, the TopDown set is permanent. */
+int HWC_num_rotating_sets = 0;
+int TopDown_set_index = -1;
 
+int HWC_TopDown_Enabled(void)
+{
+	return TopDown_set_index >= 0;
+}
 /**
  * Checks whether the module has been started and the HWC are counting
  * \return 1 if HWC's are enabled, 0 otherwise.
@@ -130,12 +140,12 @@ int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds)
 
 	num_counters = HWC_sets[set_id].num_counters;
     
-	HWCIds = xmalloc(MAX_HWC * sizeof(int));
+	HWCIds = xmalloc(MAX_HWC_IN_SET * sizeof(int));
 
 	for (i=0; i<num_counters; i++)
 		HWCIds[i] = HWC_sets[set_id].counters[i];
 
-	for (i=num_counters; i<MAX_HWC; i++)
+	for (i = num_counters; i < MAX_HWC_IN_SET; i++)
 		HWCIds[i] = NO_COUNTER;
 
 	*io_HWCIds = HWCIds;
@@ -156,6 +166,28 @@ int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds)
  *        or we could add a query function HWC_Get_Name_By_Id in the common API, implemented in each 
  *        PAPI/PMAPI/etc backends.
  */
+
+void EnableTopDownCounters(unsigned level, int rank)
+{
+#if defined(PAPI_COUNTERS)
+	HWCBE_PAPI_Add_TopDown_Set(level, rank);
+#else
+	(void)level;
+	(void)rank;
+#endif
+}
+
+/* Emit the packed TopDown events at the given timestamp. */
+int HWC_Emit_TopDown_Counters(unsigned int tid, UINT64 time)
+{
+#if defined(PAPI_COUNTERS)
+	return HWCBE_PAPI_Emit_TopDown_Counters(tid, time);
+#else
+	(void)tid;
+	(void)time;
+	return TRUE;
+#endif
+}
 
 int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds)
 {
@@ -197,7 +229,7 @@ int HWC_Get_Position_In_Set (int set_id, int hwc_id)
 void HWC_Stop_Current_Set (UINT64 time, int thread_id)
 {
 	/* If there are less than 2 sets, don't do anything! */
-	if (HWC_num_sets > 0)
+	if (HWC_num_rotating_sets > 0)
 	{
 		/* make sure we don't loose the current counter values */
 		Extrae_counters_at_Time_Wrapper(time);
@@ -214,7 +246,7 @@ void HWC_Stop_Current_Set (UINT64 time, int thread_id)
 void HWC_Start_Current_Set (UINT64 countglops, UINT64 time, int thread_id)
 {
 	/* If there are less than 2 sets, don't do anything! */
-	if (HWC_num_sets > 0)
+	if (HWC_num_rotating_sets > 0)
 	{
 		/* Actually start the counters */
 		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
@@ -229,15 +261,15 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 {
 
 	/* If there are less than 2 sets, don't do anything! */
-	if (HWC_num_sets > 1)
+	if (HWC_num_rotating_sets > 1)
 	{
 		HWC_Stop_Current_Set (time, thread_id);
 		
 		/* Move to the next set */
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
-			HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
+			HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_rotating_sets;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
-			HWC_current_set[thread_id] = xtr_random() % HWC_num_sets;
+			HWC_current_set[thread_id] = xtr_random() % HWC_num_rotating_sets;
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -250,15 +282,15 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 {
 	/* If there are less than 2 sets, don't do anything! */
-	if (HWC_num_sets > 1)
+	if (HWC_num_rotating_sets > 1)
 	{
 		HWC_Stop_Current_Set (time, thread_id);
 
 		/* Move to the previous set */
 		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
-			HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
+			HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_rotating_sets - 1) : (HWC_current_set[thread_id] - 1) ;
 		else if (HWC_current_changeto == CHANGE_RANDOM)
-			HWC_current_set[thread_id] = xtr_random() % HWC_num_sets;
+			HWC_current_set[thread_id] = xtr_random() % HWC_num_rotating_sets;
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -390,6 +422,7 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 		if (HWC_num_sets <= 0)
 			return;
 
+		HWC_num_rotating_sets = HWC_num_sets - HWC_TopDown_Enabled();
 		HWCEnabled = TRUE;
 	}
 
@@ -466,14 +499,14 @@ HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 	unsigned threadid = 0;
 
 	/* Do this if we have more than 1 counter set */
-	if (HWC_num_sets > 1)
+	if (HWC_num_rotating_sets > 1)
 	{
 		if (strncasecmp (distribution, "random", 6) == 0)
 		{
 			int i;
 			unsigned long long rset;
 
-			rset = xtr_random() % HWC_num_sets;
+			rset = xtr_random() % HWC_num_rotating_sets;
 
 			HWC_current_changeto = CHANGE_RANDOM;
 
@@ -488,7 +521,7 @@ HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			/* Sets are distributed among tasks like:
 			0 1 2 3 .. n-1 0 1 2 3 .. n-1  0 1 2 3 ... */
 			for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++) 
-				HWC_current_set[threadid] = task_id % HWC_num_sets;
+				HWC_current_set[threadid] = task_id % HWC_num_rotating_sets;
 
 			if (task_id == 0)
 				fprintf (stdout, PACKAGE_NAME": Starting distribution hardware counters set is established to 'cyclic'\n");
@@ -501,7 +534,7 @@ HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			maxThreads = Backend_getMaximumOfThreads();
 			for(threadid=0; threadid<maxThreads; threadid++)
 			{
-				HWC_current_set[threadid] = (maxThreads * task_id + threadid) % HWC_num_sets;
+				HWC_current_set[threadid] = (maxThreads * task_id + threadid) % HWC_num_rotating_sets;
 			}
 
 			if (task_id == 0)
@@ -514,7 +547,7 @@ HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			fashion */
 
 			/* a/b rounded to highest is (a+b-1)/b */
-			int BlockDivisor = (num_tasks+HWC_num_sets-1) / HWC_num_sets;
+			int BlockDivisor = (num_tasks+HWC_num_rotating_sets-1) / HWC_num_rotating_sets;
 			for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++) 
 			{
 				if (BlockDivisor > 0)
@@ -539,7 +572,7 @@ HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			}
 			else
 				for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++)
-					HWC_current_set[threadid] = (HWC_num_sets<value-1)?HWC_num_sets:value-1;
+					HWC_current_set[threadid] = (HWC_num_rotating_sets<value-1)?HWC_num_rotating_sets:value-1;
 		}
 	}
 }
@@ -609,7 +642,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 {
 	int accum_ok = FALSE; 
 
-	if (HWCEnabled)
+	if (HWCEnabled && HWC_num_rotating_sets > 0)
 	{
 		if (!HWC_Thread_Initialized[tid])
 			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
@@ -697,9 +730,10 @@ int HWC_Add_Set (int pretended_set, int rank, int ncounters, char **counters,
 
   counters_per_set = HWCBE_ADD_SET (pretended_set, rank, ncounters, counters, domain, change_at_globalops, change_at_time, num_overflows, overflow_counters, overflow_values);
   new_set          = HWC_Get_Num_Sets() - 1;
+  HWC_num_rotating_sets = HWC_num_sets - HWC_TopDown_Enabled();
 
   /* Count for each counter in how many sets appears */
-  for (i=0; i<counters_per_set; i++)
+  for (i=0; new_set != TopDown_set_index && i<counters_per_set; i++)
   {
     int j      = 0;
     int found  = 0;
@@ -747,14 +781,14 @@ void HWC_Set_ChangeAtTime_Frequency (int set, unsigned long long ns)
  */
 int HWC_IsCommonToAllSets(int set_id, int hwc_index)
 {
-  int i;
+  int i = 0;
   int hwc_id = HWC_sets[set_id].counters[hwc_index];
 
   for (i=0; i<AllHWCs; i++)
   {
     if (CommonHWCs[i].hwc_id == hwc_id)
     {
-      if (CommonHWCs[i].sets_count == HWC_Get_Num_Sets())
+      if (CommonHWCs[i].sets_count == HWC_num_rotating_sets)
       {
         return 1;
       }
@@ -773,11 +807,10 @@ int HWC_GetNumberOfCommonCounters(void)
 
   for (i=0; i<AllHWCs; i++)
   {
-    if (CommonHWCs[i].sets_count == HWC_Get_Num_Sets())
+    if (CommonHWCs[i].sets_count == HWC_num_rotating_sets)
     {
       common_hwcs ++;
     }
   }
   return common_hwcs;
 }
-

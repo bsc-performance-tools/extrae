@@ -27,9 +27,14 @@
 #include "config.h"
 #include "sampling-common.h"
 #include "sampling-timer.h"
+#include "common.h"
 #include "num_hwc.h"
 #include "hwc_version.h"
 #include "hwc.h"
+#include "events.h"
+
+/* Reserve enough space for either a normal or TopDown counter set. */
+#define MAX_HWC_IN_SET MAX(MAX_HWC, TOPDOWN_NUM_COUNTERS)
 
 /*------------------------------------------------ Structures ---------------*/
 
@@ -42,7 +47,7 @@ struct HWC_Set_t
     pm_prog_t pmprog;
     int group;
 #endif
-    int counters[MAX_HWC];
+    int counters[MAX_HWC_IN_SET];
     int num_counters;
     unsigned long long change_at;
     enum ChangeType_t change_type;
@@ -78,6 +83,8 @@ typedef struct
 extern int *HWC_Thread_Initialized;
 extern struct HWC_Set_t *HWC_sets;
 extern int HWC_num_sets;
+extern int HWC_num_rotating_sets;
+extern int TopDown_set_index;
 extern unsigned long long HWC_current_changeat;
 extern unsigned long long * HWC_current_timebegin;
 extern unsigned long long * HWC_current_glopsbegin;
@@ -188,4 +195,3 @@ extern int * HWC_current_set;
 #endif
 
 #endif /* __COMMON_HWC_H__ */
-

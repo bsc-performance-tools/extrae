@@ -35,7 +35,9 @@
 
 # define MARK_SET_READ(tid, evt, filter)                                                   \
 {                                                                                     \
-	evt.HWCReadSet = ((filter && HWC_IsEnabled()) ? (HWC_Get_Current_Set(tid) + 1) : 0); \
+	int has_rotating_sets = (HWC_Get_Num_Sets() - HWC_TopDown_Enabled()) > 0;          \
+	/* TopDown-only reads do not have a normal HWC set to mark. */                     \
+	evt.HWCReadSet = ((filter && HWC_IsEnabled() && has_rotating_sets) ? (HWC_Get_Current_Set(tid) + 1) : 0); \
 }
 
 /* Store counters values in the event and mark them as read */

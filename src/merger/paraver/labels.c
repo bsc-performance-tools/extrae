@@ -214,6 +214,11 @@ struct syscall_evt_t syscall_evt_labels[SYSCALL_EVENTS_COUNT] = {
    { SYSCALL_SCHED_YIELD_EV, SYSCALL_SCHED_YIELD_LBL }
 };
 
+static const char *td_labels[TOPDOWN_NUM_COUNTERS] = {
+	"Retiring", "Bad Speculation", "FE Bound", "BE Bound",
+	"Heavy Ops", "Light Ops", "Br Mispredict", "Machine Clears",
+	"Fetch Latency", "Fetch Bandwidth", "Mem Bound", "Core Bound"
+};
 /******************************************************************************
  ***  state_labels
  ******************************************************************************/
@@ -375,6 +380,33 @@ static void HWC_PARAVER_Labels (FILE *pcfFD)
 
 		xfree(used_counters_info);
 	}
+}
+
+static void Write_TopDown_Labels (FILE *pcf_fd)
+{
+	unsigned i = 0;
+
+	if (!TopDown_Events_Found || TopDown_Max_Idx == 0)
+		return;
+
+	fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+
+	for (i = 0; i < TopDown_Max_Idx; i++)
+	{
+		fprintf (pcf_fd, "0    %d    TopDown %s\n",
+			TOPDOWN_LVL1_FIRST_EV + i, td_labels[i]);
+	}
+	LET_SPACES (pcf_fd);
+
+	/* Add a label to TopLevel TopDown view created in Paraver */
+	fprintf (pcf_fd, "EVENT_TYPE\n");
+	fprintf (pcf_fd, "0    %d    TopDown Level\n", TOPDOWN_LEVEL_EV);
+	fprintf (pcf_fd, "VALUES\n");
+	fprintf (pcf_fd, "1    Backend Bound\n");
+	fprintf (pcf_fd, "2    Frontend Bound\n");
+	fprintf (pcf_fd, "4    Bad Speculation\n");
+	fprintf (pcf_fd, "8    Retiring\n");
+	LET_SPACES (pcf_fd);
 }
 
 #endif /* USE_HARDWARE_COUNTERS */
@@ -1028,6 +1060,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 
 #if USE_HARDWARE_COUNTERS
 	HWC_PARAVER_Labels (fd);
+	Write_TopDown_Labels (fd);
 #endif
 
 	Paraver_gradient_colors (fd);

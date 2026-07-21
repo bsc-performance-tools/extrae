@@ -76,6 +76,9 @@ int HWC_Accum_Reset (unsigned int tid);
 int HWC_Accum_Valid_Values (unsigned int tid);
 int HWC_Accum_Copy_Here (unsigned int tid, long long *store_buffer);
 int HWC_Accum_Add_Here (unsigned int tid, long long *store_buffer);
+void EnableTopDownCounters (unsigned level, int rank);
+int HWC_TopDown_Enabled(void);
+int HWC_Emit_TopDown_Counters(unsigned int tid, UINT64 time);
 
 void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution);
 void HWC_Parse_Env_Config (int task_id);
@@ -90,4 +93,3 @@ int HWC_GetNumberOfCommonCounters(void);
 #endif
 
 #endif /* __HWC_H__ */
-

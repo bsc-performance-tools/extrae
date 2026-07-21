@@ -76,6 +76,9 @@ int Memusage_Events_Found = FALSE;
 int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
 int Syscall_Events_Found = FALSE;
 int Syscall_Labels_Used[SYSCALL_EVENTS_COUNT];
+int TopDown_Events_Found = FALSE;
+unsigned TopDown_Max_Idx = 0;
+
 
 unsigned int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
 
@@ -970,6 +973,41 @@ static int HWC_Change_Ev (
 	return 0;
 }
 
+#if USE_HARDWARE_COUNTERS
+/* Writes Top-Down events from raw data into the final Paraver (.prv) file */
+static int TopDown_HWC_Ev(event_t *current_event, unsigned long long current_time,
+                          unsigned int cpu, unsigned int ptask,
+                          unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType = Get_EvEvent(current_event);
+	unsigned last_topdown_counter = 0;
+	int hwc_value_index = 0;
+	int first_topdown_counter = (EvType == TOPDOWN_PACKED_L1_EV) ?
+		0 : TOPDOWN_NUM_COUNTERS_LVL1;
+	int num_packed_counters = (EvType == TOPDOWN_PACKED_L1_EV) ?
+		TOPDOWN_NUM_COUNTERS_LVL1 : TOPDOWN_NUM_COUNTERS_LVL2;
+
+	UNREFERENCED_PARAMETER(fset);
+	TopDown_Events_Found = TRUE;
+
+	/* Update the number of TopDown labels needed in the .pcf file. */
+	last_topdown_counter = first_topdown_counter + num_packed_counters;
+	TopDown_Max_Idx = MAX(last_topdown_counter, TopDown_Max_Idx);
+
+	/* Expand packed TopDown counters using their fixed positions. */
+	for (hwc_value_index = 0; hwc_value_index < num_packed_counters; hwc_value_index++)
+	{
+		if (current_event->HWCValues[hwc_value_index] != NO_COUNTER)
+		{
+			trace_paraver_event(cpu, ptask, task, thread, current_time,
+				TOPDOWN_LVL1_FIRST_EV + first_topdown_counter + hwc_value_index,
+				current_event->HWCValues[hwc_value_index]);
+		}
+	}
+	return 0;
+}
+#endif
+
 #if defined(DEAD_CODE)
 static int Evt_SetCounters (
    event_t * current_event,
@@ -1825,6 +1863,10 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ KMPC_FREE_EV, DynamicMemory_Event },
 	{ KMPC_REALLOC_EV, DynamicMemory_Event },
 	{ KMPC_ALIGNED_MALLOC_EV, DynamicMemory_Event },
+#if USE_HARDWARE_COUNTERS
+	{ TOPDOWN_PACKED_L1_EV, TopDown_HWC_Ev },
+	{ TOPDOWN_PACKED_L2_EV, TopDown_HWC_Ev },
+#endif
 
 	{ NULL_EV, NULL }
 };
@@ -1836,4 +1878,3 @@ RangeEv_Handler_t PRV_MISC_Range_Handlers[] = {
 	{ OMP_BURST_STATS_BASE, OMP_BURST_STATS_BASE + MAX_CALLERS, Stats_Event },
 	{ NULL_EV, NULL_EV, NULL }
 };
-

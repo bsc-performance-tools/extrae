@@ -71,6 +71,7 @@
 		evt.param.omp_param.param[0] = (evtparam);                   \
 		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_OMP);  \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+		TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, 0, TRACING_HWC_OMP); \
 	}                                                           \
 }
 #define TRACE_OMPEVENT2PARAMANDCOUNTERS(evttime,evttype,evtvalue,evtparam1,evtparam2) \
@@ -86,6 +87,7 @@
 		evt.param.omp_param.param[1] = (evtparam2);                   \
 		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_OMP);  \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+		TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, 0, TRACING_HWC_OMP); \
 	}                                                           \
 }
 #else
@@ -136,6 +138,7 @@
 			evt.param.omp_param.param[0] = (evtparam);                                \
 			HARDWARE_COUNTERS_READ(thread_id, evt, Extrae_get_pthread_hwc_tracing()); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                 \
+			TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, 0, Extrae_get_pthread_hwc_tracing()); \
 		}                                                                           \
 		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);                               \
 	}                                                                             \

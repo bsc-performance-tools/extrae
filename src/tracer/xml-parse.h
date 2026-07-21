@@ -174,6 +174,7 @@
 #define TRACE_PEBS_SAMPLING_STORES_OFFCORE_L3Ms ((xmlChar*) "offcore-l3-misses")
 #define TRACE_PEBS_SAMPLING_LOAD_L3Ms           ((xmlChar*) "load-l3-misses")
 #define TRACE_PEBS_MIN_MEM_LATENCY              ((xmlChar*) "minimum-latency")
+#define TRACE_TOPDOWN                           ((xmlChar*) "topdown")
 
 #define TRACE_CPU_EVENTS		((xmlChar*) "cpu-events")
 #define TRACE_CPU_EVENTS_FREQUENCY	((xmlChar*) "frequency")

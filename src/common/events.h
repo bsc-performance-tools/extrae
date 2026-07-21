@@ -75,6 +75,13 @@ unsigned IsOPENACC(unsigned);
 
 #define SYNCHRONIZATION_POINT_EV     1000
 #define OPTIONS_EV                   1001
+#define TOPDOWN_DISABLED               0
+#define TOPDOWN_LEVEL_1                1
+#define TOPDOWN_LEVEL_2                2
+#define TOPDOWN_NUM_COUNTERS_LVL1      4
+#define TOPDOWN_NUM_COUNTERS_LVL2      8
+#define TOPDOWN_NUM_COUNTERS           \
+	(TOPDOWN_NUM_COUNTERS_LVL1 + TOPDOWN_NUM_COUNTERS_LVL2)
 
 #define SAMPLING_EV              30000000
 #define SAMPLING_LINE_EV         30000100
@@ -213,6 +220,15 @@ enum
 
 #define ADDRESSES_FOR_BINARY_EV  41000000
 
+/* Reserve 41100000-41100014 for TopDown events. */
+#define TOPDOWN_LEVEL_EV         41100000
+#define TOPDOWN_LVL1_FIRST_EV    (TOPDOWN_LEVEL_EV + 1)
+#define TOPDOWN_LVL2_FIRST_EV    \
+	(TOPDOWN_LVL1_FIRST_EV + TOPDOWN_NUM_COUNTERS_LVL1)
+#define TOPDOWN_LAST_EV          \
+	(TOPDOWN_LVL2_FIRST_EV + TOPDOWN_NUM_COUNTERS_LVL2 - 1)
+#define TOPDOWN_PACKED_L1_EV     (TOPDOWN_LAST_EV + 1)
+#define TOPDOWN_PACKED_L2_EV     (TOPDOWN_LAST_EV + 2)
 #define RUSAGE_BASE              45000000
 enum {
    RUSAGE_UTIME_EV = 0,

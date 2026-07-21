@@ -66,6 +66,7 @@
 		/* We don't read counters right now */                       \
 		HARDWARE_COUNTERS_READ(thread_id, evt, TRUE);                \
 		BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt);   \
+		TRACE_COMPANION_EVENTS(thread_id, SAMPLING_BUFFER(thread_id), evt, 0, TRUE); \
 	}                                                              \
 }
 
@@ -96,6 +97,7 @@
 		/* We don't read counters right now */                       \
 		HARDWARE_COUNTERS_READ(thread_id, evt, TRUE);                \
 		BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt);   \
+		TRACE_COMPANION_EVENTS(thread_id, SAMPLING_BUFFER(thread_id), evt, 0, TRUE); \
 	}                                                              \
 }
 
@@ -142,6 +144,7 @@
 		evt.param.misc_param.param = (unsigned long long) (evtparam); \
 		HARDWARE_COUNTERS_READ (thread_id, evt, TRUE);                \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);     \
+		TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, 0, TRUE); \
 	}                                                               \
 }
 #else
@@ -184,6 +187,7 @@
 			HARDWARE_COUNTERS_READ(thread_id, evts[_i], _i==0);                        \
 		}                                                                            \
 		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);          \
+		TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evts[0], 0, TRUE); \
 	}                                                                              \
 }
 #else
@@ -219,6 +223,7 @@
 		evt.value = evtvalue;                                           \
 		HARDWARE_COUNTERS_READ (thread_id, evt, hwc_filter);            \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);       \
+		TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, 0, hwc_filter); \
 	}                                                                 \
 }
 
