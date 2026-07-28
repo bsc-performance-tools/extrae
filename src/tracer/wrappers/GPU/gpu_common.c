@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "utils.h"
 #include "config.h"
 #include "wrapper.h"
 #include "taskid.h"
@@ -46,6 +47,9 @@
 #if defined(__APPLE__)
 #define HOST_NAME_MAX 512
 #endif
+
+//#define SHOW_UUID_STR //Append uuid string at the end of the label eg: D1-S1-abc1234ab
+//#define USE_FULL_GPU_UUID //Select between short or long uuid eg: abc1234ab (short) | abca-12ab-41ca-abc1412bc (long)
 
 /**
  * Variable to control the initialization and allow the flushing of
@@ -201,6 +205,73 @@ unsigned GetGPUCommTag(void)
 	return new_tag;
 }
 
+static int GetPhysicalDeviceId(int unsigned device_id)
+{
+	const char *visible_devices = NULL;
+	int num_devices = 0;
+	char **devices = NULL;
+	int physical_id = (int)device_id;
+
+#if defined(CUDA_SUPPORT)
+	visible_devices = getenv("CUDA_VISIBLE_DEVICES");
+#else if defined(HIP_SUPPORT)
+	visible_devices = getenv("HIP_VISIBLE_DEVICES");
+#endif
+
+	if (visible_devices != NULL)
+	{
+		num_devices = __Extrae_Utils_explode(visible_devices, ",", &devices);
+		if ((num_devices > 0) && (device_id <= (num_devices-1)))
+			physical_id = atoi(devices[device_id]);
+	}
+
+	return physical_id;
+}
+
+#if defined (SHOW_UUID_STR)
+static char *GetGPU_UUID(unsigned int device_id)
+{
+	int pos = 0;
+	struct GPU_DEVICE_PROP_T GPUprop;
+
+#if defined(CUDA_SUPPORT)
+	GPU_RUNTIME_CHECK(cudaGetDeviceProperties(&GPUprop, device_id));
+#else if defined(HIP_SUPPORT)
+	GPU_RUNTIME_CHECK(hipGetDeviceProperties(&GPUprop, device_id));
+#endif
+
+	const size_t uuid_bytes = sizeof(GPUprop.uuid.bytes); // 16 bytes on both cudaUUID_t and hipUUID
+
+#if defined(USE_FULL_GPU_UUID)
+	const size_t num_bytes = uuid_bytes; // Use all the bytes of the device UUID
+	const size_t num_dashes = 4;
+	char uuid_str[1 + 2 * uuid_bytes + num_dashes + 1]; // leading '-' + 2 hex chars/byte + dashes + '\0'
+#else
+	const size_t num_bytes = 4; // We only use the first 4 bytes
+	char uuid_str[1 + 2 * num_bytes + 1]; // leading '-' + 2 hex chars/byte + '\0'
+#endif
+
+	pos += snprintf(uuid_str + pos, sizeof(uuid_str) - pos, "-");
+
+	for (size_t i = 0; i < num_bytes; i++)
+	{
+		pos += snprintf(uuid_str + pos, sizeof(uuid_str) - pos, "%02x", (unsigned char)GPUprop.uuid.bytes[i]);
+#if defined(USE_FULL_GPU_UUID)
+		/* No need to add dashes if we only print the first 4 bytes */
+		if (i == 3 || i == 5 || i == 7 || i == 9)
+		{
+			pos += snprintf(uuid_str + pos, sizeof(uuid_str) - pos, "-");
+		}
+#endif
+	}
+
+	return strdup(uuid_str);
+
+}
+#else
+# define GetGPU_UUID(device_id) ""
+#endif // SHOW_UUID_STR
+
 static void SynchronizeStream(int device_id, struct RegisteredStream_t *registered_stream)
 {
 	if (registered_stream == NULL)
@@ -238,6 +309,7 @@ void DeinitializeDevice(int device_id)
 			xfree(deviceArray[device_id].streams);
 			deviceArray[device_id].streams = NULL;
 			deviceArray[device_id].initialized = FALSE;
+			deviceArray[device_id].physical_device_id = 0;
 		}
 	}
 }
@@ -265,6 +337,7 @@ struct RegisteredStream_t *SearchAndRegisterStream(int device_id, GPU_STREAM_T s
 	int stream_idx = 0;
 	unsigned long long unique_stream_id = 0;
 	int i = 0;
+	char _threadname[THREAD_INFO_NAME_LEN];
 
 	/* Lazy-initialize the device array on first call */
 	if (deviceArray == NULL)
@@ -278,6 +351,7 @@ struct RegisteredStream_t *SearchAndRegisterStream(int device_id, GPU_STREAM_T s
 			deviceArray[i].initialized = FALSE;
 			deviceArray[i].streams = NULL;
 			deviceArray[i].num_streams = 0;
+			deviceArray[i].physical_device_id = GetPhysicalDeviceId(i);
 		}
 
 		atexit(Extrae_gpuFinalize);
@@ -345,22 +419,15 @@ struct RegisteredStream_t *SearchAndRegisterStream(int device_id, GPU_STREAM_T s
 	gpuEventList_init(&StreamArray[stream_idx].gpu_event_list, FALSE, XTR_GPU_EVENTS_BLOCK_SIZE);
 
 #ifdef DEBUG
-	fprintf(stderr, "SearchAndRegisterStream(device_id=%d, stream=%p) => stream_idx=%d\n",
-			device_id, stream, stream_idx);
+	fprintf(stderr, "SearchAndRegisterStream(stream=%p assigned to stream_idx => %d\n", stream, stream_idx);
 #endif
 
-	/* Assign a descriptive name to the thread bound to this stream */
-	{
-		char _threadname[THREAD_INFO_NAME_LEN];
-		char _hostname[HOST_NAME_MAX];
+	sprintf(_threadname, "GPU-D%d.S%d%s", 
+		deviceArray[device_id].physical_device_id+1, 
+		stream_idx+1, 
+		GetGPU_UUID(device_id));
 
-		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-			sprintf(_threadname, "GPU-D%d.S%d-%s", device_id + 1, stream_idx + 1, _hostname);
-		else
-			sprintf(_threadname, "GPU-D%d.S%d-%s", device_id + 1, stream_idx + 1, "unknown-host");
-
-		Extrae_set_thread_name(StreamArray[stream_idx].thread_id, _threadname);
-	}
+	Extrae_set_thread_name(StreamArray[stream_idx].thread_id, _threadname);
 
 	/* Record a reference timestamp on the new stream */
 	/* FIX: CU_EVENT_BLOCKING_SYNC may be harmful — keep under review */

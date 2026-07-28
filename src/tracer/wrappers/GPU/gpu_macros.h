@@ -74,8 +74,10 @@
  */
 #if defined(CUDA_SUPPORT)
 #  define GPU_CONTEXT_T  CUcontext   /* CUDA driver API — does not follow the cuda* pattern */
+#  define GPU_DEVICE_PROP_T  cudaDeviceProp
 #elif defined(HIP_SUPPORT)
 #  define GPU_CONTEXT_T  hipCtx_t
+#  define GPU_DEVICE_PROP_T  hipDeviceProp_t
 #endif
 
 /* ══════════════════════════════════════════════════════════════════════════

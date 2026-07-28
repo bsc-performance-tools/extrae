@@ -78,7 +78,8 @@ struct RegisteredStream_t {
 };
 
 struct DeviceInfo_t {
-	struct RegisteredStream_t* streams;
+	unsigned int physical_device_id;
+	struct RegisteredStream_t *streams;
 	int num_streams;
 	gpu_event_list_t available_events; /* available events to add to stream to obtain gpu timings */
 	int initialized;
