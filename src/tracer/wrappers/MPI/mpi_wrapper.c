@@ -97,6 +97,8 @@
 */
 #include "misc_wrapper.h"
 
+double _xtr_mpi_size_factor = -1;
+
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
@@ -308,19 +310,23 @@ void CheckGlobalOpsTracingIntervals (void)
  ***  getMsgSizeFromCountAndDatatype
  ******************************************************************************/
 
-int getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype)
+UINT64 getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype)
 {
-  int size = 0;
+  UINT64 totalSize = 0;
 
   if (count > 0)
   {
-    if ((PMPI_Type_size (datatype, &size)) != MPI_SUCCESS)
+    if ((PMPI_Type_size (datatype, &totalSize)) != MPI_SUCCESS)
     {
-      size = 0;
+      totalSize = 0;
     }
+	else 
+	{
+      totalSize *= count;
+	}
   }
 
-  return (size * count);
+  return totalSize;
 }
 
 /******************************************************************************

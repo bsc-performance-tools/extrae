@@ -30,6 +30,9 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+#include <strings.h>
+
 #ifdef HAVE_MPI_H
 #include <mpi.h>
 #endif
@@ -45,6 +48,25 @@
 #warning MPI_F_STATUS_SIZE definition not found in mpi.h. Assuming our configure check for MPI_STATUS_INTEGER_FIELDS_COUNT.
 #define MPI_F_STATUS_SIZE MPI_STATUS_INTEGER_FIELDS_COUNT
 #endif
+
+
+
+extern double _xtr_mpi_size_factor;
+
+#define FACTOR_SIZE(size_message) \
+	({ \
+		if (_xtr_mpi_size_factor < 0) \
+		{ \
+			char *_xtr_mpi_size_unit = getenv ("EXTRAE_MPI_SIZE_UNIT"); \
+			if (_xtr_mpi_size_unit != NULL && strcasecmp (_xtr_mpi_size_unit, "KB") == 0) \
+				_xtr_mpi_size_factor = 0.001; \
+			else if (_xtr_mpi_size_unit != NULL && strcasecmp (_xtr_mpi_size_unit, "MB") == 0) \
+				_xtr_mpi_size_factor = 0.000001; \
+			else \
+				_xtr_mpi_size_factor = 1.0; \
+		} \
+		(int)((size_message) * _xtr_mpi_size_factor); \
+	})
 
 /*
  * MAX_MPI_HANDLES determines size of local arrays to store MPI_Request and MPI_Status objects.
@@ -62,7 +84,7 @@ enum
 
 // Helper functions to process MPI wrapper's arguments
 void getCommunicatorGroup(MPI_Comm comm, MPI_Group *group);
-int  getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype);
+UINT64 getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype);
 void getCommInfoFromStatus_C(MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *source_global);
 void getCommInfoFromStatus_F(MPI_Fint *f_status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *source_global);
 void makeProxies_C(int count_requests, MPI_Request *user_requests, MPI_Request *local_requests, MPI_Request **proxy_requests, int count_statuses, MPI_Status *user_statuses, MPI_Status *local_statuses, MPI_Status **proxy_statuses);

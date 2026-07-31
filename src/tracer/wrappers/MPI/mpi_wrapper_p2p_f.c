@@ -117,7 +117,7 @@ void PMPI_BSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_BSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_BSEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_bsend) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -132,7 +132,7 @@ void PMPI_BSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_BSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_BSEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 
@@ -160,7 +160,7 @@ void PMPI_SSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_SSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_SSEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_ssend) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -175,7 +175,7 @@ void PMPI_SSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_SSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_SSEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 /******************************************************************************
@@ -202,7 +202,7 @@ void PMPI_RSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_RSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_RSEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_rsend) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -217,7 +217,7 @@ void PMPI_RSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_RSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_RSEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 /******************************************************************************
@@ -244,7 +244,7 @@ void PMPI_Send_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_SEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_SEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_send) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -259,7 +259,7 @@ void PMPI_Send_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_SEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_SEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 
@@ -289,7 +289,7 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_IBSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_IBSEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_ibsend) (buf, count, datatype, dest, tag, comm, request, ierror);
 
@@ -313,7 +313,7 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_IBSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_IBSEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 
@@ -343,7 +343,7 @@ void PMPI_ISend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_ISEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_ISEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_isend) (buf, count, datatype, dest, tag, comm, request, ierror);
 
@@ -382,7 +382,7 @@ void PMPI_ISend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_ISEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_ISEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 
@@ -412,7 +412,7 @@ void PMPI_ISSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_ISSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_ISSEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_issend) (buf, count, datatype, dest, tag, comm, request, ierror);
 
@@ -436,7 +436,7 @@ void PMPI_ISSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats 
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_ISSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_ISSEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 
@@ -466,7 +466,7 @@ void PMPI_IRSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_IRSEND_EV, EVT_BEGIN, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_IRSEND_EV, EVT_BEGIN, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_irsend) (buf, count, datatype, dest, tag, comm, request, ierror);
 
@@ -490,7 +490,7 @@ void PMPI_IRSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, receiver_world, 0, size);
 
-	TRACE_MPIEVENT (current_time, MPI_IRSEND_EV, EVT_END, receiver_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_IRSEND_EV, EVT_END, receiver_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 }
 
 
@@ -524,7 +524,7 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_RECV_EV, EVT_BEGIN, source_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_RECV_EV, EVT_BEGIN, source_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, f_proxy_status, ierror);
 
@@ -542,7 +542,7 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, source_world, size, 0);
 
-	TRACE_MPIEVENT (current_time, MPI_RECV_EV, EVT_END, source_world, size, source_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_RECV_EV, EVT_END, source_world, FACTOR_SIZE(size), source_tag, c_comm, EMPTY);
 }
 
 
@@ -572,7 +572,7 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_IRECV_EV, EVT_BEGIN, source_world, size, c_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_IRECV_EV, EVT_BEGIN, source_world, FACTOR_SIZE(size), c_tag, c_comm, EMPTY);
 
 	CtoF77 (pmpi_irecv) (buf, count, datatype, source, tag, comm, request, ierror);
 
@@ -586,7 +586,7 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : request id
 	 */
 	iotimer_t current_time = TIME;
-	TRACE_MPIEVENT (current_time, MPI_IRECV_EV, EVT_END, source_world, size, c_tag, c_comm, c_request);
+	TRACE_MPIEVENT (current_time, MPI_IRECV_EV, EVT_END, source_world, FACTOR_SIZE(size), c_tag, c_comm, c_request);
 }
 
 
@@ -619,7 +619,7 @@ void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_MRECV_EV, EVT_BEGIN, EMPTY, size, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_MRECV_EV, EVT_BEGIN, EMPTY, FACTOR_SIZE(size), EMPTY, EMPTY, EMPTY);
 
 	CtoF77 (pmpi_mrecv) (buf, count, datatype, message, f_proxy_status, ierror);
 
@@ -639,7 +639,7 @@ void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	// MPI stats 
 	xtr_stats_MPI_update_P2P(begin_time, current_time, source_world, size, 0);
 
-	TRACE_MPIEVENT (current_time, MPI_MRECV_EV, EVT_END, source_world, size, source_tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_MRECV_EV, EVT_END, source_world, FACTOR_SIZE(size), source_tag, c_comm, EMPTY);
 }
 
 
@@ -665,7 +665,7 @@ void PMPI_Imrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_IMRECV_EV, EVT_BEGIN, EMPTY, size, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_IMRECV_EV, EVT_BEGIN, EMPTY, FACTOR_SIZE(size), EMPTY, EMPTY, EMPTY);
 
 	CtoF77 (pmpi_imrecv) (buf, count, datatype, message, request, ierror);
 
@@ -679,7 +679,7 @@ void PMPI_Imrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	 *   aux    : request id
 	 */
 	iotimer_t current_time = TIME;
-	TRACE_MPIEVENT (current_time, MPI_IMRECV_EV, EVT_END, EMPTY, size, EMPTY, c_comm, c_request);
+	TRACE_MPIEVENT (current_time, MPI_IMRECV_EV, EVT_END, EMPTY, FACTOR_SIZE(size), EMPTY, c_comm, c_request);
 }
 
 #endif /* MPI3 */
@@ -1658,7 +1658,7 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_SENDRECV_EV, EVT_BEGIN, ReceiverRank, SentSize, *sendtag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_SENDRECV_EV, EVT_BEGIN, ReceiverRank, FACTOR_SIZE(SentSize), *sendtag, c_comm, EMPTY); 
 
 	makeProxies_F (0, NULL, NULL, NULL,
 	               1, status, f_local_status, &f_proxy_status);
@@ -1681,7 +1681,7 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, SenderRank, ReceivedSize, SentSize);
 
-	TRACE_MPIEVENT (current_time, MPI_SENDRECV_EV, EVT_END, SenderRank, ReceivedSize, Tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_SENDRECV_EV, EVT_END, SenderRank, FACTOR_SIZE(ReceivedSize), Tag, c_comm, EMPTY);
 }
 
 void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
@@ -1706,7 +1706,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	 *   aux    : ---
 	 */
 	iotimer_t begin_time = LAST_READ_TIME;
-	TRACE_MPIEVENT (begin_time, MPI_SENDRECV_REPLACE_EV, EVT_BEGIN, ReceiverRank, SentSize, *sendtag, c_comm, EMPTY);
+	TRACE_MPIEVENT (begin_time, MPI_SENDRECV_REPLACE_EV, EVT_BEGIN, ReceiverRank, FACTOR_SIZE(SentSize), *sendtag, c_comm, EMPTY);
 
 	makeProxies_F (0, NULL, NULL, NULL,
 	               1, status, f_local_status, &f_proxy_status);
@@ -1727,7 +1727,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	// MPI stats
 	xtr_stats_MPI_update_P2P(begin_time, current_time, SenderRank, ReceivedSize, SentSize);
 
-	TRACE_MPIEVENT (current_time, MPI_SENDRECV_REPLACE_EV, EVT_END, SenderRank, ReceivedSize, Tag, c_comm, EMPTY);
+	TRACE_MPIEVENT (current_time, MPI_SENDRECV_REPLACE_EV, EVT_END, SenderRank, FACTOR_SIZE(ReceivedSize), Tag, c_comm, EMPTY);
 }
 
 #endif /* defined(FORTRAN_SYMBOLS) */
