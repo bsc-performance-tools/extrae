@@ -292,11 +292,11 @@ static struct helper__kmpc_task_t * helper__kmpc_task_retrieve(void *wrap_task)
 	pthread_mutex_lock(&hl__kmpc_task_mtx);
 
 	int i = hl__kmpc_task->last_task - 1;
+	if (i < 0) i = hl__kmpc_task->max_helpers - 1;
 	int start_i = i;
 
 	while (i != hl__kmpc_task->last_task && hl__kmpc_task->list[i].wrap_task != NULL)
 	{
-		if (i < 0) i = hl__kmpc_task->max_helpers - 1;
 
 		if (hl__kmpc_task->list[i].wrap_task == wrap_task)
 		{
@@ -306,6 +306,7 @@ static struct helper__kmpc_task_t * helper__kmpc_task_retrieve(void *wrap_task)
 		}
 
 		i--;
+		if (i < 0) i = hl__kmpc_task->max_helpers - 1;
 
 		//If i has looped around the list the task couldn't be found, give error
 		if (i == start_i) {
@@ -1647,7 +1648,7 @@ void __kmpc_taskloop_5(void *loc, int gtid, void *task, int if_val, void *lb, vo
 
 	/* Retrieve the real task pointer from the list that is maintained in the
 	 * instrumented function __kmpc_omp_task_alloc */
-	real_task = helper__kmpc_task_retrieve(task);
+	real_task = helper__kmpc_task_retrieve(task)->real_task;
 
 	if (TRACE(__kmpc_taskloop_5_real) && (getTrace_OpenMP_Taskloop()))
 	{
