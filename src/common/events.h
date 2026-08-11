@@ -128,6 +128,8 @@ enum {
 #define IOCTL_VAL_EV                   13 /* Used in merger, with IO_EV */
 #define CLOSE_VAL_EV                   14 /* Used in merger, with IO_EV */
 #define FCLOSE_VAL_EV                  15 /* Used in merger, with IO_EV */
+#define LSEEK_VAL_EV                   16 /* Used in merger, with IO_EV */
+#define FSEEK_VAL_EV                   17 /* Used in merger, with IO_EV */
 #define USER_EV                  40000006
 #define HWC_DEF_EV               40000007
 #define HWC_CHANGE_EV            40000008
@@ -217,6 +219,9 @@ enum
 #define IOCTL_REQUEST_EV         40000068
 #define CLOSE_EV                 40000071
 #define FCLOSE_EV                40000072
+#define LSEEK_EV                 40000073
+#define FSEEK_EV                 40000074
+#define IO_OFFSET_EV             40000075 /* supplementary: seek offset arg */
 
 #define ADDRESSES_FOR_BINARY_EV  41000000
 

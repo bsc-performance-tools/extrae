@@ -70,6 +70,12 @@ void Probe_IO_pwritev_Exit  (void);
 void Probe_IO_ioctl_Entry (int fd, unsigned long request);
 void Probe_IO_ioctl_Exit  (void);
 
+void Probe_IO_lseek_Entry (int fd, off_t offset);
+void Probe_IO_lseek_Exit  (void);
+
+void Probe_IO_fseek_Entry (int fd, off_t offset);
+void Probe_IO_fseek_Exit  (void);
+
 void Probe_IO_close_Entry(int);
 void Probe_IO_close_Exit();
 

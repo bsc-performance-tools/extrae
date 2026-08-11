@@ -119,6 +119,12 @@ static int     (*real_ioctl)(int fd, unsigned long request, ...)                
 static int     (*real_close)(int fildes) = NULL;
 static int     (*real_fclose)(FILE *stream) = NULL;
 
+static off_t     (*real_lseek)(int fd, off_t offset, int whence)              = NULL;
+static __off64_t (*real_lseek64)(int fd, __off64_t offset, int whence)        = NULL;
+static int       (*real_fseek)(FILE *stream, long offset, int whence)         = NULL;
+static int       (*real_fseeko)(FILE *stream, off_t offset, int whence)       = NULL;
+static int       (*real_fseeko64)(FILE *stream, __off64_t offset, int whence) = NULL;
+
 static unsigned traceInternalsIO = FALSE;
 
 __thread unsigned __in_io_depth = 0;
@@ -1780,6 +1786,376 @@ fclose(FILE *stream)
 #endif
 	Backend_Leave_Instrumentation ();
 	return res;
+}
+
+/**
+ * lseek
+ *
+ * Wrapper for the system call 'lseek'
+ */
+off_t lseek (int fd, off_t offset, int whence)
+{
+	Backend_Enter_Instrumentation ();
+#ifdef HAVE_ERRNO_H
+  int errno_real = errno;
+#endif
+  off_t res;
+
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses,
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: lseek() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_lseek == NULL)
+  {
+    real_lseek = XTR_FIND_SYMBOL(__func__);
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": lseek is at %p\n", real_lseek);
+    fprintf (stderr, PACKAGE_NAME": lseek params %d %ld %d\n", fd, offset, whence);
+  }
+#endif
+
+  if (real_lseek != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    Probe_IO_lseek_Entry (fd, offset);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+    res = real_lseek (fd, offset, whence);
+#ifdef HAVE_ERRNO_H
+		errno_real = errno;
+#endif
+    Probe_IO_lseek_Exit ();
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+  }
+  else if (real_lseek != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_lseek (fd, offset, whence);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": lseek is not hooked! exiting!!\n");
+    abort();
+  }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: lseek() returns\n", TASKID);
+#endif
+	Backend_Leave_Instrumentation ();
+  return res;
+}
+
+/**
+ * lseek64
+ *
+ * Wrapper for the system call 'lseek64'
+ */
+__off64_t lseek64 (int fd, __off64_t offset, int whence)
+{
+	Backend_Enter_Instrumentation ();
+#ifdef HAVE_ERRNO_H
+  int errno_real = errno;
+#endif
+  __off64_t res;
+
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses,
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: lseek64() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_lseek64 == NULL)
+  {
+    real_lseek64 = XTR_FIND_SYMBOL(__func__);
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": lseek64 is at %p\n", real_lseek64);
+    fprintf (stderr, PACKAGE_NAME": lseek64 params %d %ld %d\n", fd, offset, whence);
+  }
+#endif
+
+  if (real_lseek64 != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    Probe_IO_lseek_Entry (fd, offset);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+    res = real_lseek64 (fd, offset, whence);
+#ifdef HAVE_ERRNO_H
+		errno_real = errno;
+#endif
+    Probe_IO_lseek_Exit ();
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+  }
+  else if (real_lseek64 != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_lseek64 (fd, offset, whence);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": lseek64 is not hooked! exiting!!\n");
+    abort();
+  }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: lseek64() returns\n", TASKID);
+#endif
+	Backend_Leave_Instrumentation ();
+  return res;
+}
+
+/**
+ * fseek
+ *
+ * Wrapper for the system call 'fseek'
+ */
+int fseek (FILE *stream, long offset, int whence)
+{
+	Backend_Enter_Instrumentation ();
+#ifdef HAVE_ERRNO_H
+  int errno_real = errno;
+#endif
+  int res;
+
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses,
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fseek() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_fseek == NULL)
+  {
+    real_fseek = XTR_FIND_SYMBOL(__func__);
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": fseek is at %p\n", real_fseek);
+    fprintf (stderr, PACKAGE_NAME": fseek params %p %ld %d\n", stream, offset, whence);
+  }
+#endif
+
+  if (real_fseek != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    Probe_IO_fseek_Entry (fileno(stream), offset);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+    res = real_fseek (stream, offset, whence);
+#ifdef HAVE_ERRNO_H
+		errno_real = errno;
+#endif
+    Probe_IO_fseek_Exit ();
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+  }
+  else if (real_fseek != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_fseek (stream, offset, whence);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": fseek is not hooked! exiting!!\n");
+    abort();
+  }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fseek() returns\n", TASKID);
+#endif
+	Backend_Leave_Instrumentation ();
+  return res;
+}
+
+/**
+ * fseeko
+ *
+ * Wrapper for the system call 'fseeko'
+ */
+int fseeko (FILE *stream, off_t offset, int whence)
+{
+	Backend_Enter_Instrumentation ();
+#ifdef HAVE_ERRNO_H
+  int errno_real = errno;
+#endif
+  int res;
+
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses,
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fseeko() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_fseeko == NULL)
+  {
+    real_fseeko = XTR_FIND_SYMBOL(__func__);
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": fseeko is at %p\n", real_fseeko);
+    fprintf (stderr, PACKAGE_NAME": fseeko params %p %ld %d\n", stream, offset, whence);
+  }
+#endif
+
+  if (real_fseeko != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    Probe_IO_fseek_Entry (fileno(stream), offset);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+    res = real_fseeko (stream, offset, whence);
+#ifdef HAVE_ERRNO_H
+		errno_real = errno;
+#endif
+    Probe_IO_fseek_Exit ();
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+  }
+  else if (real_fseeko != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_fseeko (stream, offset, whence);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": fseeko is not hooked! exiting!!\n");
+    abort();
+  }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fseeko() returns\n", TASKID);
+#endif
+	Backend_Leave_Instrumentation ();
+  return res;
+}
+
+/**
+ * fseeko64
+ *
+ * Wrapper for the system call 'fseeko64'
+ */
+int fseeko64 (FILE *stream, __off64_t offset, int whence)
+{
+	Backend_Enter_Instrumentation ();
+#ifdef HAVE_ERRNO_H
+  int errno_real = errno;
+#endif
+  int res;
+
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses,
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fseeko64() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_fseeko64 == NULL)
+  {
+    real_fseeko64 = XTR_FIND_SYMBOL(__func__);
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": fseeko64 is at %p\n", real_fseeko64);
+    fprintf (stderr, PACKAGE_NAME": fseeko64 params %p %ld %d\n", stream, offset, whence);
+  }
+#endif
+
+  if (real_fseeko64 != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    Probe_IO_fseek_Entry (fileno(stream), offset);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+    res = real_fseeko64 (stream, offset, whence);
+#ifdef HAVE_ERRNO_H
+		errno_real = errno;
+#endif
+    Probe_IO_fseek_Exit ();
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
+  }
+  else if (real_fseeko64 != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_fseeko64 (stream, offset, whence);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": fseeko64 is not hooked! exiting!!\n");
+    abort();
+  }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fseeko64() returns\n", TASKID);
+#endif
+	Backend_Leave_Instrumentation ();
+  return res;
 }
 
 # endif /* -DPIC */

@@ -542,6 +542,64 @@ void Probe_IO_ioctl_Exit (void)
 }
 
 /**
+ * Probe_IO_lseek_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'lseek'
+ * \param fd A file descriptor
+ * \param offset The requested seek offset
+ */
+void Probe_IO_lseek_Entry (int fd, off_t offset)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, LSEEK_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, LSEEK_EV, EVT_BEGIN+5, offset);
+  }
+}
+
+/**
+ * Probe_IO_lseek_Exit
+ *
+ * Probe injected at the end of the I/O call 'lseek'
+ */
+void Probe_IO_lseek_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, LSEEK_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_fseek_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'fseek'
+ * \param fd A file descriptor
+ * \param offset The requested seek offset
+ */
+void Probe_IO_fseek_Entry (int fd, off_t offset)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, FSEEK_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, FSEEK_EV, EVT_BEGIN+5, offset);
+  }
+}
+
+/**
+ * Probe_IO_fseek_Exit
+ *
+ * Probe injected at the end of the I/O call 'fseek'
+ */
+void Probe_IO_fseek_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, FSEEK_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
  * Probe_IO_close_Entry
  *
  * Probe injected at the beginning of the I/O call 'close'

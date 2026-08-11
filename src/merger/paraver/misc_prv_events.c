@@ -69,7 +69,7 @@
 
 #define MAX_MISC_INDEX	       9
 
-#define NUM_MISC_PRV_ELEMENTS  15
+#define NUM_MISC_PRV_ELEMENTS  17
 
 struct t_event_misc2prv
 {
@@ -99,7 +99,9 @@ static struct t_event_misc2prv event_misc2prv[NUM_MISC_PRV_ELEMENTS] = {
 	{FOPEN_EV, FOPEN_VAL_EV, FALSE},
 	{IOCTL_EV, IOCTL_VAL_EV, FALSE},
 	{CLOSE_EV, CLOSE_VAL_EV, FALSE},
-	{FCLOSE_EV, FCLOSE_VAL_EV, FALSE}
+	{FCLOSE_EV, FCLOSE_VAL_EV, FALSE},
+	{LSEEK_EV, LSEEK_VAL_EV, FALSE},
+	{FSEEK_EV, FSEEK_VAL_EV, FALSE}
 };
 
 static struct t_prv_val_label misc_prv_val_label[NUM_MISC_PRV_ELEMENTS] = {
@@ -117,7 +119,9 @@ static struct t_prv_val_label misc_prv_val_label[NUM_MISC_PRV_ELEMENTS] = {
 	{FOPEN_VAL_EV, FOPEN_LBL},
 	{IOCTL_VAL_EV, IOCTL_LBL},
 	{CLOSE_VAL_EV, CLOSE_LBL},
-	{FCLOSE_VAL_EV, FCLOSE_LBL}
+	{FCLOSE_VAL_EV, FCLOSE_LBL},
+	{LSEEK_VAL_EV, LSEEK_LBL},
+	{FSEEK_VAL_EV, FSEEK_LBL}
 };
 
 /******************************************************************************
@@ -192,7 +196,8 @@ void Enable_MISC_Operation (int type)
 	         type == PREADV_EV || type == PWRITEV_EV ||
 	         type == OPEN_EV   || type == FOPEN_EV   ||
 	         type == IOCTL_EV  || type == CLOSE_EV   ||
-	         type == FCLOSE_EV)
+	         type == FCLOSE_EV || type == LSEEK_EV   ||
+	         type == FSEEK_EV)
 		{
 			inuse[INOUT_INDEX] = TRUE;
 			Used_MISC_Operation(type);
@@ -385,6 +390,9 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		LET_SPACES(fd);
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOCTL_REQUEST_EV, IOCTL_REQUEST_LBL);
+		LET_SPACES(fd);
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_OFFSET_EV, IO_OFFSET_LBL);
 		LET_SPACES(fd);
 	}
 	if (inuse[FORK_SYSCALL_INDEX])

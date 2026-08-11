@@ -223,6 +223,12 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 					case FCLOSE_EV:
 						io_type = FCLOSE_VAL_EV;
 						break;
+					case LSEEK_EV:
+						io_type = LSEEK_VAL_EV;
+						break;
+					case FSEEK_EV:
+						io_type = FSEEK_VAL_EV;
+						break;
 					default:
 						io_type = 0;
 						break;
@@ -251,6 +257,10 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 			case EVT_BEGIN+4:
 				/* This event refers to the request of an ioctl call */
 				trace_paraver_event (cpu, ptask, task, thread, time, IOCTL_REQUEST_EV, EvParam);
+				break;
+			case EVT_BEGIN+5:
+				/* This event refers to the offset of an lseek/fseek call */
+				trace_paraver_event (cpu, ptask, task, thread, time, IO_OFFSET_EV, EvParam);
 				break;
 			default:
 				break;
@@ -1804,6 +1814,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ IOCTL_EV, ReadWrite_Event },
 	{ CLOSE_EV, ReadWrite_Event },
 	{ FCLOSE_EV, ReadWrite_Event },
+	{ LSEEK_EV, ReadWrite_Event },
+	{ FSEEK_EV, ReadWrite_Event },
 	{ APPL_EV, Appl_Event },
 	{ TRACE_INIT_EV, InitTracing_Event },
 	{ USER_EV, User_Event },
