@@ -159,7 +159,7 @@ void Extrae_Probe_exec_l_Entry (char *newbinary)
 	Extrae_define_event_type_Wrapper (EXEC_BIN_EV, "exec() binary name", 1, &v, &newbinary);
 	TRACE_MISCEVENT(LAST_READ_TIME, USER_EV, EXEC_BIN_EV, getpid());
 
-	Extrae_fini_Wrapper();
+	Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_API, NULL, NULL);
 }
 
 void Extrae_Probe_exec_v_Entry (char *newbinary, char *const argv[])
@@ -207,7 +207,7 @@ void Extrae_Probe_exec_v_Entry (char *newbinary, char *const argv[])
 	Extrae_define_event_type_Wrapper (EXEC_BIN_EV, "exec() binary name", 1, &v, pbuffer);
 	TRACE_MISCEVENT(LAST_READ_TIME, USER_EV, EXEC_BIN_EV, getpid());
 
-	Extrae_fini_Wrapper();
+	Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_API, NULL, NULL);
 
 	#undef BUFFER_SIZE
 }

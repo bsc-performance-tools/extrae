@@ -133,7 +133,7 @@ gaspi_proc_init(gaspi_timeout_t timeout_ms)
 		 * Generate a tentative file list, remove first if the list was generated
 		 * by Extrae_init
 		 */
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_API)
 		{
 			GASPI_remove_file_list (TRUE);
 		}
@@ -166,7 +166,7 @@ gaspi_proc_term(gaspi_timeout_t timeout_ms)
 
 	Extrae_GASPI_term_Entry();
 
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_MPI)
 	{
 		Backend_Finalize ();
 		ret = pgaspi_proc_term(timeout_ms);

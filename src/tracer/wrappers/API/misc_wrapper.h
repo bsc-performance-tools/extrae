@@ -27,11 +27,13 @@
 #include "clock.h"
 #include "extrae_types.h"
 
+typedef void* (*extrae_func_t)(short int, void*);
+
 void Extrae_init_Wrapper(void);
 void Extrae_init_tracing (int forked);
-void Extrae_fini_Wrapper(void);
 void Extrae_shutdown_Wrapper (void);
 void Extrae_restart_Wrapper (void);
+void Extrae_fini_Wrapper(extrae_fini_type_t type_finalize, void* (*func)(short int, void*), void*);
 
 void Extrae_N_Event_Wrapper (unsigned *count, extrae_type_t *tipus, extrae_value_t *valors);
 void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, extrae_type_t *tipus, extrae_value_t *valors);

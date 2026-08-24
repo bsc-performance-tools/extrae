@@ -78,6 +78,11 @@
 #include <malloc.h>
 #endif
 
+#define MAX_FINALIZE_CALLBACK_FUNCS 16
+
+static extrae_func_t callback_finalize_calls[MAX_FINALIZE_CALLBACK_FUNCS];
+static int counter_callback_finalize = 0;
+
 void Extrae_shutdown_Wrapper (void)
 {
 	TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, TRACING_EV, EVT_END, EMPTY);
@@ -353,7 +358,7 @@ void Extrae_init_tracing (int forked)
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), TRACE_INIT_EV, temps_init, temps_fini, NULL))
 		return;
 
-	Extrae_set_is_initialized (EXTRAE_INITIALIZED_EXTRAE_INIT);
+	Extrae_set_is_initialized (EXTRAE_INITIALIZED_VIA_API);
 }
 
 void Extrae_init_Wrapper (void)
@@ -367,11 +372,13 @@ void Extrae_init_Wrapper (void)
 	else
 	{
 		char *previous = "Unknown";
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_API)
 			previous = "API";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_MPI)
 			previous = "MPI";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_SHMEM_INIT)
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_GASPI)
+			previous = "GASPI";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_SHMEM)
 			previous = "SHMEM";
 
 		fprintf (stderr, PACKAGE_NAME": Warning! API tries to initialize more than once\n");
@@ -386,13 +393,53 @@ void Extrae_init_Wrapper (void)
 	}
 }
 
-void Extrae_fini_Wrapper (void)
+/**
+ * Extrae_fini_wrapper
+ * 
+ * Finalize Extrae only if finalization type equals initialization type
+ *
+ * @param type_finalize One of API, MPI, GASPI, SHMEM
+ * @param func          Pointer to the actual finalization function
+ * @param rv            Variable to save return value, can be NULL
+ */
+void
+Extrae_fini_Wrapper(extrae_fini_type_t type_finalize,
+                    void* (*func)(short int, void*), void* rv)
 {
 	/* Finalize only if it is initialized */
-	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		if (func != NULL)
+		{
+			func(FALSE, rv);
+		}
+	} else if (Extrae_is_initialized_Wrapper() == type_finalize ||
+	           type_finalize == EXTRAE_FINALIZED_VIA_API)
 	{
 		/* Finalize tracing library */
 		Backend_Finalize ();
+
+		if (func != NULL)
+		{
+			func(FALSE, rv);
+		}
+
+		for (int i = 0; i < counter_callback_finalize; ++i)
+		{
+			callback_finalize_calls[i](FALSE, NULL);
+		}
+
+		counter_callback_finalize = 0;
+	} else
+	{
+		if (func != NULL)
+		{
+		    	// TRUE: Return finalization success to application so it doesn't fail
+			func(TRUE, rv);
+			// Register callback for later use
+			callback_finalize_calls[counter_callback_finalize] = func;
+			counter_callback_finalize++;
+		}
 	}
 }
 

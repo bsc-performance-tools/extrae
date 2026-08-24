@@ -66,7 +66,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_IS_INITIALIZED)
 	void CtoF77(x##_fini) (void) \
 	{ \
 		if (mpitrace_on) \
-			Extrae_fini_Wrapper ();\
+			Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_API, NULL, NULL); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 
@@ -303,7 +303,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_IS_INITIALIZED)
 	void x##_fini (void) \
 	{ \
 		if (mpitrace_on) \
-			Extrae_fini_Wrapper ();\
+			Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_API, NULL, NULL); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 
@@ -622,7 +622,7 @@ INTERFACE_ALIASES_C(_fini,Extrae_fini,(void),void)
 void Extrae_fini (void)
 {
 	if (mpitrace_on)
-		Extrae_fini_Wrapper ();
+		Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_API, NULL, NULL);
 }
 
 INTERFACE_ALIASES_C(_event, Extrae_event, (extrae_type_t type, extrae_value_t value),void)
@@ -915,7 +915,7 @@ INTERFACE_ALIASES_F(_fini,_FINI,extrae_fini,(void),void)
 void extrae_fini (void)
 {
 	if (mpitrace_on)
-		Extrae_fini_Wrapper ();
+		Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_API, NULL, NULL);
 }
 
 INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(extrae_type_t *type, extrae_value_t *value),void)

@@ -44,7 +44,7 @@ void Extrae_auto_library_fini (void)
 	 */
 	if (pid_at_constructor == getpid())
 	{
-		Extrae_fini_Wrapper ();
+		Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_API, NULL, NULL);
 	}
 }
 

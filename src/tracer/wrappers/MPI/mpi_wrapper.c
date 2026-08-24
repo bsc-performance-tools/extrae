@@ -145,6 +145,91 @@ static void Extrae_MPI_Barrier (void)
 	PMPI_Barrier (MPI_COMM_WORLD);
 }
 
+/**
+ * Extrae_MPI_Finish
+ *
+ * Finalization function for MPI
+ *
+ * @param simulate_output Don't finalize, just return MPI_SUCCESS to application so it doesn't fail
+ * @param rv              Variable to save return value, can be NULL
+ */
+#if defined(FORTRAN_SYMBOLS)
+void*
+Extrae_MPI_Finish(short int simulate_output, void* rv)
+{
+	static MPI_Fint ierror;
+	if(simulate_output)
+	{
+		ierror = MPI_SUCCESS;
+	} else
+	{
+		int flag = 0;
+		MPI_Finalized(&flag);
+
+		/* Run only when not already finalized */
+		if (!flag)
+		{
+# ifdef WITH_PMPI_HOOK
+			int (*real_mpi_finalize)() = NULL;
+			real_mpi_finalize = dlsym(RTLD_NEXT, "MPI_Finalize");
+			if(real_mpi_finalize != NULL)
+			{
+				CtoF77(real_mpi_finalize)(&ierror);
+			} else
+# endif // WITH_MPI_HOOK
+			{
+				CtoF77(pmpi_finalize)(&ierror);
+			}
+		}
+	}
+
+	if (rv != NULL)
+	{
+		*(MPI_Fint*)rv = ierror;
+	}
+
+	return &ierror;
+}
+#else // FORTRAN_SYMBOLS
+
+void*
+Extrae_MPI_Finish(short int simulate_output, void* rv)
+{
+	static int ierror;
+	if (simulate_output)
+	{
+		ierror = MPI_SUCCESS;
+	} else
+	{
+		int flag = 0;
+		MPI_Finalized(&flag);
+
+		/* Run only when not already finalized */
+		if (!flag)
+		{
+#ifdef WITH_PMPI_HOOK
+			int (*real_mpi_finalize)() = NULL;
+			real_mpi_finalize = dlsym(RTLD_NEXT, "MPI_Finalize");
+			if(real_mpi_finalize != NULL)
+			{
+				ierror = real_mpi_finalize();
+			} else
+#endif // WITH_PMPI_HOOK
+			{
+				ierror = PMPI_Finalize();
+			}
+		}
+	}
+
+	if (rv != NULL)
+	{
+		*(int*)rv = ierror;
+	}
+
+	return &ierror;
+}
+#endif // FORTRAN_SYMBOLS
+
 /******************************************************************************
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
@@ -1188,7 +1273,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
 		Extrae_set_initial_TASKID (TASKID);
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_VIA_MPI);
 
 		if (config_file != NULL && config_file[0] != '\0')
 			/* Obtain a localized copy *except for the master process* */
@@ -1302,7 +1387,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
 		Extrae_set_initial_TASKID (TASKID);
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_VIA_MPI);
 
 		if (config_file != NULL && config_file[0] != '\0')
 			/* Obtain a localized copy *except for the master process* */
@@ -1401,23 +1486,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 	/* Finalize now only if its initialized by MPI_init call, wait for the
 	 * program to end otherwise */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-	{
-		Extrae_fini_Wrapper();
-
-#ifdef WITH_PMPI_HOOK
-		int (*real_mpi_finalize)(MPI_Fint *ierror) = NULL;
-		real_mpi_finalize = dlsym(RTLD_NEXT, STRINGIFY(CtoF77 (mpi_finalize)));
-		if (real_mpi_finalize != NULL) {
-			CtoF77 (real_mpi_finalize) (ierror);
-		} else
-#endif
-		{
-			CtoF77 (pmpi_finalize) (ierror);
-		}
-	}
-	else
-		*ierror = MPI_SUCCESS;
+	Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_MPI, Extrae_MPI_Finish, ierror);
 }
 
 
@@ -2113,7 +2182,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
 		Extrae_set_initial_TASKID (TASKID);
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_VIA_MPI);
 
 		if (config_file != NULL && config_file[0] != '\0')
 			/* Obtain a localized copy *except for the master process* */
@@ -2223,7 +2292,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
 		Extrae_set_initial_TASKID (TASKID);
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_VIA_MPI);
 
 		if (config_file != NULL && config_file[0] != '\0')
 			/* Obtain a localized copy *except for the master process* */
@@ -2339,23 +2408,7 @@ int MPI_Finalize_C_Wrapper (void)
 
 	/* Finalize now only if its initialized by MPI_init call, wait for the
 	 * program to end otherwise */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-	{
-		Extrae_fini_Wrapper();
-
-#ifdef WITH_PMPI_HOOK
-		int (*real_mpi_finalize)() = NULL;
-		real_mpi_finalize = dlsym(RTLD_NEXT, "MPI_Finalize");
-		if (real_mpi_finalize != NULL) {
-			ierror = real_mpi_finalize();
-		} else
-#endif
-		{
-			ierror = PMPI_Finalize();
-		}
-	}
-	else
-		ierror = MPI_SUCCESS;
+    Extrae_fini_Wrapper(EXTRAE_FINALIZED_VIA_MPI, Extrae_MPI_Finish, &ierror);
 
 	return ierror;
 }

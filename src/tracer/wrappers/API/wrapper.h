@@ -127,6 +127,13 @@ unsigned Backend_getNumberOfThreads (void);
 unsigned Backend_getMaximumOfThreads (void);
 
 void Backend_Finalize (void);
+void Backend_Stop_Instrumentation_Runtime(int*);
+void Backend_Stop_Instrumentation_Tracing();
+void Backend_Collect_Last_Metrics();
+void Backend_finalize_flush_buffers(int, int);
+void Backend_free_allocated_memory();
+void Backend_Generate_Task_Files();
+void Backend_Embedded_Merge();
 void Backend_Finalize_close_files (void);
 
 void Extrae_setAppendingEventsToGivenPID (int pid);
@@ -210,6 +217,16 @@ void setRequestedIOInstrumentation (int b);
 void setRequestedSysCallInstrumentation (int b);
 
 int Backend_preInitialize (int rank, int world_size, const char *config_file, int forked);
+void Backend_preInitialize_env(int, int, int, int*);
+#if defined(STANDALONE)
+void Backend_preInitialize_modules(int);
+#else
+void Backend_preInitialize_pthreads(int, const char*);
+void Backend_preInitialize_libraries(int);
+#endif
+void Backend_preInitialize_tracing(int, const char*, int, int);
+void Backend_remove_residual_files(int, int);
+void Backend_initialize_events(int, int);
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);
 void Backend_updateTaskID (void);
 

@@ -139,6 +139,9 @@
 #if defined(OPENACC_SUPPORT)
 # include "openacc_wrapper.h"
 #endif
+#if defined(MPI_SUPPORT)
+# include "mpi_wrapper.h"
+#endif
 
 #include "common_hwc.h"
 
@@ -1528,7 +1531,9 @@ int Extrae_Allocate_Task_Bitmap (int size)
 	TracingBitmap = (int *) xrealloc (TracingBitmap, size*sizeof (int));
 
 	for (i = 0; i < size; i++)
+	{
 		TracingBitmap[i] = TRUE;
+	}
 
 	return 0;
 }
@@ -1676,141 +1681,173 @@ void Backend_setNumTentativeThreads (int numofthreads)
  * Backend_preInitialize :
  ******************************************************************************/
 
-int Backend_preInitialize (int me, int world_size, const char *config_file, int forked)
+void
+Backend_preInitialize_env(int me, int world_size, int forked,
+                          int *runningInDyninst)
 {
-	unsigned u;
-	int runningInDynInst = FALSE;
-	char trace_sym[TMP_DIR_LEN];
-#if defined(OMP_SUPPORT) || defined(NEW_OMP_SUPPORT)
-	char *omp_value;
-	char *new_num_omp_threads_clause;
-	int numProcessors;
-#endif
-#if USE_HARDWARE_COUNTERS
-	int set;
-#endif
-	char hostname[1024];
-
 	if (getenv("EXTRAE_APPEND_PID") != NULL)
-		Extrae_setAppendingEventsToGivenPID (atoi(getenv("EXTRAE_APPEND_PID")));
-
-	/* Mark the initialization as if we're in instrumentation */
-
-	if (gethostname (hostname, sizeof(hostname)) != 0)
-		sprintf (hostname, "localhost");
-
-#if defined(STANDALONE)
-	fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
-	int current_module = 0;
-	for (current_module=0; current_module<NumberOfModules; current_module++)
 	{
-		void (*module_init_func)(int) = Modules[i].init_ptr;
-
-		module_init_func(me);
+		Extrae_setAppendingEventsToGivenPID(atoi(getenv("EXTRAE_APPEND_PID")));
 	}
-	fprintf(stderr, "[DEBUG] current_NumOfThreads=%d maximum_NumOfThreads=%d\n", current_NumOfThreads, maximum_NumOfThreads);
-#else
-
-#if defined(PTHREAD_SUPPORT)
-	Backend_CreatepThreadIdentifier ();
-
-	/* Annotate myself */
-	{
-		pthread_t self = pthread_self();
-		Extrae_reallocate_pthread_info (1);
-		Backend_SetpThreadID (&self, 0);
-	}
-#endif
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_preInitialize (rank=%d, size=%d, config_file=%s)\n", THREADID, me, world_size, config_file);
-#endif
 
 	if (getenv("EXTRAE_DYNINST_RUN") != NULL)
 	{
-		if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") == 0)
+		if (strcmp(getenv("EXTRAE_DYNINST_RUN"), "yes") == 0)
 		{
 			if (me == 0 && !forked)
-				fprintf (stdout, PACKAGE_NAME": Target application is being run.\n");
-			runningInDynInst = TRUE;
+			{
+				fprintf(stdout, PACKAGE_NAME": Target application is being"
+				        " run.\n");
+			}
+
+			*runningInDyninst = TRUE;
 		}
-	}
-	else
+	} else
 	{
 		if (me == 0 && !forked)
-			fprintf (stdout, "Welcome to %s\n", PACKAGE_STRING);
+		{
+			fprintf(stdout, "Welcome to %s\n", PACKAGE_STRING);
+		}
 	}
-
-	/* Allocate a bitmap to know which tasks are tracing */
 	if (!forked)
-		Extrae_Allocate_Task_Bitmap (world_size);
+	{
+		/* Allocate a bitmap to know which tasks are tracing */
+		Extrae_Allocate_Task_Bitmap(world_size);
+		
+		/* Allocate thread info structure */
+		Extrae_allocate_thread_info(get_maximum_NumOfThreads());
+	}
+}
 
-#if defined(OPENCL_SUPPORT)
-	Extrae_OpenCL_init (me);
+#if defined(STANDALONE)
+void
+Backend_preInitialize_modules(int me)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME": DEBUG: THID=%d NumberOfModules=%d current_NumOfThreads=%d"
+	        " maximum_NumOfThreads=%d\n", THREADID, NumberOfModules ,current_NumOfThreads,
+	        maximum_NumOfThreads);
 #endif
+
+	for (int current_module = 0; current_module < NumberOfModules;
+	     current_module++)
+	{
+		void (*module_init_func)(int) = Modules[i].init_ptr;
+		module_init_func(me);
+	}
+}
+#endif // STANDALONE
+
+void
+Backend_preInitialize_pthreads(int me, const char *config_file)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_preInitialize_pthreads"
+	         " (rank=%d, size=%d, config_file=%s)\n", THREADID, me, world_size,
+	         config_file);
+#endif
+#if defined(PTHREAD_SUPPORT)
+	Backend_CreatepThreadIdentifier();
+
+	/* Annotate myself */
+	pthread_t self = pthread_self();
+	Extrae_reallocate_pthread_info(1);
+	Backend_SetpThreadID(&self, 0);
+#endif // PTHREAD_SUPPORT
+}
+
+void
+Backend_preInitialize_libraries(int me)
+{
+#if defined(OPENCL_SUPPORT)
+	Extrae_OpenCL_init(me);
+#endif // OPENCL_SUPPORT
 
 #if defined(OPENACC_SUPPORT)
 	Extrae_OACC_init(me);
-#endif
+#endif //OPENACC_SUPPORT
 
 #if defined(OMP_SUPPORT) || defined(NEW_OMP_SUPPORT)
+	char *omp_value;
+	unsigned int numProcessors;
 
 	Extrae_OpenMP_init(me);
 
-	/* Obtain the number of runnable threads in this execution.
-		Just check for OMP_NUM_THREADS env var (if this compilation
-		allows instrumenting OpenMP */
+	/*
+	  Obtain the number of runnable threads in this execution.
+	  Just check for OMP_NUM_THREADS env var (if this compilation allows
+	  instrumenting OpenMP.
+	*/
 	numProcessors = getnumProcessors();
 
-	new_num_omp_threads_clause = (char*) xmalloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
-	if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
+	char *new_num_omp_threads_clause;
+	new_num_omp_threads_clause =
+		(char*)xmalloc((strlen("OMP_NUM_THREADS=xxxx") + 1) * sizeof(char));
+
+	if (numProcessors >= 10000) /* XXX in new_omp_threads_clause -> max 9999 */
 	{
-		fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
-		exit (-1);
+		fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for"
+		         " tentative OMP_NUM_THREADS\n");
+		exit(-1);
 	}
 
-	sprintf (new_num_omp_threads_clause, "OMP_NUM_THREADS=%d", numProcessors);
-	omp_value = getenv ("OMP_NUM_THREADS");
+	sprintf(new_num_omp_threads_clause, "OMP_NUM_THREADS=%d",
+	        numProcessors);
+
+	omp_value = getenv("OMP_NUM_THREADS");
+
 	if (omp_value)
 	{
-		int num_of_threads = atoi (omp_value);
+		int num_of_threads = atoi(omp_value);
+
+		// XXX Should be >0 ?
 		if (num_of_threads != 0)
 		{
 			current_NumOfThreads = maximum_NumOfThreads = num_of_threads;
+
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": OMP_NUM_THREADS set to %d\n", num_of_threads);
-		}
-		else
+			{
+				fprintf(stdout, PACKAGE_NAME": OMP_NUM_THREADS set to"
+				        " %d\n", num_of_threads);
+			}
+		} else
 		{
-			if (me == 0)
-				fprintf (stderr, PACKAGE_NAME": OMP_NUM_THREADS is not set, allocating buffers for %d thread(s)\n", numProcessors);
 			current_NumOfThreads = maximum_NumOfThreads = numProcessors;
+
+			if (me == 0)
+			{
+				fprintf (stderr, PACKAGE_NAME": OMP_NUM_THREADS is not set,"
+				         " allocating buffers for %d thread(s)\n",
+				         numProcessors);
+			}
+		}
+	} else
+	{
+		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
+
+		if (me == 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": OMP_NUM_THREADS is not set,"
+			         " allocating buffers for %d thread(s)\n",
+			         numProcessors);
 		}
 	}
-	else
-	{
-		if (me == 0)
-			fprintf (stderr, PACKAGE_NAME": OMP_NUM_THREADS is not set, allocating buffers for %d thread(s)\n", numProcessors);
-		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
-	}
-
-#elif defined(SMPSS_SUPPORT) || defined(NANOS_SUPPORT) || defined (UPC_SUPPORT)
-
+#elif defined(SMPSS_SUPPORT) || defined(NANOS_SUPPORT) || defined(UPC_SUPPORT)
 	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
-
 #else
-
 	/* If we don't support OpenMP we still have this running thread :) */
 	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
 
 	if (getenv("OMP_NUM_THREADS"))
 	{
 		if (me == 0)
-			fprintf (stderr,
-				PACKAGE_NAME": Warning! OMP_NUM_THREADS is set but OpenMP is not supported!\n");
-	}
+		{
+			fprintf(stderr, PACKAGE_NAME": Warning! OMP_NUM_THREADS is set but"
+			        " OpenMP is not supported!\n");
 
-#endif /* OMP_SUPPORT || defined(NEW_OMP_SUPPORT) */
+		}
+	}
+#endif // OMP_SUPPORT || NEW_OMP_SUPPORT
 
 #if defined(CUDA_SUPPORT)
 	Extrae_CUDA_init(me);
@@ -1819,103 +1856,110 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 #if defined(HIP_SUPPORT)
 	Extrae_HIP_init(me);
 #endif
+}
 
-#endif /* STANDALONE */
-
-	/* Initialize the clock */
-	if (!forked)
-		CLOCK_INIT (get_maximum_NumOfThreads());
-
-	/* Allocate thread info structure */
-	if (!forked)
-		Extrae_allocate_thread_info (get_maximum_NumOfThreads());
-
+void
+Backend_preInitialize_tracing(int me, const char *config_file, int world_size,
+                              int forked)
+{
 	/* Configure the tracing subsystem */
 	if (!forked)
 	{
 #if defined(HAVE_XML2)
 		if (config_file != NULL && config_file[0] != '\0')
 		{
-			short int ret = Parse_XML_File  (me, world_size, config_file);
+			short int ret = Parse_XML_File(me, world_size, config_file);
 
 			if (ret < 0)
 			{
-				read_environment_variables (me);
+				read_environment_variables(me);
 			}
-		}
-		else
+		} else
 		{
-			if (getenv ("EXTRAE_ON") != NULL)
-				read_environment_variables (me);
-			else
-				fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT neither EXTRAE_ON nor EXTRAE_CONFIG_FILE are set!\n");
+			if (getenv("EXTRAE_ON") != NULL)
+			{
+				read_environment_variables(me);
+			} else
+			{
+				fprintf (stdout, PACKAGE_NAME": Application has been linked or"
+				         " preloaded with Extrae, BUT neither EXTRAE_ON nor"
+				         " EXTRAE_CONFIG_FILE are set!\n");
+			}
 		}
 #else
 		if (getenv("EXTRAE_ON") != NULL)
-			read_environment_variables (me);
-		else
-			fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT EXTRAE_ON is NOT set!\n");
-#endif
+		{
+			read_environment_variables(me);
+		} else
+		{
+			fprintf (stdout, PACKAGE_NAME": Application has been linked or"
+			         " preloaded with Extrae, BUT EXTRAE_ON is NOT set!\n");
+		}
+#endif // HAVE_XML2
 	}
+	copy_program_name();
+}
 
-	/* If we aren't tracing, just skip everything! */
-	if (!mpitrace_on)
-		return FALSE;
+void
+Backend_remove_residual_files(int me, int runningInDynInst)
+{
+	char hostname[1024];
+	char trace_sym[TMP_DIR_LEN];
 
-	copy_program_name ();
+	gethostname(hostname, sizeof(hostname));
 
 	/* Remove the .sym file if the file has not been generated by DynInst */
 	if (me == 0 && !runningInDynInst)
 	{
 		FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 		if (__Extrae_Utils_file_exists(trace_sym))
-			unlink (trace_sym);
+		{
+			unlink(trace_sym);
+		}
 	}
 
-	Backend_ChangeNumberOfThreads_InInstrumentation (get_maximum_NumOfThreads());
+	Backend_ChangeNumberOfThreads_InInstrumentation(get_maximum_NumOfThreads());
 
 	/* Remove the locals .sym file */
-	for (u = 0; u < get_maximum_NumOfThreads(); u++)
+	for (int u = 0; u < get_maximum_NumOfThreads(); u++)
 	{
 		Backend_setInSampling (u, FALSE);
-		
+
 		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
-		  appl_name, hostname, getpid(), Extrae_get_initial_TASKID(), u,
-		  EXT_SYM);
-		if (__Extrae_Utils_file_exists (trace_sym))
-			unlink (trace_sym);
+		             appl_name, hostname, getpid(), Extrae_get_initial_TASKID(),
+		             u, EXT_SYM);
+
+		if (__Extrae_Utils_file_exists(trace_sym))
+		{
+			unlink(trace_sym);
+		}
 	}
+}
 
-#if defined(MPI_SUPPORT)
-	Extrae_MPI_prepareDirectoryStructures (me, world_size);
-#else
-	/* Create temporal directory */
-	Backend_createExtraeDirectory (me, TRUE);
-
-	/* Create final directory */
-	Backend_createExtraeDirectory (me, FALSE);
-#endif
-
-	/* Allocate the buffers and trace files */
-	Allocate_buffers_and_files (world_size, get_maximum_NumOfThreads(), forked);
-
+void
+Backend_initialize_events(int me, int forked)
+{
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))
 	{
 		ApplBegin_Time = TIME;
-		TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
+
+		TRACE_EVENT(ApplBegin_Time, APPL_EV, EVT_BEGIN);
 		Extrae_AddSyncEntryToLocalSYM(ApplBegin_Time);
+
 #if !defined(IS_BG_MACHINE)
-		Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
-#endif
-		TRACE_EVENT (ApplBegin_Time, CPU_EVENT_INTERVAL_EV, MinimumCPUEventTime);
+		Extrae_AnnotateTopology(TRUE, ApplBegin_Time);
+#endif // IS_BG_MACHINE
+
+		TRACE_EVENT(ApplBegin_Time, CPU_EVENT_INTERVAL_EV, MinimumCPUEventTime);
 
 		/* Initialize Tracing Mode related variables */
 		if (forked)
+		{
 			Trace_Mode_CleanUp();
+		}
 
-		Trace_Mode_Initialize (get_maximum_NumOfThreads());
-
-		Trace_Mode_Change (0, ApplBegin_Time);
+		Trace_Mode_Initialize(get_maximum_NumOfThreads());
+		Trace_Mode_Change(0, ApplBegin_Time);
 
 #if USE_HARDWARE_COUNTERS
 		/* Write hardware counter definitions into the .sym file */
@@ -1923,47 +1967,92 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 		{
 			unsigned count;
 			HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
+
 			if (hwc_defs != NULL)
 			{
-				u = 0;
+				int u = 0;
 				while (u < count)
 				{
-					Extrae_AddTypeValuesEntryToGlobalSYM ('H', hwc_defs[u].event_code,
-						hwc_defs[u].description, (char)0, 0, NULL, NULL);
+					Extrae_AddTypeValuesEntryToGlobalSYM ('H',
+														  hwc_defs[u].event_code,
+														  hwc_defs[u].description,
+														  (char)0, 0, NULL, NULL);
 					u++;
 				}
-				xfree (hwc_defs);
+				xfree(hwc_defs);
 			}
 		}
-	
-
-#if 0
-		/* This can't be here because HWC_Start_Counters can still flag counters as NO_COUNTER if they can't be added in the EventSet.
-		 * HWC_Start_Counters can't be done earlier because already emits events that the merger needs HWC_DEF_EV first to process them. 
-		 * Trying to move this inside HWC_Start_Counters -> HWCBE_START_COUNTERS_THREAD -> HWCBE_PAPI_Init_thread, after flagging incompatible counters.
-		 * FIXME: Doing that, PMAPI does not emit the HWC_DEF_EV 
+# if 0
+		/* This can't be here because HWC_Start_Counters can still flag counters
+		 * as NO_COUNTER if they can't be added in the EventSet.
+		 * HWC_Start_Counters can't be done earlier because already emits events
+		 * that the merger needs HWC_DEF_EV first to process them.
+		 * Trying to move this inside HWC_Start_Counters ->
+		 * HWCBE_START_COUNTERS_THREAD -> HWCBE_PAPI_Init_thread, after flagging
+		 * incompatible counters.  FIXME: Doing that, PMAPI does not emit the
+		 * HWC_DEF_EV
 		 */
 
-		/* Write hardware counters set definitions (i.e. those that were succesfully added into PAPI EventSets) into the .mpit files*/
+		/* Write hardware counters set definitions (i.e. those that were
+		   succesfully added into PAPI EventSets) into the .mpit files */
 		for (set=0; set<HWC_Get_Num_Sets(); set++)
 		{
 			int *HWCid;
 	
-			HWC_Get_Set_Counters_Ids (set, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
-			TRACE_EVENT_AND_GIVEN_COUNTERS (ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
-			xfree (HWCid);
+			HWC_Get_Set_Counters_Ids(set, &HWCid); /* HWCid is allocated up to
+													 MAX_HWC and sets NO_COUNTER
+													 where appropriate */
+			TRACE_EVENT_AND_GIVEN_COUNTERS(ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
+			xfree(HWCid);
 		}
-#endif
+# endif
 
 		/* Start reading counters */
-		HWC_Start_Counters (get_maximum_NumOfThreads(), ApplBegin_Time, forked);
+		HWC_Start_Counters(get_maximum_NumOfThreads(), ApplBegin_Time, forked);
 	
-#endif
-	}
-	else
+#endif // USE_HARDWARE_COUNTERS
+	} else
 	{
-		Trace_Mode_Initialize (get_maximum_NumOfThreads());
+		Trace_Mode_Initialize(get_maximum_NumOfThreads());
 	}
+}
+
+int
+Backend_preInitialize(int me, int world_size, const char *config_file, int forked)
+{
+	int runningInDynInst = FALSE;
+
+	Backend_preInitialize_env(me, world_size, forked, &runningInDynInst);
+
+#if defined(STANDALONE)
+	Backend_preInitialize_modules(me);
+#else
+	Backend_preInitialize_pthreads(me, config_file);
+	Backend_preInitialize_libraries(me);
+#endif // STANDALONE
+
+	Backend_preInitialize_tracing(me , config_file, world_size, forked);
+	Backend_remove_residual_files(me, runningInDynInst);
+
+#if defined(MPI_SUPPORT)
+	Extrae_MPI_prepareDirectoryStructures(me, world_size);
+#else
+	/* Create temporal directory */
+	Backend_createExtraeDirectory(me, TRUE);
+
+	/* Create final directory */
+	Backend_createExtraeDirectory(me, FALSE);
+#endif // MPI_SUPPORT
+
+	/* Allocate the buffers and trace files */
+	Allocate_buffers_and_files(world_size, get_maximum_NumOfThreads(), forked);
+
+	if (!forked)
+	{
+		CLOCK_INIT(get_maximum_NumOfThreads());
+	}
+
+	Backend_initialize_events(me, forked);
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
@@ -2123,7 +2212,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	SynchronizationTimes = xmalloc_and_zero(world_size * sizeof(UINT64));
 
 #if defined(MPI_SUPPORT)
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT &&
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_MPI &&
 	    world_size > 1)
 	{
 		int rc;
@@ -2381,6 +2470,20 @@ void Flush_Thread(int thread_id)
   Extrae_Flush_Wrapper( TRACING_BUFFER(thread_id) );
 }
 
+static int __Extrae_Flush_Wrapper_getCounters = TRUE;
+
+int
+Extrae_Flush_Wrapper_getCounters()
+{
+	return __Extrae_Flush_Wrapper_getCounters;
+}
+
+int
+Extrae_Flush_Wrapper_setCounters(int c)
+{
+	__Extrae_Flush_Wrapper_getCounters = c;
+}
+
 /**
  * Flushes the buffer to disk and marks this I/O in trace.
  * \param buffer The buffer to be flushed.
@@ -2432,70 +2535,62 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 	return 1;
 }
 
-/**
- * Flushes all buffers to disk and marks this region with flush events.
- */ 
-static void Extrae_Flush_AllThreads_and_Close ( void )
+void
+Backend_Finalize()
 {
-	event_t FlushEv_Begin, FlushEv_End;
-	int check_size,thread;
-	unsigned long long current_size;
-
-	pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-
-	if (TRACING_BUFFER(0) != NULL)
-	{
-		if (!Buffer_IsClosed (TRACING_BUFFER(0)))
-		{
-			FlushEv_Begin.time = TIME;
-			FlushEv_Begin.event = FLUSH_EV;
-			FlushEv_Begin.value = EVT_BEGIN;
-			HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, TRUE);
-			Buffer_Flush (TRACING_BUFFER(0));
-		}
-	}
-
-	for (thread = 1; thread < get_maximum_NumOfThreads(); ++thread)
-	{
-		if (TRACING_BUFFER(thread) != NULL)
-		{
-			if (!Buffer_IsClosed (TRACING_BUFFER(thread)))
-			{
-				Buffer_Flush (TRACING_BUFFER(thread));
-				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
-			}
-		}
-
-	}
-
-	if (TRACING_BUFFER(0) != NULL)
-	{
-		if (!Buffer_IsClosed (TRACING_BUFFER(0)))
-		{
-			FlushEv_End.time = TIME;
-			FlushEv_End.event = FLUSH_EV;
-			FlushEv_End.value = EVT_END;
-			HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, TRUE);
-			BUFFER_INSERT (THREADID, TRACING_BUFFER(0), FlushEv_Begin);
-			BUFFER_INSERT (THREADID, TRACING_BUFFER(0), FlushEv_End);
-			TRACE_EVENT (TIME, APPL_EV, EVT_END);
-			Buffer_Flush (TRACING_BUFFER(0)); //second flush to make sure the last events are written
-			Backend_Finalize_close_mpits (getpid(), 0, FALSE);
-		}
-	}
-
-	pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
-	mpitrace_on = FALSE;
-}
-
-void Backend_Finalize (void)
-{
+	int online_mode = 0;
 	// Moved here to prevent instrumentation of IO calls on our files
 	mpitrace_on = FALSE; /* Turn off tracing now */
 
 	/* Mark as already finalized, thus avoiding further deinits */
 	Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 
+	Backend_Generate_Task_Files();
+
+	Backend_Stop_Instrumentation_Runtime( &online_mode );
+
+	if (!Extrae_getAppendingEventsToGivenPID(NULL))
+	{
+		Backend_Stop_Instrumentation_Tracing();
+		Backend_Collect_Last_Metrics();
+		Backend_finalize_flush_buffers(online_mode, FALSE);
+		Backend_finalize_flush_buffers(online_mode, TRUE);
+
+		/* Free allocated memory */
+		Backend_free_allocated_memory();
+
+		if (TASKID == 0 && Extrae_isProcessMaster())
+		{
+			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has"
+			         " been terminated.\n");
+		}
+
+#if defined(EMBED_MERGE_IN_TRACE)
+		Backend_Embedded_Merge();
+#endif
+	} else
+	{
+		int pid;
+		Extrae_getAppendingEventsToGivenPID(&pid);
+		// Protects race condition with Backend_Flush_pThread
+		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+		if (TRACING_BUFFER(THREADID) != NULL)
+		{
+			Buffer_Flush(TRACING_BUFFER(THREADID));
+			for (unsigned thread = 0; thread < get_maximum_NumOfThreads();
+			     thread++)
+			{
+				Backend_Finalize_close_mpits(pid, thread, TRUE);
+			}
+		}
+		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+		remove_temporal_files();
+	}
+}
+
+void
+Backend_Generate_Task_Files()
+{
 	/* If the application is MPI the MPI wrappers are responsible
 	   for gathering and generating the .MPITS file*/
 #if defined(MPI_SUPPORT)
@@ -2518,10 +2613,33 @@ void Backend_Finalize (void)
 			Generate_Task_File_List();
 		}
 	}
+}
 
-	unsigned thread;
-	int online_mode = 0;
+void
+Backend_Collect_Last_Metrics()
+{
+	if (THREADID == 0)
+	{
+		TIME; // Forces a tick of the clock; if the trace doesn't have any
+			  // event, the following would appear with the initialization
+			  // events otherwise as they use LAST_READ_TIME
+		Extrae_getrusage_Wrapper();
+		Extrae_memusage_Wrapper();
+#if !defined(IS_BG_MACHINE)
+		/*
+		 * Thd 0 only because pthreads already emit this when exiting their
+		 * function, and OpenMP threads don't go through Backend_Finalize. Can't
+		 * make the master read the cpu for worker threads that are already
+		 * idle.
+		 */
+		Extrae_AnnotateTopology (TRUE, LAST_READ_TIME);
+#endif
+	}
+}
 
+void
+Backend_Stop_Instrumentation_Runtime(int *online_mode)
+{
 #if defined(HAVE_BURST)
 	xtr_burst_finalize();
 #endif
@@ -2548,118 +2666,132 @@ void Backend_Finalize (void)
 			Online_Stop();
 		}
 #endif /* HAVE_ONLINE */
-
-		/* Stop collecting information from dynamic memory instrumentation */
-		Extrae_set_trace_io (FALSE);
-
-		/* Stop collecting information from dynamic memory instrumentation */
-		Extrae_set_trace_malloc (FALSE);
-
-		/* Stop sampling right now */
-		Extrae_setSamplingEnabled (FALSE);
-		unsetTimeSampling ();
-
-		if (THREADID == 0) 
-		{
-			TIME; // Forces a tick of the clock; if the trace doesn't have any event, the following would appear with the initialization events otherwise as they use LAST_READ_TIME
-			Extrae_getrusage_Wrapper ();
-			Extrae_memusage_Wrapper ();
-#if !defined(IS_BG_MACHINE)
-			Extrae_AnnotateTopology (TRUE, LAST_READ_TIME); // Thd 0 only because pthreads already emit this when exiting their function, and OpenMP threads don't go through Backend_Finalize. Can't make the master read the cpu for worker threads that are already idle. 
-#endif
-		}
-
-		Extrae_Flush_AllThreads_and_Close();
-
-		/* Free allocated memory */
-		{
-			if (TASKID == 0)
-				fprintf (stdout, PACKAGE_NAME": Deallocating memory.\n");
-
-			for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
-			{
-#if defined(PTHREAD_SUPPORT)
-				pThreads[thread] = (pthread_t)0;
-#endif
-				// Protects race condition with Backend_Flush_pThread
-				pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-				if (TRACING_BUFFER(thread) != NULL)
-				{
-					Buffer_Free (TRACING_BUFFER(thread));
-					TRACING_BUFFER(thread) = NULL;
-				}
-#if defined(SAMPLING_SUPPORT)
-				if (SamplingBuffer != NULL &&
-				  SAMPLING_BUFFER(thread) != NULL)
-				{
-					Buffer_Free (SAMPLING_BUFFER(thread));
-					SAMPLING_BUFFER(thread) = NULL;
-				}
-#endif
-				pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
-			}
-			xfree(LastCPUEmissionTime);
-			xfree(LastCPUEvent);
-			xfree(TracingBuffer);
-#if defined(SAMPLING_SUPPORT)
-			if (SamplingBuffer != NULL)
-			{
-				xfree(SamplingBuffer);
-			}
-#endif
-			xfree (TracingBitmap);
-			Extrae_allocate_thread_CleanUp();
-			TimeSync_CleanUp();
-			Trace_Mode_CleanUp();
-			Clock_CleanUp();
-			InstrumentUFroutines_GCC_CleanUp();
-			InstrumentUFroutines_XL_CleanUp();
-#if USE_HARDWARE_COUNTERS
-			HWC_CleanUp (get_maximum_NumOfThreads());
-#endif
-		}
-
-		if (TASKID == 0 && Extrae_isProcessMaster())
-			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
-
-#if defined(EMBED_MERGE_IN_TRACE)
-#if defined(MPI_SUPPORT)
-		/* The launcher extrae-uncore sets variable EXTRAE_DISABLE_MERGE when the uncore service is active, but only in the master rank.
-		 * This leads to MergeAfterTracing be set to False only for this rank. Perform a logical AND to disable embedded merging
-		 * in all ranks, otherwise they follow different paths and the execution stalls.
-		 */
-		int tmp_merge_after_tracing_and;
-		PMPI_Allreduce(&MergeAfterTracing, &tmp_merge_after_tracing_and, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
-		MergeAfterTracing = tmp_merge_after_tracing_and;
-#endif
-
-		/* Launch the merger */
-		if (MergeAfterTracing)
-		{
-			char tmp[1024];
-#if defined(MPI_SUPPORT)
-			sprintf (tmp, "%s", Extrae_core_get_mpits_file_name());
-#else
-			sprintf (tmp, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
-#endif
-			mergerLoadFilesInEmbeddedMode(TASKID, Extrae_get_num_tasks(), tmp);
-		}
-#endif /* EMBED_MERGE_IN_TRACE */
 	}
-	else
+}
+
+void
+Backend_Stop_Instrumentation_Tracing()
+{
+	/* Stop collecting information from dynamic memory instrumentation */
+	Extrae_set_trace_io(FALSE);
+
+	/* Stop collecting information from dynamic memory instrumentation */
+	Extrae_set_trace_malloc(FALSE);
+
+	/* Stop sampling right now */
+	Extrae_setSamplingEnabled(FALSE);
+	unsetTimeSampling();
+}
+
+void
+Backend_finalize_flush_buffers(int online_mode, int mark_final_event)
+{
+	// Protects race condition with Backend_Flush_pThread
+	pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+
+	/* Write files back to disk, 1st part will include flushing events */
+	for (unsigned thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 	{
-		int pid;
-		Extrae_getAppendingEventsToGivenPID (&pid);
+		/* Prevent writing performance counters from another thread */
+		if (thread == THREADID) Extrae_Flush_Wrapper_setCounters(TRUE);
+		else Extrae_Flush_Wrapper_setCounters(FALSE);
+
+		if (TRACING_BUFFER(thread) != NULL)
+		{
+			// If buffer was working in circular mode, change it to flush mode
+			// to dump the final data into the trace
+			if ((circular_buffering) && (!online_mode))
+			{
+				Buffer_SetFlushCallback(TracingBuffer[thread], Extrae_Flush_Wrapper);
+			}
+
+			if (mark_final_event) TRACE_EVENT(TIME, APPL_EV, EVT_END);
+
+			Buffer_ExecuteFlushCallback(TRACING_BUFFER(thread));
+
+			if(mark_final_event) Backend_Finalize_close_mpits(getpid(), thread, FALSE);
+		}
+	}
+	pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+}
+
+void
+Backend_free_allocated_memory()
+{
+	/* Free allocated memory */
+	if (TASKID == 0)
+	{
+		fprintf(stdout, PACKAGE_NAME": Deallocating memory.\n");
+	}
+
+	for (unsigned thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+	{
+#if defined(PTHREAD_SUPPORT)
+		pThreads[thread] = (pthread_t)0;
+#endif
 		// Protects race condition with Backend_Flush_pThread
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-		if (TRACING_BUFFER(THREADID) != NULL)
+		if (TRACING_BUFFER(thread) != NULL)
 		{
-			Buffer_Flush(TRACING_BUFFER(THREADID));
-			for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
-				Backend_Finalize_close_mpits (pid, thread, TRUE);
+			Buffer_Free (TRACING_BUFFER(thread));
+			TRACING_BUFFER(thread) = NULL;
 		}
+#if defined(SAMPLING_SUPPORT)
+		if (SamplingBuffer != NULL &&
+		    SAMPLING_BUFFER(thread) != NULL)
+		{
+			Buffer_Free (SAMPLING_BUFFER(thread));
+			SAMPLING_BUFFER(thread) = NULL;
+		}
+#endif
 		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
-		remove_temporal_files ();
+	}
+	xfree(LastCPUEmissionTime);
+	xfree(LastCPUEvent);
+	xfree(TracingBuffer);
+#if defined(SAMPLING_SUPPORT)
+	if (SamplingBuffer != NULL)
+	{
+		xfree(SamplingBuffer);
+	}
+#endif
+	xfree (TracingBitmap);
+	Extrae_allocate_thread_CleanUp();
+	TimeSync_CleanUp();
+	Trace_Mode_CleanUp();
+	Clock_CleanUp();
+	InstrumentUFroutines_GCC_CleanUp();
+	InstrumentUFroutines_XL_CleanUp();
+#if USE_HARDWARE_COUNTERS
+	HWC_CleanUp (get_maximum_NumOfThreads());
+#endif
+}
+
+void
+Backend_Embedded_Merge()
+{
+#if defined(MPI_SUPPORT)
+	/* The launcher extrae-uncore sets variable EXTRAE_DISABLE_MERGE when the
+	 * uncore service is active, but only in the master rank.  This leads to
+	 * MergeAfterTracing be set to False only for this rank. Perform a logical
+	 * AND to disable embedded merging in all ranks, otherwise they follow
+	 * different paths and the execution stalls.
+	 */
+	int tmp_merge_after_tracing_and;
+	PMPI_Allreduce(&MergeAfterTracing, &tmp_merge_after_tracing_and, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+	MergeAfterTracing = tmp_merge_after_tracing_and;
+#endif // MPI_SUPPORT
+
+	/* Launch the merger */
+	if (MergeAfterTracing)
+	{
+		char tmp[1024];
+#if defined(MPI_SUPPORT)
+		sprintf (tmp, "%s", Extrae_core_get_mpits_file_name());
+#else
+		sprintf (tmp, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
+#endif
+		mergerLoadFilesInEmbeddedMode(TASKID, Extrae_get_num_tasks(), tmp);
 	}
 }
 

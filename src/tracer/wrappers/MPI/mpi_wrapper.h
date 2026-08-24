@@ -118,6 +118,8 @@ void CheckControlFile(void);
 void CheckGlobalOpsTracingIntervals(void);
 void MPI_remove_file_list(int all);
 
+void* Extrae_MPI_Finish(short int, void*);
+
 void Extrae_network_counters_Wrapper(void);
 void Extrae_network_routes_Wrapper(int mpi_rank);
 void Extrae_tracing_tasks_Wrapper(unsigned from, unsigned to);

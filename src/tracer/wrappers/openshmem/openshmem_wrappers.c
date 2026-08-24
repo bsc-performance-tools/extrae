@@ -1525,7 +1525,7 @@ static void Initialize_Extrae_Stuff()
     }
     
     Extrae_set_initial_TASKID (TASKID);
-    Extrae_set_is_initialized (EXTRAE_INITIALIZED_SHMEM_INIT);
+    Extrae_set_is_initialized (EXTRAE_INITIALIZED_VIA_SHMEM);
     
     if (config_file != NULL)
     {
@@ -1549,7 +1549,7 @@ static void Initialize_Extrae_Stuff()
 
   OPENSHMEM_Gather_Nodes_Info();
 
-  if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+  if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_VIA_API)
     OPENSHMEM_remove_file_list (TRUE);
 
   OPENSHMEM_Generate_Task_File_list();
