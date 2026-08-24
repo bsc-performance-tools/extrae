@@ -1786,7 +1786,6 @@ __kmpc_push_num_threads(void *loc, int global_tid, int num_threads)
 		Probe_OpenMP_SetNumThreads_Entry(num_threads);
 		__kmpc_push_num_threads_real(loc, global_tid, num_threads);
 		Probe_OpenMP_SetNumThreads_Exit();
-		Backend_Leave_Instrumentation();
 	}
 	else if (__kmpc_push_num_threads_real != NULL)
 	{
