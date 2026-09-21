@@ -1260,8 +1260,20 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, int taskid, int tree
 
 	if (nevents != 0)
 	{
-		res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, my_master, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+		res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, my_master, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD);
 		MPI_CHECK(res, MPI_Send, "Failed to send the buffer of events to the MASTER");
+
+		/* The last block carried records, so the master has not seen the
+		   end-of-stream marker yet and will ask for one more block. Answer
+		   that request with 0 records to close the stream; otherwise the
+		   master keeps asking a slave that has already left. */
+		nevents = 0;
+
+		res = MPI_Recv (&tmp, 1, MPI_INT, my_master, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
+		MPI_CHECK(res, MPI_Recv, "Failed to receive remote request!");
+
+		res = MPI_Send (&nevents, 1, MPI_UNSIGNED, my_master, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD);
+		MPI_CHECK(res, MPI_Send, "Failed to send the end-of-stream marker to the MASTER");
 	}
 
 	xfree (buffer);

@@ -135,6 +135,10 @@ typedef struct
 	long long mapped_records;
 	unsigned source;
 	FileItemType type;
+	/* For REMOTE files only: set once the slave has answered with a block of
+	   0 records, which is its explicit end-of-stream marker. The master must
+	   keep asking until that marker arrives, as the slave always emits it. */
+	int stream_closed;
 }
 PRVFileItem_t;
 

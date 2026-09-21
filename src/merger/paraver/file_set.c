@@ -576,6 +576,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 		prvfset->files[i].source = WriteFileBuffer_getFD(fset->files[i].wfb);
 		prvfset->files[i].type = LOCAL;
 		prvfset->files[i].mapped_records = 0;
+		prvfset->files[i].stream_closed = FALSE;
 		prvfset->files[i].current_p =
 			prvfset->files[i].last_mapped_p =
 			prvfset->files[i].first_mapped_p = NULL;
@@ -604,6 +605,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 			prvfset->files[fset->nfiles+i-1].source = taskid + i*tree_pow(tree_fan_out, 0);
 			prvfset->files[fset->nfiles+i-1].type = REMOTE;
 			prvfset->files[fset->nfiles+i-1].mapped_records = 0;
+			prvfset->files[fset->nfiles+i-1].stream_closed = FALSE;
 			prvfset->files[fset->nfiles+i-1].current_p =
 			prvfset->files[fset->nfiles+i-1].last_mapped_p =
 				prvfset->files[fset->nfiles+i-1].first_mapped_p = NULL;
@@ -668,6 +670,7 @@ PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * infset,
 			infset->nfiles = 1;
 			infset->files[0].type = LOCAL;
 			infset->files[0].mapped_records = 0;
+			infset->files[0].stream_closed = FALSE;
 			infset->files[0].current_p =
 				infset->files[0].last_mapped_p =
 				infset->files[0].first_mapped_p = NULL;
@@ -692,6 +695,7 @@ PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * infset,
 				infset->files[i].source = taskid + i*tree_pow(tree_fan_out, depth);
 				infset->files[i].type = REMOTE;
 				infset->files[i].mapped_records = 0;
+				infset->files[i].stream_closed = FALSE;
 				infset->files[i].current_p =
 					infset->files[i].last_mapped_p =
 					infset->files[i].first_mapped_p = NULL;
@@ -725,6 +729,7 @@ PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * infset,
 
 		/* Set local file first */
 		infset->files[0].mapped_records = 0;
+		infset->files[0].stream_closed = FALSE;
 		infset->files[0].current_p =
 			infset->files[0].last_mapped_p =
 			infset->files[0].first_mapped_p = NULL;
@@ -801,6 +806,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 	for (i = 0; i < fset->nfiles; i++)
 	{
 		prvfset->files[i].mapped_records = 0;
+		prvfset->files[i].stream_closed = FALSE;
 		prvfset->files[i].source = WriteFileBuffer_getFD(fset->files[i].wfb);
 		prvfset->files[i].type = LOCAL;
 		prvfset->files[i].current_p =
@@ -902,6 +908,15 @@ static void Read_PRV_RemoteFile (PRVFileItem_t *file)
 		res = MPI_Recv (file->first_mapped_p, howmany*sizeof(paraver_rec_t), MPI_BYTE, file->source, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
 		MPI_CHECK(res, MPI_Recv, "ERROR! Failed to receive how many events are on the incoming buffer!");
 	}
+	else
+	{
+		/* A block of 0 records is the slave's explicit end-of-stream marker.
+		   The slave always emits it after its last record, so the master must
+		   ask for it even when remaining_records has already reached 0 (which
+		   happens when the record count is an exact multiple of the block
+		   size); otherwise the slave stays blocked waiting for that request. */
+		file->stream_closed = TRUE;
+	}
 }
 #endif /* PARALLEL_MERGE */
 
@@ -927,19 +942,30 @@ paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset)
 
 			if (sfile->current_p == sfile->last_mapped_p)
 			{
-				if (sfile->remaining_records == 0)
-				{
-					sfile->remaining_records = -1;
-					continue;
-				}
-				/* If we still have records to read, load a new block */
 # if defined(PARALLEL_MERGE)
-				if (fset->files[i].type == REMOTE)
+				if (sfile->type == REMOTE)
 				{
-					Read_PRV_RemoteFile(sfile);
-				} else
+					/* Remote streams are only exhausted once the slave has sent
+					   its end-of-stream marker, no matter what the record count
+					   says. Ask until that marker arrives. */
+					while (!sfile->stream_closed && sfile->current_p == sfile->last_mapped_p)
+						Read_PRV_RemoteFile (sfile);
+
+					if (sfile->current_p == sfile->last_mapped_p)
+					{
+						sfile->remaining_records = -1;
+						continue;
+					}
+				}
+				else
 # endif // PARALLEL_MERGE
 				{
+					if (sfile->remaining_records == 0)
+					{
+						sfile->remaining_records = -1;
+						continue;
+					}
+					/* If we still have records to read, load a new block */
 					Read_PRV_LocalFile(sfile, fset->records_per_block);
 				}
 			}
@@ -956,16 +982,22 @@ paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset)
 		/* Check if we still have records to read or we do have to request a new block */
 		for (i = 0; i < fset->nfiles; i++)
 			if (fset->files[i].current_p == fset->files[i].last_mapped_p)
-				if (fset->files[i].remaining_records > 0)
-				{
+			{
 #if defined(PARALLEL_MERGE)
-					/* This can only happen for task = 0 and parallel merger */
-					if (fset->files[i].type == REMOTE)
+				/* This can only happen for task = 0 and parallel merger */
+				if (fset->files[i].type == REMOTE)
+				{
+					/* Remote streams are only exhausted once the slave has sent
+					   its end-of-stream marker, no matter what the record count
+					   says. Ask until that marker arrives. */
+					while (!fset->files[i].stream_closed && fset->files[i].current_p == fset->files[i].last_mapped_p)
 						Read_PRV_RemoteFile (&(fset->files[i]));
-					else
-#endif
-						Read_PRV_LocalFile (&(fset->files[i]), fset->records_per_block);
 				}
+				else
+#endif
+					if (fset->files[i].remaining_records > 0)
+						Read_PRV_LocalFile (&(fset->files[i]), fset->records_per_block);
+			}
 		/* Sort records along all files by minimum time */
 		for (i = 0; i < fset->nfiles; i++)
 		{
