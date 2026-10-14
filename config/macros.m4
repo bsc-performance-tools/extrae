@@ -229,7 +229,7 @@ dnl AX_FLAGS_SAVE()
 
   dnl Search for libs directory
   AC_MSG_CHECKING([for __pkg_name_ucase libraries directory])
-  for libs_dir in [${ForcedLibs} ${home_dir}/lib${BITS} ${home_dir}/lib "not found"] ; do
+  for libs_dir in [${home_dir}/lib${BITS} ${home_dir}/lib "not found"] ; do
     if test -d "${libs_dir}" ; then
       break
     fi
@@ -249,17 +249,15 @@ dnl AX_FLAGS_SAVE()
   dnl Search for extra libs directories
   if test "${lib_folder_found}" = "yes" ; then
     m4_define([__PKG_LDFLAGS], __pkg_name_ucase[]_LDFLAGS) dnl Output variable <PKG>_LDFLAGS
-    __PKG_LDFLAGS="-L${libs_dir}"
+    __PKG_LDFLAGS=""
     m4_define([__PKG_RPATH], __pkg_name_ucase[]_RPATH) dnl Output variable <PKG>_RPATH
-    __PKG_RPATH="-R${libs_dir}"
+    __PKG_RPATH=""
 
     AC_MSG_CHECKING([for __pkg_name_ucase shared library folder])
     m4_define([__PKG_LIBSDIR_SHARED], __pkg_name_ucase[]_LIBSDIR_SHARED) dnl Output variable <PKG>_LIBSDIR_SHARED
     __PKG_LIBSDIR_SHARED=""
     if test -d "${libs_dir}/shared" ; then
       __PKG_LIBSDIR_SHARED="${libs_dir}/shared" 
-      __PKG_LDFLAGS="-L${__PKG_LIBSDIR_SHARED} ${__PKG_LDFLAGS}"
-      __PKG_RPATH="-R${__PKG_LIBSDIR_SHARED} ${__PKG_RPATH}"
       AC_MSG_RESULT([${__PKG_LIBSDIR_SHARED}])
     else
       dnl Added for retrocompatibility
@@ -273,8 +271,6 @@ dnl AX_FLAGS_SAVE()
     __PKG_LIBSDIR_MULTIARCH=""
     if test -n "${multiarch_triplet}" -a -d "${libs_dir}/${multiarch_triplet}" ; then
       __PKG_LIBSDIR_MULTIARCH="${libs_dir}/${multiarch_triplet}" 
-      __PKG_LDFLAGS="-L${__PKG_LIBSDIR_MULTIARCH} ${__PKG_LDFLAGS}"
-      __PKG_RPATH="-R${__PKG_LIBSDIR_MULTIARCH} ${__PKG_RPATH}"
       AC_MSG_RESULT([${__PKG_LIBSDIR_MULTIARCH}])
     else
       dnl Added for retrocompatibility
@@ -283,17 +279,10 @@ dnl AX_FLAGS_SAVE()
     fi
     AC_SUBST(__PKG_LIBSDIR_MULTIARCH)
 
-    if test "${enable_rpath}" = "no" -o "${enable_pkg_rpath}" = "no"; then
-      __PKG_RPATH=""
-    fi
-    AC_SUBST(__PKG_RPATH)
-    
-    m4_define([__PKG_LDFLAGS_RPATH], __pkg_name_ucase[]_LDFLAGS_RPATH) dnl Output variable <PKG>_LDFLAGS_RPATH
-    __PKG_LDFLAGS_RPATH="${__PKG_LDFLAGS} ${__PKG_RPATH}"
-
     dnl Search for required libraries in any of the possible folders
     required_libs_found="yes"
-    all_libs_dirs="${__PKG_LIBSDIR_MULTIARCH} ${__PKG_LIBSDIR_SHARED} ${__PKG_LIBSDIR}"
+    all_libs_dirs="${__PKG_LIBSDIR_MULTIARCH} ${__PKG_LIBSDIR_SHARED} ${__PKG_LIBSDIR} ${ForcedLibs}"
+    found_libs_dirs=""
 
     m4_define([__PKG_LIBS], __pkg_name_ucase[]_LIBS) dnl Output variable <PKG>_LIBS
     __PKG_LIBS=""
@@ -307,6 +296,7 @@ dnl AX_FLAGS_SAVE()
           if test -f "${lib_path}/lib[]lib_name[]${lib_extension}" ; then
             AC_MSG_RESULT([${lib_path}/lib[]lib_name[]${lib_extension}])
             __PKG_LIBS+="-l[]lib_name "
+            found_libs_dirs="${found_libs_dirs} ${lib_path}"
             found=1
 
             m4_pushdef([__PKG_LIBRARY_PATH], __pkg_name_ucase[]_LIB_[]lib_name) dnl Output variable <PKG>_LIB_<library> (e.g. MPI_LIB_mpich)
@@ -334,6 +324,7 @@ dnl AX_FLAGS_SAVE()
           if test -f "${lib_path}/lib[]lib_name[]${lib_extension}" ; then
             AC_MSG_RESULT([${lib_path}/lib[]lib_name[]${lib_extension}])
             __PKG_LIBS+="-l[]lib_name "
+            found_libs_dirs="${found_libs_dirs} ${lib_path}"
             found=1
 
             m4_pushdef([__PKG_LIBRARY_PATH], __pkg_name_ucase[]_LIB_[]lib_name) dnl Output variable <PKG>_LIB_<library> (e.g. MPI_LIB_mpich)
@@ -349,6 +340,40 @@ dnl AX_FLAGS_SAVE()
         AC_MSG_RESULT([no])
       fi
     ])
+
+    dnl Build all the -L and -R flags here, for every existing library directory, without duplicates
+    dnl Ideally this should iterate only over found_libs_dirs, so that only directories where libraries were found get -L/-R,
+    dnl but it is not done because it would require updating the AX_FIND_INSTALLATION calls of all the dependency modules
+    dnl to list their libraries (most of them pass none and rely on the -L/-R of their default lib dirs)
+    unique_paths=""
+    for lib_path in ${all_libs_dirs} ; do
+      if test -d "${lib_path}" ; then
+        if ! echo " ${unique_paths} " | grep -qF " ${lib_path} " ; then
+          unique_paths="${unique_paths} ${lib_path}"
+        fi
+      fi
+    done
+    for lib_path in ${unique_paths} ; do
+      __PKG_LDFLAGS="${__PKG_LDFLAGS} -L${lib_path}"
+      __PKG_RPATH="${__PKG_RPATH} -R${lib_path}"
+    done
+
+    if test "${enable_rpath}" = "no" -o "${enable_pkg_rpath}" = "no"; then
+      __PKG_RPATH=""
+    fi
+    AC_SUBST(__PKG_RPATH)
+
+    m4_define([__PKG_LDFLAGS_RPATH], __pkg_name_ucase[]_LDFLAGS_RPATH) dnl Output variable <PKG>_LDFLAGS_RPATH
+    __PKG_LDFLAGS_RPATH="${__PKG_LDFLAGS} ${__PKG_RPATH}"
+
+    dnl Remove duplicate -l flags (e.g. a library listed both as required and optional)
+    unique_libs=""
+    for lib_flag in ${__PKG_LIBS} ; do
+      if ! echo " ${unique_libs} " | grep -qF " ${lib_flag} " ; then
+        unique_libs="${unique_libs} ${lib_flag}"
+      fi
+    done
+    __PKG_LIBS="${unique_libs}"
 
     __PKG_LDFLAGS="${__PKG_LDFLAGS} ${__PKG_LIBS}"
     AC_SUBST(__PKG_LDFLAGS)
