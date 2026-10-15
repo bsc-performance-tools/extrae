@@ -229,7 +229,7 @@ dnl AX_FLAGS_SAVE()
 
   dnl Search for libs directory
   AC_MSG_CHECKING([for __pkg_name_ucase libraries directory])
-  for libs_dir in [${home_dir}/lib${BITS} ${home_dir}/lib "not found"] ; do
+  for libs_dir in [${ForcedLibs} ${home_dir}/lib${BITS} ${home_dir}/lib "not found"] ; do
     if test -d "${libs_dir}" ; then
       break
     fi
@@ -281,7 +281,10 @@ dnl AX_FLAGS_SAVE()
 
     dnl Search for required libraries in any of the possible folders
     required_libs_found="yes"
-    all_libs_dirs="${__PKG_LIBSDIR_MULTIARCH} ${__PKG_LIBSDIR_SHARED} ${__PKG_LIBSDIR} ${ForcedLibs}"
+    all_libs_dirs="${__PKG_LIBSDIR_MULTIARCH} ${__PKG_LIBSDIR_SHARED} ${__PKG_LIBSDIR}"
+    if test -n "${ForcedLibs}" ; then
+      all_libs_dirs="${all_libs_dirs} ${home_dir}/lib${BITS} ${home_dir}/lib"
+    fi
     found_libs_dirs=""
 
     m4_define([__PKG_LIBS], __pkg_name_ucase[]_LIBS) dnl Output variable <PKG>_LIBS
