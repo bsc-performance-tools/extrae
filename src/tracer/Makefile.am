@@ -1034,36 +1034,36 @@ endif
 liboacctrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 liboaccmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS)
 liboaccmpitracef_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS)
-liboacccudatrace_la_LDFLAGS = $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-liboacccudampitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-liboacccudampitracef_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+liboacccudatrace_la_LDFLAGS = $(liboacctrace_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+liboacccudampitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@ 
+liboacccudampitracef_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
 
 if SINGLE_MPI_LIBRARY
   liboaccmpitracecf_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS)
-  liboacccudampitracecf_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+  liboacccudampitracecf_la_LDFLAGS = $(NEW_MPI_LIBS) $(liboacctrace_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
 endif
 
-libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudampitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudampitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudaomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudanewomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libptcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(PTHREAD_LIBS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libptcudampitrace_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) $(PTHREAD_LIBS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libptcudampitracef_la_LDFLAGS = $(libptmpitracef_la_LDFLAGS) $(PTHREAD_LIBS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)  @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libcudampitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libcudampitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libcudaomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)  @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libcudanewomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -dynamic @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libptcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(PTHREAD_LIBS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libptcudampitrace_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) $(PTHREAD_LIBS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libptcudampitracef_la_LDFLAGS = $(libptmpitracef_la_LDFLAGS) $(PTHREAD_LIBS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
 
 if SINGLE_MPI_LIBRARY
-  libcudampitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+  libcudampitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS)  @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
 endif
 
-libcudaompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudaompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudanewompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-libcudanewompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+libcudaompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libcudaompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libcudanewompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -dynamic  @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+libcudanewompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) -dynamic  @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
 
 if SINGLE_MPI_LIBRARY
-  libcudaompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
-  libcudanewompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) -dynamic @CUDA_LDFLAGS_RPATH@ @CUPTI_LDFLAGS_RPATH@ @CUDA_LIBS@ @CUPTI_LIBS@
+  libcudaompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
+  libcudanewompitracecf_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) -dynamic  @CUPTI_LDFLAGS_RPATH@ @CUPTI_LIBS@ @CUDA_LIBS@
 endif
 
 libhipomptrace_la_LDFLAGS = @HIP_LDFLAGS_RPATH@ @HIP_LIBS@
