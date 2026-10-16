@@ -16,7 +16,7 @@
 #endif
 
 #if !defined(HIP_SUPPORT) && !defined(CUDA_SUPPORT)
-#  error "gpu_common.h requires -DUSE_HIP or -DUSE_CUDA"
+#  error "gpu_macros.h requires -DHIP_SUPPORT or -DCUDA_SUPPORT"
 #endif
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -127,10 +127,6 @@
         }                                                                      \
     } while (0)
 
-/*
- * CUDA driver API requires explicit context push/pop to ensure the correct
- * device is active when retrieving the device ID from a driver-level context.
- */
 #define GPU_GET_DEVICE_SAFE(ctx, device_id)                                    \
     do {                                                                       \
         if ((ctx) != NULL) {                                                   \

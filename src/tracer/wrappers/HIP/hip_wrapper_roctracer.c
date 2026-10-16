@@ -45,10 +45,9 @@
 #include "gpu_common.h"
 #include "gpu_probe.h"
 
-#define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 0
-
 #include "hip_wrapper_roctracer.h"
 
+#define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 0
 #define MAX_HIP_API_ID 1024
 static bool cid_filter[MAX_HIP_API_ID] = {false};
 
@@ -111,7 +110,7 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER) 
                 {
-                    Probe_Gpu_HostAlloc_Entry(p->args.hipHostAlloc.ptr, 
+                    Probe_Gpu_HostAlloc_Entry(p->args.hipHostAlloc.ptr,
                         p->args.hipHostAlloc.size);
                 } 
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
@@ -158,6 +157,45 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             }
             break;
 
+            // DriverAPI on cuda
+            // CUPTI_DRIVER_TRACE_CBID_cuModuleGetFunction equivalent
+            case HIP_API_ID_hipModuleGetFunction:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    hipFunction_t* outp = (hipFunction_t*) p->args.hipModuleGetFunction.function;
+                    hipFunction_t f     = outp ? *outp : NULL;
+                    const char*   k     = (const char*) p->args.hipModuleGetFunction.kname;
+                    if(f)
+                    {
+                        kernelMapPutSafe(f, k);
+                    }
+                }
+                ret = 1;
+            }
+            break;
+
+            // DriverAPI on cuda
+            // CUPTI_DRIVER_TRACE_CBID_cuLaunchKernel equivalent
+            case HIP_API_ID_hipModuleLaunchKernel:
+            {
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
+                {
+                    Probe_Gpu_Launch_Entry(p->args.hipModuleLaunchKernel.f,
+                        p->args.hipModuleLaunchKernel.gridDimX * p->args.hipModuleLaunchKernel.gridDimY * p->args.hipModuleLaunchKernel.gridDimZ,
+                        p->args.hipModuleLaunchKernel.blockDimX * p->args.hipModuleLaunchKernel.blockDimY * p->args.hipModuleLaunchKernel.blockDimZ,
+                        p->args.hipModuleLaunchKernel.sharedMemBytes,
+                        p->args.hipModuleLaunchKernel.stream,
+                        NULL);
+                }
+                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
+                {
+                    Probe_Gpu_Launch_Exit(NULL);
+                }
+                ret = 1;
+            }
+            break;
+
             // RUNTIMEAPI on cuda
             // CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020 equivalent
             case HIP_API_ID_hipConfigureCall:
@@ -196,10 +234,10 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER)
                 {
-                    Probe_Gpu_Malloc_Entry(HIPMALLOCPITCH_VAL, 
-                        p->args.hipMallocPitch.ptr, 
+                    Probe_Gpu_Malloc_Entry(HIPMALLOCPITCH_VAL,
+                        p->args.hipMallocPitch.ptr,
                         p->args.hipMallocPitch.width * p->args.hipMallocPitch.height);
-                } 
+                }
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT)
                 {
                     Probe_Gpu_Malloc_Exit(HIPMALLOCPITCH_VAL);
@@ -214,7 +252,7 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER)
                 {
-                    Probe_Gpu_Free_Entry(HIPFREE_VAL, 
+                    Probe_Gpu_Free_Entry(HIPFREE_VAL,
                         p->args.hipFree.ptr);
                 } 
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT)
@@ -227,17 +265,17 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
 
             // RUNTIMEAPI on cuda
             //CUPTI_RUNTIME_TRACE_CBID_cudaMallocArray_v3020 equivalent
-            case HIP_API_ID_hipMallocArray: 
+            case HIP_API_ID_hipMallocArray:
             {
-                if (p->phase == ACTIVITY_API_PHASE_ENTER) 
+                if (p->phase == ACTIVITY_API_PHASE_ENTER)
                 {
-                    Probe_Gpu_Malloc_Entry(HIPMALLOCPITCH_VAL, 
-                        p->args.hipMallocPitch.ptr, 
-                        p->args.hipMallocPitch.width * p->args.hipMallocPitch.height);
+                    Probe_Gpu_Malloc_Entry(HIPMALLOCARRAY_VAL,
+                        (void *)p->args.hipMallocArray.array,
+                        p->args.hipMallocArray.width * p->args.hipMallocArray.height);
                 }
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT)
                 {
-                    Probe_Gpu_Malloc_Exit(HIPMALLOCPITCH_VAL);
+                    Probe_Gpu_Malloc_Exit(HIPMALLOCARRAY_VAL);
                 }
                 ret = 1;
             }
@@ -245,12 +283,12 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
 
             // RUNTIMEAPI on cuda
             //CUPTI_RUNTIME_TRACE_CBID_cudaFreeArray_v3020 equivalent
-            case HIP_API_ID_hipFreeArray: 
+            case HIP_API_ID_hipFreeArray:
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER)
                 {
-                    Probe_Gpu_Free_Entry(HIPFREEARRAY_VAL, 
-                        (void*)p->args.hipFreeArray.array);
+                    Probe_Gpu_Free_Entry(HIPFREEARRAY_VAL,
+                        p->args.hipFreeArray.array);
                 }
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT)
                 {
@@ -266,8 +304,8 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER) 
                 {
-                    Probe_Gpu_Malloc_Entry(HIPMALLOCHOST_VAL, 
-                        p->args.hipHostMalloc.ptr, 
+                    Probe_Gpu_Malloc_Entry(HIPMALLOCHOST_VAL,
+                        p->args.hipHostMalloc.ptr,
                         p->args.hipHostMalloc.size);
                 }
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
@@ -284,7 +322,7 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER) 
                 {
-                    Probe_Gpu_Free_Entry(HIPFREEHOST_VAL, 
+                    Probe_Gpu_Free_Entry(HIPFREEHOST_VAL,
                         p->args.hipHostFree.ptr);
                 }
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT) 
@@ -382,7 +420,7 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER)
                 {
-                    Probe_Gpu_Memset_Entry(p->args.hipMemset.dst, 
+                    Probe_Gpu_Memset_Entry(p->args.hipMemset.dst,
                         p->args.hipMemset.sizeBytes);
                 } 
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT)
@@ -485,7 +523,7 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER)
                 {
-                    Probe_Gpu_EventSynchronize_Entry((hipEvent_t)p->args.hipEventSynchronize.event);
+                    Probe_Gpu_EventSynchronize_Entry(p->args.hipEventSynchronize.event);
                 } 
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT)
                 {
@@ -517,8 +555,8 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER) 
                 {
-                    Probe_Gpu_Malloc_Entry(HIPMALLOC3DARRAY_VAL, 
-                        (void*)p->args.hipMalloc3DArray.array, 
+                    Probe_Gpu_Malloc_Entry(HIPMALLOC3DARRAY_VAL,
+                        p->args.hipMalloc3DArray.array,
                         p->args.hipMalloc3DArray.extent.width * p->args.hipMalloc3DArray.extent.height * p->args.hipMalloc3DArray.extent.depth);
                 }
                 else if (p->phase == ACTIVITY_API_PHASE_EXIT)
@@ -593,34 +631,13 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
             }
             break;
 
-            // DriverAPI on cuda
-            // CUPTI_DRIVER_TRACE_CBID_cuLaunchKernel equivalent
-            case HIP_API_ID_hipModuleLaunchKernel:
-            {
-                if (p->phase == ACTIVITY_API_PHASE_ENTER)
-                {
-                    Probe_Gpu_Launch_Entry(p->args.hipModuleLaunchKernel.f,
-                        p->args.hipModuleLaunchKernel.gridDimX * p->args.hipModuleLaunchKernel.gridDimY * p->args.hipModuleLaunchKernel.gridDimZ,
-                        p->args.hipModuleLaunchKernel.blockDimX * p->args.hipModuleLaunchKernel.blockDimY * p->args.hipModuleLaunchKernel.blockDimZ,
-                        p->args.hipModuleLaunchKernel.sharedMemBytes,
-                        p->args.hipModuleLaunchKernel.stream,
-                        NULL);
-                }
-                else if (p->phase == ACTIVITY_API_PHASE_EXIT)
-                {
-                    Probe_Gpu_Launch_Exit(NULL);
-                }
-                ret = 1;
-            }
-            break;
-
             // RUNTIMEAPI on cuda
             // CUPTI_RUNTIME_TRACE_CBID_cudaLaunchKernel_v7000 equivalent
             case HIP_API_ID_hipLaunchKernel:
             {
                 if (p->phase == ACTIVITY_API_PHASE_ENTER) 
                 {
-                    Probe_Gpu_Launch_Entry(p->args.hipLaunchKernel.function_address, 
+                    Probe_Gpu_Launch_Entry(p->args.hipLaunchKernel.function_address,
                         p->args.hipLaunchKernel.numBlocks.x * p->args.hipLaunchKernel.numBlocks.y * p->args.hipLaunchKernel.numBlocks.z,
                         p->args.hipLaunchKernel.dimBlocks.x * p->args.hipLaunchKernel.dimBlocks.y * p->args.hipLaunchKernel.dimBlocks.z,
                         p->args.hipLaunchKernel.sharedMemBytes, 
@@ -682,4 +699,5 @@ void Extrae_HIP_init(int rank) {
     /* Equivalent to cuptiEnableAllDomains(...) + disable calls: Here we enable HIP API domain callback and apply cid filter above. */
     roctracer_enable_domain_callback(ACTIVITY_DOMAIN_HIP_API, Extrae_ROCTRACER_callback, NULL);
 
+    kernelMapCreate();
 }

@@ -1229,9 +1229,9 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 {
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_NONE);
-	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_ALLOW_DUPLICATES);
-	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_ALLOW_DUPLICATES);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_NONE, NULL);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_ALLOW_DUPLICATES, NULL);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_ALLOW_DUPLICATES, NULL);
 
 #ifdef WITH_PMPI_HOOK
         int (*real_mpi_init)(MPI_Fint *ierror) = NULL;
@@ -1343,9 +1343,9 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 {
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_LOCK);
-	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
-	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_LOCK, NULL);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES, NULL);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES, NULL);
 
 #ifdef WITH_PMPI_HOOK
         int (*real_mpi_init_thread)(MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror) = NULL;
@@ -2139,9 +2139,9 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_NONE);
-	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_ALLOW_DUPLICATES);
-	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_ALLOW_DUPLICATES);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_NONE, NULL);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_ALLOW_DUPLICATES, NULL);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_ALLOW_DUPLICATES, NULL);
 
 #ifdef WITH_PMPI_HOOK
 	int (*real_mpi_init)(int *argc, char ***argv) = NULL;
@@ -2249,9 +2249,9 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_LOCK);
-	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
-	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES);
+	hash_persistent_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_persistent_request_t), XTR_HASH_LOCK, NULL);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES, NULL);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK | XTR_HASH_ALLOW_DUPLICATES, NULL);
 
 #ifdef WITH_PMPI_HOOK
 	int (*real_mpi_init_thread)(int *argc, char ***argv, int required, int *provided) = NULL;

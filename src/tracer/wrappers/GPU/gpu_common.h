@@ -26,10 +26,6 @@
 #endif
 #include "gpu_macros.h"
 
-#ifndef GPU_MAP_NUM_BUCKETS
-#define GPU_MAP_NUM_BUCKETS 4096u
-#endif
-
 #define DEFAULT_GPU_EVENTS_BLOCK_SIZE 1024
 
 #define XTR_FLUSH_ALL_DEVICES -1
@@ -50,14 +46,14 @@ typedef enum {
 typedef struct gpu_event_t gpu_event_t;
 
 typedef struct gpu_event_t {
-	GPU_EVENT_T ts_event;			 /**< HIP event timestamp. */
+	GPU_EVENT_T ts_event;			 /**< GPU event timestamp. */
 	unsigned event;                  /**< Event identifier. */
 	unsigned long long value;        /**< Event value. */
 	unsigned tag;                    /**< Event tag. */
 	size_t memSize;                  /**< MemCopy size. */
 	unsigned blocksPerGrid;          /**< Kernel blocks grid size. */
 	unsigned threadsPerBlock;        /**< Kernel threads per block size. */
-	Extrae_GPU_Time_Type timetype;  /**< HIP timing type. */
+	Extrae_GPU_Time_Type timetype;  /**< GPU timing type. */
 	gpu_event_t* next;               /**< Pointer to the next gpu_event_t in the list. */
 } gpu_event_t;
 
@@ -85,15 +81,7 @@ struct DeviceInfo_t {
 	int initialized;
 };
 
-typedef struct KernelMapEntry
-{
-    GPU_FUNCTION_T function_handle;   // Key
-    char* kernel_name;               // Value
-    struct KernelMapEntry* next;     // Linked list in bucket
-} KernelMapEntry;
-
 extern pthread_mutex_t lastTagMutex;
-extern pthread_rwlock_t kernel_map_rwlock;
 
 typedef struct {
 	struct RegisteredStream_t* stream_ptr;
@@ -110,6 +98,12 @@ void DeinitializeDevice(int device_id);
 struct RegisteredStream_t *SearchAndRegisterStream(int device_id, GPU_STREAM_T stream, int register_stream);
 void UnregisterStream(int device_id, GPU_STREAM_T stream);
 void AddEventToStream(Extrae_GPU_Time_Type timetype, int device_id, struct RegisteredStream_t *registered_stream, unsigned event, unsigned long long value, unsigned tag, size_t size, unsigned int blockspergrid, unsigned int threadsperblock);
+
+/**************************************kernel_map**************************************/
+void kernelMapCreate(void);
+int kernelMapContains(GPU_FUNCTION_T key);
+void kernelMapClear(void);
+int kernelMapPutSafe(GPU_FUNCTION_T key, const char *name);
 
 /**************************************gpu_event_info**************************************/
 void gpuEventList_init(gpu_event_list_t*, int, size_t);

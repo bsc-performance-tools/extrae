@@ -197,6 +197,8 @@ typedef struct xtr_hash_pool {
  * 'lock' holds a mutex activated by flag XTR_HASH_LOCK for safe multithread access. 
  * 'stats' holds usage statistics for this hash.
  */
+typedef void (*xtr_hash_free_data_fn)(void *data);
+
 typedef struct xtr_hash {
   int num_buckets;
   xtr_hash_item **buckets;
@@ -210,11 +212,24 @@ typedef struct xtr_hash {
   int flags;
   pthread_rwlock_t lock;
   xtr_hash_stats stats;
+  xtr_hash_free_data_fn free_data_fn;
 } xtr_hash;
 
 
+/**
+ * xtr_hash_iter
+ *
+ * Iterator state for traversing all active items in a hash table.
+ * Use xtr_hash_iter_init to start and xtr_hash_iter_next to advance.
+ */
+typedef struct xtr_hash_iter {
+  int bucket;
+  xtr_hash_item *item;
+} xtr_hash_iter;
+
+
 // Public functions
-xtr_hash *xtr_hash_new(xtr_hash_size hash_size, int data_size, int flags);
+xtr_hash *xtr_hash_new(xtr_hash_size hash_size, int data_size, int flags, xtr_hash_free_data_fn free_data_fn);
 void xtr_hash_free(xtr_hash *hash);
 int xtr_hash_add(xtr_hash *hash, UINT64 key, void *data_in, void *data_out);
 int xtr_hash_remove(xtr_hash *hash, UINT64 key, void *data);
@@ -222,3 +237,5 @@ int xtr_hash_search(xtr_hash *hash, UINT64 key, void *data);
 void xtr_hash_dump(xtr_hash *hash, void *pretty_print_func_ptr);
 void xtr_hash_stats_reset(xtr_hash *hash);
 void xtr_hash_stats_dump(xtr_hash *hash);
+void xtr_hash_iter_init(xtr_hash *hash, xtr_hash_iter *iter);
+int  xtr_hash_iter_next(xtr_hash *hash, xtr_hash_iter *iter, UINT64 *key, void *data);

@@ -44,14 +44,78 @@
 #include "gpu_common.h"
 #include "gpu_probe.h"
 
+#include "cuda_wrapper_cupti.h"
+
 #define LOG_UNTRACKED_CALLBACKS 0
 #define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 0
-
-#include "cuda_wrapper_cupti.h"
 
 #if LOG_UNTRACKED_CALLBACKS
 static CUptiResult (*cuptiGetCallbackName_real)(CUpti_CallbackDomain, uint32_t, const char**) = NULL;
 #endif
+
+static void 
+Extrae_CUDA_API_disable_calls(CUpti_SubscriberHandle subscriber) {
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDriverGetVersion_v3020); /* 1 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaRuntimeGetVersion_v3020); /* 2 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDeviceCount_v3020); /* 3 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDeviceProperties_v3020); /* 4 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaChooseDevice_v3020); /* 5 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetChannelDesc_v3020); /* 6 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaCreateChannelDesc_v3020); /* 7 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetupArgument_v3020); /* 9 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetLastError_v3020); /* 10 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaPeekAtLastError_v3020); /* 11 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetErrorString_v3020); /* 12 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaFuncSetCacheConfig_v3020); /* 14 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaFuncGetAttributes_v3020); /* 15 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetDevice_v3020); /* 16 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDevice_v3020); /* 17 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetValidDevices_v3020); /* 18 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetDeviceFlags_v3020); /* 19 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostGetDevicePointer_v3020); /* 28 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostGetFlags_v3020); /* 29 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaMemGetInfo_v3020); /* 30 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetSymbolAddress_v3020); /* 53 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetSymbolSize_v3020); /* 54 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetTextureAlignmentOffset_v3020); /* 59 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetTextureReference_v3020); /* 60 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetSurfaceReference_v3020); /* 62 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGLSetGLDevice_v3020); /* 63 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGLSetBufferObjectMapFlags_v3020); /* 68 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaWGLGetDevice_v3020); /* 71 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventCreate_v3020); /* 133 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventCreateWithFlags_v3020); /* 134 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventDestroy_v3020); /* 136 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventElapsedTime_v3020); /* 139 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostRegister_v4000); /* 152 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSetCacheConfig_v3020); /* 169 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaProfilerStart_v4000); /* 171 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaProfilerStop_v4000); /* 172 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceGetAttribute_v5000); /* 200 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDeviceFlags_v7000); /* 212 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDriverGetVersion); /* 2 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGet); /* 3 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetCount); /* 4 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetName); /* 5 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetAttribute); /* 9 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxGetDevice); /* 16 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuModuleGetFunction); /* 23 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuEventCreate); /* 118 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuEventElapsedTime); /* 123 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuGetExportTable); /* 135 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxGetLimit); /* 137 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceTotalMem_v2); /* 259 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxSetCurrent); /* 303 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxGetCurrent); /* 304 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuEventDestroy_v2); /* 325 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDevicePrimaryCtxRetain); /* 386 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetUuid); /* 482 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuModuleGetLoadingMode); /* 673 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuStreamBatchMemOp_v2); /* 667 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuGetProcAddress_v2); /* 677 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuLibraryLoadData); /* 678 */
+	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuLibraryGetModule); /* 682 */
+}
 
 /*
  * Values for CUPTI_API_VERSION.
@@ -84,7 +148,7 @@ static CUptiResult (*cuptiGetCallbackName_real)(CUpti_CallbackDomain, uint32_t, 
 static int
 Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinfo)
 {
-	int ret;
+	int ret = 0;
 
 	switch (cbid)
 	{
@@ -95,7 +159,7 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_HostAlloc_Entry(p->pp, p->bytesize);
+                Probe_Gpu_HostAlloc_Entry((UINT64)p->pp, p->bytesize);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -107,9 +171,6 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 
 		case CUPTI_DRIVER_TRACE_CBID_cuStreamCreate:
 		{
-			cuStreamCreate_params *p =
-			  (cuStreamCreate_params*)cbinfo->functionParams;
-
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
 				Probe_Gpu_StreamCreate_Entry();
@@ -142,12 +203,19 @@ Extrae_DriverAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbinf
 
 		case CUPTI_DRIVER_TRACE_CBID_cuLaunchKernel:
 		{
-			cuLaunchKernel_params *p =
+
+			cuLaunchKernel_params *p = 
 			  (cuLaunchKernel_params*)cbinfo->functionParams;
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Launch_Entry(p->f, 
+				cudaFunction_t f = (cudaFunction_t) p->f;
+				if (f && cbinfo->symbolName && !kernelMapContains(f)) //only enter once. if is already registered avoid re-enter
+				{
+					kernelMapPutSafe(f, cbinfo->symbolName);
+				}
+
+				Probe_Gpu_Launch_Entry(f,
 				  	p->gridDimX * p->gridDimY * p->gridDimZ,
 				  	p->blockDimX * p->blockDimY * p->blockDimZ,
 					p->sharedMemBytes, p->hStream, cbinfo->context);
@@ -174,7 +242,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		/* 8 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020:
 		{
-			cudaConfigureCall_v3020_params *p = (cudaConfigureCall_v3020_params*)cbinfo->functionParams;
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
 				Probe_Gpu_ConfigureCall_Entry();
@@ -197,17 +264,17 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 			{
 # if CUPTI_API_VERSION >= 3
 				Probe_Gpu_Launch_Entry(p->func,
-					NULL, 
-					NULL, 
-					NULL, 
-					NULL, 
+					0,
+					0,
+					0,
+					NULL,
 					cbinfo->context);
 #else
 				Probe_Gpu_Launch_Entry(p->entry,
-					NULL, 
-					NULL, 
-					NULL, 
-					NULL, 
+					0,
+					0,
+					0,
+					NULL,
 					cbinfo->context);
 # endif /* CUPTI_API_VERSION >= 3 */
 			}
@@ -228,7 +295,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Malloc_Entry(CUDAMALLOC_VAL, p->devPtr, p->size);
+                Probe_Gpu_Malloc_Entry(CUDAMALLOC_VAL, (UINT64)p->devPtr, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -246,8 +313,8 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Malloc_Entry(CUDAMALLOCPITCH_VAL, 
-                    p->devPtr, p->width * p->height);
+                Probe_Gpu_Malloc_Entry(CUDAMALLOCPITCH_VAL,
+                    (UINT64)p->devPtr, p->width * p->height);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -265,7 +332,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Free_Entry(CUDAFREE_VAL, p->devPtr);
+                Probe_Gpu_Free_Entry(CUDAFREE_VAL, (UINT64)p->devPtr);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -283,8 +350,8 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Malloc_Entry(CUDAMALLOCARRAY_VAL, 
-					(void *)p->array, p->width * p->height);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOCARRAY_VAL,
+					(UINT64)p->array, p->width * p->height);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -302,7 +369,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Free_Entry(CUDAFREEARRAY_VAL, (void*)p->array);
+                Probe_Gpu_Free_Entry(CUDAFREEARRAY_VAL, (UINT64)p->array);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -320,7 +387,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Malloc_Entry(CUDAMALLOCHOST_VAL, p->ptr, p->size);
+                Probe_Gpu_Malloc_Entry(CUDAMALLOCHOST_VAL, (UINT64)p->ptr, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -338,7 +405,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Free_Entry(CUDAFREEHOST_VAL, p->ptr);
+                Probe_Gpu_Free_Entry(CUDAFREEHOST_VAL, (UINT64)p->ptr);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -356,7 +423,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_HostAlloc_Entry(p->pHost, p->size);
+                Probe_Gpu_HostAlloc_Entry((UINT64)p->pHost, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -461,7 +528,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Memset_Entry(p->devPtr, p->count);
+                Probe_Gpu_Memset_Entry((UINT64)p->devPtr, p->count);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -479,7 +546,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_MemsetAsync_Entry(p->devPtr, p->count);
+				Probe_Gpu_MemsetAsync_Entry((UINT64)p->devPtr, p->count);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -522,9 +589,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		/* 129 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020:
 		{
-			cudaStreamCreate_v3020_params *p =
-				(cudaStreamCreate_v3020_params*)cbinfo->functionParams;
-
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
 				Probe_Gpu_StreamCreate_Entry();
@@ -597,7 +661,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_EventSynchronize_Entry(p->event);
+                Probe_Gpu_EventSynchronize_Entry((UINT64)p->event);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -615,8 +679,8 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Malloc_Entry(CUDAMALLOC3D_VAL, 
-					NULL, 
+                Probe_Gpu_Malloc_Entry(CUDAMALLOC3D_VAL,
+					0,
 					p->extent.width * p->extent.height * p->extent.depth);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
@@ -636,8 +700,8 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Malloc_Entry(CUDAMALLOC3DARRAY_VAL, 
-					(void*)p->array, 
+                Probe_Gpu_Malloc_Entry(CUDAMALLOC3DARRAY_VAL,
+					(UINT64)p->array,
 				    p->extent.width * p->extent.height * p->extent.depth);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
@@ -657,7 +721,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_StreamWaitEvent_Entry(p->event);
+                Probe_Gpu_StreamWaitEvent_Entry((UINT64)p->event);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -704,9 +768,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		/* 198 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithFlags_v5000:
 		{
-			cudaStreamCreateWithFlags_v5000_params *p =
-			  (cudaStreamCreateWithFlags_v5000_params*)cbinfo->functionParams;
-
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
 				Probe_Gpu_StreamCreate_Entry();
@@ -744,9 +805,6 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 		/* 202 */
 		case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithPriority_v5050:
 		{
-			cudaStreamCreateWithPriority_v5050_params *p =
-			  (cudaStreamCreateWithPriority_v5050_params*)cbinfo->functionParams;
-
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
 				Probe_Gpu_StreamCreate_Entry();
@@ -769,7 +827,7 @@ Extrae_RuntimeAPI_callback(CUpti_CallbackId cbid, const CUpti_CallbackData *cbin
 
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
 			{
-				Probe_Gpu_Malloc_Entry(CUDAMALLOC_VAL, p->devPtr, p->size);
+				Probe_Gpu_Malloc_Entry(CUDAMALLOC_VAL, (UINT64)p->devPtr, p->size);
 			}
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 			{
@@ -966,63 +1024,7 @@ cuptiGetCallbackName_real = (CUptiResult(*)(CUpti_CallbackDomain, uint32_t, cons
 	cuptiEnableAllDomains(1, subscriber);
 
 	/* Disable uninteresting callbacks */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDriverGetVersion_v3020); /* 1 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaRuntimeGetVersion_v3020); /* 2 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDeviceCount_v3020); /* 3 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDeviceProperties_v3020); /* 4 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaChooseDevice_v3020); /* 5 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetChannelDesc_v3020); /* 6 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaCreateChannelDesc_v3020); /* 7 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetupArgument_v3020); /* 9 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetLastError_v3020); /* 10 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaPeekAtLastError_v3020); /* 11 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetErrorString_v3020); /* 12 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaFuncSetCacheConfig_v3020); /* 14 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaFuncGetAttributes_v3020); /* 15 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetDevice_v3020); /* 16 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDevice_v3020); /* 17 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetValidDevices_v3020); /* 18 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaSetDeviceFlags_v3020); /* 19 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostGetDevicePointer_v3020); /* 28 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostGetFlags_v3020); /* 29 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaMemGetInfo_v3020); /* 30 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetSymbolAddress_v3020); /* 53 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetSymbolSize_v3020); /* 54 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetTextureAlignmentOffset_v3020); /* 59 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetTextureReference_v3020); /* 60 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetSurfaceReference_v3020); /* 62 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGLSetGLDevice_v3020); /* 63 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGLSetBufferObjectMapFlags_v3020); /* 68 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaWGLGetDevice_v3020); /* 71 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventCreate_v3020); /* 133 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventCreateWithFlags_v3020); /* 134 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventDestroy_v3020); /* 136 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaEventElapsedTime_v3020); /* 139 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaHostRegister_v4000); /* 152 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSetCacheConfig_v3020); /* 169 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaProfilerStart_v4000); /* 171 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaProfilerStop_v4000); /* 172 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceGetAttribute_v5000); /* 200 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaGetDeviceFlags_v7000); /* 212 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDriverGetVersion); /* 2 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGet); /* 3 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetCount); /* 4 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetName); /* 5 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetAttribute); /* 9 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxGetDevice); /* 16 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuEventCreate); /* 118 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuEventElapsedTime); /* 123 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuGetExportTable); /* 135 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxGetLimit); /* 137 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceTotalMem_v2); /* 259 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxSetCurrent); /* 303 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuCtxGetCurrent); /* 304 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuEventDestroy_v2); /* 325 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDevicePrimaryCtxRetain); /* 386 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuDeviceGetUuid); /* 482 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuModuleGetLoadingMode); /* 673 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuStreamBatchMemOp_v2); /* 667 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuGetProcAddress_v2); /* 677 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuLibraryLoadData); /* 678 */
-	cuptiEnableCallback(0, subscriber, CUPTI_CB_DOMAIN_DRIVER_API, CUPTI_DRIVER_TRACE_CBID_cuLibraryGetModule); /* 682 */
+	Extrae_CUDA_API_disable_calls(subscriber);
+
+	kernelMapCreate();
 }

@@ -4,6 +4,7 @@ noinst_LTLIBRARIES = libwrap_hip.la
 
 libwrap_hip_la_CFLAGS = \
  -I$(COMMON_GPU_DIR) \
+ -I$(WRAPPERS_DIR)/MPI \
  -I$(COMMON_MPI_DIR) \
  -I$(TRACER_INC) \
  -I$(HWC_INC) \

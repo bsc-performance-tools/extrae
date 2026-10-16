@@ -43,6 +43,7 @@
 #include "gpu_macros.h"
 #include "gpu_common.h"
 #include "gpu_probe.h"
+#include "hash_table.h"
 
 #if defined(__APPLE__)
 #define HOST_NAME_MAX 512
@@ -63,15 +64,12 @@ __thread GPU_thread_args_t GPU_thread_args;
 
 static unsigned lastTag = 0xC0DA; /* Fixed tag */
 
-/* Array of hash buckets for the kernel map.
- * Each bucket is the head of a linked list of KernelMapEntry nodes. */
-KernelMapEntry *kernel_map_buckets[GPU_MAP_NUM_BUCKETS] = {0};
+/* Maps GPU_FUNCTION_T handles to kernel names. Created at init time by
+ * kernelMapCreate() (called from Extrae_CUDA_init / Extrae_HIP_init).
+ * Locking is handled internally by xtr_hash (XTR_HASH_LOCK). */
+static xtr_hash *kernel_name_map = NULL;
 
 pthread_mutex_t lastTagMutex = PTHREAD_MUTEX_INITIALIZER;
-
-// Read–write lock protecting the entire kernel map.
-// Readers can access concurrently, writers get exclusive access.
-pthread_rwlock_t kernel_map_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 static struct DeviceInfo_t *deviceArray = NULL;
 static int deviceCount = 0;
@@ -205,6 +203,63 @@ unsigned GetGPUCommTag(void)
 	return new_tag;
 }
 
+static void free_kernel_name(void *data)
+{
+    char *name = *(char **)data;
+    if (name)
+        free(name);
+}
+
+/**
+ * Create the kernel map. Called once from Extrae_CUDA_init / Extrae_HIP_init,
+ * before any kernel can be seen.
+ */
+void kernelMapCreate(void)
+{
+    if (kernel_name_map == NULL)
+	{
+        kernel_name_map = xtr_hash_new(XTR_HASH_SIZE_SMALL, sizeof(char*), XTR_HASH_LOCK | XTR_HASH_AUTO_EXPAND, free_kernel_name);
+	}
+}
+
+/**
+ * Look up a key in the hash map.
+ * Returns 1 if the key exists, 0 otherwise.
+ */
+int kernelMapContains(GPU_FUNCTION_T key)
+{
+    return xtr_hash_search(kernel_name_map, (UINT64)key, NULL);
+}
+
+/**
+ * Free all entries in the hash map (kernel name strings are freed by the
+ * hash table's free_data_fn callback) and destroy the map.
+ */
+void kernelMapClear(void)
+{
+    if (kernel_name_map == NULL)
+        return;
+
+    xtr_hash_free(kernel_name_map);
+    kernel_name_map = NULL;
+}
+
+/**
+ * Thread-safe insert of a (key → name) entry. If the key already exists,
+ * its stored name is replaced. Safety is provided by xtr_hash's internal lock.
+ */
+int kernelMapPutSafe(GPU_FUNCTION_T key, const char *name)
+{
+    char *new_name = name ? strdup(name) : NULL;
+    char *old_name = NULL;
+
+    int ret = xtr_hash_add(kernel_name_map, (UINT64)key, &new_name, &old_name);
+    if (ret > 1 && old_name)
+        free(old_name);   // Replaced an existing entry: free its previous name
+
+    return ret > 0;
+}
+
 static int GetPhysicalDeviceId(int unsigned device_id)
 {
 	const char *visible_devices = NULL;
@@ -214,7 +269,7 @@ static int GetPhysicalDeviceId(int unsigned device_id)
 
 #if defined(CUDA_SUPPORT)
 	visible_devices = getenv("CUDA_VISIBLE_DEVICES");
-#else if defined(HIP_SUPPORT)
+#elif defined(HIP_SUPPORT)
 	visible_devices = getenv("HIP_VISIBLE_DEVICES");
 #endif
 
@@ -236,7 +291,7 @@ static char *GetGPU_UUID(unsigned int device_id)
 
 #if defined(CUDA_SUPPORT)
 	GPU_RUNTIME_CHECK(cudaGetDeviceProperties(&GPUprop, device_id));
-#else if defined(HIP_SUPPORT)
+#elif defined(HIP_SUPPORT)
 	GPU_RUNTIME_CHECK(hipGetDeviceProperties(&GPUprop, device_id));
 #endif
 
@@ -430,7 +485,6 @@ struct RegisteredStream_t *SearchAndRegisterStream(int device_id, GPU_STREAM_T s
 	Extrae_set_thread_name(StreamArray[stream_idx].thread_id, _threadname);
 
 	/* Record a reference timestamp on the new stream */
-	/* FIX: CU_EVENT_BLOCKING_SYNC may be harmful — keep under review */
 	StreamArray[stream_idx].device_reference_event = NULL;
 	SynchronizeStream(device_id, &StreamArray[stream_idx]);
 
@@ -638,21 +692,33 @@ void AddEventToStream(Extrae_GPU_Time_Type timetype, int device_id, struct Regis
  * ══════════════════════════════════════════════════════════════════════════ */
 void Extrae_gpuFinalize(void)
 {
+
+	char code_type = 0;
+
+#if defined(CUDA_SUPPORT)
+	code_type = 'K';
+#endif
+#if defined(HIP_SUPPORT)
+	code_type = 'Y';
+#endif
+
 	Backend_Enter_Instrumentation();
 
 	if (EXTRAE_INITIALIZED() && gpuInitialized == 1)
 	{
 
-		for (int i = 0; i < GPU_MAP_NUM_BUCKETS; ++i)
+		if (kernel_name_map != NULL)
 		{
-			KernelMapEntry *n = kernel_map_buckets[i];
-			while (n)
+			xtr_hash_iter iter;
+			UINT64 key;
+			char *name;
+
+			xtr_hash_iter_init(kernel_name_map, &iter);
+			while (xtr_hash_iter_next(kernel_name_map, &iter, &key, &name))
 			{
-				KernelMapEntry *nxt = n->next;
-				int lineno = 0;
-				Extrae_AddFunctionDefinitionEntryToLocalSYM('Y',(void*)(uintptr_t)n->function_handle, n->kernel_name, "??", lineno);
-				n = nxt;
+				Extrae_AddFunctionDefinitionEntryToLocalSYM(code_type, (void*)(uintptr_t)key, name, "??", 0);
 			}
+			kernelMapClear();
 		}
 
 		FlushStreams(XTR_FLUSH_ALL_DEVICES, NULL);

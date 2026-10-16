@@ -69,10 +69,11 @@ static void allocate_new_pool(xtr_hash *hash)
  * @param hash_size Size of the hash table.
  * @param data_size Size of the data to be stored along with the keys.
  * @param flags Creation flags.
- * 
+ * @param free_data_fn Optional callback to free each item's data during xtr_hash_free (NULL if not needed).
+ *
  * @return Pointer to the newly created hash table.
  */
-xtr_hash *xtr_hash_new(xtr_hash_size hash_size, int data_size, int flags)
+xtr_hash *xtr_hash_new(xtr_hash_size hash_size, int data_size, int flags, xtr_hash_free_data_fn free_data_fn)
 {
     int i = 0;
 
@@ -104,6 +105,9 @@ xtr_hash *xtr_hash_new(xtr_hash_size hash_size, int data_size, int flags)
         }
     }
 
+    // Set optional data destructor
+    hash->free_data_fn = free_data_fn;
+
     // Set statistics to zero
     xtr_hash_stats_reset(hash);
 
@@ -120,6 +124,19 @@ xtr_hash *xtr_hash_new(xtr_hash_size hash_size, int data_size, int flags)
 void xtr_hash_free(xtr_hash *hash)
 {
     int i = 0;
+
+    if (hash->free_data_fn != NULL)
+    {
+        for (i = 0; i < hash->num_buckets; ++i)
+        {
+            xtr_hash_item *it = hash->buckets[i];
+            while (it != NULL)
+            {
+                hash->free_data_fn(it->data);
+                it = it->next;
+            }
+        }
+    }
 
     for (i = 0; i < hash->num_pools; i++)
     {
@@ -485,6 +502,60 @@ void xtr_hash_stats_dump(xtr_hash *hash)
                     ((double)num_leftovers / max_items) * 100);
 }
 
+/**
+ * xtr_hash_iter_init
+ *
+ * Initializes an iterator to traverse all active items in the hash table.
+ *
+ * @param hash Pointer to the hash table.
+ * @param iter Pointer to the iterator state to initialize.
+ */
+void xtr_hash_iter_init(xtr_hash *hash, xtr_hash_iter *iter)
+{
+    (void)hash;
+    iter->bucket = 0;
+    iter->item = NULL;
+}
+
+
+/**
+ * xtr_hash_iter_next
+ *
+ * Advances the iterator to the next active item in the hash table.
+ *
+ * @param hash Pointer to the hash table.
+ * @param iter Pointer to the iterator state.
+ * @param key [out] If not NULL, receives the key of the current item.
+ * @param data [out] If not NULL, receives a copy of the data of the current item.
+ *
+ * @return 1 if a valid item was found, 0 if the end of the hash table was reached.
+ */
+int xtr_hash_iter_next(xtr_hash *hash, xtr_hash_iter *iter, UINT64 *key, void *data)
+{
+    if (iter->item != NULL)
+    {
+        iter->item = iter->item->next;
+    }
+
+    while (iter->item == NULL)
+    {
+        if (iter->bucket >= hash->num_buckets)
+            return 0;
+
+        iter->item = hash->buckets[iter->bucket];
+        iter->bucket++;
+    }
+
+    if (key != NULL)
+        *key = iter->item->key;
+
+    if (data != NULL)
+        memcpy(data, iter->item->data, hash->data_size);
+
+    return 1;
+}
+
+
 #if defined(UNIT_TEST)
 
 static void pretty_int(FILE *fd, void *data) 
@@ -496,7 +567,7 @@ static void pretty_int(FILE *fd, void *data)
 
 int main(int argc, char **argv) 
 {
-    xtr_hash *hash = xtr_hash_new(4, sizeof(int), XTR_HASH_NONE | XTR_HASH_AUTO_EXPAND);
+    xtr_hash *hash = xtr_hash_new(4, sizeof(int), XTR_HASH_NONE | XTR_HASH_AUTO_EXPAND, NULL);
 
     int data1 = 111;
     int data2 = 222;
