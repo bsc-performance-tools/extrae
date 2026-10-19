@@ -13,7 +13,7 @@ AC_DEFUN([AX_CUDA],
   )
 
   if test "${cuda_root_path}" != "no" ; then
-    AX_FIND_INSTALLATION([CUDA], [${cuda_root_path}], [nvcc], [], [cuda_runtime_api.h], [], [cudart cuda], [],
+    AX_FIND_INSTALLATION([CUDA], [${cuda_root_path}], [nvcc], [], [cuda_runtime_api.h], [], [cudart], [],
       [ AC_MSG_NOTICE([CUDA tracing support enabled]) ],
       [ AC_MSG_ERROR([CUDA tracing support is enabled but could not find a valid CUDA installation. Check that --with-cuda points to the proper CUDA directory.]) ]
     )

@@ -35,4 +35,8 @@ if HAVE_CUDA
 libwrap_gpu_la_CFLAGS += $(CUDA_CFLAGS) -DCUDA_SUPPORT
 endif
 
+if HAVE_CUPTI
+libwrap_gpu_la_CFLAGS += $(CUPTI_CFLAGS) -DCUPTI_SUPPORT
+endif
+
 libwrap_gpu_la_SOURCES = $(WRAPPERS_GPU)

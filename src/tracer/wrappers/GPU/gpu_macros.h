@@ -10,6 +10,9 @@
 #if defined(CUDA_SUPPORT)
 #include <cuda.h>
 #include <cuda_runtime.h>
+# if defined(CUPTI_SUPPORT)
+#  include <cupti.h>
+# endif
 #elif defined(HIP_SUPPORT)
 #include <hip/hip_runtime.h>
 #include <hip/hip_runtime_api.h>
@@ -96,24 +99,10 @@
  *  
  *    HIP:  hipError_t + hipSuccess  (runtime and driver use the same type)
  *    CUDA: cudaError_t + cudaSuccess  (runtime API)
- *          CUresult   + CUDA_SUCCESS  (driver API)
- *  
+ *          CUptiResult + CUPTI_SUCCESS (CUPTI)
+ *
  * ══════════════════════════════════════════════════════════════════════════ */
 #if defined(CUDA_SUPPORT)
-
-#define GPU_DRIVER_CHECK(call)                                                 \
-    do {                                                                       \
-        CUresult _r = (call);                                                  \
-        if (_r != CUDA_SUCCESS) {                                              \
-            const char *_s = NULL;                                             \
-            cuGetErrorString(_r, &_s);                                         \
-            fprintf(stderr,                                                    \
-                "[CUDA DRIVER ERROR] '%s'\n  at %s:%d\n  %s\n",                \
-                #call, __FILE__, __LINE__,                                     \
-                _s ? _s : "Unknown");                                          \
-            exit(EXIT_FAILURE);                                                \
-        }                                                                      \
-    } while (0)
 
 #define GPU_RUNTIME_CHECK(call)                                                \
     do {                                                                       \
@@ -127,16 +116,52 @@
         }                                                                      \
     } while (0)
 
+#if defined(CUPTI_SUPPORT)
+
+#define GPU_CUPTI_CHECK(call)                                                  \
+    do {                                                                       \
+        CUptiResult _r = (call);                                               \
+        if (_r != CUPTI_SUCCESS) {                                             \
+            const char *_s = NULL;                                             \
+            cuptiGetResultString(_r, &_s);                                     \
+            fprintf(stderr,                                                    \
+                "[CUPTI ERROR] '%s'\n  at %s:%d\n  %s\n",                      \
+                #call, __FILE__, __LINE__,                                     \
+                _s ? _s : "Unknown");                                          \
+            exit(EXIT_FAILURE);                                                \
+        }                                                                      \
+    } while (0)
+
+/*
+ * The ctx received in a CUPTI callback is the context the API call was issued
+ * in, which may belong to a different device than the one current for the
+ * calling thread. cuptiGetDeviceId() returns the device that contains the
+ * given context without changing the thread's current context.
+ */
 #define GPU_GET_DEVICE_SAFE(ctx, device_id)                                    \
     do {                                                                       \
         if ((ctx) != NULL) {                                                   \
-            GPU_DRIVER_CHECK(cuCtxPushCurrent(ctx));                           \
-            GPU_RUNTIME_CHECK(cudaGetDevice(&(device_id)));                    \
-            GPU_DRIVER_CHECK(cuCtxPopCurrent(&(ctx)));                         \
+            uint32_t _dev;                                                     \
+            GPU_CUPTI_CHECK(cuptiGetDeviceId((ctx), &_dev));                   \
+            (device_id) = (int)_dev;                                           \
         } else {                                                               \
             GPU_RUNTIME_CHECK(cudaGetDevice(&(device_id)));                    \
         }                                                                      \
     } while (0)
+
+#else /* !CUPTI_SUPPORT */
+
+/*
+ * Without CUPTI only the legacy wrappers are used, and they always pass a
+ * NULL ctx: the device is the one current for the calling thread.
+ */
+#define GPU_GET_DEVICE_SAFE(ctx, device_id)                                    \
+    do {                                                                       \
+        (void)(ctx);                                                           \
+        GPU_RUNTIME_CHECK(cudaGetDevice(&(device_id)));                        \
+    } while (0)
+
+#endif /* CUPTI_SUPPORT */
 
 #endif /* CUDA_SUPPORT */
 

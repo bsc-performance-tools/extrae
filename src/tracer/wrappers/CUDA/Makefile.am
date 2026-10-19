@@ -16,7 +16,7 @@ libwrap_cuda_la_CFLAGS = \
  -I$(COMMON_INC) \
  $(UNWIND_CFLAGS) \
  @CUDA_CFLAGS@ @CUPTI_CFLAGS@ \
- -DCUDA_SUPPORT
+ -DCUDA_SUPPORT -DCUPTI_SUPPORT
 
 libwrap_cuda_la_SOURCES = \
  cuda_wrapper_cupti.c cuda_wrapper_cupti.h
