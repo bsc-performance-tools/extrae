@@ -1713,9 +1713,6 @@ Backend_preInitialize_env(int me, int world_size, int forked,
 	{
 		/* Allocate a bitmap to know which tasks are tracing */
 		Extrae_Allocate_Task_Bitmap(world_size);
-		
-		/* Allocate thread info structure */
-		Extrae_allocate_thread_info(get_maximum_NumOfThreads());
 	}
 }
 
@@ -2049,6 +2046,10 @@ Backend_preInitialize(int me, int world_size, const char *config_file, int forke
 
 	if (!forked)
 	{
+		/* Allocate thread info structure once the number of threads is known
+		   (it is set in Backend_preInitialize_libraries/_modules) */
+		Extrae_allocate_thread_info(get_maximum_NumOfThreads());
+
 		CLOCK_INIT(get_maximum_NumOfThreads());
 	}
 
