@@ -13,8 +13,6 @@ endif
 noinst_LTLIBRARIES = libwrap_gpu.la
 
 libwrap_gpu_la_CFLAGS = \
- -I$(WRAPPERS_DIR)/MPI \
- -I$(COMMON_MPI_DIR) \
  -I$(TRACER_INC) \
  -I$(HWC_INC) \
  -I$(CLOCKS_INC) \

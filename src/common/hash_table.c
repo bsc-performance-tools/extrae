@@ -125,6 +125,12 @@ void xtr_hash_free(xtr_hash *hash)
 {
     int i = 0;
 
+    // Destroy the optional global lock before freeing the hash.
+    if (hash->flags & XTR_HASH_LOCK)
+    {
+        pthread_rwlock_destroy(&hash->lock);
+    }
+
     if (hash->free_data_fn != NULL)
     {
         for (i = 0; i < hash->num_buckets; ++i)
@@ -286,9 +292,10 @@ int xtr_hash_remove(xtr_hash *hash, UINT64 key, void *data_out)
     xtr_hash_item *it = NULL;
     xtr_hash_item *prev = NULL;
 
+    // Removing a node changes the bucket chain and requires exclusive access.
     if (hash->flags & XTR_HASH_LOCK)
     {
-        pthread_rwlock_rdlock(&hash->lock);
+        pthread_rwlock_wrlock(&hash->lock);
     }
 
     // Calculate the hash index

@@ -13,6 +13,7 @@ common_SRCS = \
  new-queue.c new-queue.h \
  extrae_vector.c extrae_vector.h \
  MurmurHash2.c MurmurHash2.h \
+ hash_table.c hash_table.h \
  intel-pebs-types.h \
  debug.h \
  common.h \

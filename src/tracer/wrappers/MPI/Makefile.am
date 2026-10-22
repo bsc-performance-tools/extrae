@@ -6,16 +6,14 @@ WRAPPERS_MPI_C_ONLY = \
  mpi_wrapper_p2p_c.c mpi_wrapper_p2p_c.h \
  mpi_wrapper_coll_c.c mpi_wrapper_coll_c.h \
  mpi_wrapper_1sided_c.c mpi_wrapper_1sided_c.h \
- mpi_wrapper_io_c.c mpi_wrapper_io_c.h \
- hash_table.c hash_table.h
+ mpi_wrapper_io_c.c mpi_wrapper_io_c.h
 
 WRAPPERS_MPI_F_ONLY = \
  mpi_wrapper.c mpi_wrapper.h \
  mpi_wrapper_p2p_f.c mpi_wrapper_p2p_f.h \
  mpi_wrapper_coll_f.c mpi_wrapper_coll_f.h \
  mpi_wrapper_1sided_f.c mpi_wrapper_1sided_f.h \
- mpi_wrapper_io_f.c mpi_wrapper_io_f.h \
- hash_table.c hash_table.h
+ mpi_wrapper_io_f.c mpi_wrapper_io_f.h
 
 WRAPPERS_MPI_ALL = \
  mpi_wrapper.c mpi_wrapper.h \
@@ -26,8 +24,7 @@ WRAPPERS_MPI_ALL = \
  mpi_wrapper_p2p_f.c mpi_wrapper_p2p_f.h \
  mpi_wrapper_coll_f.c mpi_wrapper_coll_f.h \
  mpi_wrapper_1sided_f.c mpi_wrapper_1sided_f.h \
- mpi_wrapper_io_f.c mpi_wrapper_io_f.h \
- hash_table.c hash_table.h
+ mpi_wrapper_io_f.c mpi_wrapper_io_f.h
 
 if HAVE_MPI
 EXTRA_MPI_CFLAGS = -I$(COMMON_MPI_DIR) -DMPI_SUPPORT @MPI_CFLAGS@ $(PARALLEL_CFLAGS_MERGE_LIB) \
