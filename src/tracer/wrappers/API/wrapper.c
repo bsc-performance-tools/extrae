@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include <limits.h>
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -321,6 +322,9 @@ unsigned long long WantedCheckControlPeriod = 0;
 /******************************************************************************
  **********************         V A R I A B L E S        **********************
  ******************************************************************************/
+
+/* Allocate these arrays once; EXTRAE_MAX_THREADS can override the capacity. */
+static unsigned thread_array_capacity = 65536;
 
 Buffer_t **TracingBuffer = NULL;
 Buffer_t **SamplingBuffer = NULL;
@@ -1452,6 +1456,18 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	return 1;
 }
 
+/* Stop before an out-of-bounds access; returning FALSE is not enough here. */
+static void Check_thread_array_capacity (unsigned num_threads)
+{
+	if (num_threads > thread_array_capacity)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Requested %u thread slots, but capacity is %u.\n"
+		         "Set EXTRAE_MAX_THREADS to at least %u, allowing spare slots, then rerun.\n",
+		         num_threads, thread_array_capacity, num_threads);
+		exit (EXIT_FAILURE);
+	}
+}
+
 /**
  * Allocates as many tracing & sampling buffers as threads.
  * \param num_threads Total number of threads.
@@ -1480,13 +1496,42 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 	UNREFERENCED_PARAMETER(world_size);
 #endif
 
+	/* Read the override once; a forked child keeps the inherited capacity. */
 	if (!forked)
 	{
-		TracingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
-		LastCPUEmissionTime = xmalloc(num_threads * sizeof(iotimer_t));
-		LastCPUEvent = xmalloc(num_threads * sizeof(int));
+		const char *value = getenv("EXTRAE_MAX_THREADS");
+		if (value != NULL)
+		{
+			char *end;
+			unsigned long capacity;
+
+			errno = 0;
+			capacity = strtoul(value, &end, 10);
+			/* Reject invalid counts and allocation-size overflows. */
+			if (value[0] < '0' || value[0] > '9' || *end != '\0' || errno == ERANGE ||
+			    capacity == 0 || capacity > INT_MAX ||
+			    capacity > (size_t)-1 / sizeof(Buffer_t *) ||
+			    capacity > (size_t)-1 / sizeof(iotimer_t) ||
+			    capacity > (size_t)-1 / sizeof(int))
+			{
+				fprintf (stderr, PACKAGE_NAME": Error! Invalid EXTRAE_MAX_THREADS='%s'. "
+				         "Use a positive integer no greater than %d that fits the thread arrays.\n",
+				         value, INT_MAX);
+				exit (EXIT_FAILURE);
+			}
+			thread_array_capacity = (unsigned)capacity;
+		}
+	}
+	Check_thread_array_capacity (num_threads);
+
+	if (!forked)
+	{
+		/* Keep the addresses stable while other threads read these arrays. */
+		TracingBuffer = xmalloc_and_zero(thread_array_capacity * sizeof(Buffer_t *));
+		LastCPUEmissionTime = xmalloc_and_zero(thread_array_capacity * sizeof(iotimer_t));
+		LastCPUEvent = xmalloc_and_zero(thread_array_capacity * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
-		SamplingBuffer = xmalloc(num_threads * sizeof(Buffer_t *));
+		SamplingBuffer = xmalloc_and_zero(thread_array_capacity * sizeof(Buffer_t *));
 #endif
 	}
 
@@ -1505,12 +1550,7 @@ static int Reallocate_buffers_and_files (int new_num_threads)
 {
 	int i;
 
-	TracingBuffer = xrealloc(TracingBuffer, new_num_threads * sizeof(Buffer_t *));
-	LastCPUEmissionTime = xrealloc(LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
-	LastCPUEvent = xrealloc(LastCPUEvent, new_num_threads * sizeof(int));
-#if defined(SAMPLING_SUPPORT)
-	SamplingBuffer = xrealloc(SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
-#endif
+	/* Only create the new buffers; never move the shared arrays. */
 
 	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)
 		Allocate_buffer_and_file (i, FALSE);
@@ -2103,6 +2143,9 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 
 	if (EXTRAE_INITIALIZED())
 	{
+		/* Check before growing any thread structures or updating the counts. */
+		Check_thread_array_capacity (new_num_threads);
+
 		/* Just modify things if there are more threads */
 		if (new_num_threads > get_maximum_NumOfThreads())
 		{
