@@ -50,6 +50,10 @@
         To read another GPU, change the N in ':device=N'.
       -->
   <counters enabled="yes">
+    <!-- Intel TopDown (Linux, supported Intel CPUs, PAPI >= 7.2.0):
+         Add topdown="1" for 4 Level-1 counters or topdown="2" for all 12.
+         <cpu enabled="yes" starting-set-distribution="1" topdown="1">
+    -->
     <cpu enabled="yes" starting-set-distribution="1">
 
       <set enabled="yes" changeat-time="0">

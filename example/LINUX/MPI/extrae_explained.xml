@@ -76,6 +76,13 @@
            - Number : All the tasks will start with the given set 
            (from 1..N).
     -->
+    <!-- Intel TopDown (Linux, supported Intel CPUs, PAPI >= 7.2.0):
+         Add topdown="1" to collect Retiring, Bad Speculation, Frontend Bound
+         and Backend Bound, or topdown="2" to also collect 8 Level-2 counters:
+         <cpu enabled="yes" starting-set-distribution="1" topdown="2">
+         Omit topdown to disable it. For TopDown only, keep <cpu> enabled
+         and set enabled="no" on all normal counter <set> elements below.
+    -->
     <cpu enabled="yes" starting-set-distribution="1">
       <!-- In this example, we configure two sets of counters. The first will 
            be changed into the second after 5 calls to some collective
