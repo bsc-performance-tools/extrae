@@ -48,41 +48,35 @@
 #include "hip_wrapper_roctracer.h"
 
 #define LOG_OTHER_DOMAIN_UNTRACKED_CALLBACKS 0
-#define MAX_HIP_API_ID 1024
-static bool cid_filter[MAX_HIP_API_ID] = {false};
-
-#define SET_CID_FILTER(cid)   (cid_filter[cid] = true)
-#define IS_CID_FILTERED(cid)  (cid_filter[cid])
-
-static void 
+static void
 Extrae_HIP_API_disable_calls(void) {
-    SET_CID_FILTER(HIP_API_ID___hipPushCallConfiguration);
-    SET_CID_FILTER(HIP_API_ID___hipPopCallConfiguration);
-    SET_CID_FILTER(HIP_API_ID_hipRuntimeGetVersion);
-    SET_CID_FILTER(HIP_API_ID_hipDeviceGet);
-    SET_CID_FILTER(HIP_API_ID_hipGetLastError);
-    SET_CID_FILTER(HIP_API_ID_hipDeviceGetName);
-    SET_CID_FILTER(HIP_API_ID_hipGetDeviceCount);
-    SET_CID_FILTER(HIP_API_ID_hipEventCreate);
-    SET_CID_FILTER(HIP_API_ID_hipEventDestroy);
-    SET_CID_FILTER(HIP_API_ID_hipEventElapsedTime);
-    SET_CID_FILTER(HIP_API_ID_hipHostRegister);
-    SET_CID_FILTER(HIP_API_ID_hipFuncSetCacheConfig);
-    SET_CID_FILTER(HIP_API_ID_hipGetDevicePropertiesR0600);
-    SET_CID_FILTER(HIP_API_ID_hipDeviceGetAttribute);
-    SET_CID_FILTER(HIP_API_ID_hipFuncGetAttribute);
-    SET_CID_FILTER(HIP_API_ID_hipFuncGetAttributes);
-    SET_CID_FILTER(HIP_API_ID_hipDeviceComputeCapability);
-    SET_CID_FILTER(HIP_API_ID_hipPointerGetAttributes);
-    SET_CID_FILTER(HIP_API_ID_hipModuleGetGlobal);
-    SET_CID_FILTER(HIP_API_ID_hipModuleLoadData);
-    SET_CID_FILTER(HIP_API_ID_hipModuleLoad);
-    SET_CID_FILTER(HIP_API_ID_hipModuleUnload);
-    SET_CID_FILTER(HIP_API_ID_hipModuleOccupancyMaxPotentialBlockSize);
-    SET_CID_FILTER(HIP_API_ID_hipGetSymbolAddress);
-    SET_CID_FILTER(HIP_API_ID_hipModuleLaunchCooperativeKernel);
-    SET_CID_FILTER(HIP_API_ID_hipExtLaunchKernel);
-    SET_CID_FILTER(HIP_API_ID_hipSetDevice);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID___hipPushCallConfiguration);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID___hipPopCallConfiguration);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipRuntimeGetVersion);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipDeviceGet);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipGetLastError);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipDeviceGetName);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipGetDeviceCount);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipEventCreate);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipEventDestroy);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipEventElapsedTime);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipHostRegister);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipFuncSetCacheConfig);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipGetDevicePropertiesR0600);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipDeviceGetAttribute);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipFuncGetAttribute);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipFuncGetAttributes);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipDeviceComputeCapability);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipPointerGetAttributes);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipModuleGetGlobal);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipModuleLoadData);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipModuleLoad);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipModuleUnload);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipModuleOccupancyMaxPotentialBlockSize);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipGetSymbolAddress);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipModuleLaunchCooperativeKernel);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipExtLaunchKernel);
+    roctracer_disable_op_callback(ACTIVITY_DOMAIN_HIP_API, HIP_API_ID_hipSetDevice);
 }
 
 static void 
@@ -92,7 +86,7 @@ Extrae_ROCTRACER_callback(uint32_t domain, uint32_t cid, const void* callback_da
     UNREFERENCED_PARAMETER(arg);
     UNREFERENCED_PARAMETER(callback_data);
 
-    if (!mpitrace_on || !Extrae_get_trace_GPU() || callback_data == NULL || IS_CID_FILTERED(cid))
+    if (!mpitrace_on || !Extrae_get_trace_GPU() || callback_data == NULL)
         return;
 
     int ret = 0;
@@ -694,10 +688,8 @@ void Extrae_HIP_init(int rank) {
 
     UNREFERENCED_PARAMETER(rank);
 
-    Extrae_HIP_API_disable_calls();
-
-    /* Equivalent to cuptiEnableAllDomains(...) + disable calls: Here we enable HIP API domain callback and apply cid filter above. */
     roctracer_enable_domain_callback(ACTIVITY_DOMAIN_HIP_API, Extrae_ROCTRACER_callback, NULL);
+    Extrae_HIP_API_disable_calls();
 
     kernelMapCreate();
 }
