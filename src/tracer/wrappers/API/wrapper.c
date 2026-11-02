@@ -309,8 +309,6 @@ int hasMinimumTracingTime = FALSE;
 /* CPU events emission frequency */
 unsigned long long MinimumCPUEventTime = 0;
 unsigned short AlwaysEmitCPUEvent = 0;
-iotimer_t *LastCPUEmissionTime = NULL;
-int *LastCPUEvent = NULL;
 
 unsigned long long WantedCheckControlPeriod = 0;
 
@@ -323,11 +321,16 @@ unsigned long long WantedCheckControlPeriod = 0;
  **********************         V A R I A B L E S        **********************
  ******************************************************************************/
 
-/* Allocate these arrays once; EXTRAE_MAX_THREADS can override the capacity. */
-static unsigned thread_array_capacity = 65536;
+/* Shift an ID right by 16 to divide it by 65536 and find its block. */
+#define THREAD_DATA_BLOCK_SHIFT 16U
+/* Shift 1 left by 16 to get 65536 records per block. */
+#define THREAD_DATA_BLOCK_SIZE (1U << THREAD_DATA_BLOCK_SHIFT)
+/* Shift INT_MAX right by 16 to divide the maximum thread count by 65536.
+ * Add one more block for the remaining records. */
+#define THREAD_DATA_BLOCK_COUNT (((unsigned)INT_MAX >> THREAD_DATA_BLOCK_SHIFT) + 1U)
 
-Buffer_t **TracingBuffer = NULL;
-Buffer_t **SamplingBuffer = NULL;
+/* Keep the pointer array fixed; allocate each block of 65536 records when needed. */
+static Extrae_thread_trace_data_t *thread_trace_blocks[THREAD_DATA_BLOCK_COUNT];
 unsigned int min_BufferSize = EVT_NUM;
 
 //event_t **buffers;
@@ -516,7 +519,8 @@ static void Extrae_BG_gettopology (int enter, UINT64 timestamp)
 void xtr_AnnotateCPU (int thread_id, UINT64 timestamp, int force_emission_now)
 {
 #if defined(HAVE_SCHED_GETCPU)
-	iotimer_t last_emission = LastCPUEmissionTime[thread_id];
+	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread_id);
+	iotimer_t last_emission = data->last_cpu_event_time;
 
 #if defined(DEBUG)
 	if (force_emission_now)
@@ -531,13 +535,14 @@ void xtr_AnnotateCPU (int thread_id, UINT64 timestamp, int force_emission_now)
 				 ((timestamp - last_emission) > MinimumCPUEventTime) ) ) 
 	{
 		int cpu = sched_getcpu();
+		Extrae_thread_trace_data_t *current_data = Extrae_get_thread_trace_data(THREADID);
 
-		if (cpu != LastCPUEvent[THREADID] || AlwaysEmitCPUEvent)
+		if (cpu != current_data->last_cpu_id || AlwaysEmitCPUEvent)
 		{
-			LastCPUEvent[THREADID] = cpu;
+			current_data->last_cpu_id = cpu;
       THREAD_TRACE_MISCEVENT(thread_id, timestamp, GETCPU_EV, cpu, EMPTY);
 		}
-		LastCPUEmissionTime[thread_id] = timestamp;
+		data->last_cpu_event_time = timestamp;
 	}
 #else
 	UNREFERENCED_PARAMETER(thread_id);
@@ -1396,13 +1401,34 @@ int remove_temporal_files(void)
 	return 0;
 }
 
+/* Find the record directly; adding blocks does not move existing records. */
+Extrae_thread_trace_data_t *Extrae_get_thread_trace_data (unsigned thread_id)
+{
+	/* Find which block contains this thread ID. */
+	unsigned block = thread_id >> THREAD_DATA_BLOCK_SHIFT;
+	Extrae_thread_trace_data_t *data;
+
+	if (thread_id >= INT_MAX)
+		return NULL;
+	/* If another thread created this block, also see the records it zeroed. */
+	data = __atomic_load_n (&thread_trace_blocks[block], __ATOMIC_ACQUIRE);
+	if (data == NULL)
+		return NULL;
+
+	/* Find this thread's position inside the block. */
+	unsigned slot = thread_id - block * THREAD_DATA_BLOCK_SIZE;
+	return &data[slot];
+}
+
 /**
- * Allocates a new tracing & sampling buffer for a given thread. 
+ * Allocates a new tracing & sampling buffer for a given thread.
  * \param thread_id The thread identifier.
  * \return 1 if success, 0 otherwise. 
  */
 static int Allocate_buffer_and_file (int thread_id, int forked)
 {
+	/* This thread's block must exist before we create its buffers. */
+	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread_id);
 	char tmp_file[TMP_NAME_LENGTH];
 	unsigned initialTASKID = Extrae_get_initial_TASKID();
 	char hostname[1024];
@@ -1414,27 +1440,27 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	  hostname, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
 
 	if (forked)
-		Buffer_Free (TracingBuffer[thread_id]);
+		Buffer_Free (data->tracing_buffer);
 
-	LastCPUEmissionTime[thread_id] = 0;
-	LastCPUEvent[thread_id] = -1;
-	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, TRUE);
-	if (TracingBuffer[thread_id] == NULL)
+	data->last_cpu_event_time = 0;
+	data->last_cpu_id = -1;
+	data->tracing_buffer = new_Buffer (buffer_size, tmp_file, TRUE);
+	if (data->tracing_buffer == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error allocating tracing buffer for thread %d\n", thread_id);
 		return 0;
 	}
 	if (circular_buffering)
 	{
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_INIT_EV);
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_RANK_CREACIO_COMM_EV);
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_ALIAS_COMM_CREATE_EV);
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], HWC_CHANGE_EV);
-		Buffer_SetFlushCallback (TracingBuffer[thread_id], Buffer_DiscardOldest);
+		Buffer_AddCachedEvent (data->tracing_buffer, MPI_INIT_EV);
+		Buffer_AddCachedEvent (data->tracing_buffer, MPI_RANK_CREACIO_COMM_EV);
+		Buffer_AddCachedEvent (data->tracing_buffer, MPI_ALIAS_COMM_CREATE_EV);
+		Buffer_AddCachedEvent (data->tracing_buffer, HWC_CHANGE_EV);
+		Buffer_SetFlushCallback (data->tracing_buffer, Buffer_DiscardOldest);
 	}
 	else
 	{
-		Buffer_SetFlushCallback (TracingBuffer[thread_id], Extrae_Flush_Wrapper);
+		Buffer_SetFlushCallback (data->tracing_buffer, Extrae_Flush_Wrapper);
 	}
 
 #if defined(SAMPLING_SUPPORT)
@@ -1442,30 +1468,63 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	             hostname, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
 
 	if (forked)
-		Buffer_Free (SamplingBuffer[thread_id]);
+		Buffer_Free (data->sampling_buffer);
 
-	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, FALSE);
-	if (SamplingBuffer[thread_id] == NULL)
+	data->sampling_buffer = new_Buffer (buffer_size, tmp_file, FALSE);
+	if (data->sampling_buffer == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error allocating sampling buffer for thread %d\n", thread_id);
 		return 0;
 	}
-	Buffer_SetFlushCallback (SamplingBuffer[thread_id], NULL);
+	Buffer_SetFlushCallback (data->sampling_buffer, NULL);
 #endif
 
 	return 1;
 }
 
-/* Stop before an out-of-bounds access; returning FALSE is not enough here. */
-static void Check_thread_array_capacity (unsigned num_threads)
+/* Blocks can grow, but counts must still fit the signed IDs used elsewhere. */
+static void Check_thread_count (unsigned num_threads)
 {
-	if (num_threads > thread_array_capacity)
+	if (num_threads > INT_MAX)
 	{
-		fprintf (stderr, PACKAGE_NAME": Error! Requested %u thread slots, but capacity is %u.\n"
-		         "Set EXTRAE_MAX_THREADS to at least %u, allowing spare slots, then rerun.\n",
-		         num_threads, thread_array_capacity, num_threads);
+		fprintf (stderr, PACKAGE_NAME": Error! Requested %u thread slots; supported limit is %d.\n",
+		         num_threads, INT_MAX);
 		exit (EXIT_FAILURE);
 	}
+}
+
+/* Allocate enough blocks for num_threads records without moving existing records. */
+static void Allocate_thread_trace_blocks (unsigned num_threads)
+{
+	unsigned last_block = 0;
+
+	Check_thread_count (num_threads);
+	/* Subtract 1 to get the last ID, then divide by 65536 using a right shift.
+	 * If num_threads is 0, keep last_block at 0. */
+	if (num_threads > 0)
+		last_block = (num_threads - 1U) >> THREAD_DATA_BLOCK_SHIFT;
+
+	/* Blocks are allocated in order. If the last required block exists,
+	 * all required blocks are already allocated, so there is nothing to do. */
+	if (__atomic_load_n (&thread_trace_blocks[last_block], __ATOMIC_ACQUIRE) != NULL)
+		return;
+
+	/* Only one thread may add blocks at a time. The same mutex also prevents
+	 * cleanup from freeing blocks while we add them. */
+	pthread_mutex_lock (&pthreadFreeBuffer_mtx);
+	for (unsigned block = 0; block <= last_block; block++)
+	{
+		/* Allocate NULL entries only; keep any blocks created before we got the lock. */
+		if (__atomic_load_n (&thread_trace_blocks[block], __ATOMIC_RELAXED) == NULL)
+		{
+			Extrae_thread_trace_data_t *data =
+				xmalloc_and_zero(THREAD_DATA_BLOCK_SIZE * sizeof(*data));
+			/* Save the new block pointer after zeroing its records, so other threads
+			 * see the cleared records when they read this pointer with acquire. */
+			__atomic_store_n (&thread_trace_blocks[block], data, __ATOMIC_RELEASE);
+		}
+	}
+	pthread_mutex_unlock (&pthreadFreeBuffer_mtx);
 }
 
 /**
@@ -1496,44 +1555,9 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 	UNREFERENCED_PARAMETER(world_size);
 #endif
 
-	/* Read the override once; a forked child keeps the inherited capacity. */
-	if (!forked)
-	{
-		const char *value = getenv("EXTRAE_MAX_THREADS");
-		if (value != NULL)
-		{
-			char *end;
-			unsigned long capacity;
-
-			errno = 0;
-			capacity = strtoul(value, &end, 10);
-			/* Reject invalid counts and allocation-size overflows. */
-			if (value[0] < '0' || value[0] > '9' || *end != '\0' || errno == ERANGE ||
-			    capacity == 0 || capacity > INT_MAX ||
-			    capacity > (size_t)-1 / sizeof(Buffer_t *) ||
-			    capacity > (size_t)-1 / sizeof(iotimer_t) ||
-			    capacity > (size_t)-1 / sizeof(int))
-			{
-				fprintf (stderr, PACKAGE_NAME": Error! Invalid EXTRAE_MAX_THREADS='%s'. "
-				         "Use a positive integer no greater than %d that fits the thread arrays.\n",
-				         value, INT_MAX);
-				exit (EXIT_FAILURE);
-			}
-			thread_array_capacity = (unsigned)capacity;
-		}
-	}
-	Check_thread_array_capacity (num_threads);
-
-	if (!forked)
-	{
-		/* Keep the addresses stable while other threads read these arrays. */
-		TracingBuffer = xmalloc_and_zero(thread_array_capacity * sizeof(Buffer_t *));
-		LastCPUEmissionTime = xmalloc_and_zero(thread_array_capacity * sizeof(iotimer_t));
-		LastCPUEvent = xmalloc_and_zero(thread_array_capacity * sizeof(int));
-#if defined(SAMPLING_SUPPORT)
-		SamplingBuffer = xmalloc_and_zero(thread_array_capacity * sizeof(Buffer_t *));
-#endif
-	}
+	/* Blocks grow as needed; no fixed capacity or environment override is needed.
+	 * A forked child reuses the blocks inherited from its parent. */
+	Allocate_thread_trace_blocks (num_threads);
 
 	for (i = 0; i < num_threads; i++)
 		Allocate_buffer_and_file (i, forked);
@@ -1550,7 +1574,8 @@ static int Reallocate_buffers_and_files (int new_num_threads)
 {
 	int i;
 
-	/* Only create the new buffers; never move the shared arrays. */
+	/* Add blocks if needed before creating the new threads' buffers. */
+	Allocate_thread_trace_blocks (new_num_threads);
 
 	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)
 		Allocate_buffer_and_file (i, FALSE);
@@ -1645,29 +1670,26 @@ void Backend_Flush_pThread (pthread_t t)
 			// the end of this pthread and the process
 			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 
-			// TracingBuffer may have been already free'd by the master thread if the process finished
-			if (TracingBuffer != NULL)
+			/* Process cleanup may already have freed the records. */
+			Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(u);
+			if (data != NULL)
 			{
-				if (TRACING_BUFFER(u) != NULL)
+				if (data->tracing_buffer != NULL)
 				{
-					Buffer_Flush(TRACING_BUFFER(u));
+					Buffer_Flush(data->tracing_buffer);
 					Backend_Finalize_close_mpits (getpid(), u, FALSE);
 
-					Buffer_Free (TRACING_BUFFER(u));
-					TRACING_BUFFER(u) = NULL;
+					Buffer_Free (data->tracing_buffer);
+					data->tracing_buffer = NULL;
 				}
-			}
 #if defined(SAMPLING_SUPPORT)
-			// SamplingBuffer may have been already free'd by the master thread if the process finished
-			if (SamplingBuffer != NULL)
-			{
-				if (SAMPLING_BUFFER(u) != NULL)
+				if (data->sampling_buffer != NULL)
 				{
-					Buffer_Free (SAMPLING_BUFFER(u));
-					SAMPLING_BUFFER(u) = NULL;
+					Buffer_Free (data->sampling_buffer);
+					data->sampling_buffer = NULL;
 				}
-			}
 #endif
+			}
 
 			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 
@@ -2141,11 +2163,11 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 {
 	unsigned new_num_threads = numberofthreads;
 
+	/* Check before storing the count or growing any thread structures. */
+	Check_thread_count (new_num_threads);
+
 	if (EXTRAE_INITIALIZED())
 	{
-		/* Check before growing any thread structures or updating the counts. */
-		Check_thread_array_capacity (new_num_threads);
-
 		/* Just modify things if there are more threads */
 		if (new_num_threads > get_maximum_NumOfThreads())
 		{
@@ -2466,11 +2488,12 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 #if defined(SAMPLING_SUPPORT)
 	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
 	  pid, initialTASKID, thread, EXT_TMP_SAMPLE);
-	if (SamplingBuffer != NULL && SAMPLING_BUFFER(thread) != NULL &&
-	  Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
+	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
+	if (data != NULL && data->sampling_buffer != NULL &&
+	  Buffer_GetFillCount(data->sampling_buffer) > 0)
 	{
-		Buffer_Flush(SAMPLING_BUFFER(thread));
-		Buffer_Close(SAMPLING_BUFFER(thread));
+		Buffer_Flush(data->sampling_buffer);
+		Buffer_Close(data->sampling_buffer);
 
 		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, pid,
 		  TASKID, thread, EXT_SAMPLE);
@@ -2740,18 +2763,19 @@ Backend_finalize_flush_buffers(int online_mode, int mark_final_event)
 		if (thread == THREADID) Extrae_Flush_Wrapper_setCounters(TRUE);
 		else Extrae_Flush_Wrapper_setCounters(FALSE);
 
-		if (TRACING_BUFFER(thread) != NULL)
+		Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
+		if (data != NULL && data->tracing_buffer != NULL)
 		{
 			// If buffer was working in circular mode, change it to flush mode
 			// to dump the final data into the trace
 			if ((circular_buffering) && (!online_mode))
 			{
-				Buffer_SetFlushCallback(TracingBuffer[thread], Extrae_Flush_Wrapper);
+				Buffer_SetFlushCallback(data->tracing_buffer, Extrae_Flush_Wrapper);
 			}
 
 			if (mark_final_event) TRACE_EVENT(TIME, APPL_EV, EVT_END);
 
-			Buffer_ExecuteFlushCallback(TRACING_BUFFER(thread));
+			Buffer_ExecuteFlushCallback(data->tracing_buffer);
 
 			if(mark_final_event) Backend_Finalize_close_mpits(getpid(), thread, FALSE);
 		}
@@ -2775,30 +2799,38 @@ Backend_free_allocated_memory()
 #endif
 		// Protects race condition with Backend_Flush_pThread
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-		if (TRACING_BUFFER(thread) != NULL)
+		Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
+		if (data != NULL)
 		{
-			Buffer_Free (TRACING_BUFFER(thread));
-			TRACING_BUFFER(thread) = NULL;
-		}
+			if (data->tracing_buffer != NULL)
+			{
+				Buffer_Free (data->tracing_buffer);
+				data->tracing_buffer = NULL;
+			}
 #if defined(SAMPLING_SUPPORT)
-		if (SamplingBuffer != NULL &&
-		    SAMPLING_BUFFER(thread) != NULL)
-		{
-			Buffer_Free (SAMPLING_BUFFER(thread));
-			SAMPLING_BUFFER(thread) = NULL;
-		}
+			if (data->sampling_buffer != NULL)
+			{
+				Buffer_Free (data->sampling_buffer);
+				data->sampling_buffer = NULL;
+			}
 #endif
+		}
 		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 	}
-	xfree(LastCPUEmissionTime);
-	xfree(LastCPUEvent);
-	xfree(TracingBuffer);
-#if defined(SAMPLING_SUPPORT)
-	if (SamplingBuffer != NULL)
+	/* Free the record blocks after their tracing and sampling buffers. */
+	pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+	for (unsigned block = 0; block < THREAD_DATA_BLOCK_COUNT; block++)
 	{
-		xfree(SamplingBuffer);
+		/* Set this pointer to NULL before freeing the block,
+		 * so new lookups cannot find it. */
+		Extrae_thread_trace_data_t *data =
+			__atomic_exchange_n (&thread_trace_blocks[block], NULL, __ATOMIC_ACQ_REL);
+		/* Blocks are created in order; NULL means there are no more. */
+		if (data == NULL)
+			break;
+		xfree(data);
 	}
-#endif
+	pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 	xfree (TracingBitmap);
 	Extrae_allocate_thread_CleanUp();
 	TimeSync_CleanUp();
@@ -2883,13 +2915,14 @@ void Backend_Enter_Instrumentation ()
 	if (EXTRAE_ON() && Backend_Get_InstrumentationLevel() == 1)
 	{
 		unsigned thread = THREADID;
+		Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
 		UINT64 current_time;
 
 		/* Check if we have to fill the sampling buffer */
 	#if defined(SAMPLING_SUPPORT)
 		if (Extrae_get_DumpBuffersAtInstrumentation())
-			if (SamplingBuffer != NULL && SAMPLING_BUFFER(THREADID) != NULL &&
-				Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
+			if (data != NULL && data->sampling_buffer != NULL &&
+				Buffer_IsFull (data->sampling_buffer))
 			{
 				event_t FlushEv_Begin, FlushEv_End;
 
@@ -2904,7 +2937,7 @@ void Backend_Enter_Instrumentation ()
 				HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, TRUE);
 
 				/* Actually flush buffer */
-				Buffer_Flush(SAMPLING_BUFFER(THREADID));
+				Buffer_Flush(data->sampling_buffer);
 
 				/* Get time now, to mark in the instrumentation buffer the end of the flush */
 				FlushEv_End.time = TIME;
@@ -2913,8 +2946,8 @@ void Backend_Enter_Instrumentation ()
 				HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, TRUE);
 
 				/* Add events into instrumentation buffer */
-				BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_Begin);
-				BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_End);
+				BUFFER_INSERT (THREADID, data->tracing_buffer, FlushEv_Begin);
+				BUFFER_INSERT (THREADID, data->tracing_buffer, FlushEv_End);
 
 				/* Reestablish sampling */
 				Extrae_setSamplingEnabled (prev);
@@ -2922,8 +2955,8 @@ void Backend_Enter_Instrumentation ()
 	#endif
 
 		/* Check whether we will fill the buffer soon (or now) */
-		if (Buffer_RemainingEvents(TracingBuffer[thread]) <= NEVENTS)
-			Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
+		if (Buffer_RemainingEvents(data->tracing_buffer) <= NEVENTS)
+			Buffer_ExecuteFlushCallback (data->tracing_buffer);
 
 		/* Record the time when this is happening
 			we need this for subsequent calls to TIME, as this is being cached in

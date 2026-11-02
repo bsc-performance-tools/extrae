@@ -412,7 +412,8 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 {
 	unsigned u;
 	int threadid = CommandQueues[idx].threadid;
-	unsigned remainingevts = Buffer_RemainingEvents(TracingBuffer[threadid]);
+	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(threadid);
+	unsigned remainingevts = Buffer_RemainingEvents(data->tracing_buffer);
 	cl_ulong last_time = 0;
 
 	/* Calculate the difference in time between the host & accelerator */
@@ -421,7 +422,7 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 
 	/* Check whether we will fill the buffer soon (or now) */
 	if (remainingevts <= 2*CommandQueues[idx].nevents+2)
-		Buffer_ExecuteFlushCallback (TracingBuffer[threadid]);
+		Buffer_ExecuteFlushCallback (data->tracing_buffer);
 
 	/* Flush events into thread buffer, one by one */
 	for (u = 0; u < CommandQueues[idx].nevents; u++)

@@ -25,22 +25,32 @@
 #define __TRACE_BUFFERS_H__
 
 #include "buffers.h"
+#include "clock.h"
 #include "signals.h"
 
-/* Don't like these externs -> Declare fetch functions in wrapper.c and include prototypes in wrapper.h ? */
-extern Buffer_t **TracingBuffer;
-extern Buffer_t **SamplingBuffer;
+/* Keep all buffer-related values for one tracing thread ID together. */
+typedef struct
+{
+	Buffer_t *tracing_buffer;
+	iotimer_t last_cpu_event_time;
+	int last_cpu_id;
+#if defined(SAMPLING_SUPPORT)
+	Buffer_t *sampling_buffer;
+#endif
+} Extrae_thread_trace_data_t;
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
+/* Return the tracing record for this ID, or NULL if it is unavailable. */
+Extrae_thread_trace_data_t *Extrae_get_thread_trace_data (unsigned thread_id);
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 #if defined(__cplusplus)
 }
 #endif
 
-#define TRACING_BUFFER(tid) TracingBuffer[tid]
-#define SAMPLING_BUFFER(tid) SamplingBuffer[tid]
+#define TRACING_BUFFER(tid) (Extrae_get_thread_trace_data(tid)->tracing_buffer)
+#define SAMPLING_BUFFER(tid) (Extrae_get_thread_trace_data(tid)->sampling_buffer)
 
 #define BUFFER_INSERT(tid, buffer, event)                   \
 {                                                           \

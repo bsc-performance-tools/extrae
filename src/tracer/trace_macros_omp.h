@@ -105,15 +105,16 @@
 	{                                                                             \
 		/* Protect inserting events if main thread already finished and flushed */  \
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);                                 \
-		/* TracingBuffer may have been free'd by master thread if process ended */  \
-		if ((TracingBuffer != NULL) && (TRACING_BUFFER(thread_id) != NULL))         \
+		/* Process cleanup may already have freed this thread's record. */          \
+		Extrae_thread_trace_data_t *extrae_thread_data = Extrae_get_thread_trace_data(thread_id); \
+		if (extrae_thread_data != NULL && extrae_thread_data->tracing_buffer != NULL) \
 		{                                                                           \
 			evt.time = evttime;                                                       \
 			evt.event = evttype;                                                      \
 			evt.value = evtvalue;                                                     \
 			evt.param.omp_param.param[0] = evtparam;                                  \
 			HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);                            \
-			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                 \
+			BUFFER_INSERT(thread_id, extrae_thread_data->tracing_buffer, evt);         \
 		}                                                                           \
 		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);                               \
 	}                                                                             \
@@ -129,16 +130,17 @@
 	{																																				      \
 		/* Protect inserting events if main thread already finished and flushed */  \
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);                                 \
-		/* TracingBuffer may have been free'd by master thread if process ended */  \
-		if ((TracingBuffer != NULL) && (TRACING_BUFFER(thread_id) != NULL))         \
+		/* Process cleanup may already have freed this thread's record. */          \
+		Extrae_thread_trace_data_t *extrae_thread_data = Extrae_get_thread_trace_data(thread_id); \
+		if (extrae_thread_data != NULL && extrae_thread_data->tracing_buffer != NULL) \
 		{                                                                           \
 			evt.time = (evttime);                                                     \
 			evt.event = (evttype);                                                    \
 			evt.value = (evtvalue);                                                   \
 			evt.param.omp_param.param[0] = (evtparam);                                \
 			HARDWARE_COUNTERS_READ(thread_id, evt, Extrae_get_pthread_hwc_tracing()); \
-			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                 \
-			TRACE_COMPANION_EVENTS(thread_id, TRACING_BUFFER(thread_id), evt, 0, Extrae_get_pthread_hwc_tracing()); \
+			BUFFER_INSERT(thread_id, extrae_thread_data->tracing_buffer, evt);         \
+			TRACE_COMPANION_EVENTS(thread_id, extrae_thread_data->tracing_buffer, evt, 0, Extrae_get_pthread_hwc_tracing()); \
 		}                                                                           \
 		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);                               \
 	}                                                                             \
