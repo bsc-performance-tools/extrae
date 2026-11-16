@@ -78,8 +78,7 @@ int sched_yield(void)
 	int rc;
 
   /* Check whether SYSCALL instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_ON()                          &&
                       Extrae_get_trace_syscall();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,

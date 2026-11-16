@@ -155,8 +155,7 @@ int open(const char *pathname, int flags, ...)
   int fd = -1;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -247,8 +246,7 @@ int open64(const char *pathname, int flags, ...)
   int fd = -1;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -337,8 +335,7 @@ FILE * fopen(const char *path, const char *mode)
   FILE *f = NULL;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -425,8 +422,7 @@ FILE * fopen64(const char *path, const char *mode)
   FILE *f = NULL;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -512,8 +508,7 @@ int ioctl(int fd, unsigned long request, char *argp)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          && 
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -593,8 +588,7 @@ ssize_t read (int fd, void *buf, size_t count)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -674,8 +668,7 @@ ssize_t write (int fd, const void *buf, size_t count)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -755,8 +748,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   size_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -836,8 +828,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
   size_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -916,8 +907,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -997,8 +987,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1078,8 +1067,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1168,8 +1156,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1258,8 +1245,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1348,8 +1334,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1438,8 +1423,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1528,8 +1512,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   ssize_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1619,8 +1602,7 @@ close(int fildes)
 	int res;
 
 	/* Check whether IO instrumentation is enabled */
-	int canInstrument = EXTRAE_INITIALIZED() &&
-	                    mpitrace_on          &&
+	int canInstrument = EXTRAE_ON()          &&
 	                    Extrae_get_trace_io();
 
 	/*
@@ -1711,8 +1693,7 @@ fclose(FILE *stream)
 	int res;
 
 	/* Check whether IO instrumentation is enabled */
-	int canInstrument = EXTRAE_INITIALIZED() &&
-	                    mpitrace_on          &&
+	int canInstrument = EXTRAE_ON()          &&
 	                    Extrae_get_trace_io();
 
 	/*
@@ -1802,8 +1783,7 @@ off_t lseek (int fd, off_t offset, int whence)
   off_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1876,8 +1856,7 @@ __off64_t lseek64 (int fd, __off64_t offset, int whence)
   __off64_t res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -1950,8 +1929,7 @@ int fseek (FILE *stream, long offset, int whence)
   int res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -2024,8 +2002,7 @@ int fseeko (FILE *stream, off_t offset, int whence)
   int res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
@@ -2098,8 +2075,7 @@ int fseeko64 (FILE *stream, __off64_t offset, int whence)
   int res;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED() &&
-                      mpitrace_on          &&
+  int canInstrument = EXTRAE_ON()          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,

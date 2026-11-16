@@ -73,7 +73,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 #define apifTRACE_EVENT(x) \
 	void CtoF77(x##_event) (extrae_type_t *type, extrae_value_t *value) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			unsigned one = 1; \
 			Backend_Enter_Instrumentation (); \
@@ -86,7 +86,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENT)
 #define apifTRACE_NEVENT(x) \
 	void CtoF77(x##_nevent) (unsigned *count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_N_Event_Wrapper (count, types, values); \
@@ -110,7 +110,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 #define apifTRACE_EVENTANDCOUNTERS(x) \
 	void CtoF77(x##_eventandcounters) (extrae_type_t *type, extrae_value_t *value) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			unsigned one = 1; \
 			Backend_Enter_Instrumentation (); \
@@ -123,7 +123,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENTANDCOUNTERS)
 #define apifTRACE_NEVENTANDCOUNTERS(x) \
 	void CtoF77(x##_neventandcounters) (unsigned *count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_N_Eventsandcounters_Wrapper (count, types, values); \
@@ -154,7 +154,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_TRACING_MODE)
 #define apifTRACE_COUNTERS(x) \
 	void CtoF77(x##_counters) (void) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_counters_Wrapper (); \
@@ -166,7 +166,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_COUNTERS)
 #define apifTRACE_PREVIOUS_HWC_SET(x) \
 	void CtoF77(x##_previous_hwc_set) (void) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_previous_hwc_set_Wrapper (); \
@@ -178,7 +178,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_PREVIOUS_HWC_SET)
 #define apifTRACE_NEXT_HWC_SET(x) \
 	void CtoF77(x##_next_hwc_set) (void) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_next_hwc_set_Wrapper (); \
@@ -202,7 +202,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 #define apifTRACE_USER_FUNCTION(x) \
 	void CtoF77(x##_user_function) (unsigned *enter) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_user_function_Wrapper (*enter, 0); \
@@ -214,7 +214,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION);
 #define apifTRACE_USER_FUNCTION_AT_LEVEL(x) \
   void CtoF77(x##_user_function_at_level) (unsigned *enter, unsigned *lvl) \
   { \
-      if (mpitrace_on) \
+      if (EXTRAE_ON()) \
       { \
           Backend_Enter_Instrumentation(); \
           Extrae_user_function_Wrapper(*enter, *lvl); \
@@ -226,7 +226,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_AT_LEVEL);
 #define apifTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
 	void CtoF77(x##_function_from_address) (extrae_type_t *type, extrae_value_t *address) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_function_from_address_Wrapper (*type, address); \
@@ -310,7 +310,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 #define apiTRACE_EVENT(x) \
 	void x##_event (extrae_type_t type, extrae_value_t value) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			unsigned one = 1; \
 			Backend_Enter_Instrumentation (); \
@@ -323,7 +323,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 #define apiTRACE_NEVENT(x) \
 	void x##_nevent (unsigned count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_N_Event_Wrapper (&count, types, values); \
@@ -335,7 +335,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENT)
 #define apiTRACE_EVENTANDCOUNTERS(x) \
 	void x##_eventandcounters (extrae_type_t type, extrae_value_t value) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			unsigned one = 1; \
 			Backend_Enter_Instrumentation (); \
@@ -348,7 +348,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENTANDCOUNTERS)
 #define apiTRACE_NEVENTANDCOUNTERS(x) \
 	void x##_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_N_Eventsandcounters_Wrapper (&count, types, values); \
@@ -391,7 +391,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_TRACING_MODE);
 #define apiTRACE_COUNTERS(x) \
 	void x##_counters(void) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_counters_Wrapper(); \
@@ -403,7 +403,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_COUNTERS);
 #define apiTRACE_PREVIOUS_HWC_SET(x) \
 	void x##_previous_hwc_set (void) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_previous_hwc_set_Wrapper (); \
@@ -415,7 +415,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_PREVIOUS_HWC_SET)
 #define apiTRACE_NEXT_HWC_SET(x) \
 	void x##_next_hwc_set (void) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_next_hwc_set_Wrapper (); \
@@ -440,7 +440,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 	UINT64 x##_user_function (unsigned enter) \
 	{ \
 		UINT64 r = 0; \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			r = Extrae_user_function_Wrapper (enter, 0); \
@@ -454,7 +454,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
   UINT64 x##_user_function_at_level (unsigned enter, unsigned lvl) \
   { \
       UINT64 r = 0; \
-      if (mpitrace_on) \
+      if (EXTRAE_ON()) \
       { \
           Backend_Enter_Instrumentation(); \
           r = Extrae_user_function_Wrapper(enter, lvl); \
@@ -467,7 +467,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_AT_LEVEL);
 #define apiTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
 	void x##_function_from_address (extrae_type_t type, extrae_value_t *address) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_function_from_address_Wrapper (type, address); \
@@ -519,7 +519,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 #define apiTRACE_EMIT_COMBINEDEVENTS(x) \
 	void x##_emit_CombinedEvents (struct extrae_UserCommunication *ptr) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_emit_CombinedEvents_Wrapper (ptr); \
@@ -531,7 +531,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 #define apiTRACE_RESUME_VIRTUAL_THREAD(x) \
 	void x##_resume_virtual_thread (unsigned u) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_Resume_virtual_thread_Wrapper (u); \
@@ -543,7 +543,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 #define apiTRACE_SUSPEND_VIRTUAL_THREAD(x) \
 	void x##_suspend_virtual_thread (void) \
 	{ \
-		if (mpitrace_on) \
+		if (EXTRAE_ON()) \
 		{ \
 			Backend_Enter_Instrumentation (); \
 			Extrae_Suspend_virtual_thread_Wrapper (); \
@@ -628,7 +628,7 @@ void Extrae_fini (void)
 INTERFACE_ALIASES_C(_event, Extrae_event, (extrae_type_t type, extrae_value_t value),void)
 void Extrae_event (extrae_type_t type, extrae_value_t value)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		unsigned one = 1;
 		Backend_Enter_Instrumentation ();
@@ -640,7 +640,7 @@ void Extrae_event (extrae_type_t type, extrae_value_t value)
 INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned count, extrae_type_t *types, extrae_value_t *values),void)
 void Extrae_nevent (unsigned count, extrae_type_t *types, extrae_value_t *values)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_N_Event_Wrapper (&count, types, values);
@@ -651,7 +651,7 @@ void Extrae_nevent (unsigned count, extrae_type_t *types, extrae_value_t *values
 INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (extrae_type_t type, extrae_value_t value),void)
 void Extrae_eventandcounters (extrae_type_t type, extrae_value_t value)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		unsigned one = 1;
 		Backend_Enter_Instrumentation ();
@@ -663,7 +663,7 @@ void Extrae_eventandcounters (extrae_type_t type, extrae_value_t value)
 INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned count, extrae_type_t *types, extrae_value_t *values),void)
 void Extrae_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values)
 {
- 	if (mpitrace_on)
+ 	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_N_Eventsandcounters_Wrapper (&count, types, values);
@@ -702,7 +702,7 @@ void Extrae_tracing_mode (unsigned long long burst_threshold)
 INTERFACE_ALIASES_C(_counters, Extrae_counters,(void),void)
 void Extrae_counters(void)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_counters_Wrapper();
@@ -713,7 +713,7 @@ void Extrae_counters(void)
 INTERFACE_ALIASES_C(_next_hwc_set, Extrae_next_hwc_set,(void),void)
 void Extrae_next_hwc_set (void)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_next_hwc_set_Wrapper ();
@@ -724,7 +724,7 @@ void Extrae_next_hwc_set (void)
 INTERFACE_ALIASES_C(_previous_hwc_set, Extrae_previous_hwc_set,(void),void)
 void Extrae_previous_hwc_set (void)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_previous_hwc_set_Wrapper ();
@@ -747,7 +747,7 @@ INTERFACE_ALIASES_C(_user_function, Extrae_user_function,(unsigned enter),UINT64
 UINT64 Extrae_user_function (unsigned enter)
 {
 	UINT64 r = 0;
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		r = Extrae_user_function_Wrapper (enter, 0);
@@ -760,7 +760,7 @@ INTERFACE_ALIASES_C(_user_function_at_level, Extrae_user_function_at_level,(unsi
 UINT64 Extrae_user_function_at_level (unsigned enter, unsigned lvl)
 {
 	UINT64 r = 0;
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		r = Extrae_user_function_Wrapper (enter, lvl);
@@ -772,7 +772,7 @@ UINT64 Extrae_user_function_at_level (unsigned enter, unsigned lvl)
 INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address,(extrae_type_t type, void *address),void)
 void Extrae_function_from_address (extrae_type_t type, void *address)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_function_from_address_Wrapper (type, address);
@@ -820,7 +820,7 @@ void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *ptr)
 {
 	unsigned nevents;
 
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		nevents = ptr->nEvents+ptr->nCommunications;
 		nevents += (ptr->UserFunction!=EXTRAE_USER_FUNCTION_NONE)?1:0;
@@ -835,7 +835,7 @@ void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *ptr)
 INTERFACE_ALIASES_C(_resume_virtual_thread,Extrae_resume_virtual_thread,(unsigned u),void)
 void Extrae_resume_virtual_thread (unsigned u)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_Resume_virtual_thread_Wrapper (u);
@@ -846,7 +846,7 @@ void Extrae_resume_virtual_thread (unsigned u)
 INTERFACE_ALIASES_C(_suspend_virtual_thread,Extrae_suspend_virtual_thread,(void),void)
 void Extrae_suspend_virtual_thread (void)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_Suspend_virtual_thread_Wrapper ();
@@ -921,7 +921,7 @@ void extrae_fini (void)
 INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(extrae_type_t *type, extrae_value_t *value),void)
 void extrae_event (extrae_type_t *type, extrae_value_t *value)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		unsigned one = 1;
 		Backend_Enter_Instrumentation ();
@@ -933,7 +933,7 @@ void extrae_event (extrae_type_t *type, extrae_value_t *value)
 INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned *count, extrae_type_t *types, extrae_value_t *values),void)
 void extrae_nevent (unsigned *count, extrae_type_t *types, extrae_value_t *values)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_N_Event_Wrapper (count, types, values);
@@ -972,7 +972,7 @@ void extrae_tracing_mode(unsigned long long *burst_threshold)
 INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (extrae_type_t *type, extrae_value_t *value),void)
 void extrae_eventandcounters (extrae_type_t *type, extrae_value_t *value)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		unsigned one = 1;
 		Backend_Enter_Instrumentation ();
@@ -984,7 +984,7 @@ void extrae_eventandcounters (extrae_type_t *type, extrae_value_t *value)
 INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned *count, extrae_type_t *types, extrae_value_t *values),void)
 void extrae_neventandcounters (unsigned *count, extrae_type_t *types, extrae_value_t *values)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_N_Eventsandcounters_Wrapper (count, types, values);
@@ -995,7 +995,7 @@ void extrae_neventandcounters (unsigned *count, extrae_type_t *types, extrae_val
 INTERFACE_ALIASES_F(_counters,_COUNTERS,extrae_counters, (void),void)
 void extrae_counters (void)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_counters_Wrapper ();
@@ -1006,7 +1006,7 @@ void extrae_counters (void)
 INTERFACE_ALIASES_F(_next_hwc_set,_NEXT_HWC_SET,extrae_next_hwc_set,(void),void)
 void extrae_next_hwc_set (void)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_next_hwc_set_Wrapper ();
@@ -1017,7 +1017,7 @@ void extrae_next_hwc_set (void)
 INTERFACE_ALIASES_F(_previous_hwc_set,_PREVIOUS_HWC_SET,extrae_previous_hwc_set,(void),void)
 void extrae_previous_hwc_set (void)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_previous_hwc_set_Wrapper ();
@@ -1039,7 +1039,7 @@ void extrae_set_options (int *options)
 INTERFACE_ALIASES_F(_user_function,_USER_FUNCTION,extrae_user_function,(unsigned *enter),void)
 void extrae_user_function (unsigned *enter)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_user_function_Wrapper (*enter, 0);
@@ -1050,7 +1050,7 @@ void extrae_user_function (unsigned *enter)
 INTERFACE_ALIASES_F(_user_function_at_level,_USER_FUNCTION_AT_LEVEL,extrae_user_function_at_level,(unsigned *enter, unsigned *lvl),void)
 void extrae_user_function_at_level (unsigned *enter, unsigned *lvl)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_user_function_Wrapper (*enter, *lvl);
@@ -1061,7 +1061,7 @@ void extrae_user_function_at_level (unsigned *enter, unsigned *lvl)
 INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_function_from_address,(extrae_type_t *type, void *address),void)
 void extrae_function_from_address (extrae_type_t *type, void *address)
 {
-	if (mpitrace_on)
+	if (EXTRAE_ON())
 	{
 		Backend_Enter_Instrumentation ();
 		Extrae_function_from_address_Wrapper (*type, address);

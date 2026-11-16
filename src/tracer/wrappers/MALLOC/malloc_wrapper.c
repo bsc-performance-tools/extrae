@@ -227,8 +227,7 @@ static void xtr_mem_tracked_allocs_replace (const void *p1, void *p2, size_t s)
 void *malloc (size_t s)
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
                             Extrae_get_trace_malloc()            &&
                             Extrae_get_trace_malloc_allocate()   &&
                             s >= Extrae_get_trace_malloc_allocate_threshold();
@@ -294,8 +293,7 @@ void free (void *p)
 	__in_free ++;
 	__in_free_ptr = p;
 
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-	                    mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
 	                    Extrae_get_trace_malloc()            &&
 			    (__in_free == 1);
 	int present = FALSE;
@@ -366,8 +364,7 @@ void *calloc (size_t nmemb, size_t size)
 {
 	__in_calloc_depth++;
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
                             Extrae_get_trace_malloc()			&&
                             Extrae_get_trace_malloc_allocate()   &&
                             (nmemb*size) >= Extrae_get_trace_malloc_allocate_threshold();
@@ -450,8 +447,7 @@ void *calloc (size_t nmemb, size_t size)
 void *realloc (void *p, size_t s)
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
                             Extrae_get_trace_malloc()            &&
                             Extrae_get_trace_malloc_allocate()   &&
                             s >= Extrae_get_trace_malloc_allocate_threshold();
@@ -506,8 +502,7 @@ void *realloc (void *p, size_t s)
 int posix_memalign(void **memptr, size_t alignment, size_t size)
 {
   int res = 0;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_ON()                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
@@ -585,8 +580,7 @@ static int get_memkind_partition(memkind_t kind)
 void *memkind_malloc(memkind_t kind, size_t size)
 {
   void *res = NULL;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_ON()                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
@@ -634,8 +628,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
 void *memkind_calloc(memkind_t kind, size_t num, size_t size)
 {
   void *res = NULL;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_ON()                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       (num*size) >= Extrae_get_trace_malloc_allocate_threshold();
@@ -683,8 +676,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
 void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 {
   void *res = NULL;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_ON()                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
@@ -737,8 +729,7 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size_t size)
 {
   int res = 0;
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_ON()                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
@@ -785,8 +776,7 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
 
 void memkind_free(memkind_t kind, void *ptr)
 {
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_ON()                          &&
                       Extrae_get_trace_malloc();
   int present = FALSE;
 
@@ -842,8 +832,7 @@ void *
 kmpc_malloc( size_t size )
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-	                    mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
 	                    Extrae_get_trace_malloc()            &&
 	                    Extrae_get_trace_malloc_allocate()   &&
 	                    size >= Extrae_get_trace_malloc_allocate_threshold();
@@ -896,8 +885,7 @@ void *
 kmpc_aligned_malloc( size_t size, size_t alignment )
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-	                    mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
 	                    Extrae_get_trace_malloc()            &&
 	                    Extrae_get_trace_malloc_allocate()   &&
 	                    size >= Extrae_get_trace_malloc_allocate_threshold();
@@ -950,8 +938,7 @@ void *
 kmpc_calloc( size_t nelem, size_t elsize )
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-	                    mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
 	                    Extrae_get_trace_malloc()            &&
 	                    Extrae_get_trace_malloc_allocate()   &&
 	                    (nelem*elsize) >= Extrae_get_trace_malloc_allocate_threshold();
@@ -1004,8 +991,7 @@ void *
 kmpc_realloc( void *ptr, size_t size )
 {
 	void *res;
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-	                    mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
 	                    Extrae_get_trace_malloc()            &&
 	                    Extrae_get_trace_malloc_allocate()   &&
 	                    size >= Extrae_get_trace_malloc_allocate_threshold();
@@ -1063,8 +1049,7 @@ kmpc_realloc( void *ptr, size_t size )
 void
 kmpc_free ( void *ptr )
 {
-	int canInstrument = EXTRAE_INITIALIZED()                 &&
-	                    mpitrace_on                          &&
+	int canInstrument = EXTRAE_ON()                          &&
 	                    Extrae_get_trace_malloc();
 	int present = FALSE;
 

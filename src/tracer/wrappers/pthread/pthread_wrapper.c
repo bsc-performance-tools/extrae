@@ -44,6 +44,7 @@
 #include "wrapper.h"
 #include "trace_macros.h"
 #include "pthread_probe.h"
+#include "xalloc.h"
 
 //#define DEBUG
 //#define DEBUG_MUTEX
@@ -207,26 +208,26 @@ static void GetpthreadHookPoints (int rank)
 
 #if defined(PIC)
 
+/* Allocated by the creator in pthread_create and owned (freed) by the new
+   thread in pthread_create_hook */
 struct pthread_create_info
 {
 	int pthreadID;
 	void *(*routine)(void*);
 	void *arg;
-	pthread_barrier_t barrier;
 };
 
 static void * pthread_create_hook (void *p1)
 {
-	struct pthread_create_info *i = (struct pthread_create_info*)p1;
-	void *(*routine)(void*) = i->routine;
-	void *arg = i->arg;
+	struct pthread_create_info *my_start_info = (struct pthread_create_info*)p1;
+	void *(*routine)(void*) = my_start_info->routine;
+	void *arg = my_start_info->arg;
 	void *res = 0;
 
-	Backend_SetpThreadIdentifier (i->pthreadID);
+	Backend_SetpThreadIdentifier (my_start_info->pthreadID);
 	Backend_Enter_Instrumentation ();
 
-	/* Wake up the calling thread */
-	pthread_barrier_wait_real(&(i->barrier));
+	xfree (my_start_info);
 
 	Probe_pthread_Function_Entry (routine);
 
@@ -252,7 +253,8 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 {
 	static int pthread_library_depth = 0;
 	int res = 0;
-	struct pthread_create_info i;
+	struct pthread_create_info *child_start_info = NULL;
+	int child_pthreadID = 0;
 
 	Backend_Enter_Instrumentation();
 
@@ -284,10 +286,10 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 
 			Probe_pthread_Create_Entry(p3);
 
-			i.arg = p4;
-			i.routine = p3;
-			i.pthreadID = Backend_getNumberOfThreads();
-			pthread_barrier_init(&(i.barrier), NULL, 2);
+			child_start_info = (struct pthread_create_info *) xmalloc (sizeof (*child_start_info));
+			child_start_info->arg = p4;
+			child_start_info->routine = p3;
+			child_start_info->pthreadID = Backend_getNumberOfThreads();
 
 			/*
 			 * XXX Should this be Backend_getMaximumOfThreads()? If we
@@ -295,30 +297,21 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 			 * and then decreased them, we will end up with a line with mixed
 			 * semantics (thread&stream).
 			 */
-			Backend_ChangeNumberOfThreads(i.pthreadID+1);
+			Backend_ChangeNumberOfThreads(child_start_info->pthreadID+1);
+
+			child_pthreadID = child_start_info->pthreadID;
 
 			Backend_Leave_Instrumentation();
-			res = pthread_create_real(p1, p2, pthread_create_hook, (void*) &i);
+			res = pthread_create_real(p1, p2, pthread_create_hook, (void*) child_start_info);
 			Backend_Enter_Instrumentation();
 
-			if (0 == res)
-			{
-				Backend_SetpThreadID(p1, i.pthreadID);
-
-				/* Wait for the new thread to copy data from the structure 'i'
-				 * before continuing (and potentially destroying 'i' by the end
-				 * of this function). This synchronization was done before with
-				 * pthread_cond_signal/wait, but there were issues here 
-				 * calling pthread_cond_destroy. Now we rely on pthread_barrier_wait, 
-				 * but this might not be always available, and we currently turn off 
-				 * pthread tracing support if this is not available. If we find
-				 * systems that can't use this, consider changing this synchronization
-				 * into a semaphore (sem_wait).
-				 */
-				pthread_barrier_wait_real(&(i.barrier));
+			if (0 == res){
+				Backend_SetpThreadID(p1, child_pthreadID);
+			}
+			else{
+				xfree (child_start_info); /* No child was created */
 			}
 
-			pthread_barrier_destroy(&(i.barrier));
 			Probe_pthread_Create_Exit();
 			
 			pthread_library_depth--;
@@ -1051,7 +1044,6 @@ void __attribute__ ((constructor)) pthread_tracing_init(void);
 void pthread_tracing_init (void)
 {
 	GetpthreadHookPoints (0);
-	Backend_CreatepThreadIdentifier ();
 }
 
 

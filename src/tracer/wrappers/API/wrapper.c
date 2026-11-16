@@ -447,7 +447,18 @@ int Extrae_getAppendingEventsToGivenPID (int *pid)
 
 static int extrae_initialized = FALSE;
 
-int EXTRAE_ON (void) { return mpitrace_on && extrae_initialized; }
+static int Backend_isThreadTraceable (void)
+{
+/* All these define checks are needed because of --enable-pthread-support-in-all-libs */
+#if defined(PTHREAD_SUPPORT) && !defined(OMP_SUPPORT) && \
+    !defined(NEW_OMP_SUPPORT) && !defined(SMPSS_SUPPORT)
+	return Backend_ispThreadIdentified();
+#else
+	return TRUE;
+#endif
+}
+
+int EXTRAE_ON (void) { return mpitrace_on && extrae_initialized && Backend_isThreadTraceable(); }
 
 int EXTRAE_INITIALIZED(void)
 { return extrae_initialized; }
@@ -1638,6 +1649,12 @@ static pthread_mutex_t pThreadIdentifier_mtx;
 static void Extrae_reallocate_pthread_info (int new_num_threads)
 {
 	pThreads = xrealloc(pThreads, new_num_threads * sizeof(pthread_t));
+
+	/* New slots stay 0 (no pthread mapped) until Backend_SetpThreadID fills them */
+	if ((unsigned) new_num_threads > numpThreads)
+		xmemset (&pThreads[numpThreads], 0,
+		  (new_num_threads - numpThreads) * sizeof(pthread_t));
+
 	numpThreads = new_num_threads;
 }
 
@@ -1698,25 +1715,46 @@ void Backend_Flush_pThread (pthread_t t)
 	}
 }
 
-void Backend_CreatepThreadIdentifier (void)
+static pthread_once_t pThreadIdentifier_once = PTHREAD_ONCE_INIT;
+
+static void Extrae_create_pthread_identifier_key (void)
 {
 	pthread_key_create (&pThreadIdentifier, NULL);
 	pthread_mutex_init (&pThreadIdentifier_mtx, NULL);
 }
 
-void Backend_SetpThreadIdentifier (int ID)
+/* Create the key only once per process. A forked child inherits them, so it must not be created again. */
+static void Backend_CreatepThreadIdentifier (void)
 {
-	pthread_setspecific (pThreadIdentifier, (void*)((long) ID));
+	pthread_once (&pThreadIdentifier_once, Extrae_create_pthread_identifier_key);
 }
 
+/* The key stores ID+1, so that NULL means "not identified" instead of index 0 */
+void Backend_SetpThreadIdentifier (int ID)
+{
+	pthread_setspecific (pThreadIdentifier, (void*)((long) ID + 1));
+}
+
+int Backend_ispThreadIdentified (void)
+{
+	return pthread_getspecific (pThreadIdentifier) != NULL;
+}
+
+/* Returns this thread's index, or 0 if it has not been identified */
 int Backend_GetpThreadIdentifier (void)
 {
-	return (int) ((long)pthread_getspecific (pThreadIdentifier));
+	long value = (long) pthread_getspecific (pThreadIdentifier);
+
+	return (value != 0) ? (int) (value - 1) : 0;
 }
 
 void Backend_NotifyNewPthread (void)
 {
 	int numthreads;
+
+	/* Threads that already have an index keep it */
+	if (Backend_ispThreadIdentified())
+		return;
 
 	pthread_mutex_lock (&pThreadIdentifier_mtx);
 
@@ -1800,19 +1838,22 @@ Backend_preInitialize_modules(int me)
 void
 Backend_preInitialize_pthreads(int me, const char *config_file)
 {
+#if defined(PTHREAD_SUPPORT)
+	Backend_CreatepThreadIdentifier();
+
+	/* Annotate myself: the thread initializing Extrae is index 0 */
+	Backend_SetpThreadIdentifier (0);
+
+	pthread_t self = pthread_self();
+	Extrae_reallocate_pthread_info(1);
+	Backend_SetpThreadID(&self, 0);
+#endif // PTHREAD_SUPPORT
+
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_preInitialize_pthreads"
 	         " (rank=%d, size=%d, config_file=%s)\n", THREADID, me, world_size,
 	         config_file);
 #endif
-#if defined(PTHREAD_SUPPORT)
-	Backend_CreatepThreadIdentifier();
-
-	/* Annotate myself */
-	pthread_t self = pthread_self();
-	Extrae_reallocate_pthread_info(1);
-	Backend_SetpThreadID(&self, 0);
-#endif // PTHREAD_SUPPORT
 }
 
 void

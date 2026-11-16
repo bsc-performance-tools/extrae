@@ -728,7 +728,7 @@ static void extrae_intel_pebs_handler_load (int threadid)
 		prev_head[threadid][LOAD_INDEX] = extrae_perf_mmap_read_pebs (_mmap, 
 		  prev_head[threadid][LOAD_INDEX], LOAD_SAMPLE_TYPE, &ip, &addr, &weight, &data_src);
 
-		if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
+		if (tracejant && EXTRAE_ON() && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
 		{
 			unsigned memlevel, memhitormiss;
 			unsigned tlblevel, tlbhitormiss;
@@ -826,7 +826,7 @@ static void extrae_intel_pebs_handler_store (int threadid)
 		prev_head[threadid][STORE_INDEX] = extrae_perf_mmap_read_pebs (_mmap,
 		  prev_head[threadid][STORE_INDEX], STORE_SAMPLE_TYPE, &ip, &addr, NULL, &data_src);
 
-		if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
+		if (tracejant && EXTRAE_ON() && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
 		{
 			uint64_t cnt;
 			unsigned memlevel, memhitormiss;
@@ -870,7 +870,7 @@ static void extrae_intel_pebs_handler_load_l3m (int threadid)
 		prev_head[threadid][LOAD_L3M_INDEX] = extrae_perf_mmap_read_pebs (_mmap,
 		  prev_head[threadid][LOAD_L3M_INDEX], LOAD_L3M_SAMPLE_TYPE, &ip, &addr, NULL, NULL);
 	
-		if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
+		if (tracejant && EXTRAE_ON() && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
 		{
 			UINT64 t = Clock_getCurrentTime_nstore();
 			SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_LD_EV, ip, addr);

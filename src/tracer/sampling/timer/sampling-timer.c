@@ -65,7 +65,7 @@ static struct sigaction signalaction;
 
 void Extrae_SamplingHandler (void* address)
 {
-	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	if (tracejant && EXTRAE_ON() && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
 		Backend_setInSampling(THREADID, TRUE);
 		UINT64 temps = Clock_getCurrentTime_nstore();
@@ -77,7 +77,7 @@ void Extrae_SamplingHandler (void* address)
 
 void Extrae_SamplingHandler_PAPI (void* address)
 {
-	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	if (tracejant && EXTRAE_ON() && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
 		Backend_setInSampling(THREADID, TRUE);
 		UINT64 temps = Clock_getCurrentTime_nstore();
