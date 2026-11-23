@@ -42,7 +42,8 @@
 #if MPI_SUPPORTS_MPI_IO
 
 void PMPI_File_open_Fortran_Wrapper (MPI_Fint *comm, char *filename,
-	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len);
+	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror,
+	size_t filename_len);
 
 void PMPI_File_close_Fortran_Wrapper (MPI_File *fh, MPI_Fint *ierror);
 

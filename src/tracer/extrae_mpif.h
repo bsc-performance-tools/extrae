@@ -390,7 +390,7 @@ void CtoF77 (mpi_iexscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 
 #if defined(MPI_SUPPORTS_MPI_IO)
 void CtoF77 (mpi_file_open) (MPI_Fint *comm, char *filename, MPI_Fint *amode,
-	MPI_Fint *info, MPI_File *fh, MPI_Fint *len);
+	MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror, size_t filename_len);
 
 void CtoF77 (mpi_file_close) (MPI_File *fh, MPI_Fint *ierror);
 
@@ -889,7 +889,7 @@ void CtoF77 (pmpi_iexscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 
 #if (MPI_SUPPORTS_MPI_IO)
 void CtoF77 (pmpi_file_open) (MPI_Fint *comm, char *filename, MPI_Fint *amode,
-	MPI_Fint *info, MPI_File *fh, MPI_Fint *len);
+	MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror, size_t filename_len);
 
 void CtoF77 (pmpi_file_close) (MPI_File *fh, MPI_Fint *ierror);
 

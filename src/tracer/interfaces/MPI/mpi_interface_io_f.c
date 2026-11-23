@@ -119,29 +119,35 @@
 /******************************************************************************
  ***  MPI_File_open
  ******************************************************************************/
-#if 0 
-/* Instrumentation of mpi_file_open is buggy because conversion from Fortran/string
-into C/string is non-direct. ATM, this routine is not instrumented */
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_open__,mpi_file_open_,MPI_FILE_OPEN,mpi_file_open, (MPI_Fint *comm, char *filename, MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len))
+MPI_F_SYMS(mpi_file_open__,mpi_file_open_,MPI_FILE_OPEN,mpi_file_open, (MPI_Fint *comm, char *filename, MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror, size_t filename_len))
 
 void NAME_ROUTINE_F(mpi_file_open) (MPI_Fint *comm, char *filename,
-	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len)
+	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror,
+	size_t filename_len)
 #else
 void NAME_ROUTINE_C2F(mpi_file_open) (MPI_Fint *comm, char *filename,
-	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len)
+	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror,
+	size_t filename_len)
 #endif
 {
+	Backend_Enter_Instrumentation ();
+	DLB(DLB_MPI_File_open_F_enter, comm, filename, amode, info, fh, ierror);
+
 	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
-		PMPI_File_open_Fortran_Wrapper (comm, filename, amode, info, fh, len);
+		PMPI_File_open_Fortran_Wrapper (comm, filename, amode, info, fh, ierror,
+		    filename_len);
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_file_open) (comm, filename, amode, info, fh, len);
+		CtoF77 (pmpi_file_open) (comm, filename, amode, info, fh, ierror,
+		    filename_len);
+
+	DLB(DLB_MPI_File_open_F_leave);
+	Backend_Leave_Instrumentation ();
 }
-#endif /* Buggy mpi_file_open */
 
 /******************************************************************************
  ***  MPI_File_close

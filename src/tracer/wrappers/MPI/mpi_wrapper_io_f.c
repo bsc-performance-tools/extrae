@@ -91,12 +91,12 @@
  **********************      MPIIO      **********************
  *************************************************************/
 void PMPI_File_open_Fortran_Wrapper (MPI_Fint *comm, char *filename, MPI_Fint *amode,
-	MPI_Fint *info, MPI_File *fh, MPI_Fint *len)
+	MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror, size_t filename_len)
 {
-  iotimer_t begin_time = LAST_READ_TIME;
+    iotimer_t begin_time = LAST_READ_TIME;
 	TRACE_MPIEVENT (begin_time, MPI_FILE_OPEN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-  CtoF77 (pmpi_file_open) (comm, filename, amode, info, fh, len);
-  iotimer_t current_time = TIME;
+    CtoF77 (pmpi_file_open) (comm, filename, amode, info, fh, ierror, filename_len);
+    iotimer_t current_time = TIME;
 	xtr_stats_MPI_update_other(begin_time, current_time);
 	TRACE_MPIEVENT (current_time, MPI_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 

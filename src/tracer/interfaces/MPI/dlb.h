@@ -588,6 +588,10 @@ void DLB_MPI_Sendrecv_replace_leave (void)__attribute__((weak));
 
 /***  Fortran  ***/
 
+void DLB_MPI_File_open_F_enter (MPI_Fint *comm, char *filename, MPI_Fint *amode,
+	MPI_Fint *info, MPI_File *fh, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_open_F_leave (void)__attribute__((weak));
+
 void DLB_MPI_File_close_F_enter (MPI_File *fh, MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_File_close_F_leave (void)__attribute__((weak));
 
