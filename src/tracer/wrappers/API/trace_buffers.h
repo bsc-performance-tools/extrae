@@ -24,11 +24,13 @@
 #ifndef __TRACE_BUFFERS_H__
 #define __TRACE_BUFFERS_H__
 
+#include <pthread.h>
+
 #include "buffers.h"
 #include "clock.h"
 #include "signals.h"
 
-/* Keep all buffer-related values for one tracing thread ID together. */
+/* Keep each thread's tracing data together. */
 typedef struct
 {
 	Buffer_t *tracing_buffer;
@@ -37,20 +39,29 @@ typedef struct
 #if defined(SAMPLING_SUPPORT)
 	Buffer_t *sampling_buffer;
 #endif
+	UINT64 last_read_clock;
+	int in_sampling;
+	int mpi_deepness;
+	int current_trace_mode;
+	int future_trace_mode;
+	int pending_trace_mode_change;
+	int first_trace_mode;
+	pthread_t pthread_id;
+	char *thread_name;
 } Extrae_thread_trace_data_t;
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 /* Return the tracing record for this ID, or NULL if it is unavailable. */
-Extrae_thread_trace_data_t *Extrae_get_thread_trace_data (unsigned thread_id);
+Extrae_thread_trace_data_t *get_thread_trace_data (unsigned thread_id);
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 #if defined(__cplusplus)
 }
 #endif
 
-#define TRACING_BUFFER(tid) (Extrae_get_thread_trace_data(tid)->tracing_buffer)
-#define SAMPLING_BUFFER(tid) (Extrae_get_thread_trace_data(tid)->sampling_buffer)
+#define TRACING_BUFFER(tid) (get_thread_trace_data(tid)->tracing_buffer)
+#define SAMPLING_BUFFER(tid) (get_thread_trace_data(tid)->sampling_buffer)
 
 #define BUFFER_INSERT(tid, buffer, event)                   \
 {                                                           \

@@ -26,13 +26,7 @@
 
 #define THREAD_INFO_NAME_LEN 256
 
-typedef struct Extrae_thread_info
-{
-	char ThreadName[THREAD_INFO_NAME_LEN];
-} Extrae_thread_info_t;
-
 void Extrae_allocate_thread_CleanUp (void);
-void Extrae_allocate_thread_info (unsigned nthreads);
 void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads);
 void Extrae_set_thread_name (unsigned thread, char *name);
 char *Extrae_get_thread_name (unsigned thread);

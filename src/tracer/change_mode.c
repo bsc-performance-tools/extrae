@@ -36,12 +36,6 @@
 # include "burst_mode.h"
 #endif
 
-int *MPI_Deepness              = NULL;
-int *Current_Trace_Mode        = NULL;
-static int *Future_Trace_Mode         = NULL;
-int *Pending_Trace_Mode_Change = NULL;
-static int *First_Trace_Mode          = NULL;
-
 /* Default configuration variables */
 int Starting_Trace_Mode = TRACE_MODE_DETAIL;
 
@@ -63,38 +57,19 @@ static int is_ValidMode (int mode)
 	}
 }
 
-void Trace_Mode_CleanUp (void)
-{
-	xfree (MPI_Deepness);
-	xfree (Current_Trace_Mode);
-	xfree (Future_Trace_Mode);
-	xfree (Pending_Trace_Mode_Change);
-	xfree (First_Trace_Mode);
-}
-
 int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 {
-	int i, size;
+	int i;
 
-	size = sizeof(int) * new_num_threads;
-
-	MPI_Deepness = (int *)xrealloc(MPI_Deepness, size);
-
-	Current_Trace_Mode = (int *)xrealloc(Current_Trace_Mode, size);
-
-	Future_Trace_Mode = (int *)xrealloc(Future_Trace_Mode,size);
-
-	Pending_Trace_Mode_Change = (int *)xrealloc(Pending_Trace_Mode_Change, size);
-
-	First_Trace_Mode = (int *)xrealloc(First_Trace_Mode, size);
-
+	/* Blocks already exist; only initialize the newly added threads. */
 	for (i=old_num_threads; i<new_num_threads; i++)
 	{
-		MPI_Deepness[i] = 0;
-		Current_Trace_Mode[i] = Starting_Trace_Mode;
-		Future_Trace_Mode[i] = Starting_Trace_Mode;
-		Pending_Trace_Mode_Change[i] = FALSE;
-		First_Trace_Mode[i] = TRUE;
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(i);
+		data->mpi_deepness = 0;
+		data->current_trace_mode = Starting_Trace_Mode;
+		data->future_trace_mode = Starting_Trace_Mode;
+		data->pending_trace_mode_change = FALSE;
+		data->first_trace_mode = TRUE;
 	}
 
 	return TRUE;
@@ -102,7 +77,7 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 
 int Trace_Mode_FirstMode (unsigned thread)
 {
-	return First_Trace_Mode[thread];
+	return get_thread_trace_data(thread)->first_trace_mode;
 }
 
 int Trace_Mode_Initialize (int num_threads)
@@ -136,11 +111,12 @@ int Trace_Mode_Initialize (int num_threads)
 
 void Trace_Mode_Change (int tid, iotimer_t time)
 {
-	if (Pending_Trace_Mode_Change[tid] || First_Trace_Mode[tid])
+	Extrae_thread_trace_data_t *data = get_thread_trace_data(tid);
+	if (data->pending_trace_mode_change || data->first_trace_mode)
 	{
-		if (Future_Trace_Mode[tid] != Current_Trace_Mode[tid] || First_Trace_Mode[tid])
+		if (data->future_trace_mode != data->current_trace_mode || data->first_trace_mode)
 		{
-			switch(Future_Trace_Mode[tid])
+			switch(data->future_trace_mode)
 			{
 				case TRACE_MODE_DETAIL:
 #if defined(HAVE_BURST)
@@ -153,11 +129,11 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 				default:
 					break;
 			}
-			Current_Trace_Mode[tid] = Future_Trace_Mode[tid];
-			TRACE_EVENT (time, TRACING_MODE_EV, Current_Trace_Mode[tid]);
+			data->current_trace_mode = data->future_trace_mode;
+			TRACE_EVENT (time, TRACING_MODE_EV, data->current_trace_mode);
 		}
-		Pending_Trace_Mode_Change[tid] = FALSE;
-		First_Trace_Mode[tid] = FALSE;
+		data->pending_trace_mode_change = FALSE;
+		data->first_trace_mode = FALSE;
 	}
 }
 
@@ -174,8 +150,9 @@ Trace_mode_switch(void)
 	 */
 	for (i=0; i<Backend_getNumberOfThreads(); i++)
 	{
-		Pending_Trace_Mode_Change[i] = TRUE;
-		Future_Trace_Mode[i] = (Current_Trace_Mode[i] == TRACE_MODE_DETAIL)?TRACE_MODE_BURST:TRACE_MODE_DETAIL;
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(i);
+		data->pending_trace_mode_change = TRUE;
+		data->future_trace_mode = (data->current_trace_mode == TRACE_MODE_DETAIL)?TRACE_MODE_BURST:TRACE_MODE_DETAIL;
 	}
 }
 
@@ -216,10 +193,11 @@ void TMODE_setCurrent (unsigned long long burst_threshold)
 	 */
 	for (int i=0; i<Backend_getNumberOfThreads(); i++)
 	{
-		Future_Trace_Mode[i] = new_mode;
-		if (Current_Trace_Mode[i] != Future_Trace_Mode[i]) 
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(i);
+		data->future_trace_mode = new_mode;
+		if (data->current_trace_mode != data->future_trace_mode)
 		{
-			Pending_Trace_Mode_Change[i] = TRUE;
+			data->pending_trace_mode_change = TRUE;
 		}
 	}
 #endif /* HAVE_BURST */

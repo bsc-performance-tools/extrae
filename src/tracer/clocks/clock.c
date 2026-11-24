@@ -34,6 +34,7 @@
 #include "xalloc.h"
 
 #include "clock.h"
+#include "trace_buffers.h"
 
 #include <posix_clock.h>
 #include <rusage_clock.h>
@@ -73,7 +74,6 @@
 # error "Unhandled clock type"
 #endif
 
-static UINT64 *_extrae_last_read_clock = NULL;
 static unsigned ClockType = REAL_CLOCK;
 iotimer_t (*get_clock)();
 
@@ -90,7 +90,7 @@ unsigned Clock_getType (void)
 /* We obtain the last read time */
 UINT64 Clock_getLastReadTime (unsigned thread)
 {
-	return _extrae_last_read_clock[thread];
+	return get_thread_trace_data(thread)->last_read_clock;
 }
 
 /* We obtain the current time, but we don't store it in the last read time */
@@ -104,26 +104,14 @@ UINT64 Clock_getCurrentTime_nstore (void)
 UINT64 Clock_getCurrentTime (unsigned thread)
 {
 	UINT64 tmp = Clock_getCurrentTime_nstore ();
-	_extrae_last_read_clock[thread] = tmp;
+	get_thread_trace_data(thread)->last_read_clock = tmp;
 	return tmp;
 }
 
-void Clock_AllocateThreads (unsigned numthreads)
-{
-	_extrae_last_read_clock = (UINT64*) xrealloc (_extrae_last_read_clock,
-		sizeof(UINT64)*numthreads);
-}
-
-void Clock_CleanUp (void)
-{
-	xfree (_extrae_last_read_clock);
-}
-
-void Clock_Initialize (unsigned numthreads)
+void Clock_Initialize (void)
 {
 	void (*init_clock)();
 
-	Clock_AllocateThreads (numthreads);
 	if (ClockType == REAL_CLOCK)
 	{
 		char *use_posix_clock = NULL;

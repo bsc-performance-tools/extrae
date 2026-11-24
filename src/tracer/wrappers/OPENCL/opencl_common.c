@@ -412,7 +412,7 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 {
 	unsigned u;
 	int threadid = CommandQueues[idx].threadid;
-	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(threadid);
+	Extrae_thread_trace_data_t *data = get_thread_trace_data(threadid);
 	unsigned remainingevts = Buffer_RemainingEvents(data->tracing_buffer);
 	cl_ulong last_time = 0;
 

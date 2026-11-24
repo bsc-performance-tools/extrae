@@ -530,7 +530,7 @@ static void Extrae_BG_gettopology (int enter, UINT64 timestamp)
 void xtr_AnnotateCPU (int thread_id, UINT64 timestamp, int force_emission_now)
 {
 #if defined(HAVE_SCHED_GETCPU)
-	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread_id);
+	Extrae_thread_trace_data_t *data = get_thread_trace_data(thread_id);
 	iotimer_t last_emission = data->last_cpu_event_time;
 
 #if defined(DEBUG)
@@ -546,7 +546,7 @@ void xtr_AnnotateCPU (int thread_id, UINT64 timestamp, int force_emission_now)
 				 ((timestamp - last_emission) > MinimumCPUEventTime) ) ) 
 	{
 		int cpu = sched_getcpu();
-		Extrae_thread_trace_data_t *current_data = Extrae_get_thread_trace_data(THREADID);
+		Extrae_thread_trace_data_t *current_data = get_thread_trace_data(THREADID);
 
 		if (cpu != current_data->last_cpu_id || AlwaysEmitCPUEvent)
 		{
@@ -1413,7 +1413,7 @@ int remove_temporal_files(void)
 }
 
 /* Find the record directly; adding blocks does not move existing records. */
-Extrae_thread_trace_data_t *Extrae_get_thread_trace_data (unsigned thread_id)
+Extrae_thread_trace_data_t *get_thread_trace_data (unsigned thread_id)
 {
 	/* Find which block contains this thread ID. */
 	unsigned block = thread_id >> THREAD_DATA_BLOCK_SHIFT;
@@ -1439,7 +1439,7 @@ Extrae_thread_trace_data_t *Extrae_get_thread_trace_data (unsigned thread_id)
 static int Allocate_buffer_and_file (int thread_id, int forked)
 {
 	/* This thread's block must exist before we create its buffers. */
-	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread_id);
+	Extrae_thread_trace_data_t *data = get_thread_trace_data(thread_id);
 	char tmp_file[TMP_NAME_LENGTH];
 	unsigned initialTASKID = Extrae_get_initial_TASKID();
 	char hostname[1024];
@@ -1641,31 +1641,17 @@ static int getnumProcessors (void)
   created and instrumented 
 */
 
-static pthread_t *pThreads = NULL;
-static unsigned numpThreads = 0;
 static pthread_key_t pThreadIdentifier;
 static pthread_mutex_t pThreadIdentifier_mtx;
 
-static void Extrae_reallocate_pthread_info (int new_num_threads)
-{
-	pThreads = xrealloc(pThreads, new_num_threads * sizeof(pthread_t));
-
-	/* New slots stay 0 (no pthread mapped) until Backend_SetpThreadID fills them */
-	if ((unsigned) new_num_threads > numpThreads)
-		xmemset (&pThreads[numpThreads], 0,
-		  (new_num_threads - numpThreads) * sizeof(pthread_t));
-
-	numpThreads = new_num_threads;
-}
-
 void Backend_SetpThreadID (pthread_t *t, int threadid)
 {
-	pThreads[threadid] = *t;
+	get_thread_trace_data(threadid)->pthread_id = *t;
 }
 
 pthread_t Backend_GetpThreadID (int threadid)
 {
-	return pThreads[threadid];
+	return get_thread_trace_data(threadid)->pthread_id;
 }
 
 int Backend_ispThreadFinished (int threadid)
@@ -1677,42 +1663,33 @@ void Backend_Flush_pThread (pthread_t t)
 {
 	unsigned u;
 
+	/* Prevent cleanup from freeing thread data while we scan and flush its buffers. */
+	pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 	{
-		if (pThreads[u] == t)
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(u);
+		if (data != NULL && data->pthread_id == t)
 		{
-			pThreads[u] = (pthread_t)0; // This slot won't be used in the future
-
-			// Protect race condition with the master thread flushing the buffers at
-			// the end of this pthread and the process
-			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-
-			/* Process cleanup may already have freed the records. */
-			Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(u);
-			if (data != NULL)
+			data->pthread_id = (pthread_t)0; // This slot won't be used in the future
+			if (data->tracing_buffer != NULL)
 			{
-				if (data->tracing_buffer != NULL)
-				{
-					Buffer_Flush(data->tracing_buffer);
-					Backend_Finalize_close_mpits (getpid(), u, FALSE);
+				Buffer_Flush(data->tracing_buffer);
+				Backend_Finalize_close_mpits (getpid(), u, FALSE);
 
-					Buffer_Free (data->tracing_buffer);
-					data->tracing_buffer = NULL;
-				}
-#if defined(SAMPLING_SUPPORT)
-				if (data->sampling_buffer != NULL)
-				{
-					Buffer_Free (data->sampling_buffer);
-					data->sampling_buffer = NULL;
-				}
-#endif
+				Buffer_Free (data->tracing_buffer);
+				data->tracing_buffer = NULL;
 			}
-
-			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
-
+#if defined(SAMPLING_SUPPORT)
+			if (data->sampling_buffer != NULL)
+			{
+				Buffer_Free (data->sampling_buffer);
+				data->sampling_buffer = NULL;
+			}
+#endif
 			break;
 		}
 	}
+	pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 }
 
 static pthread_once_t pThreadIdentifier_once = PTHREAD_ONCE_INIT;
@@ -1845,7 +1822,6 @@ Backend_preInitialize_pthreads(int me, const char *config_file)
 	Backend_SetpThreadIdentifier (0);
 
 	pthread_t self = pthread_self();
-	Extrae_reallocate_pthread_info(1);
 	Backend_SetpThreadID(&self, 0);
 #endif // PTHREAD_SUPPORT
 
@@ -2053,11 +2029,6 @@ Backend_initialize_events(int me, int forked)
 		TRACE_EVENT(ApplBegin_Time, CPU_EVENT_INTERVAL_EV, MinimumCPUEventTime);
 
 		/* Initialize Tracing Mode related variables */
-		if (forked)
-		{
-			Trace_Mode_CleanUp();
-		}
-
 		Trace_Mode_Initialize(get_maximum_NumOfThreads());
 		Trace_Mode_Change(0, ApplBegin_Time);
 
@@ -2124,6 +2095,9 @@ Backend_preInitialize(int me, int world_size, const char *config_file, int forke
 
 	Backend_preInitialize_env(me, world_size, forked, &runningInDynInst);
 
+	/* Prepare at least one record before pthread setup writes thread 0's data. */
+	Allocate_thread_trace_blocks (1);
+
 #if defined(STANDALONE)
 	Backend_preInitialize_modules(me);
 #else
@@ -2151,9 +2125,10 @@ Backend_preInitialize(int me, int world_size, const char *config_file, int forke
 	{
 		/* Allocate thread info structure once the number of threads is known
 		   (it is set in Backend_preInitialize_libraries/_modules) */
-		Extrae_allocate_thread_info(get_maximum_NumOfThreads());
+		Extrae_reallocate_thread_info (0, get_maximum_NumOfThreads());
 
-		CLOCK_INIT(get_maximum_NumOfThreads());
+		/* Initialize the clock; timestamps now live in thread records. */
+		CLOCK_INIT();
 	}
 
 	Backend_initialize_events(me, forked);
@@ -2218,16 +2193,13 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 			Extrae_IntelPEBS_pauseSampling();
 #endif
 	
-			/* Reallocate InInstrumentation structures */
+			/* Create the records before initializing any new per-thread fields. */
 			Backend_ChangeNumberOfThreads_InInstrumentation (new_num_threads);
 			/* We leave... so, we're no longer in instrumentatin from this point */
 			for (u = get_maximum_NumOfThreads(); u < new_num_threads; u++)
 			{
 				Backend_setInSampling (u, FALSE);
 			}
-	
-			/* Reallocate clock structures */
-			Clock_AllocateThreads (new_num_threads);
 	
 			/* Reallocate the buffers and trace files */
 			Reallocate_buffers_and_files (new_num_threads);
@@ -2249,11 +2221,6 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 			/* Allocate thread info structure */
 			Extrae_reallocate_thread_info (get_maximum_NumOfThreads(), new_num_threads);
 
-#if defined(PTHREAD_SUPPORT)
-			/* Allocate thread info for pthread execs */
-			Extrae_reallocate_pthread_info (new_num_threads);
-#endif
-	
 			maximum_NumOfThreads = current_NumOfThreads = new_num_threads;
 
 #if defined(ENABLE_PEBS_SAMPLING)
@@ -2529,7 +2496,7 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 #if defined(SAMPLING_SUPPORT)
 	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
 	  pid, initialTASKID, thread, EXT_TMP_SAMPLE);
-	Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
+	Extrae_thread_trace_data_t *data = get_thread_trace_data(thread);
 	if (data != NULL && data->sampling_buffer != NULL &&
 	  Buffer_GetFillCount(data->sampling_buffer) > 0)
 	{
@@ -2804,7 +2771,7 @@ Backend_finalize_flush_buffers(int online_mode, int mark_final_event)
 		if (thread == THREADID) Extrae_Flush_Wrapper_setCounters(TRUE);
 		else Extrae_Flush_Wrapper_setCounters(FALSE);
 
-		Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(thread);
 		if (data != NULL && data->tracing_buffer != NULL)
 		{
 			// If buffer was working in circular mode, change it to flush mode
@@ -2835,14 +2802,12 @@ Backend_free_allocated_memory()
 
 	for (unsigned thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 	{
-#if defined(PTHREAD_SUPPORT)
-		pThreads[thread] = (pthread_t)0;
-#endif
 		// Protects race condition with Backend_Flush_pThread
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
-		Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(thread);
 		if (data != NULL)
 		{
+			data->pthread_id = (pthread_t)0;
 			if (data->tracing_buffer != NULL)
 			{
 				Buffer_Free (data->tracing_buffer);
@@ -2858,8 +2823,9 @@ Backend_free_allocated_memory()
 		}
 		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 	}
-	/* Free the record blocks after their tracing and sampling buffers. */
+	/* Free thread names before freeing thread records. */
 	pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+	Extrae_allocate_thread_CleanUp();
 	for (unsigned block = 0; block < THREAD_DATA_BLOCK_COUNT; block++)
 	{
 		/* Set this pointer to NULL before freeing the block,
@@ -2873,10 +2839,7 @@ Backend_free_allocated_memory()
 	}
 	pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 	xfree (TracingBitmap);
-	Extrae_allocate_thread_CleanUp();
 	TimeSync_CleanUp();
-	Trace_Mode_CleanUp();
-	Clock_CleanUp();
 	InstrumentUFroutines_GCC_CleanUp();
 	InstrumentUFroutines_XL_CleanUp();
 #if USE_HARDWARE_COUNTERS
@@ -2912,14 +2875,11 @@ Backend_Embedded_Merge()
 	}
 }
 
-static int *Extrae_inSampling = NULL;
-
 int Backend_inInstrumentation (unsigned thread)
 {
-    if (Extrae_inSampling != NULL)
-		return Extrae_inSampling[thread] || (inInstrumentationLevel > 0);
-	else
-		return inInstrumentationLevel > 0;
+	/* Intercepted calls may arrive before any record has been allocated. */
+	Extrae_thread_trace_data_t *data = get_thread_trace_data(thread);
+	return (data != NULL && data->in_sampling) || (inInstrumentationLevel > 0);
 }
 
 
@@ -2928,11 +2888,12 @@ int Backend_Get_InstrumentationLevel()
 	return inInstrumentationLevel;
 }
 
-void Backend_setInSampling (unsigned thread, int insampling)      
-{                                                                               
-	  if (Extrae_inSampling != NULL)                                         
-			    Extrae_inSampling[thread] = insampling;                       
-}                                                                               
+void Backend_setInSampling (unsigned thread, int insampling)
+{
+	Extrae_thread_trace_data_t *data = get_thread_trace_data(thread);
+	if (data != NULL)
+		data->in_sampling = insampling;
+}
 
 void _Backend_Update_InstrumentationLevel (int value)
 {
@@ -2941,7 +2902,8 @@ void _Backend_Update_InstrumentationLevel (int value)
 
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 {
-	Extrae_inSampling = (int*) xrealloc (Extrae_inSampling, sizeof(int)*nthreads);
+	/* Sampling flags live in these records, not in a resizable array. */
+	Allocate_thread_trace_blocks (nthreads);
 }
 
 /*
@@ -2956,7 +2918,7 @@ void Backend_Enter_Instrumentation ()
 	if (EXTRAE_ON() && Backend_Get_InstrumentationLevel() == 1)
 	{
 		unsigned thread = THREADID;
-		Extrae_thread_trace_data_t *data = Extrae_get_thread_trace_data(thread);
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(thread);
 		UINT64 current_time;
 
 		/* Check if we have to fill the sampling buffer */
@@ -3029,8 +2991,8 @@ void Backend_Leave_Instrumentation (void)
 		// LAST_READ_TIME same time as exit probe, if already forced, won't do it again because time hasn't progressed.
 		xtr_AnnotateCPU(thread, LAST_READ_TIME, FALSE);
 
-		/* Change trace mode? (issue from API) */
-		if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
+		/* Change trace mode only when this thread is outside MPI. */
+		if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_IS_NOT_STACKED(thread))
 			Trace_Mode_Change(thread, LAST_READ_TIME);
 	}
 

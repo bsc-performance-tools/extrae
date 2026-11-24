@@ -26,17 +26,14 @@
 
 #include "clock.h"
 #include "trace_mode.h"
+#include "trace_buffers.h"
 
-extern int *MPI_Deepness;
-extern int *Current_Trace_Mode;
-extern int *Pending_Trace_Mode_Change;
+#define CURRENT_TRACE_MODE(tid) (get_thread_trace_data(tid)->current_trace_mode)
+#define PENDING_TRACE_MODE_CHANGE(tid) (get_thread_trace_data(tid)->pending_trace_mode_change)
 
-#define CURRENT_TRACE_MODE(tid) Current_Trace_Mode[tid]
-#define PENDING_TRACE_MODE_CHANGE(tid) Pending_Trace_Mode_Change[tid]
-
-#define INCREASE_MPI_DEEPNESS(tid) (MPI_Deepness[tid]++)
-#define DECREASE_MPI_DEEPNESS(tid) (MPI_Deepness[tid]--)
-#define MPI_IS_NOT_STACKED(tid) (MPI_Deepness[tid] == 0)
+#define INCREASE_MPI_DEEPNESS(tid) (get_thread_trace_data(tid)->mpi_deepness++)
+#define DECREASE_MPI_DEEPNESS(tid) (get_thread_trace_data(tid)->mpi_deepness--)
+#define MPI_IS_NOT_STACKED(tid) (get_thread_trace_data(tid)->mpi_deepness == 0)
 
 
 void TMODE_setInitial (int mode);
@@ -44,7 +41,6 @@ void TMODE_setCurrent (unsigned long long burst_threshold);
 int Trace_Mode_Initialize (int num_threads);
 int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads);
 void Trace_Mode_Change (int tid, iotimer_t time);
-void Trace_Mode_CleanUp (void);
 void Trace_mode_switch (void);
 int Trace_Mode_FirstMode (unsigned thread);
 

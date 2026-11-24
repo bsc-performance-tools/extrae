@@ -106,7 +106,7 @@
 		/* Protect inserting events if main thread already finished and flushed */  \
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);                                 \
 		/* Process cleanup may already have freed this thread's record. */          \
-		Extrae_thread_trace_data_t *extrae_thread_data = Extrae_get_thread_trace_data(thread_id); \
+		Extrae_thread_trace_data_t *extrae_thread_data = get_thread_trace_data(thread_id); \
 		if (extrae_thread_data != NULL && extrae_thread_data->tracing_buffer != NULL) \
 		{                                                                           \
 			evt.time = evttime;                                                       \
@@ -131,7 +131,7 @@
 		/* Protect inserting events if main thread already finished and flushed */  \
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);                                 \
 		/* Process cleanup may already have freed this thread's record. */          \
-		Extrae_thread_trace_data_t *extrae_thread_data = Extrae_get_thread_trace_data(thread_id); \
+		Extrae_thread_trace_data_t *extrae_thread_data = get_thread_trace_data(thread_id); \
 		if (extrae_thread_data != NULL && extrae_thread_data->tracing_buffer != NULL) \
 		{                                                                           \
 			evt.time = (evttime);                                                     \

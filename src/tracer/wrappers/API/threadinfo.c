@@ -34,35 +34,37 @@
 #include "utils.h"
 #include "xalloc.h"
 #include "threadinfo.h"
+#include "trace_buffers.h"
 
-static Extrae_thread_info_t *thread_info = NULL;
 static unsigned thread_info_nthreads = 0;
 
 void Extrae_allocate_thread_CleanUp (void)
 {
-	xfree (thread_info);
-}
-
-void Extrae_allocate_thread_info (unsigned nthreads)
-{
-	unsigned u;
-
-	thread_info = (Extrae_thread_info_t*) xrealloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
-
-	for (u = 0; u < nthreads; u++)
-		Extrae_set_thread_name (u, "");
-
-	thread_info_nthreads = nthreads;
+	/* Names must be released before the backend frees the record blocks. */
+	for (unsigned u = 0; u < thread_info_nthreads; u++)
+	{
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(u);
+		if (data != NULL)
+		{
+			xfree(data->thread_name);
+			data->thread_name = NULL;
+		}
+	}
+	thread_info_nthreads = 0;
 }
 
 void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads)
 {
 	unsigned u;
 
-	thread_info = (Extrae_thread_info_t*) xrealloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
-
 	for (u = prevnthreads; u < nthreads; u++)
+	{
+		Extrae_thread_trace_data_t *data = get_thread_trace_data(u);
+		/* Keep the full name buffer, including in a forked child. */
+		if (data->thread_name == NULL)
+			data->thread_name = xmalloc(THREAD_INFO_NAME_LEN);
 		Extrae_set_thread_name (u, "");
+	}
 
 	thread_info_nthreads = nthreads;
 }
@@ -70,25 +72,26 @@ void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads)
 void Extrae_set_thread_name (unsigned thread, char *name)
 {
 	size_t i;
+	char *thread_name = get_thread_trace_data(thread)->thread_name;
 
 	/* Clear space */
-	xmemset (thread_info[thread].ThreadName, 0, THREAD_INFO_NAME_LEN);
+	xmemset (thread_name, 0, THREAD_INFO_NAME_LEN);
 
 	/* Copy name */
-	snprintf (thread_info[thread].ThreadName, THREAD_INFO_NAME_LEN, "%s", name);
+	snprintf (thread_name, THREAD_INFO_NAME_LEN, "%s", name);
 
 	/* Remove spaces */
-	for (i = 0; i < strlen(thread_info[thread].ThreadName); i++)
-		if (thread_info[thread].ThreadName[i] == ' ')
-			thread_info[thread].ThreadName[i] = '_';
+	for (i = 0; i < strlen(thread_name); i++)
+		if (thread_name[i] == ' ')
+			thread_name[i] = '_';
 
 	/* Set last char to empty */
-	thread_info[thread].ThreadName[THREAD_INFO_NAME_LEN-1] = (char) 0;
+	thread_name[THREAD_INFO_NAME_LEN-1] = (char) 0;
 }
 
 char *Extrae_get_thread_name (unsigned thread)
 {
-	return thread_info[thread].ThreadName;
+	return get_thread_trace_data(thread)->thread_name;
 }
 
 unsigned Extrae_search_thread_name (char *name, int *found)
