@@ -128,7 +128,8 @@ void WriteEnabled_pthread_Operations (FILE * fd)
 	{
 		anypresent = anypresent || pthread_event_presency_label[u].present;
 //#if defined(HAVE_LIBADDR2LINE) /* Unprotected to allow user-translated addresses through O|P|U entries in SYM file */
-		if (pthread_event_presency_label[u].eventtype == PTHREAD_CREATE_EV)
+		if (pthread_event_presency_label[u].eventtype == PTHREAD_CREATE_EV &&
+			pthread_event_presency_label[u].present)
 			createpresent = TRUE;
 //#endif
 	}
