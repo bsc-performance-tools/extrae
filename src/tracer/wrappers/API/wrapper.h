@@ -231,7 +231,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 void Backend_updateTaskID (void);
 
 int Backend_ChangeNumberOfThreads (unsigned numberofthreads);
-void Backend_setNumTentativeThreads (int numofthreads);
 
 #if defined(PTHREAD_SUPPORT)
 extern pthread_mutex_t pthreadFreeBuffer_mtx;
@@ -242,7 +241,6 @@ pthread_t Backend_GetpThreadID (int threadid);
 int Backend_GetpThreadIdentifier (void);
 int Backend_ispThreadIdentified (void);
 void Backend_SetpThreadID (pthread_t *t, int threadid);
-void Backend_NotifyNewPthread (void);
 void Backend_Flush_pThread (pthread_t t);
 #endif
 

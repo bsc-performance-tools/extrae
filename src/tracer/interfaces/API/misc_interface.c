@@ -235,26 +235,6 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_AT_LEVEL);
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_FROM_ADDRESS);
 
-#if defined(PTHREAD_SUPPORT)
-
-# define apifTRACE_NOTIFY_NEW_PTHREAD(x) \
-	void CtoF77(x##_notify_new_pthread) (void) \
-	{ \
-		if (mpitrace_on) \
-			Backend_NotifyNewPthread (); \
-	}
-EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NOTIFY_NEW_PTHREAD);
-
-# define apifTRACE_SET_NUM_TENTATIVE_THREADS(x) \
-	void CtoF77(x##_set_num_tentative_threads) (int *numthreads) \
-	{ \
-		if (mpitrace_on) \
-			Backend_setNumTentativeThreads (*numthreads); \
-	}
-EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
-
-#endif /* PTHREAD_SUPPORT */
-
 # define apifDEFINE_EVENT_TYPE(x) \
 	void CtoF77(x##_define_event_type) (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values) \
 	{ \
@@ -268,13 +248,6 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 		Extrae_get_version_Wrapper (M, m, r); \
 	}
   EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_GET_VERSION);
-
-#define apifCHANGE_NUM_THREADS(x) \
-	void CtoF77(x##_change_num_threads) (unsigned *n) \
-	{ \
-		Extrae_change_number_of_threads_Wrapper (*n); \
-	}
-  EXPAND_F_ROUTINE_WITH_PREFIXES(apifCHANGE_NUM_THREADS);
 
 #define apifTRACE_FLUSH(x) \
 	void CtoF77(x##_flush) (void) \
@@ -476,25 +449,6 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_AT_LEVEL);
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 
-#if defined(PTHREAD_SUPPORT)
-# define apiTRACE_NOTIFY_NEW_PTHREAD(x) \
-	void x##_notify_new_pthread (void) \
-	{ \
-		if (mpitrace_on) \
-			Backend_NotifyNewPthread (); \
-	}
- EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NOTIFY_NEW_PTHREAD);
-
-# define apiTRACE_SET_NUM_TENTATIVE_THREADS(x) \
-	void x##_set_num_tentative_threads (int numthreads) \
-	{ \
-		if (mpitrace_on) \
-			Backend_setNumTentativeThreads (numthreads); \
-	}
- EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SET_NUM_TENTATIVE_THREADS);
-
-#endif /* PTHREAD_SUPPORT */
-
 # define apiDEFINE_EVENT_TYPE(x) \
 	void x##_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values) \
 	{ \
@@ -593,13 +547,6 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_REGISTER_FUNCTION_ADDRESS);
 
-#define apiCHANGE_NUM_THREADS(x) \
-	void x##_change_num_threads (unsigned n) \
-	{ \
-		Extrae_change_number_of_threads_Wrapper (n); \
-	}
-  EXPAND_ROUTINE_WITH_PREFIXES(apiCHANGE_NUM_THREADS);
-	
 #else /* HAVE_WEAK_ALIAS_ATTRIBUTE */
 
 /** C BINDINGS **/
@@ -780,23 +727,6 @@ void Extrae_function_from_address (extrae_type_t type, void *address)
 	}
 }
 
-#if defined(PTHREAD_SUPPORT)
-INTERFACE_ALIASES_C(_notify_new_pthread,Extrae_notify_new_pthread,(void),void)
-void Extrae_notify_new_pthread (void)
-{
-	if (mpitrace_on)
-		Backend_NotifyNewPthread ();
-}
-
-INTERFACE_ALIASES_C(_set_num_tentative_threads,Extrae_set_num_tentative_threads,(int numthreads),void)
-void Extrae_set_num_tentative_threads (int numthreads)
-{
-	if (mpitrace_on)
-		Backend_setNumTentativeThreads (numthreads);
-}
-
-#endif /* PTHREAD_SUPPORT */
-
 INTERFACE_ALIASES_C(_define_event_type,Extrae_define_event_type,(extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values),void)
 void Extrae_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values)
 {
@@ -883,12 +813,6 @@ void Extrae_register_function_address (void *ptr,const char *funcname,const char
 {
 	/* Does not need to check whether mpitrace_on is enabled */
 	Extrae_register_function_address_Wrapper (ptr, funcname, modname, line);
-}
-
-INTERFACE_ALIASES_C(_change_num_threads,Extrae_change_num_threads,(unsigned),void)
-void Extrae_change_num_threads (unsigned n)
-{
-	Extrae_change_number_of_threads_Wrapper (n);
 }
 
 INTERFACE_ALIASES_C(_flush,Extrae_flush,(void),void)
@@ -1069,31 +993,11 @@ void extrae_function_from_address (extrae_type_t *type, void *address)
 	}
 }
 
-#if defined(PTHREAD_SUPPORT)
-INTERFACE_ALIASES_F(_notify_new_pthread,_NOTIFY_NEW_PTHREAD,extrae_notify_new_pthread,(void), void)
-void extrae_notify_new_pthread (void)
-{
-	if (mpitrace_on)
-		Backend_NotifyNewPthread ();
-}
-
-INTERFACE_ALIASES_F(_set_num_tentative_threads,_SET_NUM_TENTATIVE_THREADS,extrae_set_num_tentative_threads,(int *numthreads),void)
-void extrae_set_num_tentative_threads (int *numthreads)
-{
-	if (mpitrace_on)
-		Backend_setNumTentativeThreads (*numthreads);
-}
-
-#endif /* PTHREAD_SUPPORT */
-
 INTERFACE_ALIASES_F_REUSE_C(_define_event_type,_DEFINE_EVENT_TYPE,Extrae_define_event_type,(extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values),void)
 /* This extrae_define_event_type calls automatically to the C version */
 
 INTERFACE_ALIASES_F_REUSE_C(_get_version,_GET_VERSION,Extrae_get_version,(unsigned*,unsigned*,unsigned*),void)
 /* This extrae_get_version calls automatically to the C version */
-
-INTERFACE_ALIASES_F_REUSE_C(_change_num_threads,_CHANGE_NUM_THREADS,Extrae_change_num_threads,(unsigned),void)
-/* This extrae_change_num_threads calls automatically to the C version */
 
 INTERFACE_ALIASES_F(_flush,_FLUSH,extrae_flush,(void), void)
 void extrae_flush (void)

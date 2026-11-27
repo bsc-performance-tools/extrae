@@ -50,8 +50,6 @@ void Extrae_function_from_address_Wrapper (extrae_type_t type, void *address);
 void Extrae_next_hwc_set_Wrapper (void);
 void Extrae_previous_hwc_set_Wrapper (void);
 
-void Extrae_notify_new_pthread (void);
-
 void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr);
 void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
 void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
@@ -68,8 +66,6 @@ void Extrae_define_event_type_Wrapper (extrae_type_t type, char *description,
 	unsigned nvalues, extrae_value_t *values, char **description_values);
 void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
   unsigned *revision);
-
-void Extrae_change_number_of_threads_Wrapper (unsigned nthreads);
 
 void Extrae_flush_manual_Wrapper ();
 

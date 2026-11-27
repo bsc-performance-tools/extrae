@@ -1642,7 +1642,6 @@ static int getnumProcessors (void)
 */
 
 static pthread_key_t pThreadIdentifier;
-static pthread_mutex_t pThreadIdentifier_mtx;
 
 void Backend_SetpThreadID (pthread_t *t, int threadid)
 {
@@ -1697,7 +1696,6 @@ static pthread_once_t pThreadIdentifier_once = PTHREAD_ONCE_INIT;
 static void Extrae_create_pthread_identifier_key (void)
 {
 	pthread_key_create (&pThreadIdentifier, NULL);
-	pthread_mutex_init (&pThreadIdentifier_mtx, NULL);
 }
 
 /* Create the key only once per process. A forked child inherits them, so it must not be created again. */
@@ -1725,34 +1723,7 @@ int Backend_GetpThreadIdentifier (void)
 	return (value != 0) ? (int) (value - 1) : 0;
 }
 
-void Backend_NotifyNewPthread (void)
-{
-	int numthreads;
-
-	/* Threads that already have an index keep it */
-	if (Backend_ispThreadIdentified())
-		return;
-
-	pthread_mutex_lock (&pThreadIdentifier_mtx);
-
-	numthreads = Backend_getNumberOfThreads();
-	Backend_SetpThreadIdentifier (numthreads);
-	Backend_ChangeNumberOfThreads (numthreads+1);
-
-	pthread_mutex_unlock (&pThreadIdentifier_mtx);
-}
 #endif
-
-void Backend_setNumTentativeThreads (int numofthreads)
-{
-	int numthreads = get_current_NumOfThreads();
-
-	/* These calls just allocate memory and files for the given num threads, but does not
-	   modify the current number of threads */
-	Backend_ChangeNumberOfThreads (numofthreads);
-	Backend_ChangeNumberOfThreads (numthreads);
-}
-
 
 /******************************************************************************
  * Backend_preInitialize :
